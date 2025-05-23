@@ -81,7 +81,7 @@ export function SignUpForm() {
     setIsLoading(true);
     setErrors({});
     try {
-      const data = await signUp.mutateAsync({
+      const data = await signUp({
         email: values.email,
         password: values.password,
         firstName: values.firstName,

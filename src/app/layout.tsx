@@ -5,7 +5,6 @@ import React, { Suspense } from 'react';
 
 import FullPageLoading from '@/components/layout/FullPageLoading';
 import { Toaster } from '@/components/ui/sonner';
-import { TanstackQueryProviders } from '@/providers';
 import StoreProvider from '@/providers/StoreProvider';
 import type { Metadata } from 'next';
 
@@ -46,11 +45,9 @@ export default function RootLayout({
       <body className='antialiased bg-background text-foreground relative'>
         <StoreProvider>
           <Suspense fallback={null}>
-            <TanstackQueryProviders>
-              {children}
-              <FullPageLoading />
-              <Toaster theme='light' richColors />
-            </TanstackQueryProviders>
+            {children}
+            <FullPageLoading />
+            <Toaster theme='light' richColors />
           </Suspense>
         </StoreProvider>
       </body>

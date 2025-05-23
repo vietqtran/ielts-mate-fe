@@ -54,7 +54,7 @@ export default function OtpVerificationForm() {
 
   const handleSendOtp = async () => {
     try {
-      await sendOtp.mutateAsync(email);
+      await sendOtp(email);
     } catch (error) {
       if (error instanceof AxiosError) {
         const axiosError = error as AxiosError<{
@@ -115,7 +115,7 @@ export default function OtpVerificationForm() {
     setErrors({});
 
     try {
-      const verifyResponse = await verifyOtp.mutateAsync({
+      const verifyResponse = await verifyOtp({
         email: email,
         otp: values.otp,
       });

@@ -56,7 +56,7 @@ export default function ForgotPasswordForm() {
     setErrors({});
 
     try {
-      const response = await forgotPassword.mutateAsync(values.email);
+      const response = await forgotPassword(values.email);
       toast(response.message);
       setIsLoading(false);
     } catch (error) {

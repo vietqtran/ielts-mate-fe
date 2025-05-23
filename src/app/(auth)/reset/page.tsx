@@ -72,7 +72,7 @@ export default function ResetPasswordForm() {
         router.replace('/sign-in');
       } else {
         try {
-          await verifyResetToken.mutateAsync({ token, email });
+          await verifyResetToken({ token, email });
         } catch (error) {
           if (error instanceof AxiosError) {
             const axiosError = error as AxiosError<{ message: string }>;
@@ -97,7 +97,7 @@ export default function ResetPasswordForm() {
       router.replace('/sign-in');
     }
     try {
-      const response = await resetPassword.mutateAsync({
+      const response = await resetPassword({
         token,
         email,
         password: values.password,

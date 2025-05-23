@@ -75,7 +75,7 @@ export function SignInForm() {
     setIsLoading(true);
     setErrors({});
     try {
-      const data = await signIn.mutateAsync({
+      const data = await signIn({
         email: values.email,
         password: values.password,
       });
