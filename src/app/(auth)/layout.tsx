@@ -14,7 +14,7 @@ export default function RootLayout({
         <div className='hidden flex-shrink-0 lg:block lg:w-1/2 relative'>
           <div className='h-screen w-full bg-[#f7fbff] sticky top-0 left-0 right-0'>
             <Image
-              src='/image.png'
+              src='/assets/images/auth-banner.png'
               alt='Decorative background'
               width={5000}
               height={5000}

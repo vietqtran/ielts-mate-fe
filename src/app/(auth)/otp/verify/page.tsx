@@ -8,6 +8,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
+import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
+import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -16,7 +19,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { otpValidation } from '@/constants/validate';
-import { useAuth } from '@/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AxiosError } from 'axios';
 import { useForm } from 'react-hook-form';
@@ -32,6 +34,8 @@ export default function OtpVerificationForm() {
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
   const { sendOtp, verifyOtp } = useAuth();
+  const { isFirstSendOtp, unverifyEmail } = useAppSelector((state) => state.common);
+  const dispatch = useAppDispatch();
 
   const [errors, setErrors] = useState<{
     otp?: string;
@@ -64,21 +68,31 @@ export default function OtpVerificationForm() {
   };
 
   useEffect(() => {
-    const unVerifyEmail = localStorage.getItem('unverify_email');
-    const isFirstSendOtp = localStorage.getItem('is_first_send_otp');
-    if (!unVerifyEmail) {
+    if (window != undefined) {
+      sessionStorage.setItem(CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES.AUTH.OTP.VERIFY);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!unverifyEmail) {
       router.replace('/sign-in');
       return;
     } else {
       if (isFirstSendOtp) {
         handleSendOtp();
-        localStorage.removeItem('is_first_send_otp');
+        if (isFirstSendOtp) {
+          dispatch(setIsFirstSendOtp(false));
+        }
       }
     }
 
     return () => {
-      localStorage.removeItem('unverify_email');
-      localStorage.removeItem('is_first_send_otp');
+      if (isFirstSendOtp) {
+        dispatch(setIsFirstSendOtp(false));
+      }
+      if (unverifyEmail) {
+        dispatch(setUnverifyEmail(null));
+      }
     };
   }, []);
 

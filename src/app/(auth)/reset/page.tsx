@@ -9,6 +9,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
 import { confirmPasswordValidation, passwordValidation } from '@/constants/validate';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -56,6 +57,12 @@ export default function ResetPasswordForm() {
       confirmPassword: '',
     },
   });
+
+  useEffect(() => {
+    if (window != undefined) {
+      sessionStorage.setItem(CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES.AUTH.RESET);
+    }
+  }, []);
 
   useEffect(() => {
     const checkToken = async () => {

@@ -83,7 +83,6 @@ export function useAuth() {
         });
         if (mountedRef.current) {
           dispatch(setUser(data.data.user));
-          localStorage.setItem('session_id', data.data.session_id);
         }
         return data;
       } catch (error) {
@@ -122,7 +121,6 @@ export function useAuth() {
     },
     onSuccess: () => {
       if (mountedRef.current) {
-        localStorage.removeItem('session_id');
         dispatch(setUser(null));
       }
     },
@@ -188,7 +186,6 @@ export function useAuth() {
         });
         if (mountedRef.current) {
           dispatch(setUser(response.data.user));
-          localStorage.setItem('session_id', response.data.session_id);
         }
         return response;
       } catch (error) {
@@ -210,9 +207,8 @@ export function useAuth() {
   const handleAuthCallback = useCallback(
     async (params: URLSearchParams) => {
       const accessToken = params.get('access_token');
-      const sessionId = params.get('session_id');
 
-      if (accessToken && sessionId) {
+      if (accessToken) {
         const controller = createAbortController('authCallback');
         try {
           const { data } = await instance.get('/auth/me', {
@@ -222,7 +218,6 @@ export function useAuth() {
 
           if (data.status === 'success' && mountedRef.current) {
             dispatch(setUser(data.data));
-            localStorage.setItem('session_id', sessionId);
             return true;
           }
         } catch (error) {

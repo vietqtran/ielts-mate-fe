@@ -4,10 +4,10 @@ import 'ldrs/react/Ring.css';
 import React, { Suspense } from 'react';
 
 import FullPageLoading from '@/components/layout/FullPageLoading';
-import type { Metadata } from 'next';
-import StoreProvider from '@/providers/StoreProvider';
-import { TanstackQueryProviders } from '@/providers';
 import { Toaster } from '@/components/ui/sonner';
+import { TanstackQueryProviders } from '@/providers';
+import StoreProvider from '@/providers/StoreProvider';
+import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: {

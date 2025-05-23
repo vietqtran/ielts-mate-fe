@@ -8,6 +8,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
+import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,7 +20,6 @@ import { emailValidation } from '@/constants/validate';
 import { useAuth } from '@/hooks';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AxiosError } from 'axios';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -36,6 +37,12 @@ export default function ForgotPasswordForm() {
     general?: string;
   }>({});
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (window != undefined) {
+      sessionStorage.setItem(CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES.AUTH.FORGOT);
+    }
+  }, []);
 
   const form = useForm<z.infer<typeof forgotPasswordSchema>>({
     resolver: zodResolver(forgotPasswordSchema),

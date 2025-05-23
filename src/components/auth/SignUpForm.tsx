@@ -1,12 +1,9 @@
 'use client';
 
-import {
-  confirmPasswordValidation,
-  emailValidation,
-  firstNameValidation,
-  lastNameValidation,
-  passwordValidation,
-} from '@/constants/validate';
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
+import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
+import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
+import { useEffect, useState } from 'react';
 import {
   Form,
   FormControl,
@@ -20,29 +17,16 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/hooks';
+import { signUpSchema } from '@/schemas/auth.schema';
+import { setSignUpForm } from '@/store/slices/auth-form-slice';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import GithubSocialButton from '../common/social/GithubSocialButton';
 import GoogleSocialButton from '../common/social/GoogleSocialButton';
 import LoadingSpinner from '../ui/loading-spinner';
-
-const signUpSchema = z
-  .object({
-    firstName: firstNameValidation,
-    lastName: lastNameValidation,
-    email: emailValidation,
-    password: passwordValidation,
-    confirmPassword: confirmPasswordValidation,
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
-  });
 
 export function SignUpForm() {
   const router = useRouter();
@@ -55,6 +39,8 @@ export function SignUpForm() {
     general?: string;
   }>({});
   const [isLoading, setIsLoading] = useState(false);
+  const dispatch = useAppDispatch();
+  const { signUpForm } = useAppSelector((state) => state.authForm);
 
   const form = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
@@ -66,6 +52,29 @@ export function SignUpForm() {
       confirmPassword: '',
     },
   });
+
+  const handleBeforeUnload = () => {
+    dispatch(setSignUpForm(form.getValues()));
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const currentPage = sessionStorage.getItem(CURRENT_PAGE_SESSION_STORAGE_KEY);
+      if (signUpForm && currentPage === PAGES.AUTH.SIGN_UP) {
+        form.setValue('firstName', signUpForm.firstName);
+        form.setValue('lastName', signUpForm.lastName);
+        form.setValue('email', signUpForm.email);
+        form.setValue('password', signUpForm.password);
+        form.setValue('confirmPassword', signUpForm.confirmPassword);
+      } else {
+        dispatch(setSignUpForm(form.getValues()));
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   async function handleSubmit(values: z.infer<typeof signUpSchema>) {
     if (isLoading) return;
@@ -80,8 +89,8 @@ export function SignUpForm() {
       });
 
       if (data.status === 'success') {
-        localStorage.setItem('unverify_email', values.email);
-        localStorage.setItem('is_first_send_otp', 'true');
+        dispatch(setUnverifyEmail(values.email));
+        dispatch(setIsFirstSendOtp(true));
         router.push('/otp/verify' + `?email=${values.email}`);
       } else {
         setErrors({ general: data.message });

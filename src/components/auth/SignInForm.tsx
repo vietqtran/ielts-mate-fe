@@ -1,17 +1,20 @@
 'use client';
 
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
 import { emailValidation, passwordSignInValidation } from '@/constants/validate';
+import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
+import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
+import { useEffect, useState } from 'react';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ERROR_CODE } from '@/constants/error_code';
-import { useAuth } from '@/hooks';
+import { setSignInForm } from '@/store/slices/auth-form-slice';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import GithubSocialButton from '../common/social/GithubSocialButton';
@@ -29,6 +32,7 @@ const COOKIE_SETUP_DELAY = 800;
 export function SignInForm() {
   const router = useRouter();
   const { signIn } = useAuth();
+  const dispatch = useAppDispatch();
 
   const [errors, setErrors] = useState<{
     email?: string;
@@ -36,6 +40,7 @@ export function SignInForm() {
     general?: string;
   }>({});
   const [isLoading, setIsLoading] = useState(false);
+  const { signInForm } = useAppSelector((state) => state.authForm);
 
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
@@ -44,6 +49,26 @@ export function SignInForm() {
       password: '',
     },
   });
+
+  const handleBeforeUnload = () => {
+    dispatch(setSignInForm(form.getValues()));
+  };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const currentPage = sessionStorage.getItem(CURRENT_PAGE_SESSION_STORAGE_KEY);
+      if (signInForm && currentPage === PAGES.AUTH.SIGN_IN) {
+        form.setValue('email', signInForm.email);
+        form.setValue('password', signInForm.password);
+      } else {
+        dispatch(setSignInForm(form.getValues()));
+      }
+    }
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   async function handleSubmit(values: z.infer<typeof signInSchema>) {
     if (isLoading) return;
@@ -65,8 +90,8 @@ export function SignInForm() {
       if (error instanceof AxiosError) {
         const axiosError = error as AxiosError<{ message: string; error_code: string }>;
         if (axiosError.response?.data.error_code === ERROR_CODE.EMAIL_UNVERIFIED) {
-          localStorage.setItem('unverify_email', values.email);
-          localStorage.setItem('is_first_send_otp', 'true');
+          dispatch(setUnverifyEmail(values.email));
+          dispatch(setIsFirstSendOtp(true));
           router.push('/otp/verify' + `?email=${values.email}`);
           return;
         }

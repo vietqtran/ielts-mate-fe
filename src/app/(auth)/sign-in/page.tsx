@@ -1,7 +1,18 @@
+'use client';
+
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
+
 import { SignInForm } from '@/components/auth/SignInForm';
 import CustomLink from '@/components/ui/link';
+import { useEffect } from 'react';
 
 export default function SignInPage() {
+  useEffect(() => {
+    if (window != undefined) {
+      sessionStorage.setItem(CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES.AUTH.SIGN_IN);
+    }
+  }, []);
+
   return (
     <div className='flex flex-1 flex-col justify-center px-8 py-12 sm:px-16 lg:px-24'>
       <div className='mx-auto w-full max-w-sm'>

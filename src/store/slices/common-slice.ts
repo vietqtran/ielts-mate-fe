@@ -3,6 +3,8 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState: CommonState = {
   isFullPageLoading: false,
+  unverifyEmail: null,
+  isFirstSendOtp: false,
 };
 
 const commonSlice = createSlice({
@@ -12,8 +14,14 @@ const commonSlice = createSlice({
     setFullPageLoading(state, action) {
       state.isFullPageLoading = action.payload;
     },
+    setUnverifyEmail(state, action) {
+      state.unverifyEmail = action.payload;
+    },
+    setIsFirstSendOtp(state, action) {
+      state.isFirstSendOtp = action.payload;
+    },
   },
 });
 
-export const { setFullPageLoading } = commonSlice.actions;
+export const { setFullPageLoading, setUnverifyEmail, setIsFirstSendOtp } = commonSlice.actions;
 export default commonSlice.reducer;
