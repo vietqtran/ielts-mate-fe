@@ -1,24 +1,23 @@
 'use client';
 
-import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { emailValidation, passwordSignInValidation } from '@/constants/validate';
-import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
-import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
-import { useEffect, useState } from 'react';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ERROR_CODE } from '@/constants/error_code';
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
+import { emailValidation, passwordSignInValidation } from '@/constants/validate';
+import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
 import { setSignInForm } from '@/store/slices/auth-form-slice';
+import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
+import { extractAxiosErrorData } from '@/utils/error';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AxiosError } from 'axios';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import GithubSocialButton from '../common/social/GithubSocialButton';
 import GoogleSocialButton from '../common/social/GoogleSocialButton';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import CustomLink from '../ui/link';
 import LoadingSpinner from '../ui/loading-spinner';
 
@@ -87,16 +86,20 @@ export function SignInForm() {
         setIsLoading(false);
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
-        const axiosError = error as AxiosError<{ message: string; error_code: string }>;
-        if (axiosError.response?.data.error_code === ERROR_CODE.EMAIL_UNVERIFIED) {
-          dispatch(setUnverifyEmail(values.email));
-          dispatch(setIsFirstSendOtp(true));
-          router.push('/otp/verify' + `?email=${values.email}`);
-          return;
-        }
-        setErrors({ general: axiosError.response?.data.message });
+      const { message, error_code } = extractAxiosErrorData(error);
+      if (error_code === ERROR_CODE.EMAIL_UNVERIFIED) {
+        dispatch(setUnverifyEmail(values.email));
+        dispatch(setIsFirstSendOtp(true));
+        router.push('/otp/verify' + `?email=${values.email}`);
+        return;
       }
+      setErrors({ general: message });
+      setTimeout(() => {
+        const emailInput = document.getElementById('email') as HTMLInputElement | null;
+        if (emailInput) {
+          emailInput.focus();
+        }
+      }, 200);
     } finally {
       setIsLoading(false);
     }

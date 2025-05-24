@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -8,19 +9,17 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
-import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
-
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import LoadingSpinner from '@/components/ui/loading-spinner';
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
 import { otpValidation } from '@/constants/validate';
+import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
+import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
+import { extractAxiosErrorData } from '@/utils/error';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AxiosError } from 'axios';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -32,7 +31,7 @@ const otpVerificationSchema = z.object({
 export default function OtpVerificationForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const email = searchParams.get('email') || '';
+  const email = searchParams.get('email') ?? '';
   const { sendOtp, verifyOtp } = useAuth();
   const { isFirstSendOtp, unverifyEmail } = useAppSelector((state) => state.common);
   const dispatch = useAppDispatch();
@@ -54,16 +53,10 @@ export default function OtpVerificationForm() {
 
   const handleSendOtp = async () => {
     try {
-      await sendOtp(email);
+      await sendOtp(unverifyEmail ?? email);
     } catch (error) {
-      if (error instanceof AxiosError) {
-        const axiosError = error as AxiosError<{
-          message: string;
-        }>;
-        toast.error(axiosError.response?.data.message);
-        return;
-      }
-      toast.error('An unexpected error occurred. Please try again.');
+      const { message } = extractAxiosErrorData(error, 'Failed to send OTP. Please try again.');
+      toast.error(message);
     }
   };
 
@@ -74,15 +67,13 @@ export default function OtpVerificationForm() {
   }, []);
 
   useEffect(() => {
-    if (!unverifyEmail) {
+    if (!unverifyEmail || unverifyEmail !== email) {
       router.replace('/sign-in');
       return;
-    } else {
+    } else if (isFirstSendOtp) {
+      handleSendOtp();
       if (isFirstSendOtp) {
-        handleSendOtp();
-        if (isFirstSendOtp) {
-          dispatch(setIsFirstSendOtp(false));
-        }
+        dispatch(setIsFirstSendOtp(false));
       }
     }
 
@@ -124,17 +115,12 @@ export default function OtpVerificationForm() {
         router.replace('/');
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
-        const axiosError = error as AxiosError<{
-          message: string;
-          error_code: string;
-        }>;
-        setErrors({ general: axiosError.response?.data.message });
-        return;
-      }
-      setErrors({
-        general: 'Invalid verification code. Please try again.',
-      });
+      const { message } = extractAxiosErrorData(
+        error,
+        'Invalid verification code. Please try again.'
+      );
+      setErrors({ general: message });
+      return;
     } finally {
       setIsLoading(false);
     }

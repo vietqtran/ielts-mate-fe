@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -8,18 +9,16 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { useEffect, useState } from 'react';
-
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import CustomLink from '@/components/ui/link';
 import LoadingSpinner from '@/components/ui/loading-spinner';
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
 import { emailValidation } from '@/constants/validate';
 import { useAuth } from '@/hooks';
+import { extractAxiosErrorData } from '@/utils/error';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { AxiosError } from 'axios';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -60,12 +59,8 @@ export default function ForgotPasswordForm() {
       toast(response.message);
       setIsLoading(false);
     } catch (error) {
-      if (error instanceof AxiosError) {
-        const axiosError = error as AxiosError<{ message: string }>;
-        setErrors({ general: axiosError.response?.data.message });
-      } else {
-        setErrors({ general: 'Failed to send verification code. Please try again.' });
-      }
+      const { message } = extractAxiosErrorData(error);
+      setErrors({ general: message });
     } finally {
       setIsLoading(false);
     }

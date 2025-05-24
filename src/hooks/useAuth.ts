@@ -2,7 +2,6 @@
 
 import instance from '@/lib/axios';
 import { setUser } from '@/store/slices/auth-slice';
-import { AxiosError } from 'axios';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppDispatch } from './useStore';
 
@@ -61,13 +60,9 @@ export function useAuth() {
       }
       return data;
     } catch (error) {
-      if (error instanceof AxiosError && error.name === 'AbortError') {
-        console.log('Fetch user request was aborted');
-        return null;
-      }
       if (mountedRef.current) {
         setErrorState('fetchUser', error as Error);
-        throw error;
+        return null;
       }
       return null;
     } finally {
@@ -91,10 +86,6 @@ export function useAuth() {
         }
         return data;
       } catch (error) {
-        if (error instanceof AxiosError && error.name === 'AbortError') {
-          console.log('Sign in request was aborted');
-          throw new Error('Sign in request was cancelled');
-        }
         setErrorState('signIn', error as Error);
         throw error;
       } finally {
@@ -123,10 +114,6 @@ export function useAuth() {
       }
       return data;
     } catch (error) {
-      if (error instanceof AxiosError && error.name === 'AbortError') {
-        console.log('Sign out request was aborted');
-        throw new Error('Sign out request was cancelled');
-      }
       setErrorState('signOut', error as Error);
       throw error;
     } finally {
@@ -152,10 +139,6 @@ export function useAuth() {
         });
         return data;
       } catch (error) {
-        if (error instanceof AxiosError && error.name === 'AbortError') {
-          console.log('Sign up request was aborted');
-          throw new Error('Sign up request was cancelled');
-        }
         setErrorState('signUp', error as Error);
         throw error;
       } finally {
@@ -182,10 +165,6 @@ export function useAuth() {
         );
         return data;
       } catch (error) {
-        if (error instanceof AxiosError && error.name === 'AbortError') {
-          console.log('Send OTP request was aborted');
-          throw new Error('Send OTP request was cancelled');
-        }
         setErrorState('sendOtp', error as Error);
         throw error;
       } finally {
@@ -211,10 +190,6 @@ export function useAuth() {
         }
         return response;
       } catch (error) {
-        if (error instanceof AxiosError && error.name === 'AbortError') {
-          console.log('Verify OTP request was aborted');
-          throw new Error('Verify OTP request was cancelled');
-        }
         setErrorState('verifyOtp', error as Error);
         throw error;
       } finally {
@@ -249,11 +224,6 @@ export function useAuth() {
             return true;
           }
         } catch (error) {
-          if (error instanceof AxiosError && error.name === 'AbortError') {
-            console.log('Auth callback request was aborted');
-            return false;
-          }
-          console.error('Failed to fetch user after OAuth:', error);
           setErrorState('authCallback', error as Error);
         } finally {
           setLoading('authCallback', false);
@@ -281,10 +251,6 @@ export function useAuth() {
         );
         return data;
       } catch (error) {
-        if (error instanceof AxiosError && error.name === 'AbortError') {
-          console.log('Forgot password request was aborted');
-          throw new Error('Forgot password request was cancelled');
-        }
         setErrorState('forgotPassword', error as Error);
         throw error;
       } finally {
@@ -307,10 +273,6 @@ export function useAuth() {
         });
         return data;
       } catch (error) {
-        if (error instanceof AxiosError && error.name === 'AbortError') {
-          console.log('Verify reset token request was aborted');
-          throw new Error('Verify reset token request was cancelled');
-        }
         setErrorState('verifyResetToken', error as Error);
         throw error;
       } finally {
@@ -338,10 +300,6 @@ export function useAuth() {
         });
         return response;
       } catch (error) {
-        if (error instanceof AxiosError && error.name === 'AbortError') {
-          console.log('Reset password request was aborted');
-          throw new Error('Reset password request was cancelled');
-        }
         setErrorState('resetPassword', error as Error);
         throw error;
       } finally {

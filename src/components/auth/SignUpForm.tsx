@@ -1,9 +1,21 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
 import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
+import { signUpSchema } from '@/schemas/auth.schema';
+import { setSignUpForm } from '@/store/slices/auth-form-slice';
 import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
+import { extractAxiosErrorData } from '@/utils/error';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import GithubSocialButton from '../common/social/GithubSocialButton';
+import GoogleSocialButton from '../common/social/GoogleSocialButton';
 import {
   Form,
   FormControl,
@@ -13,19 +25,6 @@ import {
   FormLabel,
   FormMessage,
 } from '../ui/form';
-
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { signUpSchema } from '@/schemas/auth.schema';
-import { setSignUpForm } from '@/store/slices/auth-form-slice';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { AxiosError } from 'axios';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import GithubSocialButton from '../common/social/GithubSocialButton';
-import GoogleSocialButton from '../common/social/GoogleSocialButton';
 import LoadingSpinner from '../ui/loading-spinner';
 
 export function SignUpForm() {
@@ -91,15 +90,15 @@ export function SignUpForm() {
       if (data.status === 'success') {
         dispatch(setUnverifyEmail(values.email));
         dispatch(setIsFirstSendOtp(true));
-        router.push('/otp/verify' + `?email=${values.email}`);
+        setTimeout(() => {
+          router.push('/otp/verify' + `?email=${values.email}`);
+        }, 1000);
       } else {
         setErrors({ general: data.message });
       }
     } catch (error) {
-      if (error instanceof AxiosError) {
-        const axiosError = error as AxiosError<{ message: string }>;
-        setErrors({ general: axiosError.response?.data.message });
-      }
+      const { message } = extractAxiosErrorData(error);
+      setErrors({ general: message });
     } finally {
       setIsLoading(false);
     }

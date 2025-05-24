@@ -1,9 +1,10 @@
 'use client';
 
 import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
+import React, { useEffect } from 'react';
+
 import { setFullPageLoading } from '@/store/slices/common-slice';
 import { useRouter } from 'next/navigation';
-import React, { useEffect } from 'react';
 
 type Props = {
   children: React.ReactNode;

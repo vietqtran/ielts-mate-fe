@@ -11,7 +11,12 @@ export const passwordSignInValidation = z.string();
 
 export const confirmPasswordValidation = z.string();
 
-export const emailValidation = z.string().email({ message: 'Please enter a valid email address' });
+export const emailValidation = z
+  .string()
+  .email({ message: 'Please enter a valid email address' })
+  .regex(/^(?!.*\+)/, {
+    message: 'Not allow sub-address in email',
+  });
 
 export const firstNameValidation = z
   .string()

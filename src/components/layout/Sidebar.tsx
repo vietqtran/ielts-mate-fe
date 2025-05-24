@@ -127,7 +127,7 @@ export function AppSidebar() {
           <DropdownMenuTrigger asChild>
             <Button variant='ghost' className='w-full justify-start gap-2'>
               <Avatar className='h-6 w-6'>
-                <AvatarImage src='/placeholder.svg?height=32&width=32' />
+                <AvatarImage src='/image.png?height=32&width=32' />
                 <AvatarFallback>JD</AvatarFallback>
               </Avatar>
               <span>John Doe</span>
