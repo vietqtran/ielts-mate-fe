@@ -66,7 +66,7 @@ export default function ResetPasswordForm() {
 
   useEffect(() => {
     const checkToken = async () => {
-      const token = (searchParams.get('token') ?? '').replace(/ /g, '+');
+      const token = searchParams.get('token') ?? '';
       const email = (searchParams.get('email') ?? '').replace(/ /g, '+');
       if (!token || !email) {
         router.replace('/sign-in');
@@ -89,7 +89,7 @@ export default function ResetPasswordForm() {
   async function handleSubmit(values: ResetPasswordFormValues) {
     setIsLoading(true);
     setErrors({});
-    const token = (searchParams.get('token') ?? '').replace(/ /g, '+');
+    const token = searchParams.get('token') ?? '';
     const email = (searchParams.get('email') ?? '').replace(/ /g, '+');
     if (!token || !email) {
       router.replace('/sign-in');
@@ -118,7 +118,7 @@ export default function ResetPasswordForm() {
       <LoadingSpinner color='black' />
     </div>
   ) : (
-    <div className='mx-auto max-w-md space-y-6 px-4 py-8'>
+    <div className='mx-auto max-w-md space-y-6 p-8'>
       <div className='text-center'>
         <h1 className='text-2xl font-bold text-[#313957]'>Reset Your Password</h1>
         <p className='mt-2 text-[#8897ad]'>Create a new secure password for your account</p>

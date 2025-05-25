@@ -17,6 +17,7 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import CustomLink from '@/components/ui/link';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { otpValidation } from '@/constants/validate';
 import { extractAxiosErrorData } from '@/utils/error';
@@ -142,7 +143,7 @@ export default function OtpVerificationForm() {
   };
 
   return (
-    <div className='mx-auto max-w-md space-y-6 px-4 py-8'>
+    <div className='mx-auto max-w-md space-y-6 p-8'>
       <div className='text-center'>
         <h1 className='text-2xl font-bold text-[#313957]'>Verify Your Identity</h1>
         <p className='mt-2 text-[#8897ad]'>
@@ -203,6 +204,9 @@ export default function OtpVerificationForm() {
             >
               {resendDisabled ? `Resend code in ${timeLeft}s` : 'Resend code'}
             </button>
+          </div>
+          <div className='text-center'>
+            <CustomLink href='/sign-in' text='Back to sign in' />
           </div>
         </form>
       </Form>
