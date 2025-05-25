@@ -1,21 +1,9 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
 import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
-import { signUpSchema } from '@/schemas/auth.schema';
-import { setSignUpForm } from '@/store/slices/auth-form-slice';
 import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
-import { extractAxiosErrorData } from '@/utils/error';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import GithubSocialButton from '../common/social/GithubSocialButton';
-import GoogleSocialButton from '../common/social/GoogleSocialButton';
 import {
   Form,
   FormControl,
@@ -25,6 +13,18 @@ import {
   FormLabel,
   FormMessage,
 } from '../ui/form';
+
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { signUpSchema } from '@/schemas/auth.schema';
+import { setSignUpForm } from '@/store/slices/auth-form-slice';
+import { extractAxiosErrorData } from '@/utils/error';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import GoogleSocialButton from '../common/social/GoogleSocialButton';
 import LoadingSpinner from '../ui/loading-spinner';
 
 export function SignUpForm() {
@@ -91,7 +91,7 @@ export function SignUpForm() {
         dispatch(setUnverifyEmail(values.email));
         dispatch(setIsFirstSendOtp(true));
         setTimeout(() => {
-          router.push('/otp/verify' + `?email=${values.email}`);
+          router.push('/otp/verify' + `?email=${encodeURIComponent(values.email)}`);
         }, 1000);
       } else {
         setErrors({ general: data.message });
@@ -103,6 +103,12 @@ export function SignUpForm() {
       setIsLoading(false);
     }
   }
+
+  const watch = form.watch();
+
+  useEffect(() => {
+    setErrors({});
+  }, [watch.email, watch.password, watch.firstName, watch.lastName, watch.confirmPassword]);
 
   return (
     <Form {...form}>
@@ -264,7 +270,6 @@ export function SignUpForm() {
 
         <div className='space-y-3'>
           <GoogleSocialButton />
-          <GithubSocialButton />
         </div>
       </form>
     </Form>

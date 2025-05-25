@@ -7,16 +7,16 @@ export const passwordValidation = z
     message: 'Password must contain at least one number and one special character',
   });
 
-export const passwordSignInValidation = z.string();
+export const passwordSignInValidation = z.string().min(8, {
+  message: 'Password must be at least 8 characters',
+});
 
 export const confirmPasswordValidation = z.string();
 
-export const emailValidation = z
-  .string()
-  .email({ message: 'Please enter a valid email address' })
-  .regex(/^(?!.*\+)/, {
-    message: 'Not allow sub-address in email',
-  });
+export const emailValidation = z.string().email({ message: 'Please enter a valid email address' });
+// .regex(/^(?!.*\+)/, {
+//   message: 'Not allow sub-address in email',
+// });
 
 export const firstNameValidation = z
   .string()

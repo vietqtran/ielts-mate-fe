@@ -1,6 +1,5 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -10,16 +9,18 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
+import { confirmPasswordValidation, passwordValidation } from '@/constants/validate';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import LoadingSpinner from '@/components/ui/loading-spinner';
-import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { confirmPasswordValidation, passwordValidation } from '@/constants/validate';
 import { useAuth } from '@/hooks';
 import { extractAxiosErrorData } from '@/utils/error';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -65,13 +66,13 @@ export default function ResetPasswordForm() {
 
   useEffect(() => {
     const checkToken = async () => {
-      const token = searchParams.get('token');
-      const email = searchParams.get('email');
+      const token = (searchParams.get('token') ?? '').replace(/ /g, '+');
+      const email = (searchParams.get('email') ?? '').replace(/ /g, '+');
       if (!token || !email) {
         router.replace('/sign-in');
       } else {
         try {
-          await verifyResetToken({ token, email });
+          await verifyResetToken({ otp: token, email });
         } catch (error) {
           const { message } = extractAxiosErrorData(error, 'Failed to send OTP. Please try again.');
           toast.error(message);
@@ -88,8 +89,8 @@ export default function ResetPasswordForm() {
   async function handleSubmit(values: ResetPasswordFormValues) {
     setIsLoading(true);
     setErrors({});
-    const token = searchParams.get('token') ?? '';
-    const email = searchParams.get('email') ?? '';
+    const token = (searchParams.get('token') ?? '').replace(/ /g, '+');
+    const email = (searchParams.get('email') ?? '').replace(/ /g, '+');
     if (!token || !email) {
       router.replace('/sign-in');
     }

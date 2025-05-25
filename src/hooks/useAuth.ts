@@ -1,8 +1,9 @@
 'use client';
 
+import { useCallback, useEffect, useRef, useState } from 'react';
+
 import instance from '@/lib/axios';
 import { setUser } from '@/store/slices/auth-slice';
-import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAppDispatch } from './useStore';
 
 export function useAuth() {
@@ -185,9 +186,6 @@ export function useAuth() {
         const { data: response } = await instance.post('/auth/verify-email/verify', data, {
           signal: controller.signal,
         });
-        if (mountedRef.current) {
-          dispatch(setUser(response.data.user));
-        }
         return response;
       } catch (error) {
         setErrorState('verifyOtp', error as Error);
@@ -262,7 +260,7 @@ export function useAuth() {
   );
 
   const verifyResetToken = useCallback(
-    async (payload: { email: string; token: string }) => {
+    async (payload: { email: string; otp: string }) => {
       setLoading('verifyResetToken', true);
       setErrorState('verifyResetToken', null);
 
@@ -271,6 +269,7 @@ export function useAuth() {
         const { data } = await instance.post('/auth/verify-reset-token', payload, {
           signal: controller.signal,
         });
+        console.log('verifyResetToken response:', data);
         return data;
       } catch (error) {
         setErrorState('verifyResetToken', error as Error);
