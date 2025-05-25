@@ -58,6 +58,8 @@ export function useAuth() {
       });
       if (data.status === 'success' && mountedRef.current) {
         dispatch(setUser(data.data));
+      } else {
+        dispatch(setUser(null));
       }
       return data;
     } catch (error) {
@@ -65,6 +67,7 @@ export function useAuth() {
         setErrorState('fetchUser', error as Error);
         return null;
       }
+      dispatch(setUser(null));
       return null;
     } finally {
       setLoading('fetchUser', false);
