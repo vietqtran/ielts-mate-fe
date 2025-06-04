@@ -8,7 +8,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { UpdatePassageRequest, readingPassageAPI } from '@/lib/api/reading-passages';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { UpdatePassageRequest, readingPassageAPI } from '@/lib/api/reading';
 import { Loader2, Minus, Plus, Save } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -18,6 +19,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import QuestionManager from '../../_components/QuestionManager';
 
 // Constants for IELTS types and status
 const IELTS_TYPES = [
@@ -31,8 +33,9 @@ const PASSAGE_STATUS = [
   { value: 3, label: 'Archived' },
 ];
 
-export default function EditPassagePage({ params }: { readonly params: { id: string } }) {
+export default function EditPassagePage({ params }: { readonly params: Promise<{ id: string }> }) {
   const router = useRouter();
+  const [resolvedParams, setResolvedParams] = useState<{ id: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
@@ -45,9 +48,14 @@ export default function EditPassagePage({ params }: { readonly params: { id: str
     content: '',
     content_with_highlight_keyword: '',
     passage_status: 1,
-  }); // State for managing drop zones
+  });
   const [dropZones, setDropZones] = useState<{ id: number; label: string }[]>([]);
   const nextDropZoneIdRef = useRef(1);
+
+  // Resolve params on mount
+  useEffect(() => {
+    params.then(setResolvedParams);
+  }, [params]);
 
   // Function to extract drop zones from content
   const extractDropZonesFromContent = (content: string) => {
@@ -218,39 +226,41 @@ export default function EditPassagePage({ params }: { readonly params: { id: str
   };
 
   // Load existing passage data
-  useEffect(() => {
-    const loadPassage = async () => {
-      try {
-        setInitialLoading(true);
-        const response = await readingPassageAPI.getPassage(params.id);
-        if (response.data) {
-          setPassageData({
-            ielts_type: typeof response.data.ielts_type === 'number' ? response.data.ielts_type : 1,
-            part_number: response.data.part_number ?? 1,
-            instruction: response.data.instruction ?? '',
-            title: response.data.title ?? '',
-            content: response.data.content ?? '',
-            content_with_highlight_keyword: response.data.content_with_highlight_keyword ?? '',
-            passage_status: response.data.passage_status ?? 1,
-          }); // Extract existing drop zones from content
-          const existingDropZones = extractDropZonesFromContent(response.data.content ?? '');
-          setDropZones(existingDropZones);
-          if (existingDropZones.length > 0) {
-            nextDropZoneIdRef.current = Math.max(...existingDropZones.map((z) => z.id)) + 1;
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load passage:', error);
-        toast.error('Failed to load passage data. Please try again.');
-      } finally {
-        setInitialLoading(false);
-      }
-    };
+  const loadPassage = async () => {
+    if (!resolvedParams?.id) return;
 
-    if (params.id) {
+    try {
+      setInitialLoading(true);
+      const response = await readingPassageAPI.getPassage(resolvedParams.id);
+      if (response.data) {
+        setPassageData({
+          ielts_type: typeof response.data.ielts_type === 'number' ? response.data.ielts_type : 1,
+          part_number: response.data.part_number ?? 1,
+          instruction: response.data.instruction ?? '',
+          title: response.data.title ?? '',
+          content: response.data.content ?? '',
+          content_with_highlight_keyword: response.data.content_with_highlight_keyword ?? '',
+          passage_status: response.data.passage_status ?? 1,
+        }); // Extract existing drop zones from content
+        const existingDropZones = extractDropZonesFromContent(response.data.content ?? '');
+        setDropZones(existingDropZones);
+        if (existingDropZones.length > 0) {
+          nextDropZoneIdRef.current = Math.max(...existingDropZones.map((z) => z.id)) + 1;
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load passage:', error);
+      toast.error('Failed to load passage data. Please try again.');
+    } finally {
+      setInitialLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (resolvedParams?.id) {
       loadPassage();
     }
-  }, [params.id]);
+  }, [resolvedParams?.id]);
   const handlePassageChange = (field: keyof typeof passageData, value: any) => {
     setPassageData((prev) => ({
       ...prev,
@@ -262,8 +272,12 @@ export default function EditPassagePage({ params }: { readonly params: { id: str
       syncDropZonesFromContent(value);
     }
   };
-
   const handleSave = async (status?: number) => {
+    if (!resolvedParams?.id) {
+      toast.error('Invalid passage ID');
+      return;
+    }
+
     try {
       setLoading(true);
       const requestData: UpdatePassageRequest = {
@@ -276,7 +290,7 @@ export default function EditPassagePage({ params }: { readonly params: { id: str
         content_with_highlight_keywords: passageData.content_with_highlight_keyword,
       };
 
-      await readingPassageAPI.updatePassage(params.id, requestData);
+      await readingPassageAPI.updatePassage(resolvedParams.id, requestData);
 
       toast.success('Reading passage updated successfully.');
 
@@ -319,214 +333,232 @@ export default function EditPassagePage({ params }: { readonly params: { id: str
               Save Changes
             </Button>
           </div>
-        </div>
+        </div>{' '}
+        {/* Tabs for editing passage and managing questions */}
+        <Tabs defaultValue='passage' className='w-full'>
+          <TabsList className='grid w-full grid-cols-2'>
+            <TabsTrigger value='passage'>Passage Content</TabsTrigger>
+            <TabsTrigger value='questions'>Questions</TabsTrigger>
+          </TabsList>
 
-        <div className='space-y-6'>
-          <Card>
-            <CardHeader>
-              <CardTitle>Passage Information</CardTitle>
-            </CardHeader>
-            <CardContent className='space-y-4'>
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div className='space-y-2'>
-                  <Label htmlFor='title'>Title</Label>
-                  <Input
-                    id='title'
-                    placeholder='Enter passage title'
-                    value={passageData.title}
-                    onChange={(e) => handlePassageChange('title', e.target.value)}
-                  />
+          <TabsContent value='passage' className='space-y-6'>
+            <Card>
+              <CardHeader>
+                <CardTitle>Passage Information</CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  <div className='space-y-2'>
+                    <Label htmlFor='title'>Title</Label>
+                    <Input
+                      id='title'
+                      placeholder='Enter passage title'
+                      value={passageData.title}
+                      onChange={(e) => handlePassageChange('title', e.target.value)}
+                    />
+                  </div>
+                  <div className='space-y-2'>
+                    <Label htmlFor='part_number'>Part Number</Label>
+                    <Input
+                      id='part_number'
+                      type='number'
+                      min='1'
+                      max='3'
+                      placeholder='1-3'
+                      value={passageData.part_number}
+                      onChange={(e) =>
+                        handlePassageChange('part_number', Number.parseInt(e.target.value) || 1)
+                      }
+                    />
+                  </div>
                 </div>
-                <div className='space-y-2'>
-                  <Label htmlFor='part_number'>Part Number</Label>
-                  <Input
-                    id='part_number'
-                    type='number'
-                    min='1'
-                    max='3'
-                    placeholder='1-3'
-                    value={passageData.part_number}
-                    onChange={(e) =>
-                      handlePassageChange('part_number', Number.parseInt(e.target.value) || 1)
-                    }
-                  />
-                </div>
-              </div>
 
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                <div className='space-y-2'>
-                  <Label htmlFor='ielts_type'>IELTS Type</Label>{' '}
-                  <Select
-                    value={passageData.ielts_type.toString()}
-                    onValueChange={(value) =>
-                      handlePassageChange('ielts_type', Number.parseInt(value))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='Select IELTS type' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {IELTS_TYPES.map((type) => (
-                        <SelectItem key={type.value} value={type.value.toString()}>
-                          {type.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className='space-y-2'>
-                  <Label htmlFor='status'>Status</Label>
-                  <Select
-                    value={passageData.passage_status.toString()}
-                    onValueChange={(value) =>
-                      handlePassageChange('passage_status', Number.parseInt(value))
-                    }
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder='Select status' />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {PASSAGE_STATUS.map((status) => (
-                        <SelectItem key={status.value} value={status.value.toString()}>
-                          {status.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className='space-y-2'>
-                <Label htmlFor='instruction'>Instruction</Label>
-                <Textarea
-                  id='instruction'
-                  placeholder='Enter instructions for this passage'
-                  value={passageData.instruction}
-                  onChange={(e) => handlePassageChange('instruction', e.target.value)}
-                  rows={3}
-                />
-              </div>
-            </CardContent>
-          </Card>{' '}
-          <Card>
-            <CardHeader>
-              <CardTitle>Passage Content</CardTitle>
-            </CardHeader>
-            <CardContent className='space-y-4'>
-              {/* Drop Zone Management */}
-              <Card className='bg-blue-50 border-blue-200'>
-                <CardHeader className='pb-3'>
-                  <CardTitle className='text-lg flex items-center gap-2'>
-                    🎯 Drop Zone Manager
-                    <Button size='sm' onClick={addDropZone} className='ml-auto'>
-                      <Plus className='h-4 w-4 mr-1' />
-                      Add Drop Zone
-                    </Button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className='space-y-3'>
-                    <p className='text-sm text-gray-600'>
-                      Quản lý các drop zone trong đoạn văn. Học sinh sẽ kéo thả đáp án vào các vùng
-                      này.
-                    </p>
-
-                    {dropZones.length === 0 ? (
-                      <div className='text-center py-4 text-gray-500'>
-                        Chưa có drop zone nào. Nhấn "Add Drop Zone" để tạo.
-                      </div>
-                    ) : (
-                      <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                        {dropZones.map((zone) => (
-                          <div
-                            key={zone.id}
-                            className='flex items-center gap-2 p-3 bg-white rounded border'
-                          >
-                            <span className='font-mono text-sm bg-gray-100 px-2 py-1 rounded'>
-                              [DROP_ZONE:{zone.id}]
-                            </span>
-                            <div className='flex gap-1 ml-auto'>
-                              <Button
-                                size='sm'
-                                variant='outline'
-                                onClick={() => insertDropZoneInContent(zone.id, 'content')}
-                                title='Chèn vào nội dung chính'
-                              >
-                                Insert to Content
-                              </Button>
-                              <Button
-                                size='sm'
-                                variant='outline'
-                                onClick={() => insertDropZoneInContent(zone.id, 'highlight')}
-                                title='Chèn vào nội dung có highlight'
-                              >
-                                Insert to Highlight
-                              </Button>
-                              <Button
-                                size='sm'
-                                variant='destructive'
-                                onClick={() => removeDropZone(zone.id)}
-                              >
-                                <Minus className='h-4 w-4' />
-                              </Button>
-                            </div>
-                          </div>
+                <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                  <div className='space-y-2'>
+                    <Label htmlFor='ielts_type'>IELTS Type</Label>{' '}
+                    <Select
+                      value={passageData.ielts_type.toString()}
+                      onValueChange={(value) =>
+                        handlePassageChange('ielts_type', Number.parseInt(value))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select IELTS type' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {IELTS_TYPES.map((type) => (
+                          <SelectItem key={type.value} value={type.value.toString()}>
+                            {type.label}
+                          </SelectItem>
                         ))}
-                      </div>
-                    )}
+                      </SelectContent>
+                    </Select>
                   </div>
-                </CardContent>
-              </Card>
-
-              <div className='space-y-2'>
-                <Label htmlFor='content'>Content</Label>
-                <div className='space-y-2'>
-                  {' '}
-                  <Textarea
-                    ref={contentTextareaRef}
-                    id='content'
-                    placeholder="Nhập nội dung đoạn văn. Chọn vị trí cần chèn drop zone rồi nhấn nút 'Insert to Content' ở trên..."
-                    value={passageData.content}
-                    onChange={(e) => handlePassageChange('content', e.target.value)}
-                    rows={10}
-                    className='min-h-[200px] font-mono text-sm'
-                  />
-                  <div className='text-xs text-gray-500'>
-                    💡 Tip: Chọn đoạn text cần thay thế bằng drop zone, sau đó nhấn "Insert to
-                    Content"
+                  <div className='space-y-2'>
+                    <Label htmlFor='status'>Status</Label>
+                    <Select
+                      value={passageData.passage_status.toString()}
+                      onValueChange={(value) =>
+                        handlePassageChange('passage_status', Number.parseInt(value))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder='Select status' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {PASSAGE_STATUS.map((status) => (
+                          <SelectItem key={status.value} value={status.value.toString()}>
+                            {status.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
-              </div>
 
-              <div className='space-y-2'>
-                <Label htmlFor='content_with_highlight'>Content with Highlighted Keywords</Label>
                 <div className='space-y-2'>
+                  <Label htmlFor='instruction'>Instruction</Label>
                   <Textarea
-                    ref={highlightTextareaRef}
-                    id='content_with_highlight'
-                    placeholder='Nội dung có từ khóa được highlight (thường giống với content chính)...'
-                    value={passageData.content_with_highlight_keyword}
-                    onChange={(e) =>
-                      handlePassageChange('content_with_highlight_keyword', e.target.value)
-                    }
-                    rows={10}
-                    className='min-h-[200px] font-mono text-sm'
+                    id='instruction'
+                    placeholder='Enter instructions for this passage'
+                    value={passageData.instruction}
+                    onChange={(e) => handlePassageChange('instruction', e.target.value)}
+                    rows={3}
                   />
                 </div>
-              </div>
+              </CardContent>
+            </Card>{' '}
+            <Card>
+              <CardHeader>
+                <CardTitle>Passage Content</CardTitle>
+              </CardHeader>
+              <CardContent className='space-y-4'>
+                {/* Drop Zone Management */}
+                <Card className='bg-blue-50 border-blue-200'>
+                  <CardHeader className='pb-3'>
+                    <CardTitle className='text-lg flex items-center gap-2'>
+                      🎯 Drop Zone Manager
+                      <Button size='sm' onClick={addDropZone} className='ml-auto'>
+                        <Plus className='h-4 w-4 mr-1' />
+                        Add Drop Zone
+                      </Button>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className='space-y-3'>
+                      <p className='text-sm text-gray-600'>
+                        Quản lý các drop zone trong đoạn văn. Học sinh sẽ kéo thả đáp án vào các
+                        vùng này.
+                      </p>
 
-              {/* Preview */}
-              {passageData.content && (
+                      {dropZones.length === 0 ? (
+                        <div className='text-center py-4 text-gray-500'>
+                          Chưa có drop zone nào. Nhấn &quot;Add Drop Zone&quot; để tạo.
+                        </div>
+                      ) : (
+                        <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+                          {dropZones.map((zone) => (
+                            <div
+                              key={zone.id}
+                              className='flex items-center gap-2 p-3 bg-white rounded border'
+                            >
+                              <span className='font-mono text-sm bg-gray-100 px-2 py-1 rounded'>
+                                [DROP_ZONE:{zone.id}]
+                              </span>
+                              <div className='flex gap-1 ml-auto'>
+                                <Button
+                                  size='sm'
+                                  variant='outline'
+                                  onClick={() => insertDropZoneInContent(zone.id, 'content')}
+                                  title='Chèn vào nội dung chính'
+                                >
+                                  Insert to Content
+                                </Button>
+                                <Button
+                                  size='sm'
+                                  variant='outline'
+                                  onClick={() => insertDropZoneInContent(zone.id, 'highlight')}
+                                  title='Chèn vào nội dung có highlight'
+                                >
+                                  Insert to Highlight
+                                </Button>
+                                <Button
+                                  size='sm'
+                                  variant='destructive'
+                                  onClick={() => removeDropZone(zone.id)}
+                                >
+                                  <Minus className='h-4 w-4' />
+                                </Button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+
                 <div className='space-y-2'>
-                  <Label>Preview (với Drop Zones)</Label>
-                  <div className='bg-white p-4 border rounded min-h-[100px]'>
-                    {previewPassageWithDropZones()}
+                  <Label htmlFor='content'>Content</Label>
+                  <div className='space-y-2'>
+                    {' '}
+                    <Textarea
+                      ref={contentTextareaRef}
+                      id='content'
+                      placeholder="Nhập nội dung đoạn văn. Chọn vị trí cần chèn drop zone rồi nhấn nút 'Insert to Content' ở trên..."
+                      value={passageData.content}
+                      onChange={(e) => handlePassageChange('content', e.target.value)}
+                      rows={10}
+                      className='min-h-[200px] font-mono text-sm'
+                    />
+                    <div className='text-xs text-gray-500'>
+                      💡 Tip: Chọn đoạn text cần thay thế bằng drop zone, sau đó nhấn &quot;Insert
+                      to Content&quot;
+                    </div>
                   </div>
                 </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+
+                <div className='space-y-2'>
+                  <Label htmlFor='content_with_highlight'>Content with Highlighted Keywords</Label>
+                  <div className='space-y-2'>
+                    <Textarea
+                      ref={highlightTextareaRef}
+                      id='content_with_highlight'
+                      placeholder='Nội dung có từ khóa được highlight (thường giống với content chính)...'
+                      value={passageData.content_with_highlight_keyword}
+                      onChange={(e) =>
+                        handlePassageChange('content_with_highlight_keyword', e.target.value)
+                      }
+                      rows={10}
+                      className='min-h-[200px] font-mono text-sm'
+                    />
+                  </div>
+                </div>
+
+                {/* Preview */}
+                {passageData.content && (
+                  <div className='space-y-2'>
+                    <Label>Preview (với Drop Zones)</Label>
+                    <div className='bg-white p-4 border rounded min-h-[100px]'>
+                      {previewPassageWithDropZones()}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          <TabsContent value='questions' className='space-y-6'>
+            {resolvedParams?.id && (
+              <QuestionManager
+                passageId={resolvedParams.id}
+                onQuestionsChange={(questions) => {
+                  // Optional: handle questions change if needed
+                  console.log('Questions updated:', questions);
+                }}
+              />
+            )}
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

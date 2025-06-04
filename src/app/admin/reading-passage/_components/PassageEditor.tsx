@@ -20,7 +20,6 @@ export function PassageEditor({
   onChange,
   onHighlightedContentChange,
 }: PassageEditorProps) {
-  const [_cursorPosition, setCursorPosition] = useState(0);
   const [highlightedContent, setHighlightedContent] = useState(content);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -42,10 +41,8 @@ export function PassageEditor({
       textarea.setSelectionRange(start + dropZoneText.length, start + dropZoneText.length);
     }, 0);
   };
-
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onChange(e.target.value);
-    setCursorPosition(e.target.selectionStart);
 
     // If we have a highlighted content handler, update the highlighted version too
     if (onHighlightedContentChange) {
@@ -90,7 +87,6 @@ export function PassageEditor({
         {' '}
         {parts.map((part, index) => {
           if (part.match(/\[DROP_ZONE:[^\]]+\]/)) {
-            const _dropZoneId = part.match(/\[DROP_ZONE:([^\]]+)\]/)?.[1] || '';
             return (
               <span
                 key={index}
@@ -163,10 +159,10 @@ export function PassageEditor({
               value={content}
               onChange={handleTextareaChange}
               className='min-h-[400px] font-mono text-sm'
-            />
+            />{' '}
             <div className='mt-2 text-xs text-gray-500'>
-              Tip: Place your cursor where you want to insert a drop zone, then click "Insert Drop
-              Zone"
+              Tip: Place your cursor where you want to insert a drop zone, then click &quot;Insert
+              Drop Zone&quot;
             </div>
           </CardContent>
         </Card>
@@ -189,9 +185,9 @@ export function PassageEditor({
           <CardContent>
             <div className='min-h-[200px] p-4 bg-gray-50 rounded border'>
               {renderHighlightedPreview()}
-            </div>
+            </div>{' '}
             <div className='mt-2 text-xs text-gray-500'>
-              Select text and click "Highlight Selection" to mark important keywords
+              Select text and click &quot;Highlight Selection&quot; to mark important keywords
             </div>
           </CardContent>
         </Card>

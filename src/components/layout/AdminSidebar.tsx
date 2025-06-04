@@ -37,6 +37,7 @@ import {
 import { usePathname, useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
+import { authAPI } from '@/lib/api/auth';
 import Image from 'next/image';
 import Link from 'next/link';
 import { toast } from 'sonner';
@@ -47,6 +48,10 @@ export function AdminSidebar() {
 
   const handleLogout = async () => {
     try {
+      // Call logout API
+      await authAPI.logout();
+
+      // Clear local storage and session storage
       localStorage.clear();
       sessionStorage.clear();
 
@@ -54,7 +59,12 @@ export function AdminSidebar() {
       router.push('/sign-in');
     } catch (error) {
       console.error('Logout error:', error);
-      toast.error('Failed to logout');
+
+      // Even if API call fails, still clear local storage and redirect
+      localStorage.clear();
+      sessionStorage.clear();
+      toast.error('Logout API failed, but you have been logged out locally');
+      router.push('/sign-in');
     }
   };
 

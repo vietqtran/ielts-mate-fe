@@ -29,22 +29,30 @@ export interface ReadingPassage {
   content?: string;
   content_with_highlight_keyword?: string;
   instruction?: string;
+  questions?: Question[];
 }
 
 export interface Choice {
+  choice_id?: string;
+  question_id?: string;
   label: string;
   content: string;
   choice_order: number;
   is_correct: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Question {
+  question_id?: string;
+  passage_id?: string;
   question_order: number;
   point: number;
   question_type: number;
   question_category: string[];
   explanation: string;
   number_of_correct_answer: number;
+  instruction?: string;
   choices?: Choice[];
   instruction_for_choice?: string;
   blank_index?: number;
@@ -53,6 +61,43 @@ export interface Question {
   correct_answer_for_matching?: string;
   zone_index?: number;
   drag_item?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface DragItem {
+  drag_item_id?: string;
+  question_id?: string;
+  content: string;
+  drag_item_order: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface QuestionAttempt {
+  attempt_id?: string;
+  user_id?: string;
+  question_id?: string;
+  selected_choice_id?: string;
+  drag_answer?: string;
+  fill_blank_answer?: string;
+  is_correct?: boolean;
+  point_earned?: number;
+  attempted_at?: string;
+}
+
+export interface AttemptSubmission {
+  submission_id?: string;
+  user_id?: string;
+  passage_id?: string;
+  total_questions?: number;
+  correct_answers?: number;
+  total_points?: number;
+  points_earned?: number;
+  accuracy_percentage?: number;
+  time_spent_seconds?: number;
+  submitted_at?: string;
+  attempts?: QuestionAttempt[];
 }
 
 export interface QuestionGroup {

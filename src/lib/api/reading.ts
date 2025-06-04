@@ -2,11 +2,9 @@ import {
   ApiResponse,
   AttemptSubmission,
   Choice,
-  CreatePassageRequest,
   DragItem,
   Question,
   ReadingPassage,
-  UpdatePassageRequest,
 } from '@/types/reading-passage.types';
 
 import instance from '@/lib/axios';
@@ -18,6 +16,26 @@ export interface GetPassagesParams {
   partNumber?: number;
   status?: number;
   questionCategory?: string;
+}
+
+export interface CreatePassageRequest {
+  ielts_type: number;
+  part_number: number;
+  instruction: string;
+  title: string;
+  content: string;
+  passage_status: number;
+  content_with_highlight_keywords: string;
+}
+
+export interface UpdatePassageRequest {
+  ielts_type?: number;
+  part_number?: number;
+  instruction?: string;
+  title?: string;
+  content?: string;
+  passage_status?: number;
+  content_with_highlight_keywords?: string;
 }
 
 export interface CreateQuestionRequest {
@@ -234,7 +252,7 @@ export const questionAPI = {
   reorderQuestions: async (
     passageId: string,
     questionOrders: { question_id: string; question_order: number }[]
-  ): Promise<ApiResponse<any>> => {
+  ): Promise<ApiResponse<null>> => {
     const { data } = await instance.put(
       `/reading/passages/${passageId}/questions/reorder`,
       {
@@ -278,7 +296,7 @@ export const choiceAPI = {
   },
 
   // 17. Delete a choice
-  deleteChoice: async (choiceId: string): Promise<ApiResponse<any>> => {
+  deleteChoice: async (choiceId: string): Promise<ApiResponse<null>> => {
     const { data } = await instance.delete(`/reading/choices/${choiceId}`, {
       withCredentials: true,
     });
@@ -331,9 +349,8 @@ export const dragItemAPI = {
     });
     return data;
   },
-
   // 22. Delete a drag item
-  deleteDragItem: async (dragItemId: string): Promise<ApiResponse<any>> => {
+  deleteDragItem: async (dragItemId: string): Promise<ApiResponse<null>> => {
     const { data } = await instance.delete(`/reading/drag-items/${dragItemId}`, {
       withCredentials: true,
     });

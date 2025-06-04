@@ -79,8 +79,8 @@ export function DragDropQuestion({ question, passageContent, onChange }: DragDro
           <CardContent className='py-6 text-center'>
             <p className='text-gray-500 mb-2'>No drop zones found in the passage</p>
             <p className='text-sm text-gray-400'>
-              Go back to the Passage Content tab and insert drop zones using the "Insert Drop Zone"
-              button
+              Go back to the Passage Content tab and insert drop zones using the &quot;Insert Drop
+              Zone&quot; button
             </p>
           </CardContent>
         </Card>
