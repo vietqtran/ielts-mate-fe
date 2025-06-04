@@ -52,7 +52,7 @@ export function useAuth() {
 
     const controller = createAbortController('fetchUser');
     try {
-      const { data } = await instance.get('/auth/me', {
+      const { data } = await instance.get('/identity/auth/me', {
         withCredentials: true,
         signal: controller.signal,
       });
@@ -82,7 +82,7 @@ export function useAuth() {
 
       const controller = createAbortController('signIn');
       try {
-        const { data } = await instance.post('/auth/sign-in', credentials, {
+        const { data } = await instance.post('/identity/auth/sign-in', credentials, {
           signal: controller.signal,
         });
         if (mountedRef.current) {
@@ -107,7 +107,7 @@ export function useAuth() {
     const controller = createAbortController('signOut');
     try {
       const { data } = await instance.post(
-        '/auth/sign-out',
+        '/identity/auth/sign-out',
         {},
         {
           signal: controller.signal,
@@ -138,7 +138,7 @@ export function useAuth() {
 
       const controller = createAbortController('signUp');
       try {
-        const { data } = await instance.post('/auth/sign-up', credentials, {
+        const { data } = await instance.post('/identity/auth/sign-up', credentials, {
           signal: controller.signal,
         });
         return data;
@@ -161,7 +161,7 @@ export function useAuth() {
       const controller = createAbortController('sendOtp');
       try {
         const { data } = await instance.post(
-          '/auth/verify-email/send-otp',
+          '/identity/auth/verify-email/send-otp',
           { email },
           {
             signal: controller.signal,
@@ -186,7 +186,7 @@ export function useAuth() {
 
       const controller = createAbortController('verifyOtp');
       try {
-        const { data: response } = await instance.post('/auth/verify-email/verify', data, {
+        const { data: response } = await instance.post('/identity/auth/verify-email/verify', data, {
           signal: controller.signal,
         });
         return response;
@@ -202,7 +202,7 @@ export function useAuth() {
   );
 
   const googleAuth = useCallback(() => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/auth/google/auth`;
+    window.location.href = `${process.env.NEXT_PUBLIC_API_BASE_URL}/identity/auth/google/auth`;
   }, []);
 
   const handleAuthCallback = useCallback(
@@ -215,7 +215,7 @@ export function useAuth() {
 
         const controller = createAbortController('authCallback');
         try {
-          const { data } = await instance.get('/auth/me', {
+          const { data } = await instance.get('/identity/auth/me', {
             withCredentials: true,
             signal: controller.signal,
           });
@@ -244,7 +244,7 @@ export function useAuth() {
       const controller = createAbortController('forgotPassword');
       try {
         const { data } = await instance.post(
-          '/auth/forgot-password',
+          '/identity/auth/forgot-password',
           { email },
           {
             signal: controller.signal,
@@ -269,7 +269,7 @@ export function useAuth() {
 
       const controller = createAbortController('verifyResetToken');
       try {
-        const { data } = await instance.post('/auth/verify-reset-token', payload, {
+        const { data } = await instance.post('/identity/auth/verify-reset-token', payload, {
           signal: controller.signal,
         });
         console.log('verifyResetToken response:', data);
@@ -297,7 +297,7 @@ export function useAuth() {
 
       const controller = createAbortController('resetPassword');
       try {
-        const { data: response } = await instance.post('/auth/reset-password', data, {
+        const { data: response } = await instance.post('/identity/auth/reset-password', data, {
           signal: controller.signal,
         });
         return response;
