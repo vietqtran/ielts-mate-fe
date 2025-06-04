@@ -12,7 +12,7 @@ export interface GetPassagesParams {
 }
 
 export interface CreatePassageRequest {
-  ietls_type: number;
+  ielts_type: number;
   part_number: number;
   instruction: string;
   title: string;
@@ -22,7 +22,7 @@ export interface CreatePassageRequest {
 }
 
 export interface UpdatePassageRequest {
-  ietls_type?: number;
+  ielts_type?: number;
   part_number?: number;
   instruction?: string;
   title?: string;

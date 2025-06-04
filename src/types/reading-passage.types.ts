@@ -1,12 +1,12 @@
 import { User } from './user.types';
 
 export interface Pagination {
-  current_page: number;
-  total_pages: number;
-  page_size: number;
-  total_item: number;
-  has_next_page: boolean;
-  has_previoud_page: boolean;
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  totalItems: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
 }
 
 export interface ApiResponse<T> {
@@ -18,7 +18,7 @@ export interface ApiResponse<T> {
 
 export interface ReadingPassage {
   passage_id: string;
-  ietls_type: string | number;
+  ielts_type: number;
   part_number: number;
   passage_status: number;
   created_by: User;

@@ -4,6 +4,8 @@ export const getIeltsTypeLabel = (type: string | number): string => {
   const typeNumber = typeof type === 'string' ? parseInt(type) : type;
 
   switch (typeNumber) {
+    case 0:
+      return 'Unknown';
     case 1:
       return 'Academic';
     case 2:

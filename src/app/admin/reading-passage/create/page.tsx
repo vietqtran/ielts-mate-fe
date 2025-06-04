@@ -37,9 +37,8 @@ export default function CreatePassagePage() {
   const [loading, setLoading] = useState(false);
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightTextareaRef = useRef<HTMLTextAreaElement>(null);
-
   const [passageData, setPassageData] = useState({
-    ietls_type: 1,
+    ielts_type: 1,
     part_number: 1,
     instruction: '',
     title: '',
@@ -47,10 +46,9 @@ export default function CreatePassagePage() {
     content_with_highlight_keyword: '',
     passage_status: 1,
   });
-
   // State for managing drop zones
   const [dropZones, setDropZones] = useState<{ id: number; label: string }[]>([]);
-  const [_nextDropZoneId, setNextDropZoneId] = useState(1);
+  const nextDropZoneIdRef = useRef(1);
 
   const handlePassageChange = (field: keyof typeof passageData, value: any) => {
     setPassageData((prev) => ({
@@ -77,9 +75,7 @@ export default function CreatePassagePage() {
       (zone, index, self) => index === self.findIndex((z) => z.id === zone.id)
     );
     // Update drop zones state
-    setDropZones(uniqueZones);
-
-    // Update next ID to be the smallest available ID starting from 1
+    setDropZones(uniqueZones); // Update next ID to be the smallest available ID starting from 1
     const existingIds = uniqueZones.map((z) => z.id).sort((a, b) => a - b);
     let nextId = 1;
     for (const id of existingIds) {
@@ -89,7 +85,7 @@ export default function CreatePassagePage() {
         break;
       }
     }
-    setNextDropZoneId(nextId);
+    nextDropZoneIdRef.current = nextId;
   };
   // Drop zone management functions
   const addDropZone = () => {
@@ -103,10 +99,9 @@ export default function CreatePassagePage() {
         break;
       }
     }
-
     const newDropZone = { id: newId, label: `Zone ${newId}` };
     setDropZones([...dropZones, newDropZone]);
-    setNextDropZoneId(newId + 1);
+    nextDropZoneIdRef.current = newId + 1;
   };
   const removeDropZone = (id: number) => {
     // First, check if this drop zone exists in content
@@ -120,9 +115,7 @@ export default function CreatePassagePage() {
       id: index + 1,
       label: `Zone ${index + 1}`,
     }));
-    setDropZones(reindexedZones);
-
-    // Update nextDropZoneId to be the smallest available ID starting from 1
+    setDropZones(reindexedZones); // Update nextDropZoneId to be the smallest available ID starting from 1
     const newExistingIds = reindexedZones.map((z) => z.id).sort((a, b) => a - b);
     let nextId = 1;
     for (const existingId of newExistingIds) {
@@ -132,7 +125,7 @@ export default function CreatePassagePage() {
         break;
       }
     }
-    setNextDropZoneId(nextId);
+    nextDropZoneIdRef.current = nextId;
 
     // Create mapping for old IDs to new IDs
     const idMapping: { [key: number]: number } = {};
@@ -234,23 +227,18 @@ export default function CreatePassagePage() {
       </div>
     );
   };
-
-  const handleSave = async (status: number) => {
+  const handleSave = async () => {
     try {
-      setLoading(true); // Update status before saving
-      const updatedPassageData = {
-        ...passageData,
-        passage_status: status,
-      };
+      setLoading(true);
 
       const requestData: CreatePassageRequest = {
-        ietls_type: updatedPassageData.ietls_type,
-        part_number: updatedPassageData.part_number,
-        instruction: updatedPassageData.instruction,
-        title: updatedPassageData.title,
-        content: updatedPassageData.content,
-        passage_status: updatedPassageData.passage_status,
-        content_with_highlight_keywords: updatedPassageData.content_with_highlight_keyword,
+        ielts_type: passageData.ielts_type,
+        part_number: passageData.part_number,
+        instruction: passageData.instruction,
+        title: passageData.title,
+        content: passageData.content,
+        passage_status: passageData.passage_status,
+        content_with_highlight_keywords: passageData.content_with_highlight_keyword,
       };
 
       await readingPassageAPI.createPassage(requestData);
@@ -274,19 +262,15 @@ export default function CreatePassagePage() {
           <div>
             <h1 className='text-3xl font-bold text-gray-900'>Create Reading Passage</h1>
             <p className='text-gray-600'>Add a new IELTS reading passage</p>
-          </div>
+          </div>{' '}
           <div className='flex gap-2'>
-            <Button variant='outline' onClick={() => handleSave(1)} disabled={loading}>
-              {loading ? <Loader2 className='h-4 w-4 mr-2 animate-spin' /> : null}
-              Save as Draft
-            </Button>
-            <Button onClick={() => handleSave(2)} disabled={loading}>
+            <Button onClick={() => handleSave()} disabled={loading}>
               {loading ? (
                 <Loader2 className='h-4 w-4 mr-2 animate-spin' />
               ) : (
                 <Save className='h-4 w-4 mr-2' />
               )}
-              Save & Publish
+              Save Passage
             </Button>
           </div>
         </div>
@@ -321,14 +305,14 @@ export default function CreatePassagePage() {
                     }
                   />
                 </div>
-              </div>
+              </div>{' '}
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                 <div className='space-y-2'>
                   <Label htmlFor='ielts_type'>IELTS Type</Label>
                   <Select
-                    value={passageData.ietls_type.toString()}
+                    value={passageData.ielts_type.toString()}
                     onValueChange={(value) =>
-                      handlePassageChange('ietls_type', Number.parseInt(value))
+                      handlePassageChange('ielts_type', Number.parseInt(value))
                     }
                   >
                     <SelectTrigger>

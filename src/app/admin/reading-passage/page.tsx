@@ -55,11 +55,10 @@ export default function ReadingPassagesPage() {
         page: currentPage,
         size: pageSize,
       });
-
       setPassages(response.data);
 
       if (response.pagination) {
-        setTotalPages(response.pagination.total_pages);
+        setTotalPages(response.pagination.totalPages);
       }
     } catch (error) {
       console.error('Failed to fetch reading passages:', error);
@@ -91,11 +90,10 @@ export default function ReadingPassagesPage() {
       }
     }
   };
-
   const filteredPassages = passages.filter(
     (passage) =>
       passage.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      getIeltsTypeLabel(passage.ietls_type).toLowerCase().includes(searchTerm.toLowerCase())
+      getIeltsTypeLabel(passage.ielts_type).toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handlePageChange = (newPage: number) => {
@@ -149,9 +147,9 @@ export default function ReadingPassagesPage() {
                     <div className='flex-1'>
                       <CardTitle className='text-lg mb-2 line-clamp-2'>
                         {passage.title ?? 'Untitled Passage'}
-                      </CardTitle>
+                      </CardTitle>{' '}
                       <CardDescription className='text-sm'>
-                        Type: {getIeltsTypeLabel(passage.ietls_type)}
+                        Type: {getIeltsTypeLabel(passage.ielts_type)}
                       </CardDescription>
                     </div>
                     <DropdownMenu>

@@ -37,19 +37,17 @@ export default function EditPassagePage({ params }: { readonly params: { id: str
   const [initialLoading, setInitialLoading] = useState(true);
   const contentTextareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightTextareaRef = useRef<HTMLTextAreaElement>(null);
-
   const [passageData, setPassageData] = useState({
-    ietls_type: 1,
+    ielts_type: 1,
     part_number: 1,
     instruction: '',
     title: '',
     content: '',
     content_with_highlight_keyword: '',
     passage_status: 1,
-  });
-  // State for managing drop zones
+  }); // State for managing drop zones
   const [dropZones, setDropZones] = useState<{ id: number; label: string }[]>([]);
-  const [_nextDropZoneId, setNextDropZoneId] = useState(1);
+  const nextDropZoneIdRef = useRef(1);
 
   // Function to extract drop zones from content
   const extractDropZonesFromContent = (content: string) => {
@@ -65,9 +63,7 @@ export default function EditPassagePage({ params }: { readonly params: { id: str
   // Function to sync drop zones from content
   const syncDropZonesFromContent = (content: string) => {
     const extractedZones = extractDropZonesFromContent(content);
-    setDropZones(extractedZones);
-
-    // Update next ID to be the smallest available ID starting from 1
+    setDropZones(extractedZones); // Update next ID to be the smallest available ID starting from 1
     const existingIds = extractedZones.map((z) => z.id).sort((a, b) => a - b);
     let nextId = 1;
     for (const id of existingIds) {
@@ -77,7 +73,7 @@ export default function EditPassagePage({ params }: { readonly params: { id: str
         break;
       }
     }
-    setNextDropZoneId(nextId);
+    nextDropZoneIdRef.current = nextId;
   };
   // Drop zone management functions
   const addDropZone = () => {
@@ -91,10 +87,9 @@ export default function EditPassagePage({ params }: { readonly params: { id: str
         break;
       }
     }
-
     const newDropZone = { id: newId, label: `Zone ${newId}` };
     setDropZones([...dropZones, newDropZone]);
-    setNextDropZoneId(newId + 1);
+    nextDropZoneIdRef.current = newId + 1;
   };
   const removeDropZone = (id: number) => {
     // First, check if this drop zone exists in content
@@ -120,7 +115,7 @@ export default function EditPassagePage({ params }: { readonly params: { id: str
         break;
       }
     }
-    setNextDropZoneId(nextId);
+    nextDropZoneIdRef.current = nextId;
 
     // Create mapping for old IDs to new IDs
     const idMapping: { [key: number]: number } = {};
@@ -230,20 +225,18 @@ export default function EditPassagePage({ params }: { readonly params: { id: str
         const response = await readingPassageAPI.getPassage(params.id);
         if (response.data) {
           setPassageData({
-            ietls_type: typeof response.data.ietls_type === 'number' ? response.data.ietls_type : 1,
+            ielts_type: typeof response.data.ielts_type === 'number' ? response.data.ielts_type : 1,
             part_number: response.data.part_number ?? 1,
             instruction: response.data.instruction ?? '',
             title: response.data.title ?? '',
             content: response.data.content ?? '',
             content_with_highlight_keyword: response.data.content_with_highlight_keyword ?? '',
             passage_status: response.data.passage_status ?? 1,
-          });
-
-          // Extract existing drop zones from content
+          }); // Extract existing drop zones from content
           const existingDropZones = extractDropZonesFromContent(response.data.content ?? '');
           setDropZones(existingDropZones);
           if (existingDropZones.length > 0) {
-            setNextDropZoneId(Math.max(...existingDropZones.map((z) => z.id)) + 1);
+            nextDropZoneIdRef.current = Math.max(...existingDropZones.map((z) => z.id)) + 1;
           }
         }
       } catch (error) {
@@ -273,9 +266,8 @@ export default function EditPassagePage({ params }: { readonly params: { id: str
   const handleSave = async (status?: number) => {
     try {
       setLoading(true);
-
       const requestData: UpdatePassageRequest = {
-        ietls_type: passageData.ietls_type,
+        ielts_type: passageData.ielts_type,
         part_number: passageData.part_number,
         instruction: passageData.instruction,
         title: passageData.title,
@@ -316,23 +308,15 @@ export default function EditPassagePage({ params }: { readonly params: { id: str
           <div>
             <h1 className='text-3xl font-bold text-gray-900'>Edit Reading Passage</h1>
             <p className='text-gray-600'>Update the IELTS reading passage</p>
-          </div>
+          </div>{' '}
           <div className='flex gap-2'>
-            <Button variant='outline' onClick={() => handleSave(1)} disabled={loading}>
-              {loading ? <Loader2 className='h-4 w-4 mr-2 animate-spin' /> : null}
-              Save as Draft
-            </Button>
-            <Button onClick={() => handleSave(2)} disabled={loading}>
+            <Button onClick={() => handleSave()} disabled={loading}>
               {loading ? (
                 <Loader2 className='h-4 w-4 mr-2 animate-spin' />
               ) : (
                 <Save className='h-4 w-4 mr-2' />
               )}
-              Save & Publish
-            </Button>
-            <Button variant='outline' onClick={() => handleSave()} disabled={loading}>
-              {loading ? <Loader2 className='h-4 w-4 mr-2 animate-spin' /> : null}
-              Update
+              Save Changes
             </Button>
           </div>
         </div>
@@ -371,11 +355,11 @@ export default function EditPassagePage({ params }: { readonly params: { id: str
 
               <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                 <div className='space-y-2'>
-                  <Label htmlFor='ielts_type'>IELTS Type</Label>
+                  <Label htmlFor='ielts_type'>IELTS Type</Label>{' '}
                   <Select
-                    value={passageData.ietls_type.toString()}
+                    value={passageData.ielts_type.toString()}
                     onValueChange={(value) =>
-                      handlePassageChange('ietls_type', Number.parseInt(value))
+                      handlePassageChange('ielts_type', Number.parseInt(value))
                     }
                   >
                     <SelectTrigger>
