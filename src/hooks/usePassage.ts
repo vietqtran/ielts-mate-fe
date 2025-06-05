@@ -4,16 +4,9 @@ import {
   AddGroupQuestionRequest,
   AddGroupQuestionResponse,
   BaseResponse,
-  ChoiceRequest,
-  CreateDragItemRequest,
-  DragItemListResponse,
-  DragItemResponse,
   PassageCreationRequest,
   PassageDetailResponse,
   PassageGetResponse,
-  QuestionCreationRequest,
-  QuestionCreationResponse,
-  UpdateDragItemRequest,
 } from '@/types/reading.types';
 
 import instance from '@/lib/axios';
@@ -24,19 +17,19 @@ export function usePassage() {
   const [error, setError] = useState<Record<string, Error | null>>({});
 
   const setLoadingState = (key: string, value: boolean) => {
-    setIsLoading(prev => ({ ...prev, [key]: value }));
+    setIsLoading((prev) => ({ ...prev, [key]: value }));
   };
 
   const setErrorState = (key: string, value: Error | null) => {
-    setError(prev => ({ ...prev, [key]: value }));
+    setError((prev) => ({ ...prev, [key]: value }));
   };
 
   // Get active passages for public
   const getActivePassages = async (params?: {
     page?: number;
     size?: number;
-    ieltsType?: number;
-    partNumber?: number;
+    ielts_type?: number;
+    part_number?: number;
     questionCategory?: string;
   }) => {
     setLoadingState('getActivePassages', true);
@@ -57,9 +50,9 @@ export function usePassage() {
   const getPassagesForTeacher = async (params?: {
     page?: number;
     size?: number;
-    ieltsType?: number;
+    ielts_type?: number;
     status?: number;
-    partNumber?: number;
+    part_number?: number;
     questionCategory?: string;
   }) => {
     setLoadingState('getPassagesForTeacher', true);
@@ -85,7 +78,8 @@ export function usePassage() {
       // Ensure content_with_highlight_keywords has a default value
       const requestData = {
         ...request,
-        content_with_highlight_keywords: request.content_with_highlight_keywords || request.content || '',
+        content_with_highlight_keywords:
+          request.content_with_highlight_keywords || request.content || '',
       };
       const { data } = await instance.post('/reading/passages', requestData);
       return data;
@@ -98,12 +92,12 @@ export function usePassage() {
   };
 
   // Update passage
-  const updatePassage = async (passageId: string, request: PassageCreationRequest) => {
+  const updatePassage = async (passage_id: string, request: PassageCreationRequest) => {
     setLoadingState('updatePassage', true);
     setErrorState('updatePassage', null);
 
     try {
-      const { data } = await instance.put(`/reading/passages/${passageId}`, request);
+      const { data } = await instance.put(`/reading/passages/${passage_id}`, request);
       return data as BaseResponse<PassageDetailResponse>;
     } catch (error) {
       setErrorState('updatePassage', error as Error);
@@ -114,12 +108,12 @@ export function usePassage() {
   };
 
   // Get passage by ID
-  const getPassageById = async (passageId: string) => {
+  const getPassageById = async (passage_id: string) => {
     setLoadingState('getPassageById', true);
     setErrorState('getPassageById', null);
 
     try {
-      const { data } = await instance.get(`/reading/passages/${passageId}`);
+      const { data } = await instance.get(`/reading/passages/${passage_id}`);
       return data as BaseResponse<PassageDetailResponse>;
     } catch (error) {
       setErrorState('getPassageById', error as Error);
@@ -130,12 +124,12 @@ export function usePassage() {
   };
 
   // Delete passage
-  const deletePassage = async (passageId: string) => {
+  const deletePassage = async (passage_id: string) => {
     setLoadingState('deletePassage', true);
     setErrorState('deletePassage', null);
 
     try {
-      const { data } = await instance.delete(`/reading/passages/${passageId}`);
+      const { data } = await instance.delete(`/reading/passages/${passage_id}`);
       return data as BaseResponse<void>;
     } catch (error) {
       setErrorState('deletePassage', error as Error);
@@ -146,12 +140,12 @@ export function usePassage() {
   };
 
   // Add question group to passage
-  const addGroupQuestion = async (passageId: string, request: AddGroupQuestionRequest) => {
+  const addGroupQuestion = async (passage_id: string, request: AddGroupQuestionRequest) => {
     setLoadingState('addGroupQuestion', true);
     setErrorState('addGroupQuestion', null);
 
     try {
-      const { data } = await instance.post(`/reading/passages/${passageId}/groups`, request);
+      const { data } = await instance.post(`/reading/passages/${passage_id}/groups`, request);
       return data as BaseResponse<AddGroupQuestionResponse>;
     } catch (error) {
       setErrorState('addGroupQuestion', error as Error);
@@ -162,12 +156,12 @@ export function usePassage() {
   };
 
   // Get all question groups for passage
-  const getAllQuestionGroups = async (passageId: string) => {
+  const getAllQuestionGroups = async (passage_id: string) => {
     setLoadingState('getAllQuestionGroups', true);
     setErrorState('getAllQuestionGroups', null);
 
     try {
-      const { data } = await instance.get(`/reading/passages/${passageId}/groups`);
+      const { data } = await instance.get(`/reading/passages/${passage_id}/groups`);
       return data as BaseResponse<AddGroupQuestionResponse[]>;
     } catch (error) {
       setErrorState('getAllQuestionGroups', error as Error);
@@ -178,12 +172,19 @@ export function usePassage() {
   };
 
   // Update question group
-  const updateGroupQuestion = async (passageId: string, groupId: string, request: AddGroupQuestionRequest) => {
+  const updateGroupQuestion = async (
+    passage_id: string,
+    groupId: string,
+    request: AddGroupQuestionRequest
+  ) => {
     setLoadingState('updateGroupQuestion', true);
     setErrorState('updateGroupQuestion', null);
 
     try {
-      const { data } = await instance.put(`/reading/passages/${passageId}/groups/${groupId}`, request);
+      const { data } = await instance.put(
+        `/reading/passages/${passage_id}/groups/${groupId}`,
+        request
+      );
       return data as BaseResponse<AddGroupQuestionResponse>;
     } catch (error) {
       setErrorState('updateGroupQuestion', error as Error);
@@ -194,12 +195,12 @@ export function usePassage() {
   };
 
   // Delete question group
-  const deleteGroupQuestion = async (passageId: string, groupId: string) => {
+  const deleteGroupQuestion = async (passage_id: string, groupId: string) => {
     setLoadingState('deleteGroupQuestion', true);
     setErrorState('deleteGroupQuestion', null);
 
     try {
-      const { data } = await instance.delete(`/reading/passages/${passageId}/groups/${groupId}`);
+      const { data } = await instance.delete(`/reading/passages/${passage_id}/groups/${groupId}`);
       return data as BaseResponse<void>;
     } catch (error) {
       setErrorState('deleteGroupQuestion', error as Error);
@@ -210,12 +211,12 @@ export function usePassage() {
   };
 
   // Get question group by ID
-  const getGroupQuestionById = async (passageId: string, groupId: string) => {
+  const getGroupQuestionById = async (passage_id: string, groupId: string) => {
     setLoadingState('getGroupQuestionById', true);
     setErrorState('getGroupQuestionById', null);
 
     try {
-      const { data } = await instance.get(`/reading/passages/${passageId}/groups/${groupId}`);
+      const { data } = await instance.get(`/reading/passages/${passage_id}/groups/${groupId}`);
       return data as BaseResponse<AddGroupQuestionResponse>;
     } catch (error) {
       setErrorState('getGroupQuestionById', error as Error);

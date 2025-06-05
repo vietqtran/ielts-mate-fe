@@ -19,8 +19,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
-import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 
 const choiceSchema = z.object({
   label: z.string().min(1, 'Label is required'),
@@ -55,10 +55,10 @@ interface MultipleChoiceManagerProps {
   onUpdateGroup: (group: QuestionGroup) => void;
 }
 
-export function MultipleChoiceManager({ 
-  group, 
-  groupIndex, 
-  onUpdateGroup 
+export function MultipleChoiceManager({
+  group,
+  groupIndex,
+  onUpdateGroup,
 }: MultipleChoiceManagerProps) {
   const [isAddingQuestion, setIsAddingQuestion] = useState(false);
   const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
@@ -89,16 +89,16 @@ export function MultipleChoiceManager({
   const choices = form.watch('choices');
 
   const handleSubmit = (data: QuestionFormData) => {
-    const correctCount = data.choices.filter(choice => choice.isCorrect).length;
-    
+    const correctCount = data.choices.filter((choice) => choice.isCorrect).length;
+
     if (correctCount === 0) {
       form.setError('choices', { message: 'At least one choice must be correct' });
       return;
     }
 
     if (correctCount !== data.numberOfCorrectAnswers) {
-      form.setError('numberOfCorrectAnswers', { 
-        message: `Number of correct answers (${data.numberOfCorrectAnswers}) must match selected correct choices (${correctCount})` 
+      form.setError('numberOfCorrectAnswers', {
+        message: `Number of correct answers (${data.numberOfCorrectAnswers}) must match selected correct choices (${correctCount})`,
       });
       return;
     }
@@ -115,9 +115,9 @@ export function MultipleChoiceManager({
       onUpdateGroup({ ...group, questions: updatedQuestions });
       setEditingQuestionIndex(null);
     } else {
-      onUpdateGroup({ 
-        ...group, 
-        questions: [...group.questions, newQuestion] 
+      onUpdateGroup({
+        ...group,
+        questions: [...group.questions, newQuestion],
       });
     }
 
@@ -160,11 +160,11 @@ export function MultipleChoiceManager({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Multiple Choice Questions ({group.questions.length})</h3>
-        <Button onClick={() => setIsAddingQuestion(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
+    <div className='space-y-6'>
+      <div className='flex items-center justify-between'>
+        <h3 className='font-semibold'>Multiple Choice Questions ({group.questions.length})</h3>
+        <Button onClick={() => setIsAddingQuestion(true)} className='gap-2'>
+          <Plus className='h-4 w-4' />
           Add Question
         </Button>
       </div>
@@ -179,16 +179,20 @@ export function MultipleChoiceManager({
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                <div className="grid grid-cols-3 gap-4">
+              <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
+                <div className='grid grid-cols-3 gap-4'>
                   <FormField
                     control={form.control}
-                    name="questionOrder"
+                    name='questionOrder'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Question Number</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input
+                            type='number'
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -197,12 +201,16 @@ export function MultipleChoiceManager({
 
                   <FormField
                     control={form.control}
-                    name="point"
+                    name='point'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Points</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input
+                            type='number'
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -211,12 +219,17 @@ export function MultipleChoiceManager({
 
                   <FormField
                     control={form.control}
-                    name="numberOfCorrectAnswers"
+                    name='numberOfCorrectAnswers'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Correct Answers</FormLabel>
                         <FormControl>
-                          <Input type="number" min="1" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input
+                            type='number'
+                            min='1'
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -226,7 +239,7 @@ export function MultipleChoiceManager({
 
                 <FormField
                   control={form.control}
-                  name="instructionForChoice"
+                  name='instructionForChoice'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Question Text</FormLabel>
@@ -243,36 +256,38 @@ export function MultipleChoiceManager({
                 />
 
                 {/* Choices */}
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
+                <div className='space-y-4'>
+                  <div className='flex items-center justify-between'>
                     <FormLabel>Answer Choices</FormLabel>
-                    <Button type="button" onClick={addChoice} variant="outline" size="sm">
-                      <Plus className="h-4 w-4 mr-2" />
+                    <Button type='button' onClick={addChoice} variant='outline' size='sm'>
+                      <Plus className='h-4 w-4 mr-2' />
                       Add Choice
                     </Button>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className='space-y-3'>
                     {fields.map((field, index) => (
-                      <div key={field.id} className="flex items-start gap-4 p-4 border rounded-lg">
-                        <div className="flex items-center mt-2">
+                      <div key={field.id} className='flex items-start gap-4 p-4 border rounded-lg'>
+                        <div className='flex items-center mt-2'>
                           {numberOfCorrectAnswers === 1 ? (
                             <input
-                              type="radio"
-                              name="correctAnswer"
+                              type='radio'
+                              name='correctAnswer'
                               checked={choices[index]?.isCorrect || false}
                               onChange={(e) => handleCorrectAnswerChange(index, e.target.checked)}
-                              className="w-4 h-4"
+                              className='w-4 h-4'
                             />
                           ) : (
                             <Checkbox
                               checked={choices[index]?.isCorrect || false}
-                              onCheckedChange={(checked) => handleCorrectAnswerChange(index, !!checked)}
+                              onCheckedChange={(checked) =>
+                                handleCorrectAnswerChange(index, !!checked)
+                              }
                             />
                           )}
                         </div>
 
-                        <div className="grid grid-cols-4 gap-4 flex-1">
+                        <div className='grid grid-cols-4 gap-4 flex-1'>
                           <FormField
                             control={form.control}
                             name={`choices.${index}.label`}
@@ -287,7 +302,7 @@ export function MultipleChoiceManager({
                             )}
                           />
 
-                          <div className="col-span-3">
+                          <div className='col-span-3'>
                             <FormField
                               control={form.control}
                               name={`choices.${index}.content`}
@@ -295,7 +310,7 @@ export function MultipleChoiceManager({
                                 <FormItem>
                                   <FormLabel>Choice Text</FormLabel>
                                   <FormControl>
-                                    <Textarea placeholder="Enter choice content" {...field} />
+                                    <Textarea placeholder='Enter choice content' {...field} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -306,13 +321,13 @@ export function MultipleChoiceManager({
 
                         {fields.length > 2 && (
                           <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
+                            type='button'
+                            variant='ghost'
+                            size='sm'
                             onClick={() => remove(index)}
-                            className="mt-8"
+                            className='mt-8'
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className='h-4 w-4' />
                           </Button>
                         )}
                       </div>
@@ -322,13 +337,13 @@ export function MultipleChoiceManager({
 
                 <FormField
                   control={form.control}
-                  name="explanation"
+                  name='explanation'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Explanation</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Explain why the correct answer(s) are correct and why others are wrong"
+                          placeholder='Explain why the correct answer(s) are correct and why others are wrong'
                           {...field}
                         />
                       </FormControl>
@@ -337,10 +352,10 @@ export function MultipleChoiceManager({
                   )}
                 />
 
-                <div className="flex justify-end gap-2">
+                <div className='flex justify-end gap-2'>
                   <Button
-                    type="button"
-                    variant="outline"
+                    type='button'
+                    variant='outline'
                     onClick={() => {
                       setIsAddingQuestion(false);
                       setEditingQuestionIndex(null);
@@ -349,8 +364,8 @@ export function MultipleChoiceManager({
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" className="gap-2">
-                    <Save className="h-4 w-4" />
+                  <Button type='submit' className='gap-2'>
+                    <Save className='h-4 w-4' />
                     {editingQuestionIndex !== null ? 'Update Question' : 'Add Question'}
                   </Button>
                 </div>
@@ -362,45 +377,47 @@ export function MultipleChoiceManager({
 
       {/* Questions List */}
       {group.questions.length > 0 && (
-        <div className="space-y-4">
-          <h4 className="font-medium">Questions:</h4>
+        <div className='space-y-4'>
+          <h4 className='font-medium'>Questions:</h4>
           {group.questions.map((question, index) => (
             <Card key={index}>
-              <CardContent className="pt-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-semibold">Q{question.questionOrder}</span>
-                      <span className="text-sm text-muted-foreground">({question.point} point{question.point !== 1 ? 's' : ''})</span>
+              <CardContent className='pt-4'>
+                <div className='flex items-start justify-between'>
+                  <div className='flex-1'>
+                    <div className='flex items-center gap-2 mb-2'>
+                      <span className='font-semibold'>Q{question.questionOrder}</span>
+                      <span className='text-sm text-muted-foreground'>
+                        ({question.point} point{question.point !== 1 ? 's' : ''})
+                      </span>
                       {question.numberOfCorrectAnswers > 1 && (
-                        <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                        <span className='text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded'>
                           {question.numberOfCorrectAnswers} correct answers
                         </span>
                       )}
                     </div>
-                    <div 
-                      className="prose prose-sm max-w-none mb-3"
+                    <div
+                      className='prose prose-sm max-w-none mb-3'
                       dangerouslySetInnerHTML={{ __html: question.instructionForChoice }}
                     />
-                    <div className="space-y-2">
+                    <div className='space-y-2'>
                       {question.choices?.map((choice: any, choiceIndex: number) => (
-                        <div 
-                          key={choiceIndex} 
+                        <div
+                          key={choiceIndex}
                           className={`flex items-center gap-2 text-sm ${choice.isCorrect ? 'text-green-600 font-medium' : ''}`}
                         >
-                          <span className="font-mono">{choice.label}.</span>
+                          <span className='font-mono'>{choice.label}.</span>
                           <span>{choice.content}</span>
-                          {choice.isCorrect && <span className="text-green-600">✓</span>}
+                          {choice.isCorrect && <span className='text-green-600'>✓</span>}
                         </div>
                       ))}
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleEdit(index)}>
+                  <div className='flex gap-2'>
+                    <Button variant='ghost' size='sm' onClick={() => handleEdit(index)}>
                       Edit
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(index)}>
-                      <Trash2 className="h-4 w-4" />
+                    <Button variant='ghost' size='sm' onClick={() => handleDelete(index)}>
+                      <Trash2 className='h-4 w-4' />
                     </Button>
                   </div>
                 </div>
@@ -411,10 +428,10 @@ export function MultipleChoiceManager({
       )}
 
       {group.questions.length === 0 && !isAddingQuestion && (
-        <div className="text-center py-8 text-muted-foreground">
-          <Plus className="h-8 w-8 mx-auto mb-2 opacity-50" />
+        <div className='text-center py-8 text-muted-foreground'>
+          <Plus className='h-8 w-8 mx-auto mb-2 opacity-50' />
           <p>No questions created yet.</p>
-          <p className="text-sm">Add your first multiple choice question.</p>
+          <p className='text-sm'>Add your first multiple choice question.</p>
         </div>
       )}
     </div>

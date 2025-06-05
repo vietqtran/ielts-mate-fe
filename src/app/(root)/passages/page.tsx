@@ -4,13 +4,13 @@ import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
 import { Plus, PlusCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-import { Button } from '@/components/ui/button';
 import { CreatePassageModal } from '@/components/passages/CreatePassageModal';
 import { EditPassageModal } from '@/components/passages/EditPassageModal';
-import { PassageGetResponse } from '@/types/reading.types';
 import { PassageTable } from '@/components/passages/PassageTable';
 import { ViewPassageModal } from '@/components/passages/ViewPassageModal';
+import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/usePassage';
+import { PassageGetResponse } from '@/types/reading.types';
 import { useRouter } from 'next/navigation';
 
 export default function PassagesPage() {
@@ -68,9 +68,9 @@ export default function PassagesPage() {
     setIsEditModalOpen(true);
   };
 
-  const handleDeletePassage = async (passageId: string) => {
+  const handleDeletePassage = async (passage_id: string) => {
     try {
-      await deletePassage(passageId);
+      await deletePassage(passage_id);
       await loadPassages(pagination.currentPage, pagination.pageSize);
     } catch (error) {
       console.error('Failed to delete passage:', error);
@@ -92,21 +92,19 @@ export default function PassagesPage() {
   };
 
   return (
-    <div className="container mx-auto py-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className='container mx-auto py-6'>
+      <div className='flex items-center justify-between mb-6'>
         <div>
-          <h1 className="text-3xl font-bold">Reading Passages</h1>
-          <p className="text-muted-foreground">
-            Manage your IELTS reading passages and questions
-          </p>
+          <h1 className='text-3xl font-bold'>Reading Passages</h1>
+          <p className='text-muted-foreground'>Manage your IELTS reading passages and questions</p>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={handleCreatePassage} className="gap-2">
-            <PlusCircle className="h-4 w-4" />
+        <div className='flex gap-2'>
+          <Button onClick={handleCreatePassage} className='gap-2'>
+            <PlusCircle className='h-4 w-4' />
             Create New Passage
           </Button>
-          <Button variant="outline" onClick={() => setIsCreateModalOpen(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
+          <Button variant='outline' onClick={() => setIsCreateModalOpen(true)} className='gap-2'>
+            <Plus className='h-4 w-4' />
             Quick Create
           </Button>
         </div>
@@ -141,7 +139,7 @@ export default function PassagesPage() {
               setIsViewModalOpen(false);
               setIsEditModalOpen(true);
             }}
-            onDelete={() => handleDeletePassage(selectedPassage.passageId)}
+            onDelete={() => handleDeletePassage(selectedPassage.passage_id)}
           />
 
           <EditPassageModal

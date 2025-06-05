@@ -19,8 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { IeltsType, PassageGetResponse, PassageStatus } from '@/types/reading.types';
-import { useEffect } from 'react';
+import { PassageGetResponse, ielts_type, passage_status } from '@/types/reading.types';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,6 +27,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { usePassage } from '@/hooks/usePassage';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 
 const passageSchema = z.object({
@@ -35,9 +35,9 @@ const passageSchema = z.object({
   instruction: z.string().min(1, 'Instruction is required'),
   content: z.string().min(1, 'Content is required'),
   contentWithHighlightKeywords: z.string().min(1, 'Content with highlights is required'),
-  ieltsType: z.nativeEnum(IeltsType),
-  partNumber: z.number().min(1).max(3),
-  passageStatus: z.nativeEnum(PassageStatus),
+  ielts_type: z.nativeEnum(ielts_type),
+  part_number: z.number().min(1).max(3),
+  passage_status: z.nativeEnum(passage_status),
 });
 
 type PassageFormData = z.infer<typeof passageSchema>;
@@ -49,31 +49,31 @@ interface EditPassageModalProps {
   onSuccess: () => void;
 }
 
-const getIeltsTypeFromNumber = (type: number): IeltsType => {
+const getielts_typeFromNumber = (type: number): ielts_type => {
   switch (type) {
     case 0:
-      return IeltsType.ACADEMIC;
+      return ielts_type.ACADEMIC;
     case 1:
-      return IeltsType.GENERAL_TRAINING;
+      return ielts_type.GENERAL_TRAINING;
     default:
-      return IeltsType.ACADEMIC;
+      return ielts_type.ACADEMIC;
   }
 };
 
-const getPassageStatusFromNumber = (status: number): PassageStatus => {
+const getpassage_statusFromNumber = (status: number): passage_status => {
   switch (status) {
     case 0:
-      return PassageStatus.DRAFT;
+      return passage_status.DRAFT;
     case 1:
-      return PassageStatus.PUBLISHED;
+      return passage_status.PUBLISHED;
     case 2:
-      return PassageStatus.DEACTIVATED;
+      return passage_status.DEACTIVATED;
     case 3:
-      return PassageStatus.FINISHED;
+      return passage_status.FINISHED;
     case 4:
-      return PassageStatus.TEST;
+      return passage_status.TEST;
     default:
-      return PassageStatus.DRAFT;
+      return passage_status.DRAFT;
   }
 };
 
@@ -87,9 +87,9 @@ export function EditPassageModal({ passage, isOpen, onClose, onSuccess }: EditPa
       instruction: passage.instruction,
       content: passage.content,
       contentWithHighlightKeywords: passage.contentWithHighlightKeywords,
-      ieltsType: getIeltsTypeFromNumber(passage.ieltsType),
-      partNumber: passage.partNumber,
-      passageStatus: getPassageStatusFromNumber(passage.passageStatus),
+      ielts_type: getielts_typeFromNumber(passage.ielts_type),
+      part_number: passage.part_number,
+      passage_status: getpassage_statusFromNumber(passage.passage_status),
     },
   });
 
@@ -107,9 +107,9 @@ export function EditPassageModal({ passage, isOpen, onClose, onSuccess }: EditPa
         instruction: passage.instruction,
         content: passage.content,
         contentWithHighlightKeywords: passage.contentWithHighlightKeywords,
-        ieltsType: getIeltsTypeFromNumber(passage.ieltsType),
-        partNumber: passage.partNumber,
-        passageStatus: getPassageStatusFromNumber(passage.passageStatus),
+        ielts_type: getielts_typeFromNumber(passage.ielts_type),
+        part_number: passage.part_number,
+        passage_status: getpassage_statusFromNumber(passage.passage_status),
       });
     }
   }, [passage, form]);
@@ -140,12 +140,12 @@ export function EditPassageModal({ passage, isOpen, onClose, onSuccess }: EditPa
         instruction: data.instruction,
         content: data.content,
         content_with_highlight_keywords: data.contentWithHighlightKeywords,
-        ielts_type: Object.values(IeltsType).indexOf(data.ieltsType),
-        part_number: data.partNumber,
-        passage_status: Object.values(PassageStatus).indexOf(data.passageStatus),
+        ielts_type: Object.values(ielts_type).indexOf(data.ielts_type),
+        part_number: data.part_number,
+        passage_status: Object.values(passage_status).indexOf(data.passage_status),
       };
 
-      await updatePassage(passage.passageId, request);
+      await updatePassage(passage.passage_id, request);
       onSuccess();
       handleClose();
     } catch (error) {
@@ -184,7 +184,7 @@ export function EditPassageModal({ passage, isOpen, onClose, onSuccess }: EditPa
 
               <FormField
                 control={form.control}
-                name='ieltsType'
+                name='ielts_type'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>IELTS Type</FormLabel>
@@ -195,8 +195,10 @@ export function EditPassageModal({ passage, isOpen, onClose, onSuccess }: EditPa
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={IeltsType.ACADEMIC}>Academic</SelectItem>
-                        <SelectItem value={IeltsType.GENERAL_TRAINING}>General Training</SelectItem>
+                        <SelectItem value={ielts_type.ACADEMIC}>Academic</SelectItem>
+                        <SelectItem value={ielts_type.GENERAL_TRAINING}>
+                          General Training
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -208,7 +210,7 @@ export function EditPassageModal({ passage, isOpen, onClose, onSuccess }: EditPa
             <div className='grid grid-cols-2 gap-4'>
               <FormField
                 control={form.control}
-                name='partNumber'
+                name='part_number'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Part Number</FormLabel>
@@ -234,7 +236,7 @@ export function EditPassageModal({ passage, isOpen, onClose, onSuccess }: EditPa
 
               <FormField
                 control={form.control}
-                name='passageStatus'
+                name='passage_status'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
@@ -245,11 +247,11 @@ export function EditPassageModal({ passage, isOpen, onClose, onSuccess }: EditPa
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={PassageStatus.DRAFT}>Draft</SelectItem>
-                        <SelectItem value={PassageStatus.PUBLISHED}>Published</SelectItem>
-                        <SelectItem value={PassageStatus.TEST}>Test</SelectItem>
-                        <SelectItem value={PassageStatus.DEACTIVATED}>Deactivated</SelectItem>
-                        <SelectItem value={PassageStatus.FINISHED}>Finished</SelectItem>
+                        <SelectItem value={passage_status.DRAFT}>Draft</SelectItem>
+                        <SelectItem value={passage_status.PUBLISHED}>Published</SelectItem>
+                        <SelectItem value={passage_status.TEST}>Test</SelectItem>
+                        <SelectItem value={passage_status.DEACTIVATED}>Deactivated</SelectItem>
+                        <SelectItem value={passage_status.FINISHED}>Finished</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

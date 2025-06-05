@@ -2,19 +2,6 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
-  BarChart3,
-  BookOpen,
-  Code2,
-  GitMerge,
-  Github,
-  LayoutDashboard,
-  LineChart,
-  LogOut,
-  Server,
-  Settings,
-  User2,
-} from 'lucide-react';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -36,6 +23,19 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
+import {
+  BarChart3,
+  BookOpen,
+  Code2,
+  GitMerge,
+  Github,
+  LayoutDashboard,
+  LineChart,
+  LogOut,
+  Server,
+  Settings,
+  User2,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';

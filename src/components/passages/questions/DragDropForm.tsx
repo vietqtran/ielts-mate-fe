@@ -11,17 +11,16 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { GripVertical, Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
-import { useQuestion } from '@/hooks/useQuestion';
-import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 
 const dragItemSchema = z.object({
   content: z.string().min(1, 'Content is required'),
@@ -55,11 +54,11 @@ interface DragDropFormProps {
   onDragItemsChange: (dragItems: string[]) => void;
 }
 
-export function DragDropForm({ 
-  questions, 
-  dragItems, 
-  onQuestionsChange, 
-  onDragItemsChange 
+export function DragDropForm({
+  questions,
+  dragItems,
+  onQuestionsChange,
+  onDragItemsChange,
 }: DragDropFormProps) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState('dragItems');
@@ -78,24 +77,33 @@ export function DragDropForm({
   const dragItemsForm = useForm<DragItemsFormData>({
     resolver: zodResolver(dragItemsSchema),
     defaultValues: {
-      dragItems: dragItems.length > 0 
-        ? dragItems.map((item, index) => ({ content: item, itemOrder: index + 1 }))
-        : [{ content: '', itemOrder: 1 }],
+      dragItems:
+        dragItems.length > 0
+          ? dragItems.map((item, index) => ({ content: item, itemOrder: index + 1 }))
+          : [{ content: '', itemOrder: 1 }],
     },
   });
 
-  const { fields: questionAnswerFields, append: appendAnswer, remove: removeAnswer } = useFieldArray({
+  const {
+    fields: questionAnswerFields,
+    append: appendAnswer,
+    remove: removeAnswer,
+  } = useFieldArray({
     control: questionForm.control,
     name: 'questionAnswers',
   });
 
-  const { fields: dragItemFields, append: appendDragItem, remove: removeDragItem } = useFieldArray({
+  const {
+    fields: dragItemFields,
+    append: appendDragItem,
+    remove: removeDragItem,
+  } = useFieldArray({
     control: dragItemsForm.control,
     name: 'dragItems',
   });
 
   const handleDragItemsSubmit = (data: DragItemsFormData) => {
-    const newDragItems = data.dragItems.map(item => item.content);
+    const newDragItems = data.dragItems.map((item) => item.content);
     onDragItemsChange(newDragItems);
   };
 
@@ -136,12 +144,13 @@ export function DragDropForm({
 
   const handleEdit = (index: number) => {
     const question = questions[index];
-    const groupQuestions = questions.filter(q => 
-      q.instructionForChoice === question.instructionForChoice || 
-      (q.instructionForChoice === '' && question.instructionForChoice !== '')
+    const groupQuestions = questions.filter(
+      (q) =>
+        q.instructionForChoice === question.instructionForChoice ||
+        (q.instructionForChoice === '' && question.instructionForChoice !== '')
     );
 
-    const questionAnswers = groupQuestions.map(q => ({
+    const questionAnswers = groupQuestions.map((q) => ({
       zoneIndex: q.zoneIndex,
       dragItemContent: q.dragItemContent,
     }));
@@ -158,9 +167,12 @@ export function DragDropForm({
 
   const handleDelete = (index: number) => {
     const question = questions[index];
-    const updatedQuestions = questions.filter(q => 
-      !(q.instructionForChoice === question.instructionForChoice || 
-        (q.instructionForChoice === '' && question.instructionForChoice !== ''))
+    const updatedQuestions = questions.filter(
+      (q) =>
+        !(
+          q.instructionForChoice === question.instructionForChoice ||
+          (q.instructionForChoice === '' && question.instructionForChoice !== '')
+        )
     );
     onQuestionsChange(updatedQuestions);
   };
@@ -180,39 +192,46 @@ export function DragDropForm({
   };
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="dragItems">Drag Items</TabsTrigger>
-          <TabsTrigger value="questions">Questions</TabsTrigger>
+        <TabsList className='grid w-full grid-cols-2'>
+          <TabsTrigger value='dragItems'>Drag Items</TabsTrigger>
+          <TabsTrigger value='questions'>Questions</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="dragItems" className="space-y-6">
+        <TabsContent value='dragItems' className='space-y-6'>
           <Card>
             <CardHeader>
               <CardTitle>Manage Drag Items</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Create the items that students can drag into the zones. These items will be available for all questions in this group.
+              <p className='text-sm text-muted-foreground'>
+                Create the items that students can drag into the zones. These items will be
+                available for all questions in this group.
               </p>
             </CardHeader>
             <CardContent>
               <Form {...dragItemsForm}>
-                <form onSubmit={dragItemsForm.handleSubmit(handleDragItemsSubmit)} className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-medium">Drag Items</h3>
-                      <Button type="button" onClick={addDragItem} variant="outline" size="sm">
-                        <Plus className="h-4 w-4 mr-2" />
+                <form
+                  onSubmit={dragItemsForm.handleSubmit(handleDragItemsSubmit)}
+                  className='space-y-6'
+                >
+                  <div className='space-y-4'>
+                    <div className='flex items-center justify-between'>
+                      <h3 className='text-lg font-medium'>Drag Items</h3>
+                      <Button type='button' onClick={addDragItem} variant='outline' size='sm'>
+                        <Plus className='h-4 w-4 mr-2' />
                         Add Item
                       </Button>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className='space-y-3'>
                       {dragItemFields.map((field, index) => (
-                        <div key={field.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                          <GripVertical className="h-4 w-4 text-muted-foreground" />
-                          
-                          <div className="grid grid-cols-2 gap-4 flex-1">
+                        <div
+                          key={field.id}
+                          className='flex items-center gap-4 p-4 border rounded-lg'
+                        >
+                          <GripVertical className='h-4 w-4 text-muted-foreground' />
+
+                          <div className='grid grid-cols-2 gap-4 flex-1'>
                             <FormField
                               control={dragItemsForm.control}
                               name={`dragItems.${index}.content`}
@@ -220,7 +239,7 @@ export function DragDropForm({
                                 <FormItem>
                                   <FormLabel>Content</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="Enter drag item content" {...field} />
+                                    <Input placeholder='Enter drag item content' {...field} />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -234,7 +253,11 @@ export function DragDropForm({
                                 <FormItem>
                                   <FormLabel>Order</FormLabel>
                                   <FormControl>
-                                    <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                                    <Input
+                                      type='number'
+                                      {...field}
+                                      onChange={(e) => field.onChange(Number(e.target.value))}
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -244,12 +267,12 @@ export function DragDropForm({
 
                           {dragItemFields.length > 1 && (
                             <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
+                              type='button'
+                              variant='ghost'
+                              size='sm'
                               onClick={() => removeDragItem(index)}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className='h-4 w-4' />
                             </Button>
                           )}
                         </div>
@@ -257,32 +280,41 @@ export function DragDropForm({
                     </div>
                   </div>
 
-                  <Button type="submit">Save Drag Items</Button>
+                  <Button type='submit'>Save Drag Items</Button>
                 </form>
               </Form>
             </CardContent>
           </Card>
         </TabsContent>
 
-        <TabsContent value="questions" className="space-y-6">
+        <TabsContent value='questions' className='space-y-6'>
           <Card>
             <CardHeader>
               <CardTitle>
-                {editingIndex !== null ? 'Edit Drag & Drop Question' : 'Add New Drag & Drop Question'}
+                {editingIndex !== null
+                  ? 'Edit Drag & Drop Question'
+                  : 'Add New Drag & Drop Question'}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <Form {...questionForm}>
-                <form onSubmit={questionForm.handleSubmit(handleQuestionSubmit)} className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
+                <form
+                  onSubmit={questionForm.handleSubmit(handleQuestionSubmit)}
+                  className='space-y-6'
+                >
+                  <div className='grid grid-cols-2 gap-4'>
                     <FormField
                       control={questionForm.control}
-                      name="questionOrder"
+                      name='questionOrder'
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Question Order</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                            <Input
+                              type='number'
+                              {...field}
+                              onChange={(e) => field.onChange(Number(e.target.value))}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -291,12 +323,16 @@ export function DragDropForm({
 
                     <FormField
                       control={questionForm.control}
-                      name="point"
+                      name='point'
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Points per Zone</FormLabel>
                           <FormControl>
-                            <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                            <Input
+                              type='number'
+                              {...field}
+                              onChange={(e) => field.onChange(Number(e.target.value))}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -306,7 +342,7 @@ export function DragDropForm({
 
                   <FormField
                     control={questionForm.control}
-                    name="instructionForChoice"
+                    name='instructionForChoice'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Description</FormLabel>
@@ -314,12 +350,13 @@ export function DragDropForm({
                           <TiptapEditor
                             content={field.value}
                             onChange={field.onChange}
-                            placeholder="Enter the description with drop zones. Use [ZONE:1], [ZONE:2], [ZONE:3] to indicate drop zones."
+                            placeholder='Enter the description with drop zones. Use [ZONE:1], [ZONE:2], [ZONE:3] to indicate drop zones.'
                           />
                         </FormControl>
                         <FormMessage />
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Use [ZONE:1], [ZONE:2], [ZONE:3], etc. to create drop zones in your description.
+                        <p className='text-sm text-muted-foreground mt-1'>
+                          Use [ZONE:1], [ZONE:2], [ZONE:3], etc. to create drop zones in your
+                          description.
                         </p>
                       </FormItem>
                     )}
@@ -327,15 +364,12 @@ export function DragDropForm({
 
                   <FormField
                     control={questionForm.control}
-                    name="explanation"
+                    name='explanation'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Explanation</FormLabel>
                         <FormControl>
-                          <Textarea
-                            placeholder="Enter explanation for the answers"
-                            {...field}
-                          />
+                          <Textarea placeholder='Enter explanation for the answers' {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -343,19 +377,22 @@ export function DragDropForm({
                   />
 
                   {/* Zone Answers */}
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-lg font-medium">Zone Answers</h3>
-                      <Button type="button" onClick={addQuestionAnswer} variant="outline" size="sm">
-                        <Plus className="h-4 w-4 mr-2" />
+                  <div className='space-y-4'>
+                    <div className='flex items-center justify-between'>
+                      <h3 className='text-lg font-medium'>Zone Answers</h3>
+                      <Button type='button' onClick={addQuestionAnswer} variant='outline' size='sm'>
+                        <Plus className='h-4 w-4 mr-2' />
                         Add Zone
                       </Button>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className='space-y-3'>
                       {questionAnswerFields.map((field, index) => (
-                        <div key={field.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                          <div className="grid grid-cols-2 gap-4 flex-1">
+                        <div
+                          key={field.id}
+                          className='flex items-center gap-4 p-4 border rounded-lg'
+                        >
+                          <div className='grid grid-cols-2 gap-4 flex-1'>
                             <FormField
                               control={questionForm.control}
                               name={`questionAnswers.${index}.zoneIndex`}
@@ -363,7 +400,11 @@ export function DragDropForm({
                                 <FormItem>
                                   <FormLabel>Zone Number</FormLabel>
                                   <FormControl>
-                                    <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                                    <Input
+                                      type='number'
+                                      {...field}
+                                      onChange={(e) => field.onChange(Number(e.target.value))}
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -377,7 +418,10 @@ export function DragDropForm({
                                 <FormItem>
                                   <FormLabel>Correct Drag Item</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="Enter the correct drag item content" {...field} />
+                                    <Input
+                                      placeholder='Enter the correct drag item content'
+                                      {...field}
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -387,12 +431,12 @@ export function DragDropForm({
 
                           {questionAnswerFields.length > 1 && (
                             <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
+                              type='button'
+                              variant='ghost'
+                              size='sm'
                               onClick={() => removeAnswer(index)}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className='h-4 w-4' />
                             </Button>
                           )}
                         </div>
@@ -400,11 +444,11 @@ export function DragDropForm({
                     </div>
                   </div>
 
-                  <div className="flex justify-end gap-2">
+                  <div className='flex justify-end gap-2'>
                     {editingIndex !== null && (
                       <Button
-                        type="button"
-                        variant="outline"
+                        type='button'
+                        variant='outline'
                         onClick={() => {
                           setEditingIndex(null);
                           questionForm.reset();
@@ -413,7 +457,7 @@ export function DragDropForm({
                         Cancel
                       </Button>
                     )}
-                    <Button type="submit">
+                    <Button type='submit'>
                       {editingIndex !== null ? 'Update Question' : 'Add Question'}
                     </Button>
                   </div>
@@ -429,41 +473,42 @@ export function DragDropForm({
                 <CardTitle>Drag & Drop Questions ({questions.length})</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
+                <div className='space-y-4'>
                   {questions
-                    .filter(q => q.instructionForChoice) // Only show questions with instructions
+                    .filter((q) => q.instructionForChoice) // Only show questions with instructions
                     .map((question, index) => {
-                      const relatedQuestions = questions.filter(q => 
-                        q.instructionForChoice === question.instructionForChoice || 
-                        (q.instructionForChoice === '' && question.instructionForChoice !== '')
+                      const relatedQuestions = questions.filter(
+                        (q) =>
+                          q.instructionForChoice === question.instructionForChoice ||
+                          (q.instructionForChoice === '' && question.instructionForChoice !== '')
                       );
 
                       return (
-                        <div key={index} className="p-4 border rounded-lg">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <h4 className="font-medium">Question {question.questionOrder}</h4>
+                        <div key={index} className='p-4 border rounded-lg'>
+                          <div className='flex items-start justify-between'>
+                            <div className='flex-1'>
+                              <h4 className='font-medium'>Question {question.questionOrder}</h4>
                               <div
-                                className="text-sm text-muted-foreground mt-1"
+                                className='text-sm text-muted-foreground mt-1'
                                 dangerouslySetInnerHTML={{ __html: question.instructionForChoice }}
                               />
-                              <div className="mt-2 space-y-1">
-                                <p className="text-sm font-medium">Zone Answers:</p>
+                              <div className='mt-2 space-y-1'>
+                                <p className='text-sm font-medium'>Zone Answers:</p>
                                 {relatedQuestions
                                   .sort((a, b) => a.zoneIndex - b.zoneIndex)
                                   .map((q, qIndex) => (
-                                    <div key={qIndex} className="text-sm">
+                                    <div key={qIndex} className='text-sm'>
                                       Zone {q.zoneIndex}: {q.dragItemContent}
                                     </div>
                                   ))}
                               </div>
                             </div>
-                            <div className="flex gap-2">
-                              <Button variant="ghost" size="sm" onClick={() => handleEdit(index)}>
+                            <div className='flex gap-2'>
+                              <Button variant='ghost' size='sm' onClick={() => handleEdit(index)}>
                                 Edit
                               </Button>
-                              <Button variant="ghost" size="sm" onClick={() => handleDelete(index)}>
-                                <Trash2 className="h-4 w-4" />
+                              <Button variant='ghost' size='sm' onClick={() => handleDelete(index)}>
+                                <Trash2 className='h-4 w-4' />
                               </Button>
                             </div>
                           </div>
@@ -484,11 +529,11 @@ export function DragDropForm({
             <CardTitle>Available Drag Items ({dragItems.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex flex-wrap gap-2">
+            <div className='flex flex-wrap gap-2'>
               {dragItems.map((item, index) => (
                 <div
                   key={index}
-                  className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                  className='px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm'
                 >
                   {item}
                 </div>

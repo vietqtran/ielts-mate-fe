@@ -19,11 +19,11 @@ export function useQuestion() {
   const [error, setError] = useState<Record<string, Error | null>>({});
 
   const setLoadingState = (key: string, value: boolean) => {
-    setIsLoading(prev => ({ ...prev, [key]: value }));
+    setIsLoading((prev) => ({ ...prev, [key]: value }));
   };
 
   const setErrorState = (key: string, value: Error | null) => {
-    setError(prev => ({ ...prev, [key]: value }));
+    setError((prev) => ({ ...prev, [key]: value }));
   };
 
   // Create questions for a group
@@ -43,12 +43,19 @@ export function useQuestion() {
   };
 
   // Update question order
-  const updateQuestionOrder = async (groupId: string, questionId: string, orderRequest: { questionOrder: number }) => {
+  const updateQuestionOrder = async (
+    groupId: string,
+    questionId: string,
+    orderRequest: { questionOrder: number }
+  ) => {
     setLoadingState('updateQuestionOrder', true);
     setErrorState('updateQuestionOrder', null);
 
     try {
-      const { data } = await instance.put(`/reading/groups/${groupId}/questions/${questionId}/order`, orderRequest);
+      const { data } = await instance.put(
+        `/reading/groups/${groupId}/questions/${questionId}/order`,
+        orderRequest
+      );
       return data as BaseResponse<QuestionCreationResponse>;
     } catch (error) {
       setErrorState('updateQuestionOrder', error as Error);
@@ -59,12 +66,19 @@ export function useQuestion() {
   };
 
   // Update question information
-  const updateQuestionInfo = async (groupId: string, questionId: string, infoRequest: Partial<QuestionCreationRequest>) => {
+  const updateQuestionInfo = async (
+    groupId: string,
+    questionId: string,
+    infoRequest: Partial<QuestionCreationRequest>
+  ) => {
     setLoadingState('updateQuestionInfo', true);
     setErrorState('updateQuestionInfo', null);
 
     try {
-      const { data } = await instance.put(`/reading/groups/${groupId}/questions/${questionId}/info`, infoRequest);
+      const { data } = await instance.put(
+        `/reading/groups/${groupId}/questions/${questionId}/info`,
+        infoRequest
+      );
       return data as BaseResponse<QuestionCreationResponse>;
     } catch (error) {
       setErrorState('updateQuestionInfo', error as Error);
@@ -123,12 +137,19 @@ export function useQuestion() {
   };
 
   // Update choice
-  const updateChoice = async (questionId: string, choiceId: string, choice: Partial<ChoiceRequest>) => {
+  const updateChoice = async (
+    questionId: string,
+    choiceId: string,
+    choice: Partial<ChoiceRequest>
+  ) => {
     setLoadingState('updateChoice', true);
     setErrorState('updateChoice', null);
 
     try {
-      const { data } = await instance.put(`/reading/questions/${questionId}/choices/${choiceId}`, choice);
+      const { data } = await instance.put(
+        `/reading/questions/${questionId}/choices/${choiceId}`,
+        choice
+      );
       return data as BaseResponse<QuestionCreationResponse['choices']>;
     } catch (error) {
       setErrorState('updateChoice', error as Error);
@@ -144,7 +165,9 @@ export function useQuestion() {
     setErrorState('deleteChoice', null);
 
     try {
-      const { data } = await instance.delete(`/reading/questions/${questionId}/choices/${choiceId}`);
+      const { data } = await instance.delete(
+        `/reading/questions/${questionId}/choices/${choiceId}`
+      );
       return data as BaseResponse<void>;
     } catch (error) {
       setErrorState('deleteChoice', error as Error);
@@ -171,7 +194,11 @@ export function useQuestion() {
   };
 
   // Update drag item
-  const updateDragItem = async (groupId: string, itemId: string, dragItem: UpdateDragItemRequest) => {
+  const updateDragItem = async (
+    groupId: string,
+    itemId: string,
+    dragItem: UpdateDragItemRequest
+  ) => {
     setLoadingState('updateDragItem', true);
     setErrorState('updateDragItem', null);
 

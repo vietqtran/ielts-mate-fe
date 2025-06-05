@@ -1,14 +1,9 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { PassageGetResponse } from '@/types/reading.types';
 import { Edit, Eye, EyeOff, Trash2 } from 'lucide-react';
-import { IeltsType, PassageGetResponse, PassageStatus } from '@/types/reading.types';
 import { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
@@ -24,7 +19,7 @@ interface ViewPassageModalProps {
   onDelete: () => void;
 }
 
-const getIeltsTypeLabel = (type: number): string => {
+const getielts_typeLabel = (type: number): string => {
   switch (type) {
     case 0:
       return 'Academic';
@@ -69,22 +64,28 @@ const getStatusColor = (status: number): string => {
   }
 };
 
-export function ViewPassageModal({ passage, isOpen, onClose, onEdit, onDelete }: ViewPassageModalProps) {
+export function ViewPassageModal({
+  passage,
+  isOpen,
+  onClose,
+  onEdit,
+  onDelete,
+}: ViewPassageModalProps) {
   const { getAllQuestionGroups } = usePassage();
   const [questionGroups, setQuestionGroups] = useState<any[]>([]);
   const [isLoadingGroups, setIsLoadingGroups] = useState(false);
   const [showHighlights, setShowHighlights] = useState(false);
 
   useEffect(() => {
-    if (isOpen && passage.passageId) {
+    if (isOpen && passage.passage_id) {
       loadQuestionGroups();
     }
-  }, [isOpen, passage.passageId]);
+  }, [isOpen, passage.passage_id]);
 
   const loadQuestionGroups = async () => {
     setIsLoadingGroups(true);
     try {
-      const response = await getAllQuestionGroups(passage.passageId);
+      const response = await getAllQuestionGroups(passage.passage_id);
       if (response.data) {
         setQuestionGroups(response.data);
       }
@@ -100,11 +101,11 @@ export function ViewPassageModal({ passage, isOpen, onClose, onEdit, onDelete }:
       switch (question.questionType) {
         case 0: // Multiple Choice
           return (
-            <div key={index} className="space-y-2">
-              <h5 className="font-medium">Question {question.questionOrder}</h5>
+            <div key={index} className='space-y-2'>
+              <h5 className='font-medium'>Question {question.questionOrder}</h5>
               <div dangerouslySetInnerHTML={{ __html: question.instructionForChoice }} />
               {question.choices && (
-                <div className="space-y-1 ml-4">
+                <div className='space-y-1 ml-4'>
                   {question.choices.map((choice: any, choiceIndex: number) => (
                     <div
                       key={choiceIndex}
@@ -121,22 +122,20 @@ export function ViewPassageModal({ passage, isOpen, onClose, onEdit, onDelete }:
 
         case 1: // Fill in Blank
           return (
-            <div key={index} className="space-y-2">
-              <h5 className="font-medium">Blank {question.blankIndex}</h5>
-              <p className="text-sm text-green-600 font-medium">
-                Answer: {question.correctAnswer}
-              </p>
+            <div key={index} className='space-y-2'>
+              <h5 className='font-medium'>Blank {question.blankIndex}</h5>
+              <p className='text-sm text-green-600 font-medium'>Answer: {question.correctAnswer}</p>
             </div>
           );
 
         case 2: // Matching
           return (
-            <div key={index} className="space-y-2">
-              <h5 className="font-medium">Question {question.questionOrder}</h5>
+            <div key={index} className='space-y-2'>
+              <h5 className='font-medium'>Question {question.questionOrder}</h5>
               <div dangerouslySetInnerHTML={{ __html: question.instructionForMatching }} />
-              <div className="text-sm">
-                <p className="font-medium">Correct Answers:</p>
-                <p className="font-mono bg-gray-50 p-2 rounded">
+              <div className='text-sm'>
+                <p className='font-medium'>Correct Answers:</p>
+                <p className='font-mono bg-gray-50 p-2 rounded'>
                   {question.correctAnswerForMatching}
                 </p>
               </div>
@@ -145,9 +144,9 @@ export function ViewPassageModal({ passage, isOpen, onClose, onEdit, onDelete }:
 
         case 3: // Drag and Drop
           return (
-            <div key={index} className="space-y-2">
-              <h5 className="font-medium">Zone {question.zoneIndex}</h5>
-              <p className="text-sm text-green-600 font-medium">
+            <div key={index} className='space-y-2'>
+              <h5 className='font-medium'>Zone {question.zoneIndex}</h5>
+              <p className='text-sm text-green-600 font-medium'>
                 Correct Item: {question.dragItemContent}
               </p>
             </div>
@@ -161,59 +160,57 @@ export function ViewPassageModal({ passage, isOpen, onClose, onEdit, onDelete }:
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className='max-w-6xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
-          <div className="flex items-center justify-between">
+          <div className='flex items-center justify-between'>
             <DialogTitle>{passage.title}</DialogTitle>
-            <div className="flex gap-2">
-              <Button onClick={onEdit} variant="outline" size="sm">
-                <Edit className="h-4 w-4 mr-2" />
+            <div className='flex gap-2'>
+              <Button onClick={onEdit} variant='outline' size='sm'>
+                <Edit className='h-4 w-4 mr-2' />
                 Edit
               </Button>
-              <Button onClick={onDelete} variant="destructive" size="sm">
-                <Trash2 className="h-4 w-4 mr-2" />
+              <Button onClick={onDelete} variant='destructive' size='sm'>
+                <Trash2 className='h-4 w-4 mr-2' />
                 Delete
               </Button>
             </div>
           </div>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className='space-y-6'>
           {/* Passage Information */}
           <Card>
             <CardHeader>
               <CardTitle>Passage Information</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <CardContent className='space-y-4'>
+              <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">IELTS Type</p>
-                  <Badge variant="outline">
-                    {getIeltsTypeLabel(passage.ieltsType)}
+                  <p className='text-sm font-medium text-muted-foreground'>IELTS Type</p>
+                  <Badge variant='outline'>{getielts_typeLabel(passage.ielts_type)}</Badge>
+                </div>
+                <div>
+                  <p className='text-sm font-medium text-muted-foreground'>Part Number</p>
+                  <p>Part {passage.part_number}</p>
+                </div>
+                <div>
+                  <p className='text-sm font-medium text-muted-foreground'>Status</p>
+                  <Badge className={getStatusColor(passage.passage_status)}>
+                    {getStatusLabel(passage.passage_status)}
                   </Badge>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground">Part Number</p>
-                  <p>Part {passage.partNumber}</p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Status</p>
-                  <Badge className={getStatusColor(passage.passageStatus)}>
-                    {getStatusLabel(passage.passageStatus)}
-                  </Badge>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">Created By</p>
-                  <p>{passage.createdBy?.firstName} {passage.createdBy?.lastName}</p>
+                  <p className='text-sm font-medium text-muted-foreground'>Created By</p>
+                  <p>
+                    {passage.created_by?.first_name} {passage.created_by?.last_name}
+                  </p>
                 </div>
               </div>
 
               {passage.instruction && (
                 <div>
-                  <p className="text-sm font-medium text-muted-foreground mb-2">Instruction</p>
-                  <div className="p-3 bg-gray-50 rounded-md">
-                    {passage.instruction}
-                  </div>
+                  <p className='text-sm font-medium text-muted-foreground mb-2'>Instruction</p>
+                  <div className='p-3 bg-gray-50 rounded-md'>{passage.instruction}</div>
                 </div>
               )}
             </CardContent>
@@ -222,21 +219,21 @@ export function ViewPassageModal({ passage, isOpen, onClose, onEdit, onDelete }:
           {/* Reading Content */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className='flex items-center justify-between'>
                 <CardTitle>Reading Passage</CardTitle>
                 <Button
-                  variant="outline"
-                  size="sm"
+                  variant='outline'
+                  size='sm'
                   onClick={() => setShowHighlights(!showHighlights)}
                 >
                   {showHighlights ? (
                     <>
-                      <EyeOff className="h-4 w-4 mr-2" />
+                      <EyeOff className='h-4 w-4 mr-2' />
                       Hide Highlights
                     </>
                   ) : (
                     <>
-                      <Eye className="h-4 w-4 mr-2" />
+                      <Eye className='h-4 w-4 mr-2' />
                       Show Highlights
                     </>
                   )}
@@ -244,10 +241,10 @@ export function ViewPassageModal({ passage, isOpen, onClose, onEdit, onDelete }:
               </div>
             </CardHeader>
             <CardContent>
-              <div 
-                className="prose max-w-none"
-                dangerouslySetInnerHTML={{ 
-                  __html: showHighlights ? passage.contentWithHighlightKeywords : passage.content 
+              <div
+                className='prose max-w-none'
+                dangerouslySetInnerHTML={{
+                  __html: showHighlights ? passage.contentWithHighlightKeywords : passage.content,
                 }}
               />
             </CardContent>
@@ -260,57 +257,63 @@ export function ViewPassageModal({ passage, isOpen, onClose, onEdit, onDelete }:
             </CardHeader>
             <CardContent>
               {isLoadingGroups ? (
-                <div className="flex items-center justify-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                <div className='flex items-center justify-center py-8'>
+                  <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary'></div>
                 </div>
               ) : questionGroups.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
+                <p className='text-center text-muted-foreground py-8'>
                   No question groups found for this passage.
                 </p>
               ) : (
-                <div className="space-y-6">
+                <div className='space-y-6'>
                   {questionGroups.map((group, groupIndex) => (
-                    <div key={groupIndex} className="border rounded-lg p-4">
-                      <div className="mb-4">
-                        <h4 className="font-semibold text-lg">{group.sectionLabel}</h4>
+                    <div key={groupIndex} className='border rounded-lg p-4'>
+                      <div className='mb-4'>
+                        <h4 className='font-semibold text-lg'>{group.sectionLabel}</h4>
                         {group.instruction && (
-                          <div className="mt-2 p-3 bg-blue-50 rounded-md">
-                            <p className="text-sm">{group.instruction}</p>
+                          <div className='mt-2 p-3 bg-blue-50 rounded-md'>
+                            <p className='text-sm'>{group.instruction}</p>
                           </div>
                         )}
                       </div>
 
-                      <Separator className="my-4" />
+                      <Separator className='my-4' />
 
                       {group.questions && group.questions.length > 0 ? (
-                        <div className="space-y-4">
+                        <div className='space-y-4'>
                           {/* Group questions by type and show instruction once */}
-                          {group.questions.filter((q: any) => q.instructionForChoice || q.instructionForMatching).length > 0 && (
-                            <div className="space-y-3">
+                          {group.questions.filter(
+                            (q: any) => q.instructionForChoice || q.instructionForMatching
+                          ).length > 0 && (
+                            <div className='space-y-3'>
                               {group.questions
-                                .filter((q: any) => q.instructionForChoice || q.instructionForMatching)
+                                .filter(
+                                  (q: any) => q.instructionForChoice || q.instructionForMatching
+                                )
                                 .slice(0, 1) // Show instruction from first question only
                                 .map((question: any, index: number) => (
-                                  <div key={index} className="p-3 bg-gray-50 rounded-md">
-                                    <div dangerouslySetInnerHTML={{ 
-                                      __html: question.instructionForChoice || question.instructionForMatching 
-                                    }} />
+                                  <div key={index} className='p-3 bg-gray-50 rounded-md'>
+                                    <div
+                                      dangerouslySetInnerHTML={{
+                                        __html:
+                                          question.instructionForChoice ||
+                                          question.instructionForMatching,
+                                      }}
+                                    />
                                   </div>
                                 ))}
                             </div>
                           )}
 
-                          <div className="grid gap-4">
-                            {renderQuestionsByType(group.questions)}
-                          </div>
+                          <div className='grid gap-4'>{renderQuestionsByType(group.questions)}</div>
 
                           {/* Show drag items if this is a drag & drop group */}
                           {group.questions.some((q: any) => q.questionType === 3) && (
-                            <div className="mt-4 p-3 bg-blue-50 rounded-md">
-                              <p className="text-sm font-medium mb-2">Available Drag Items:</p>
-                              <div className="flex flex-wrap gap-2">
+                            <div className='mt-4 p-3 bg-blue-50 rounded-md'>
+                              <p className='text-sm font-medium mb-2'>Available Drag Items:</p>
+                              <div className='flex flex-wrap gap-2'>
                                 {/* This would need to be populated from drag items API */}
-                                <span className="text-sm text-muted-foreground">
+                                <span className='text-sm text-muted-foreground'>
                                   Drag items would be loaded separately
                                 </span>
                               </div>
@@ -318,7 +321,7 @@ export function ViewPassageModal({ passage, isOpen, onClose, onEdit, onDelete }:
                           )}
                         </div>
                       ) : (
-                        <p className="text-muted-foreground text-center py-4">
+                        <p className='text-muted-foreground text-center py-4'>
                           No questions in this group.
                         </p>
                       )}

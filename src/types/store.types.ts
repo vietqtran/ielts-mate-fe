@@ -15,8 +15,8 @@ export interface AuthFormState {
     email: string;
     password: string;
     confirmPassword: string;
-    firstName: string;
-    lastName: string;
+    first_name: string;
+    last_name: string;
   };
   signInForm: {
     email: string;

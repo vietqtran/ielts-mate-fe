@@ -16,8 +16,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Edit, Eye, MoreHorizontal, Trash2 } from 'lucide-react';
-import { IeltsType, PassageGetResponse, PassageStatus } from '@/types/reading.types';
 import {
   Table,
   TableBody,
@@ -26,6 +24,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { PassageGetResponse } from '@/types/reading.types';
+import { Edit, Eye, MoreHorizontal, Trash2 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -38,11 +38,11 @@ interface PassageTableProps {
   pagination: Pagination;
   onView: (passage: PassageGetResponse) => void;
   onEdit: (passage: PassageGetResponse) => void;
-  onDelete: (passageId: string) => void;
+  onDelete: (passage_id: string) => void;
   onPageChange: (page: number) => void;
 }
 
-const getIeltsTypeLabel = (type: number): string => {
+const getielts_typeLabel = (type: number): string => {
   switch (type) {
     case 0:
       return 'Academic';
@@ -96,30 +96,30 @@ export function PassageTable({
   onDelete,
   onPageChange,
 }: PassageTableProps) {
-  const [deletePassageId, setDeletePassageId] = useState<string | null>(null);
+  const [deletepassage_id, setDeletepassage_id] = useState<string | null>(null);
 
-  const handleDeleteClick = (passageId: string) => {
-    setDeletePassageId(passageId);
+  const handleDeleteClick = (passage_id: string) => {
+    setDeletepassage_id(passage_id);
   };
 
   const handleDeleteConfirm = () => {
-    if (deletePassageId) {
-      onDelete(deletePassageId);
-      setDeletePassageId(null);
+    if (deletepassage_id) {
+      onDelete(deletepassage_id);
+      setDeletepassage_id(null);
     }
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className='flex items-center justify-center h-64'>
+        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary'></div>
       </div>
     );
   }
 
   return (
     <>
-      <div className="rounded-md border">
+      <div className='rounded-md border'>
         <Table>
           <TableHeader>
             <TableRow>
@@ -129,58 +129,54 @@ export function PassageTable({
               <TableHead>Status</TableHead>
               <TableHead>Created By</TableHead>
               <TableHead>Created At</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className='text-right'>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {passages.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                <TableCell colSpan={7} className='text-center py-8 text-muted-foreground'>
                   No passages found. Create your first passage to get started.
                 </TableCell>
               </TableRow>
             ) : (
               passages.map((passage) => (
-                <TableRow key={passage.passageId}>
-                  <TableCell className="font-medium">{passage.title}</TableCell>
+                <TableRow key={passage.passage_id}>
+                  <TableCell className='font-medium'>{passage.title}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">
-                      {getIeltsTypeLabel(passage.ieltsType)}
+                    <Badge variant='outline'>{getielts_typeLabel(passage.ielts_type)}</Badge>
+                  </TableCell>
+                  <TableCell>Part {passage.part_number}</TableCell>
+                  <TableCell>
+                    <Badge className={getStatusColor(passage.passage_status)}>
+                      {getStatusLabel(passage.passage_status)}
                     </Badge>
                   </TableCell>
-                  <TableCell>Part {passage.partNumber}</TableCell>
                   <TableCell>
-                    <Badge className={getStatusColor(passage.passageStatus)}>
-                      {getStatusLabel(passage.passageStatus)}
-                    </Badge>
+                    {passage.created_by?.first_name} {passage.created_by?.last_name}
                   </TableCell>
-                  <TableCell>
-                    {passage.createdBy?.firstName} {passage.createdBy?.lastName}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(passage.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell>{new Date(passage.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell className='text-right'>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
+                        <Button variant='ghost' size='sm'>
+                          <MoreHorizontal className='h-4 w-4' />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align='end'>
                         <DropdownMenuItem onClick={() => onView(passage)}>
-                          <Eye className="h-4 w-4 mr-2" />
+                          <Eye className='h-4 w-4 mr-2' />
                           View
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => onEdit(passage)}>
-                          <Edit className="h-4 w-4 mr-2" />
+                          <Edit className='h-4 w-4 mr-2' />
                           Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleDeleteClick(passage.passageId)}
-                          className="text-red-600"
+                          onClick={() => handleDeleteClick(passage.passage_id)}
+                          className='text-red-600'
                         >
-                          <Trash2 className="h-4 w-4 mr-2" />
+                          <Trash2 className='h-4 w-4 mr-2' />
                           Delete
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -194,27 +190,27 @@ export function PassageTable({
       </div>
 
       {passages.length > 0 && (
-        <div className="flex items-center justify-between mt-4">
-          <div className="text-sm text-muted-foreground">
+        <div className='flex items-center justify-between mt-4'>
+          <div className='text-sm text-muted-foreground'>
             Showing {(pagination.currentPage - 1) * pagination.pageSize + 1} to{' '}
             {Math.min(pagination.currentPage * pagination.pageSize, pagination.totalItems)} of{' '}
             {pagination.totalItems} entries
           </div>
-          <div className="flex items-center space-x-2">
+          <div className='flex items-center space-x-2'>
             <Button
-              variant="outline"
-              size="sm"
+              variant='outline'
+              size='sm'
               onClick={() => onPageChange(pagination.currentPage - 1)}
               disabled={!pagination.hasPreviousPage}
             >
               Previous
             </Button>
-            <div className="flex items-center space-x-1">
+            <div className='flex items-center space-x-1'>
               {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map((page) => (
                 <Button
                   key={page}
                   variant={page === pagination.currentPage ? 'default' : 'outline'}
-                  size="sm"
+                  size='sm'
                   onClick={() => onPageChange(page)}
                 >
                   {page}
@@ -222,8 +218,8 @@ export function PassageTable({
               ))}
             </div>
             <Button
-              variant="outline"
-              size="sm"
+              variant='outline'
+              size='sm'
               onClick={() => onPageChange(pagination.currentPage + 1)}
               disabled={!pagination.hasNextPage}
             >
@@ -233,17 +229,21 @@ export function PassageTable({
         </div>
       )}
 
-      <AlertDialog open={!!deletePassageId} onOpenChange={() => setDeletePassageId(null)}>
+      <AlertDialog open={!!deletepassage_id} onOpenChange={() => setDeletepassage_id(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the passage and all its questions.
+              This action cannot be undone. This will permanently delete the passage and all its
+              questions.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleDeleteConfirm} className="bg-red-600 hover:bg-red-700">
+            <AlertDialogAction
+              onClick={handleDeleteConfirm}
+              className='bg-red-600 hover:bg-red-700'
+            >
               Delete
             </AlertDialogAction>
           </AlertDialogFooter>

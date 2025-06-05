@@ -81,7 +81,7 @@
         "noUnsafeOptionalChaining": "error",
         "noUnusedLabels": "error",
         "noUnusedPrivateClassMembers": "error",
-        "noUnusedVariables": "error",
+        "noUnusedVariables": "off",
         "useArrayLiterals": "off",
         "useHookAtTopLevel": "error",
         "useIsNan": "error",

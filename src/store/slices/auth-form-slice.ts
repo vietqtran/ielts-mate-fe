@@ -6,8 +6,8 @@ const initialState: AuthFormState = {
     email: '',
     password: '',
     confirmPassword: '',
-    firstName: '',
-    lastName: '',
+    first_name: '',
+    last_name: '',
   },
   signInForm: {
     email: '',

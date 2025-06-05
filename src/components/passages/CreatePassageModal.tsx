@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { IeltsType, PassageStatus } from '@/types/reading.types';
+import { ielts_type, passage_status } from '@/types/reading.types';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -37,9 +37,9 @@ const passageSchema = z.object({
   instruction: z.string().min(1, 'Instruction is required'),
   content: z.string().min(1, 'Content is required'),
   contentWithHighlightKeywords: z.string().min(1, 'Content with highlights is required'),
-  ieltsType: z.nativeEnum(IeltsType),
-  partNumber: z.number().min(1).max(3),
-  passageStatus: z.nativeEnum(PassageStatus),
+  ielts_type: z.nativeEnum(ielts_type),
+  part_number: z.number().min(1).max(3),
+  passage_status: z.nativeEnum(passage_status),
 });
 
 type PassageFormData = z.infer<typeof passageSchema>;
@@ -53,7 +53,7 @@ interface CreatePassageModalProps {
 export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassageModalProps) {
   const { createPassage, addGroupQuestion, isLoading } = usePassage();
   const [currentTab, setCurrentTab] = useState('passage');
-  const [createdPassageId, setCreatedPassageId] = useState<string | null>(null);
+  const [createdpassage_id, setCreatedpassage_id] = useState<string | null>(null);
   const [questionGroups, setQuestionGroups] = useState<any[]>([]);
   console.log(questionGroups);
   const form = useForm<PassageFormData>({
@@ -63,9 +63,9 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
       instruction: '',
       content: '',
       contentWithHighlightKeywords: '',
-      ieltsType: IeltsType.ACADEMIC,
-      partNumber: 1,
-      passageStatus: PassageStatus.DRAFT,
+      ielts_type: ielts_type.ACADEMIC,
+      part_number: 1,
+      passage_status: passage_status.DRAFT,
     },
   });
 
@@ -101,14 +101,14 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
         instruction: data.instruction,
         content: data.content,
         content_with_highlight_keywords: data.contentWithHighlightKeywords,
-        ielts_type: Object.values(IeltsType).indexOf(data.ieltsType),
-        part_number: data.partNumber,
-        passage_status: Object.values(PassageStatus).indexOf(data.passageStatus),
+        ielts_type: Object.values(ielts_type).indexOf(data.ielts_type),
+        part_number: data.part_number,
+        passage_status: Object.values(passage_status).indexOf(data.passage_status),
       };
 
       const response = await createPassage(request);
-      if (response.data?.passageId) {
-        setCreatedPassageId(response.data.passageId);
+      if (response.data?.passage_id) {
+        setCreatedpassage_id(response.data.passage_id);
         setCurrentTab('questions');
       }
     } catch (error) {
@@ -121,10 +121,10 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
   };
 
   const handleSaveQuestionGroup = async (groupData: any) => {
-    if (!createdPassageId) return;
+    if (!createdpassage_id) return;
 
     try {
-      await addGroupQuestion(createdPassageId, groupData);
+      await addGroupQuestion(createdpassage_id, groupData);
       // Group saved successfully
     } catch (error) {
       console.error('Failed to save question group:', error);
@@ -139,7 +139,7 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
   const handleClose = () => {
     form.reset();
     setCurrentTab('passage');
-    setCreatedPassageId(null);
+    setCreatedpassage_id(null);
     setQuestionGroups([]);
     onClose();
   };
@@ -154,7 +154,7 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
         <Tabs value={currentTab} onValueChange={setCurrentTab} className='w-full'>
           <TabsList className='grid w-full grid-cols-2'>
             <TabsTrigger value='passage'>Passage Information</TabsTrigger>
-            <TabsTrigger value='questions' disabled={!createdPassageId}>
+            <TabsTrigger value='questions' disabled={!createdpassage_id}>
               Question Groups
             </TabsTrigger>
           </TabsList>
@@ -179,7 +179,7 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
 
                   <FormField
                     control={form.control}
-                    name='ieltsType'
+                    name='ielts_type'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>IELTS Type</FormLabel>
@@ -190,8 +190,8 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value={IeltsType.ACADEMIC}>Academic</SelectItem>
-                            <SelectItem value={IeltsType.GENERAL_TRAINING}>
+                            <SelectItem value={ielts_type.ACADEMIC}>Academic</SelectItem>
+                            <SelectItem value={ielts_type.GENERAL_TRAINING}>
                               General Training
                             </SelectItem>
                           </SelectContent>
@@ -205,7 +205,7 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
                 <div className='grid grid-cols-2 gap-4'>
                   <FormField
                     control={form.control}
-                    name='partNumber'
+                    name='part_number'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Part Number</FormLabel>
@@ -231,7 +231,7 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
 
                   <FormField
                     control={form.control}
-                    name='passageStatus'
+                    name='passage_status'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Status</FormLabel>
@@ -242,11 +242,11 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value={PassageStatus.DRAFT}>Draft</SelectItem>
-                            <SelectItem value={PassageStatus.PUBLISHED}>Published</SelectItem>
-                            <SelectItem value={PassageStatus.DEACTIVATED}>Deactivated</SelectItem>
-                            <SelectItem value={PassageStatus.FINISHED}>Finished</SelectItem>
-                            <SelectItem value={PassageStatus.TEST}>Test</SelectItem>
+                            <SelectItem value={passage_status.DRAFT}>Draft</SelectItem>
+                            <SelectItem value={passage_status.PUBLISHED}>Published</SelectItem>
+                            <SelectItem value={passage_status.DEACTIVATED}>Deactivated</SelectItem>
+                            <SelectItem value={passage_status.FINISHED}>Finished</SelectItem>
+                            <SelectItem value={passage_status.TEST}>Test</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -319,9 +319,9 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
           </TabsContent>
 
           <TabsContent value='questions' className='space-y-6'>
-            {createdPassageId && (
+            {createdpassage_id && (
               <GroupQuestionForm
-                passageId={createdPassageId}
+                passage_id={createdpassage_id}
                 onAddGroup={handleAddQuestionGroup}
                 onSaveGroup={handleSaveQuestionGroup}
                 onFinish={handleFinish}

@@ -17,9 +17,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
-import { useForm } from 'react-hook-form';
-import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 const questionSchema = z.object({
   questionOrder: z.number().min(1),
@@ -46,11 +46,7 @@ interface MatchingManagerProps {
   onUpdateGroup: (group: QuestionGroup) => void;
 }
 
-export function MatchingManager({ 
-  group, 
-  groupIndex, 
-  onUpdateGroup 
-}: MatchingManagerProps) {
+export function MatchingManager({ group, groupIndex, onUpdateGroup }: MatchingManagerProps) {
   const [isAddingQuestion, setIsAddingQuestion] = useState(false);
   const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
 
@@ -79,9 +75,9 @@ export function MatchingManager({
       onUpdateGroup({ ...group, questions: updatedQuestions });
       setEditingQuestionIndex(null);
     } else {
-      onUpdateGroup({ 
-        ...group, 
-        questions: [...group.questions, newQuestion] 
+      onUpdateGroup({
+        ...group,
+        questions: [...group.questions, newQuestion],
       });
     }
 
@@ -108,11 +104,11 @@ export function MatchingManager({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Matching Questions ({group.questions.length})</h3>
-        <Button onClick={() => setIsAddingQuestion(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
+    <div className='space-y-6'>
+      <div className='flex items-center justify-between'>
+        <h3 className='font-semibold'>Matching Questions ({group.questions.length})</h3>
+        <Button onClick={() => setIsAddingQuestion(true)} className='gap-2'>
+          <Plus className='h-4 w-4' />
           Add Question
         </Button>
       </div>
@@ -127,16 +123,20 @@ export function MatchingManager({
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
+                <div className='grid grid-cols-2 gap-4'>
                   <FormField
                     control={form.control}
-                    name="questionOrder"
+                    name='questionOrder'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Question Number</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input
+                            type='number'
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -145,12 +145,16 @@ export function MatchingManager({
 
                   <FormField
                     control={form.control}
-                    name="point"
+                    name='point'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Points</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input
+                            type='number'
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -160,7 +164,7 @@ export function MatchingManager({
 
                 <FormField
                   control={form.control}
-                  name="instructionForMatching"
+                  name='instructionForMatching'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Matching Task Description</FormLabel>
@@ -168,54 +172,57 @@ export function MatchingManager({
                         <TiptapEditor
                           content={field.value}
                           onChange={field.onChange}
-                          placeholder="Describe what students need to match. Include the items to be matched and the categories/options."
+                          placeholder='Describe what students need to match. Include the items to be matched and the categories/options.'
                         />
                       </FormControl>
                       <FormMessage />
-                      <p className="text-xs text-muted-foreground">
-                        Example: "Match each statement (1-5) to the correct paragraph (A-E). You may use any letter more than once."
+                      <p className='text-xs text-muted-foreground'>
+                        Example: "Match each statement (1-5) to the correct paragraph (A-E). You may
+                        use any letter more than once."
                       </p>
                     </FormItem>
                   )}
                 />
 
-                <div className="grid grid-cols-1 gap-4">
-                  <div className="space-y-4">
-                    <h4 className="font-medium">Common IELTS Matching Types:</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div className="p-3 border rounded-lg">
-                        <h5 className="font-semibold text-sm text-blue-700">Paragraph Matching</h5>
-                        <p className="text-xs text-muted-foreground mt-1">
+                <div className='grid grid-cols-1 gap-4'>
+                  <div className='space-y-4'>
+                    <h4 className='font-medium'>Common IELTS Matching Types:</h4>
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                      <div className='p-3 border rounded-lg'>
+                        <h5 className='font-semibold text-sm text-blue-700'>Paragraph Matching</h5>
+                        <p className='text-xs text-muted-foreground mt-1'>
                           Match statements to paragraphs A, B, C, etc.
                         </p>
-                        <p className="text-xs text-blue-600 mt-1">
+                        <p className='text-xs text-blue-600 mt-1'>
                           Format: "1-A, 2-C, 3-B, 4-E, 5-A"
                         </p>
                       </div>
-                      <div className="p-3 border rounded-lg">
-                        <h5 className="font-semibold text-sm text-green-700">Heading Matching</h5>
-                        <p className="text-xs text-muted-foreground mt-1">
+                      <div className='p-3 border rounded-lg'>
+                        <h5 className='font-semibold text-sm text-green-700'>Heading Matching</h5>
+                        <p className='text-xs text-muted-foreground mt-1'>
                           Match headings to sections of text
                         </p>
-                        <p className="text-xs text-green-600 mt-1">
+                        <p className='text-xs text-green-600 mt-1'>
                           Format: "1-vi, 2-ii, 3-iv, 4-i, 5-iii"
                         </p>
                       </div>
-                      <div className="p-3 border rounded-lg">
-                        <h5 className="font-semibold text-sm text-purple-700">Feature Matching</h5>
-                        <p className="text-xs text-muted-foreground mt-1">
+                      <div className='p-3 border rounded-lg'>
+                        <h5 className='font-semibold text-sm text-purple-700'>Feature Matching</h5>
+                        <p className='text-xs text-muted-foreground mt-1'>
                           Match features to people/places/times
                         </p>
-                        <p className="text-xs text-purple-600 mt-1">
+                        <p className='text-xs text-purple-600 mt-1'>
                           Format: "1-Smith, 2-Jones, 3-Brown"
                         </p>
                       </div>
-                      <div className="p-3 border rounded-lg">
-                        <h5 className="font-semibold text-sm text-orange-700">Information Matching</h5>
-                        <p className="text-xs text-muted-foreground mt-1">
+                      <div className='p-3 border rounded-lg'>
+                        <h5 className='font-semibold text-sm text-orange-700'>
+                          Information Matching
+                        </h5>
+                        <p className='text-xs text-muted-foreground mt-1'>
                           Match types of information to sections
                         </p>
-                        <p className="text-xs text-orange-600 mt-1">
+                        <p className='text-xs text-orange-600 mt-1'>
                           Format: "1-causes, 2-effects, 3-solutions"
                         </p>
                       </div>
@@ -225,19 +232,20 @@ export function MatchingManager({
 
                 <FormField
                   control={form.control}
-                  name="correctAnswerForMatching"
+                  name='correctAnswerForMatching'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Correct Answer Mapping</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Enter the correct answers in format: 1-A, 2-C, 3-B, 4-E, 5-A"
+                          placeholder='Enter the correct answers in format: 1-A, 2-C, 3-B, 4-E, 5-A'
                           {...field}
                         />
                       </FormControl>
                       <FormMessage />
-                      <p className="text-xs text-muted-foreground">
-                        Use comma-separated format. Examples: "1-A, 2-C, 3-B" or "1-vi, 2-ii, 3-iv" or "1-Smith, 2-Jones, 3-Brown"
+                      <p className='text-xs text-muted-foreground'>
+                        Use comma-separated format. Examples: "1-A, 2-C, 3-B" or "1-vi, 2-ii, 3-iv"
+                        or "1-Smith, 2-Jones, 3-Brown"
                       </p>
                     </FormItem>
                   )}
@@ -245,13 +253,13 @@ export function MatchingManager({
 
                 <FormField
                   control={form.control}
-                  name="explanation"
+                  name='explanation'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Explanation</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Explain the correct answers and key clues students should look for"
+                          placeholder='Explain the correct answers and key clues students should look for'
                           {...field}
                         />
                       </FormControl>
@@ -260,9 +268,9 @@ export function MatchingManager({
                   )}
                 />
 
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-900 mb-2">IELTS Matching Tips</h4>
-                  <ul className="text-sm text-blue-700 space-y-1">
+                <div className='bg-blue-50 p-4 rounded-lg'>
+                  <h4 className='font-medium text-blue-900 mb-2'>IELTS Matching Tips</h4>
+                  <ul className='text-sm text-blue-700 space-y-1'>
                     <li>• Questions don't always follow passage order</li>
                     <li>• Options (A, B, C, etc.) can usually be used more than once</li>
                     <li>• There are often more options than questions</li>
@@ -271,10 +279,10 @@ export function MatchingManager({
                   </ul>
                 </div>
 
-                <div className="flex justify-end gap-2">
+                <div className='flex justify-end gap-2'>
                   <Button
-                    type="button"
-                    variant="outline"
+                    type='button'
+                    variant='outline'
                     onClick={() => {
                       setIsAddingQuestion(false);
                       setEditingQuestionIndex(null);
@@ -283,8 +291,8 @@ export function MatchingManager({
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" className="gap-2">
-                    <Save className="h-4 w-4" />
+                  <Button type='submit' className='gap-2'>
+                    <Save className='h-4 w-4' />
                     {editingQuestionIndex !== null ? 'Update Question' : 'Add Question'}
                   </Button>
                 </div>
@@ -296,45 +304,45 @@ export function MatchingManager({
 
       {/* Questions List */}
       {group.questions.length > 0 && (
-        <div className="space-y-4">
-          <h4 className="font-medium">Questions:</h4>
+        <div className='space-y-4'>
+          <h4 className='font-medium'>Questions:</h4>
           {group.questions.map((question, index) => (
             <Card key={index}>
-              <CardContent className="pt-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-semibold">Q{question.questionOrder}</span>
-                      <span className="text-sm text-muted-foreground">
+              <CardContent className='pt-4'>
+                <div className='flex items-start justify-between'>
+                  <div className='flex-1'>
+                    <div className='flex items-center gap-2 mb-2'>
+                      <span className='font-semibold'>Q{question.questionOrder}</span>
+                      <span className='text-sm text-muted-foreground'>
                         ({question.point} point{question.point !== 1 ? 's' : ''})
                       </span>
                     </div>
-                    <div 
-                      className="prose prose-sm max-w-none mb-3"
+                    <div
+                      className='prose prose-sm max-w-none mb-3'
                       dangerouslySetInnerHTML={{ __html: question.instructionForMatching }}
                     />
-                    <div className="text-sm space-y-2">
+                    <div className='text-sm space-y-2'>
                       <div>
-                        <p className="text-green-600 font-medium">
+                        <p className='text-green-600 font-medium'>
                           <strong>Correct Answers:</strong>
                         </p>
-                        <p className="font-mono text-sm bg-green-50 p-2 rounded mt-1">
+                        <p className='font-mono text-sm bg-green-50 p-2 rounded mt-1'>
                           {question.correctAnswerForMatching}
                         </p>
                       </div>
                       {question.explanation && (
-                        <p className="text-muted-foreground">
+                        <p className='text-muted-foreground'>
                           <strong>Explanation:</strong> {question.explanation}
                         </p>
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleEdit(index)}>
+                  <div className='flex gap-2'>
+                    <Button variant='ghost' size='sm' onClick={() => handleEdit(index)}>
                       Edit
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(index)}>
-                      <Trash2 className="h-4 w-4" />
+                    <Button variant='ghost' size='sm' onClick={() => handleDelete(index)}>
+                      <Trash2 className='h-4 w-4' />
                     </Button>
                   </div>
                 </div>
@@ -345,10 +353,10 @@ export function MatchingManager({
       )}
 
       {group.questions.length === 0 && !isAddingQuestion && (
-        <div className="text-center py-8 text-muted-foreground">
-          <Plus className="h-8 w-8 mx-auto mb-2 opacity-50" />
+        <div className='text-center py-8 text-muted-foreground'>
+          <Plus className='h-8 w-8 mx-auto mb-2 opacity-50' />
           <p>No questions created yet.</p>
-          <p className="text-sm">Add your first matching question.</p>
+          <p className='text-sm'>Add your first matching question.</p>
         </div>
       )}
     </div>

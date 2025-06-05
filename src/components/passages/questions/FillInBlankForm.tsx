@@ -18,8 +18,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
-import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 
 const blankAnswerSchema = z.object({
   blankIndex: z.number().min(1),
@@ -99,12 +99,13 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
   const handleEdit = (index: number) => {
     // Find all questions that belong to this fill-in-blank group
     const question = questions[index];
-    const groupQuestions = questions.filter(q => 
-      q.instructionForChoice === question.instructionForChoice || 
-      (q.instructionForChoice === '' && question.instructionForChoice !== '')
+    const groupQuestions = questions.filter(
+      (q) =>
+        q.instructionForChoice === question.instructionForChoice ||
+        (q.instructionForChoice === '' && question.instructionForChoice !== '')
     );
 
-    const blankAnswers = groupQuestions.map(q => ({
+    const blankAnswers = groupQuestions.map((q) => ({
       blankIndex: q.blankIndex,
       correctAnswer: q.correctAnswer,
     }));
@@ -122,9 +123,12 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
   const handleDelete = (index: number) => {
     // Find and remove all questions that belong to this fill-in-blank group
     const question = questions[index];
-    const updatedQuestions = questions.filter(q => 
-      !(q.instructionForChoice === question.instructionForChoice || 
-        (q.instructionForChoice === '' && question.instructionForChoice !== ''))
+    const updatedQuestions = questions.filter(
+      (q) =>
+        !(
+          q.instructionForChoice === question.instructionForChoice ||
+          (q.instructionForChoice === '' && question.instructionForChoice !== '')
+        )
     );
     onQuestionsChange(updatedQuestions);
   };
@@ -137,26 +141,32 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
   };
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {/* Question Form */}
       <Card>
         <CardHeader>
           <CardTitle>
-            {editingIndex !== null ? 'Edit Fill-in-Blank Question' : 'Add New Fill-in-Blank Question'}
+            {editingIndex !== null
+              ? 'Edit Fill-in-Blank Question'
+              : 'Add New Fill-in-Blank Question'}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
+              <div className='grid grid-cols-2 gap-4'>
                 <FormField
                   control={form.control}
-                  name="questionOrder"
+                  name='questionOrder'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Question Order</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                        <Input
+                          type='number'
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -165,12 +175,16 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
 
                 <FormField
                   control={form.control}
-                  name="point"
+                  name='point'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Points per Blank</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                        <Input
+                          type='number'
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -180,7 +194,7 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
 
               <FormField
                 control={form.control}
-                name="instructionForChoice"
+                name='instructionForChoice'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Description</FormLabel>
@@ -188,12 +202,13 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
                       <TiptapEditor
                         content={field.value}
                         onChange={field.onChange}
-                        placeholder="Enter the description with blanks. Use numbered boxes like [1], [2], [3] to indicate blank positions."
+                        placeholder='Enter the description with blanks. Use numbered boxes like [1], [2], [3] to indicate blank positions.'
                       />
                     </FormControl>
                     <FormMessage />
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Tip: Use [1], [2], [3], etc. to create numbered blank boxes in your description.
+                    <p className='text-sm text-muted-foreground mt-1'>
+                      Tip: Use [1], [2], [3], etc. to create numbered blank boxes in your
+                      description.
                     </p>
                   </FormItem>
                 )}
@@ -201,15 +216,12 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
 
               <FormField
                 control={form.control}
-                name="explanation"
+                name='explanation'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Explanation</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Enter explanation for the answers"
-                        {...field}
-                      />
+                      <Textarea placeholder='Enter explanation for the answers' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -217,19 +229,19 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
               />
 
               {/* Blank Answers */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium">Blank Answers</h3>
-                  <Button type="button" onClick={addBlankAnswer} variant="outline" size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
+              <div className='space-y-4'>
+                <div className='flex items-center justify-between'>
+                  <h3 className='text-lg font-medium'>Blank Answers</h3>
+                  <Button type='button' onClick={addBlankAnswer} variant='outline' size='sm'>
+                    <Plus className='h-4 w-4 mr-2' />
                     Add Blank
                   </Button>
                 </div>
 
-                <div className="space-y-3">
+                <div className='space-y-3'>
                   {fields.map((field, index) => (
-                    <div key={field.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                      <div className="grid grid-cols-2 gap-4 flex-1">
+                    <div key={field.id} className='flex items-center gap-4 p-4 border rounded-lg'>
+                      <div className='grid grid-cols-2 gap-4 flex-1'>
                         <FormField
                           control={form.control}
                           name={`blankAnswers.${index}.blankIndex`}
@@ -237,7 +249,11 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
                             <FormItem>
                               <FormLabel>Blank Number</FormLabel>
                               <FormControl>
-                                <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                                <Input
+                                  type='number'
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number(e.target.value))}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -251,7 +267,7 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
                             <FormItem>
                               <FormLabel>Correct Answer</FormLabel>
                               <FormControl>
-                                <Input placeholder="Enter correct answer" {...field} />
+                                <Input placeholder='Enter correct answer' {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -261,12 +277,12 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
 
                       {fields.length > 1 && (
                         <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
+                          type='button'
+                          variant='ghost'
+                          size='sm'
                           onClick={() => remove(index)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className='h-4 w-4' />
                         </Button>
                       )}
                     </div>
@@ -274,11 +290,11 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2">
+              <div className='flex justify-end gap-2'>
                 {editingIndex !== null && (
                   <Button
-                    type="button"
-                    variant="outline"
+                    type='button'
+                    variant='outline'
                     onClick={() => {
                       setEditingIndex(null);
                       form.reset();
@@ -287,7 +303,7 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
                     Cancel
                   </Button>
                 )}
-                <Button type="submit">
+                <Button type='submit'>
                   {editingIndex !== null ? 'Update Question' : 'Add Question'}
                 </Button>
               </div>
@@ -303,41 +319,42 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
             <CardTitle>Fill-in-Blank Questions ({questions.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className='space-y-4'>
               {questions
-                .filter(q => q.instructionForChoice) // Only show questions with instructions (group headers)
+                .filter((q) => q.instructionForChoice) // Only show questions with instructions (group headers)
                 .map((question, index) => {
-                  const relatedQuestions = questions.filter(q => 
-                    q.instructionForChoice === question.instructionForChoice || 
-                    (q.instructionForChoice === '' && question.instructionForChoice !== '')
+                  const relatedQuestions = questions.filter(
+                    (q) =>
+                      q.instructionForChoice === question.instructionForChoice ||
+                      (q.instructionForChoice === '' && question.instructionForChoice !== '')
                   );
 
                   return (
-                    <div key={index} className="p-4 border rounded-lg">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-medium">Question {question.questionOrder}</h4>
+                    <div key={index} className='p-4 border rounded-lg'>
+                      <div className='flex items-start justify-between'>
+                        <div className='flex-1'>
+                          <h4 className='font-medium'>Question {question.questionOrder}</h4>
                           <div
-                            className="text-sm text-muted-foreground mt-1"
+                            className='text-sm text-muted-foreground mt-1'
                             dangerouslySetInnerHTML={{ __html: question.instructionForChoice }}
                           />
-                          <div className="mt-2 space-y-1">
-                            <p className="text-sm font-medium">Answers:</p>
+                          <div className='mt-2 space-y-1'>
+                            <p className='text-sm font-medium'>Answers:</p>
                             {relatedQuestions
                               .sort((a, b) => a.blankIndex - b.blankIndex)
                               .map((q, qIndex) => (
-                                <div key={qIndex} className="text-sm">
+                                <div key={qIndex} className='text-sm'>
                                   {q.blankIndex}. {q.correctAnswer}
                                 </div>
                               ))}
                           </div>
                         </div>
-                        <div className="flex gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => handleEdit(index)}>
+                        <div className='flex gap-2'>
+                          <Button variant='ghost' size='sm' onClick={() => handleEdit(index)}>
                             Edit
                           </Button>
-                          <Button variant="ghost" size="sm" onClick={() => handleDelete(index)}>
-                            <Trash2 className="h-4 w-4" />
+                          <Button variant='ghost' size='sm' onClick={() => handleDelete(index)}>
+                            <Trash2 className='h-4 w-4' />
                           </Button>
                         </div>
                       </div>

@@ -16,10 +16,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
-import { Trash2 } from 'lucide-react';
-import { useForm } from 'react-hook-form';
-import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Trash2 } from 'lucide-react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 const questionSchema = z.object({
   questionOrder: z.number().min(1),
@@ -88,7 +88,7 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
   };
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {/* Question Form */}
       <Card>
         <CardHeader>
@@ -98,16 +98,20 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
+              <div className='grid grid-cols-2 gap-4'>
                 <FormField
                   control={form.control}
-                  name="questionOrder"
+                  name='questionOrder'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Question Order</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                        <Input
+                          type='number'
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -116,12 +120,16 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
 
                 <FormField
                   control={form.control}
-                  name="point"
+                  name='point'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Points</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                        <Input
+                          type='number'
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -131,7 +139,7 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
 
               <FormField
                 control={form.control}
-                name="instructionForMatching"
+                name='instructionForMatching'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Matching Instruction</FormLabel>
@@ -143,8 +151,9 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
                       />
                     </FormControl>
                     <FormMessage />
-                    <p className="text-sm text-muted-foreground mt-1">
-                      Describe the matching task. The passage should be divided into sections (A, B, C, D, E, etc.)
+                    <p className='text-sm text-muted-foreground mt-1'>
+                      Describe the matching task. The passage should be divided into sections (A, B,
+                      C, D, E, etc.)
                     </p>
                   </FormItem>
                 )}
@@ -152,7 +161,7 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
 
               <FormField
                 control={form.control}
-                name="correctAnswerForMatching"
+                name='correctAnswerForMatching'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Correct Answer Mapping</FormLabel>
@@ -163,7 +172,7 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
                       />
                     </FormControl>
                     <FormMessage />
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className='text-sm text-muted-foreground mt-1'>
                       Format: Question number - Section letter (e.g., "1-A, 2-C, 3-B")
                     </p>
                   </FormItem>
@@ -172,13 +181,13 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
 
               <FormField
                 control={form.control}
-                name="explanation"
+                name='explanation'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Explanation</FormLabel>
                     <FormControl>
                       <Textarea
-                        placeholder="Enter explanation for the matching answers"
+                        placeholder='Enter explanation for the matching answers'
                         {...field}
                       />
                     </FormControl>
@@ -187,22 +196,24 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
                 )}
               />
 
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-medium text-blue-900 mb-2">Matching Question Format</h4>
-                <p className="text-sm text-blue-700 mb-2">
-                  In a matching question, the reading passage is typically divided into sections (A, B, C, D, E, etc.).
-                  Students need to match statements or questions to the correct section.
+              <div className='bg-blue-50 p-4 rounded-lg'>
+                <h4 className='font-medium text-blue-900 mb-2'>Matching Question Format</h4>
+                <p className='text-sm text-blue-700 mb-2'>
+                  In a matching question, the reading passage is typically divided into sections (A,
+                  B, C, D, E, etc.). Students need to match statements or questions to the correct
+                  section.
                 </p>
-                <p className="text-sm text-blue-700">
-                  Example: "Match each statement (1-5) to the correct paragraph (A-E). You may use any letter more than once."
+                <p className='text-sm text-blue-700'>
+                  Example: "Match each statement (1-5) to the correct paragraph (A-E). You may use
+                  any letter more than once."
                 </p>
               </div>
 
-              <div className="flex justify-end gap-2">
+              <div className='flex justify-end gap-2'>
                 {editingIndex !== null && (
                   <Button
-                    type="button"
-                    variant="outline"
+                    type='button'
+                    variant='outline'
                     onClick={() => {
                       setEditingIndex(null);
                       form.reset();
@@ -211,7 +222,7 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
                     Cancel
                   </Button>
                 )}
-                <Button type="submit">
+                <Button type='submit'>
                   {editingIndex !== null ? 'Update Question' : 'Add Question'}
                 </Button>
               </div>
@@ -227,38 +238,40 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
             <CardTitle>Matching Questions ({questions.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className='space-y-4'>
               {questions.map((question, index) => (
-                <div key={index} className="p-4 border rounded-lg">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium">Question {question.questionOrder}</h4>
-                      <div className="mt-2">
-                        <p className="text-sm font-medium text-muted-foreground">Instruction:</p>
+                <div key={index} className='p-4 border rounded-lg'>
+                  <div className='flex items-start justify-between'>
+                    <div className='flex-1'>
+                      <h4 className='font-medium'>Question {question.questionOrder}</h4>
+                      <div className='mt-2'>
+                        <p className='text-sm font-medium text-muted-foreground'>Instruction:</p>
                         <div
-                          className="text-sm mt-1"
+                          className='text-sm mt-1'
                           dangerouslySetInnerHTML={{ __html: question.instructionForMatching }}
                         />
                       </div>
-                      <div className="mt-2">
-                        <p className="text-sm font-medium text-muted-foreground">Correct Answers:</p>
-                        <p className="text-sm mt-1 font-mono bg-gray-50 p-2 rounded">
+                      <div className='mt-2'>
+                        <p className='text-sm font-medium text-muted-foreground'>
+                          Correct Answers:
+                        </p>
+                        <p className='text-sm mt-1 font-mono bg-gray-50 p-2 rounded'>
                           {question.correctAnswerForMatching}
                         </p>
                       </div>
                       {question.explanation && (
-                        <div className="mt-2">
-                          <p className="text-sm font-medium text-muted-foreground">Explanation:</p>
-                          <p className="text-sm mt-1">{question.explanation}</p>
+                        <div className='mt-2'>
+                          <p className='text-sm font-medium text-muted-foreground'>Explanation:</p>
+                          <p className='text-sm mt-1'>{question.explanation}</p>
                         </div>
                       )}
                     </div>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(index)}>
+                    <div className='flex gap-2'>
+                      <Button variant='ghost' size='sm' onClick={() => handleEdit(index)}>
                         Edit
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(index)}>
-                        <Trash2 className="h-4 w-4" />
+                      <Button variant='ghost' size='sm' onClick={() => handleDelete(index)}>
+                        <Trash2 className='h-4 w-4' />
                       </Button>
                     </div>
                   </div>

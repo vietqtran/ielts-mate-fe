@@ -10,8 +10,8 @@ import { z } from 'zod';
 
 export const signUpSchema = z
   .object({
-    firstName: firstNameValidation,
-    lastName: lastNameValidation,
+    first_name: firstNameValidation,
+    last_name: lastNameValidation,
     email: emailValidation,
     password: passwordValidation,
     confirmPassword: confirmPasswordValidation,

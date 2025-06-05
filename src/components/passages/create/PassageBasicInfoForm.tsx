@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { IeltsType, PassageStatus } from '@/types/reading.types';
+import { ielts_type, passage_status } from '@/types/reading.types';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -33,28 +33,28 @@ interface PassageBasicInfoFormProps {
   isCompleted: boolean;
 }
 
-const getIeltsTypeLabel = (type: IeltsType): string => {
+const getielts_typeLabel = (type: ielts_type): string => {
   switch (type) {
-    case IeltsType.ACADEMIC:
+    case ielts_type.ACADEMIC:
       return 'Academic';
-    case IeltsType.GENERAL_TRAINING:
+    case ielts_type.GENERAL_TRAINING:
       return 'General Training';
     default:
       return 'Unknown';
   }
 };
 
-const getStatusLabel = (status: PassageStatus): string => {
+const getStatusLabel = (status: passage_status): string => {
   switch (status) {
-    case PassageStatus.DRAFT:
+    case passage_status.DRAFT:
       return 'Draft';
-    case PassageStatus.PUBLISHED:
+    case passage_status.PUBLISHED:
       return 'Published';
-    case PassageStatus.DEACTIVATED:
+    case passage_status.DEACTIVATED:
       return 'Deactivated';
-    case PassageStatus.FINISHED:
+    case passage_status.FINISHED:
       return 'Finished';
-    case PassageStatus.TEST:
+    case passage_status.TEST:
       return 'Test';
     default:
       return 'Unknown';
@@ -88,9 +88,9 @@ export function PassageBasicInfoForm({
             <div>
               <h3 className='font-semibold text-lg'>{formData.title}</h3>
               <div className='flex gap-2 mt-2'>
-                <Badge variant='outline'>{getIeltsTypeLabel(formData.ieltsType)}</Badge>
-                <Badge variant='outline'>Part {formData.partNumber}</Badge>
-                <Badge variant='outline'>{getStatusLabel(formData.passageStatus)}</Badge>
+                <Badge variant='outline'>{getielts_typeLabel(formData.ielts_type)}</Badge>
+                <Badge variant='outline'>Part {formData.part_number}</Badge>
+                <Badge variant='outline'>{getStatusLabel(formData.passage_status)}</Badge>
               </div>
             </div>
             <div>
@@ -146,7 +146,7 @@ export function PassageBasicInfoForm({
 
               <FormField
                 control={form.control}
-                name='ieltsType'
+                name='ielts_type'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>IELTS Type *</FormLabel>
@@ -157,8 +157,10 @@ export function PassageBasicInfoForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={IeltsType.ACADEMIC}>Academic</SelectItem>
-                        <SelectItem value={IeltsType.GENERAL_TRAINING}>General Training</SelectItem>
+                        <SelectItem value={ielts_type.ACADEMIC}>Academic</SelectItem>
+                        <SelectItem value={ielts_type.GENERAL_TRAINING}>
+                          General Training
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -170,7 +172,7 @@ export function PassageBasicInfoForm({
             <div className='grid grid-cols-2 gap-4'>
               <FormField
                 control={form.control}
-                name='partNumber'
+                name='part_number'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Part Number *</FormLabel>
@@ -200,7 +202,7 @@ export function PassageBasicInfoForm({
 
               <FormField
                 control={form.control}
-                name='passageStatus'
+                name='passage_status'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status *</FormLabel>
@@ -211,11 +213,11 @@ export function PassageBasicInfoForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={PassageStatus.DRAFT}>Draft</SelectItem>
-                        <SelectItem value={PassageStatus.PUBLISHED}>Published</SelectItem>
-                        <SelectItem value={PassageStatus.DEACTIVATED}>Deactivated</SelectItem>
-                        <SelectItem value={PassageStatus.FINISHED}>Finished</SelectItem>
-                        <SelectItem value={PassageStatus.TEST}>Test</SelectItem>
+                        <SelectItem value={passage_status.DRAFT}>Draft</SelectItem>
+                        <SelectItem value={passage_status.PUBLISHED}>Published</SelectItem>
+                        <SelectItem value={passage_status.DEACTIVATED}>Deactivated</SelectItem>
+                        <SelectItem value={passage_status.FINISHED}>Finished</SelectItem>
+                        <SelectItem value={passage_status.TEST}>Test</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

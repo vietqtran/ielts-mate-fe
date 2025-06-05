@@ -5,12 +5,12 @@ export enum QuestionType {
   DRAG_AND_DROP = 'DRAG_AND_DROP',
 }
 
-export enum IeltsType {
+export enum ielts_type {
   ACADEMIC = 'ACADEMIC',
   GENERAL_TRAINING = 'GENERAL_TRAINING',
 }
 
-export enum PassageStatus {
+export enum passage_status {
   DRAFT = 'DRAFT',
   PUBLISHED = 'PUBLISHED',
   DEACTIVATED = 'DEACTIVATED',
@@ -20,39 +20,39 @@ export enum PassageStatus {
 
 export interface UserInformation {
   id: string;
-  firstName: string;
-  lastName: string;
+  first_name: string;
+  last_name: string;
   email: string;
 }
 
 export interface PassageDetailResponse {
-  passageId: string;
-  ieltsType: number;
-  partNumber: number;
+  passage_id: string;
+  ielts_type: number;
+  part_number: number;
   instruction: string;
   title: string;
   content: string;
   contentWithHighlightKeywords: string;
-  passageStatus: number;
-  createdBy: UserInformation;
-  updatedBy: UserInformation;
-  createdAt: string;
-  updatedAt: string;
+  passage_status: number;
+  created_by: UserInformation;
+  updated_by: UserInformation;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface PassageGetResponse {
-  passageId: string;
-  ieltsType: number;
-  partNumber: number;
+  passage_id: string;
+  ielts_type: number;
+  part_number: number;
   instruction: string;
   title: string;
   content: string;
   contentWithHighlightKeywords: string;
-  passageStatus: number;
-  createdBy: UserInformation;
-  updatedBy: UserInformation;
-  createdAt: string;
-  updatedAt: string;
+  passage_status: number;
+  created_by: UserInformation;
+  updated_by: UserInformation;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface PassageCreationRequest {
@@ -166,13 +166,13 @@ export interface UpdateDragItemRequest {
 
 // Form types for frontend
 export interface PassageFormData {
-  ieltsType: IeltsType;
-  partNumber: number;
+  ielts_type: ielts_type;
+  part_number: number;
   instruction: string;
   title: string;
   content: string;
   contentWithHighlightKeywords: string;
-  passageStatus: PassageStatus;
+  passage_status: passage_status;
   groups: GroupFormData[];
 }
 

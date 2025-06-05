@@ -44,8 +44,8 @@ export function SignUpForm() {
   const form = useForm<z.infer<typeof signUpSchema>>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
-      firstName: '',
-      lastName: '',
+      first_name: '',
+      last_name: '',
       email: '',
       password: '',
       confirmPassword: '',
@@ -60,8 +60,8 @@ export function SignUpForm() {
     if (typeof window !== 'undefined') {
       const currentPage = sessionStorage.getItem(CURRENT_PAGE_SESSION_STORAGE_KEY);
       if (signUpForm && currentPage === PAGES.AUTH.SIGN_UP) {
-        form.setValue('firstName', signUpForm.firstName);
-        form.setValue('lastName', signUpForm.lastName);
+        form.setValue('first_name', signUpForm.first_name);
+        form.setValue('last_name', signUpForm.last_name);
         form.setValue('email', signUpForm.email);
         form.setValue('password', signUpForm.password);
         form.setValue('confirmPassword', signUpForm.confirmPassword);
@@ -83,8 +83,8 @@ export function SignUpForm() {
       const data = await signUp({
         email: values.email,
         password: values.password,
-        firstName: values.firstName,
-        lastName: values.lastName,
+        first_name: values.first_name,
+        last_name: values.last_name,
       });
 
       if (data.status === 'success') {
@@ -108,7 +108,7 @@ export function SignUpForm() {
 
   useEffect(() => {
     setErrors({});
-  }, [watch.email, watch.password, watch.firstName, watch.lastName, watch.confirmPassword]);
+  }, [watch.email, watch.password, watch.first_name, watch.last_name, watch.confirmPassword]);
 
   return (
     <Form {...form}>
@@ -116,22 +116,22 @@ export function SignUpForm() {
         <div className='flex items-start gap-2'>
           <FormField
             control={form.control}
-            name='firstName'
+            name='first_name'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  <Label htmlFor='firstName' className='block text-sm font-medium'>
+                  <Label htmlFor='first_name' className='block text-sm font-medium'>
                     First name
                   </Label>
                 </FormLabel>
                 <FormControl>
                   <Input
-                    id='firstName'
+                    id='first_name'
                     autoFocus
                     type='text'
                     placeholder='John'
                     className={`w-full rounded-md border px-3 py-2`}
-                    isError={!!form.formState.errors.firstName}
+                    isError={!!form.formState.errors.first_name}
                     {...field}
                   />
                 </FormControl>
@@ -141,21 +141,21 @@ export function SignUpForm() {
           />
           <FormField
             control={form.control}
-            name='lastName'
+            name='last_name'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>
-                  <Label htmlFor='lastName' className='block text-sm font-medium'>
+                  <Label htmlFor='last_name' className='block text-sm font-medium'>
                     Last name
                   </Label>
                 </FormLabel>
                 <FormControl>
                   <Input
-                    id='lastName'
+                    id='last_name'
                     type='text'
                     placeholder='Doe'
                     className={`w-full rounded-md border px-3 py-2`}
-                    isError={!!form.formState.errors.lastName}
+                    isError={!!form.formState.errors.last_name}
                     {...field}
                   />
                 </FormControl>

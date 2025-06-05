@@ -2,7 +2,6 @@
 
 import * as z from 'zod';
 
-import { AddGroupQuestionRequest, QuestionType } from '@/types/reading.types';
 import {
   Form,
   FormControl,
@@ -18,12 +17,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { AddGroupQuestionRequest, QuestionType } from '@/types/reading.types';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 
 const questionGroupSchema = z.object({
   sectionOrder: z.number().min(1),
@@ -50,7 +50,8 @@ const QUESTION_TYPE_INFO = {
   [QuestionType.FILL_IN_THE_BLANKS]: {
     label: 'Fill in the Blanks',
     description: 'Students complete sentences with words from the passage',
-    example: 'Questions 6-10: Complete the sentences below. Use NO MORE THAN THREE WORDS from the passage.',
+    example:
+      'Questions 6-10: Complete the sentences below. Use NO MORE THAN THREE WORDS from the passage.',
   },
   [QuestionType.MATCHING]: {
     label: 'Matching',
@@ -64,11 +65,11 @@ const QUESTION_TYPE_INFO = {
   },
 };
 
-export function QuestionGroupForm({ 
-  onSubmit, 
-  onCancel, 
-  isLoading, 
-  initialData 
+export function QuestionGroupForm({
+  onSubmit,
+  onCancel,
+  isLoading,
+  initialData,
 }: QuestionGroupFormProps) {
   const form = useForm<QuestionGroupFormData>({
     resolver: zodResolver(questionGroupSchema),
@@ -97,25 +98,25 @@ export function QuestionGroupForm({
 
   return (
     <div>
-      <h3 className="font-semibold mb-4">
+      <h3 className='font-semibold mb-4'>
         {initialData ? 'Edit Question Group' : 'Create New Question Group'}
       </h3>
-      
+
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-4'>
+          <div className='grid grid-cols-2 gap-4'>
             <FormField
               control={form.control}
-              name="sectionOrder"
+              name='sectionOrder'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Section Order</FormLabel>
                   <FormControl>
-                    <Input 
-                      type="number" 
-                      min="1"
-                      {...field} 
-                      onChange={(e) => field.onChange(Number(e.target.value))} 
+                    <Input
+                      type='number'
+                      min='1'
+                      {...field}
+                      onChange={(e) => field.onChange(Number(e.target.value))}
                     />
                   </FormControl>
                   <FormMessage />
@@ -125,15 +126,12 @@ export function QuestionGroupForm({
 
             <FormField
               control={form.control}
-              name="sectionLabel"
+              name='sectionLabel'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Section Label</FormLabel>
                   <FormControl>
-                    <Input 
-                      placeholder="e.g., Questions 1-5"
-                      {...field} 
-                    />
+                    <Input placeholder='e.g., Questions 1-5' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -143,22 +141,22 @@ export function QuestionGroupForm({
 
           <FormField
             control={form.control}
-            name="questionType"
+            name='questionType'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Question Type</FormLabel>
                 <Select onValueChange={field.onChange} defaultValue={field.value}>
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select question type" />
+                      <SelectValue placeholder='Select question type' />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {Object.entries(QUESTION_TYPE_INFO).map(([type, info]) => (
                       <SelectItem key={type} value={type}>
-                        <div className="flex flex-col">
-                          <span className="font-medium">{info.label}</span>
-                          <span className="text-xs text-muted-foreground">{info.description}</span>
+                        <div className='flex flex-col'>
+                          <span className='font-medium'>{info.label}</span>
+                          <span className='text-xs text-muted-foreground'>{info.description}</span>
                         </div>
                       </SelectItem>
                     ))}
@@ -170,14 +168,14 @@ export function QuestionGroupForm({
           />
 
           {selectedQuestionType && (
-            <div className="p-3 bg-blue-50 rounded-md">
-              <h4 className="font-medium text-blue-900 mb-1">
+            <div className='p-3 bg-blue-50 rounded-md'>
+              <h4 className='font-medium text-blue-900 mb-1'>
                 {QUESTION_TYPE_INFO[selectedQuestionType].label}
               </h4>
-              <p className="text-sm text-blue-700 mb-2">
+              <p className='text-sm text-blue-700 mb-2'>
                 {QUESTION_TYPE_INFO[selectedQuestionType].description}
               </p>
-              <p className="text-xs text-blue-600 italic">
+              <p className='text-xs text-blue-600 italic'>
                 Example: {QUESTION_TYPE_INFO[selectedQuestionType].example}
               </p>
             </div>
@@ -185,28 +183,28 @@ export function QuestionGroupForm({
 
           <FormField
             control={form.control}
-            name="instruction"
+            name='instruction'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Instruction</FormLabel>
                 <FormControl>
                   <Textarea
                     placeholder="Enter the instruction for this question group (e.g., 'Choose the correct letter A, B, C or D')"
-                    className="min-h-[80px]"
+                    className='min-h-[80px]'
                     {...field}
                   />
                 </FormControl>
                 <FormMessage />
-                <p className="text-xs text-muted-foreground">
+                <p className='text-xs text-muted-foreground'>
                   This instruction will appear before the questions in this group.
                 </p>
               </FormItem>
             )}
           />
 
-          <div className="bg-yellow-50 p-3 rounded-md">
-            <h4 className="font-medium text-yellow-900 mb-1">💡 Tips for Instructions</h4>
-            <ul className="text-sm text-yellow-700 space-y-1">
+          <div className='bg-yellow-50 p-3 rounded-md'>
+            <h4 className='font-medium text-yellow-900 mb-1'>💡 Tips for Instructions</h4>
+            <ul className='text-sm text-yellow-700 space-y-1'>
               <li>• Be specific about answer format (letters, numbers, words)</li>
               <li>• Include word limits for written answers (NO MORE THAN THREE WORDS)</li>
               <li>• Mention if options can be used more than once</li>
@@ -214,12 +212,12 @@ export function QuestionGroupForm({
             </ul>
           </div>
 
-          <div className="flex justify-end gap-2">
-            <Button type="button" variant="outline" onClick={onCancel}>
+          <div className='flex justify-end gap-2'>
+            <Button type='button' variant='outline' onClick={onCancel}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Creating...' : (initialData ? 'Update Group' : 'Create Group')}
+            <Button type='submit' disabled={isLoading}>
+              {isLoading ? 'Creating...' : initialData ? 'Update Group' : 'Create Group'}
             </Button>
           </div>
         </form>

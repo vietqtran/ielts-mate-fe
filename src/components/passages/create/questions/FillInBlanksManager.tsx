@@ -17,9 +17,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
-import { useForm } from 'react-hook-form';
-import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 
 const questionSchema = z.object({
   questionOrder: z.number().min(1),
@@ -47,10 +47,10 @@ interface FillInBlanksManagerProps {
   onUpdateGroup: (group: QuestionGroup) => void;
 }
 
-export function FillInBlanksManager({ 
-  group, 
-  groupIndex, 
-  onUpdateGroup 
+export function FillInBlanksManager({
+  group,
+  groupIndex,
+  onUpdateGroup,
 }: FillInBlanksManagerProps) {
   const [isAddingQuestion, setIsAddingQuestion] = useState(false);
   const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
@@ -81,9 +81,9 @@ export function FillInBlanksManager({
       onUpdateGroup({ ...group, questions: updatedQuestions });
       setEditingQuestionIndex(null);
     } else {
-      onUpdateGroup({ 
-        ...group, 
-        questions: [...group.questions, newQuestion] 
+      onUpdateGroup({
+        ...group,
+        questions: [...group.questions, newQuestion],
       });
     }
 
@@ -111,11 +111,11 @@ export function FillInBlanksManager({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold">Fill in the Blanks Questions ({group.questions.length})</h3>
-        <Button onClick={() => setIsAddingQuestion(true)} className="gap-2">
-          <Plus className="h-4 w-4" />
+    <div className='space-y-6'>
+      <div className='flex items-center justify-between'>
+        <h3 className='font-semibold'>Fill in the Blanks Questions ({group.questions.length})</h3>
+        <Button onClick={() => setIsAddingQuestion(true)} className='gap-2'>
+          <Plus className='h-4 w-4' />
           Add Question
         </Button>
       </div>
@@ -130,16 +130,20 @@ export function FillInBlanksManager({
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                <div className="grid grid-cols-3 gap-4">
+              <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
+                <div className='grid grid-cols-3 gap-4'>
                   <FormField
                     control={form.control}
-                    name="questionOrder"
+                    name='questionOrder'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Question Number</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input
+                            type='number'
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -148,12 +152,16 @@ export function FillInBlanksManager({
 
                   <FormField
                     control={form.control}
-                    name="blankIndex"
+                    name='blankIndex'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Blank Number</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input
+                            type='number'
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -162,12 +170,16 @@ export function FillInBlanksManager({
 
                   <FormField
                     control={form.control}
-                    name="point"
+                    name='point'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Points</FormLabel>
                         <FormControl>
-                          <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                          <Input
+                            type='number'
+                            {...field}
+                            onChange={(e) => field.onChange(Number(e.target.value))}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -177,7 +189,7 @@ export function FillInBlanksManager({
 
                 <FormField
                   control={form.control}
-                  name="instructionForChoice"
+                  name='instructionForChoice'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Sentence with Blank</FormLabel>
@@ -185,12 +197,13 @@ export function FillInBlanksManager({
                         <TiptapEditor
                           content={field.value}
                           onChange={field.onChange}
-                          placeholder="Enter the sentence with a blank. Use [BLANK] or _____ to indicate where students should fill in the answer."
+                          placeholder='Enter the sentence with a blank. Use [BLANK] or _____ to indicate where students should fill in the answer.'
                         />
                       </FormControl>
                       <FormMessage />
-                      <p className="text-xs text-muted-foreground">
-                        Example: "The main cause of global warming is the increase in _____ gases in the atmosphere."
+                      <p className='text-xs text-muted-foreground'>
+                        Example: "The main cause of global warming is the increase in _____ gases in
+                        the atmosphere."
                       </p>
                     </FormItem>
                   )}
@@ -198,19 +211,20 @@ export function FillInBlanksManager({
 
                 <FormField
                   control={form.control}
-                  name="correctAnswer"
+                  name='correctAnswer'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Correct Answer</FormLabel>
                       <FormControl>
-                        <Input 
-                          placeholder="Enter the correct answer (usually 1-3 words)" 
-                          {...field} 
+                        <Input
+                          placeholder='Enter the correct answer (usually 1-3 words)'
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
-                      <p className="text-xs text-muted-foreground">
-                        Use the exact words from the passage. Multiple acceptable answers can be separated by commas.
+                      <p className='text-xs text-muted-foreground'>
+                        Use the exact words from the passage. Multiple acceptable answers can be
+                        separated by commas.
                       </p>
                     </FormItem>
                   )}
@@ -218,7 +232,7 @@ export function FillInBlanksManager({
 
                 <FormField
                   control={form.control}
-                  name="explanation"
+                  name='explanation'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Explanation</FormLabel>
@@ -233,9 +247,9 @@ export function FillInBlanksManager({
                   )}
                 />
 
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-900 mb-2">IELTS Fill in Blanks Tips</h4>
-                  <ul className="text-sm text-blue-700 space-y-1">
+                <div className='bg-blue-50 p-4 rounded-lg'>
+                  <h4 className='font-medium text-blue-900 mb-2'>IELTS Fill in Blanks Tips</h4>
+                  <ul className='text-sm text-blue-700 space-y-1'>
                     <li>• Use words directly from the passage (exact spelling matters)</li>
                     <li>• Usually 1-3 words per blank, follow instruction word limits</li>
                     <li>• Questions typically follow passage order</li>
@@ -244,10 +258,10 @@ export function FillInBlanksManager({
                   </ul>
                 </div>
 
-                <div className="flex justify-end gap-2">
+                <div className='flex justify-end gap-2'>
                   <Button
-                    type="button"
-                    variant="outline"
+                    type='button'
+                    variant='outline'
                     onClick={() => {
                       setIsAddingQuestion(false);
                       setEditingQuestionIndex(null);
@@ -256,8 +270,8 @@ export function FillInBlanksManager({
                   >
                     Cancel
                   </Button>
-                  <Button type="submit" className="gap-2">
-                    <Save className="h-4 w-4" />
+                  <Button type='submit' className='gap-2'>
+                    <Save className='h-4 w-4' />
                     {editingQuestionIndex !== null ? 'Update Question' : 'Add Question'}
                   </Button>
                 </div>
@@ -269,40 +283,41 @@ export function FillInBlanksManager({
 
       {/* Questions List */}
       {group.questions.length > 0 && (
-        <div className="space-y-4">
-          <h4 className="font-medium">Questions:</h4>
+        <div className='space-y-4'>
+          <h4 className='font-medium'>Questions:</h4>
           {group.questions.map((question, index) => (
             <Card key={index}>
-              <CardContent className="pt-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="font-semibold">Q{question.questionOrder}</span>
-                      <span className="text-sm text-muted-foreground">
-                        (Blank {question.blankIndex}, {question.point} point{question.point !== 1 ? 's' : ''})
+              <CardContent className='pt-4'>
+                <div className='flex items-start justify-between'>
+                  <div className='flex-1'>
+                    <div className='flex items-center gap-2 mb-2'>
+                      <span className='font-semibold'>Q{question.questionOrder}</span>
+                      <span className='text-sm text-muted-foreground'>
+                        (Blank {question.blankIndex}, {question.point} point
+                        {question.point !== 1 ? 's' : ''})
                       </span>
                     </div>
-                    <div 
-                      className="prose prose-sm max-w-none mb-3"
+                    <div
+                      className='prose prose-sm max-w-none mb-3'
                       dangerouslySetInnerHTML={{ __html: question.instructionForChoice }}
                     />
-                    <div className="text-sm">
-                      <p className="text-green-600 font-medium">
+                    <div className='text-sm'>
+                      <p className='text-green-600 font-medium'>
                         <strong>Answer:</strong> {question.correctAnswer}
                       </p>
                       {question.explanation && (
-                        <p className="text-muted-foreground mt-1">
+                        <p className='text-muted-foreground mt-1'>
                           <strong>Explanation:</strong> {question.explanation}
                         </p>
                       )}
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="ghost" size="sm" onClick={() => handleEdit(index)}>
+                  <div className='flex gap-2'>
+                    <Button variant='ghost' size='sm' onClick={() => handleEdit(index)}>
                       Edit
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(index)}>
-                      <Trash2 className="h-4 w-4" />
+                    <Button variant='ghost' size='sm' onClick={() => handleDelete(index)}>
+                      <Trash2 className='h-4 w-4' />
                     </Button>
                   </div>
                 </div>
@@ -313,10 +328,10 @@ export function FillInBlanksManager({
       )}
 
       {group.questions.length === 0 && !isAddingQuestion && (
-        <div className="text-center py-8 text-muted-foreground">
-          <Plus className="h-8 w-8 mx-auto mb-2 opacity-50" />
+        <div className='text-center py-8 text-muted-foreground'>
+          <Plus className='h-8 w-8 mx-auto mb-2 opacity-50' />
           <p>No questions created yet.</p>
-          <p className="text-sm">Add your first fill-in-the-blanks question.</p>
+          <p className='text-sm'>Add your first fill-in-the-blanks question.</p>
         </div>
       )}
     </div>

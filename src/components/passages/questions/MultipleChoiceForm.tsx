@@ -11,8 +11,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Plus, Trash2 } from 'lucide-react';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Plus, Trash2 } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
@@ -20,8 +20,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
-import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
 
 const choiceSchema = z.object({
   label: z.string().min(1, 'Label is required'),
@@ -124,7 +124,7 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
 
   const handleCorrectAnswerChange = (choiceIndex: number, isCorrect: boolean) => {
     const currentChoices = form.getValues('choices');
-    
+
     if (isMultipleChoice) {
       // Multiple choice: allow multiple correct answers
       form.setValue(`choices.${choiceIndex}.isCorrect`, isCorrect);
@@ -137,26 +137,28 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
   };
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       {/* Question Form */}
       <Card>
         <CardHeader>
-          <CardTitle>
-            {editingIndex !== null ? 'Edit Question' : 'Add New Question'}
-          </CardTitle>
+          <CardTitle>{editingIndex !== null ? 'Edit Question' : 'Add New Question'}</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              <div className="grid grid-cols-3 gap-4">
+            <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
+              <div className='grid grid-cols-3 gap-4'>
                 <FormField
                   control={form.control}
-                  name="questionOrder"
+                  name='questionOrder'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Question Order</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                        <Input
+                          type='number'
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -165,12 +167,16 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
 
                 <FormField
                   control={form.control}
-                  name="point"
+                  name='point'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Points</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                        <Input
+                          type='number'
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -179,12 +185,17 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
 
                 <FormField
                   control={form.control}
-                  name="numberOfCorrectAnswers"
+                  name='numberOfCorrectAnswers'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Correct Answers</FormLabel>
                       <FormControl>
-                        <Input type="number" min="1" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                        <Input
+                          type='number'
+                          min='1'
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -194,7 +205,7 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
 
               <FormField
                 control={form.control}
-                name="instructionForChoice"
+                name='instructionForChoice'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Question Instruction</FormLabel>
@@ -202,7 +213,7 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
                       <TiptapEditor
                         content={field.value}
                         onChange={field.onChange}
-                        placeholder="Enter the question instruction"
+                        placeholder='Enter the question instruction'
                       />
                     </FormControl>
                     <FormMessage />
@@ -212,15 +223,12 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
 
               <FormField
                 control={form.control}
-                name="explanation"
+                name='explanation'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Explanation</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Enter explanation for the answer"
-                        {...field}
-                      />
+                      <Textarea placeholder='Enter explanation for the answer' {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -228,56 +236,60 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
               />
 
               {/* Choices */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium">Answer Choices</h3>
-                  <Button type="button" onClick={addChoice} variant="outline" size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
+              <div className='space-y-4'>
+                <div className='flex items-center justify-between'>
+                  <h3 className='text-lg font-medium'>Answer Choices</h3>
+                  <Button type='button' onClick={addChoice} variant='outline' size='sm'>
+                    <Plus className='h-4 w-4 mr-2' />
                     Add Choice
                   </Button>
                 </div>
 
-                <div className="space-y-3">
+                <div className='space-y-3'>
                   {fields.map((field, index) => (
-                    <div key={field.id} className="flex items-start gap-4 p-4 border rounded-lg">
-                      <div className="flex items-center gap-2">
+                    <div key={field.id} className='flex items-start gap-4 p-4 border rounded-lg'>
+                      <div className='flex items-center gap-2'>
                         {isMultipleChoice ? (
                           <Checkbox
                             checked={form.watch(`choices.${index}.isCorrect`)}
-                            onCheckedChange={(checked) => handleCorrectAnswerChange(index, !!checked)}
+                            onCheckedChange={(checked) =>
+                              handleCorrectAnswerChange(index, !!checked)
+                            }
                           />
                         ) : (
                           <RadioGroup
                             value={form.watch(`choices.${index}.isCorrect`) ? index.toString() : ''}
-                            onValueChange={(value) => handleCorrectAnswerChange(Number(value), true)}
+                            onValueChange={(value) =>
+                              handleCorrectAnswerChange(Number(value), true)
+                            }
                           >
                             <RadioGroupItem value={index.toString()} />
                           </RadioGroup>
                         )}
                       </div>
 
-                      <div className="flex-1 grid grid-cols-4 gap-4">
+                      <div className='flex-1 grid grid-cols-4 gap-4'>
                         <FormField
                           control={form.control}
                           name={`choices.${index}.label`}
                           render={({ field }) => (
                             <FormItem>
                               <FormControl>
-                                <Input placeholder="Label" {...field} />
+                                <Input placeholder='Label' {...field} />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
                           )}
                         />
 
-                        <div className="col-span-2">
+                        <div className='col-span-2'>
                           <FormField
                             control={form.control}
                             name={`choices.${index}.content`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormControl>
-                                  <Input placeholder="Choice content" {...field} />
+                                  <Input placeholder='Choice content' {...field} />
                                 </FormControl>
                                 <FormMessage />
                               </FormItem>
@@ -291,7 +303,11 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
                           render={({ field }) => (
                             <FormItem>
                               <FormControl>
-                                <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                                <Input
+                                  type='number'
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number(e.target.value))}
+                                />
                               </FormControl>
                               <FormMessage />
                             </FormItem>
@@ -301,12 +317,12 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
 
                       {fields.length > 2 && (
                         <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
+                          type='button'
+                          variant='ghost'
+                          size='sm'
                           onClick={() => remove(index)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className='h-4 w-4' />
                         </Button>
                       )}
                     </div>
@@ -314,11 +330,11 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
                 </div>
               </div>
 
-              <div className="flex justify-end gap-2">
+              <div className='flex justify-end gap-2'>
                 {editingIndex !== null && (
                   <Button
-                    type="button"
-                    variant="outline"
+                    type='button'
+                    variant='outline'
                     onClick={() => {
                       setEditingIndex(null);
                       form.reset();
@@ -327,7 +343,7 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
                     Cancel
                   </Button>
                 )}
-                <Button type="submit">
+                <Button type='submit'>
                   {editingIndex !== null ? 'Update Question' : 'Add Question'}
                 </Button>
               </div>
@@ -343,19 +359,19 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
             <CardTitle>Questions ({questions.length})</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className='space-y-4'>
               {questions.map((question, index) => (
-                <div key={index} className="p-4 border rounded-lg">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h4 className="font-medium">Question {question.questionOrder}</h4>
+                <div key={index} className='p-4 border rounded-lg'>
+                  <div className='flex items-start justify-between'>
+                    <div className='flex-1'>
+                      <h4 className='font-medium'>Question {question.questionOrder}</h4>
                       <div
-                        className="text-sm text-muted-foreground mt-1"
+                        className='text-sm text-muted-foreground mt-1'
                         dangerouslySetInnerHTML={{ __html: question.instructionForChoice }}
                       />
-                      <div className="mt-2 space-y-1">
+                      <div className='mt-2 space-y-1'>
                         {question.choices?.map((choice: any, choiceIndex: number) => (
-                          <div key={choiceIndex} className="flex items-center gap-2 text-sm">
+                          <div key={choiceIndex} className='flex items-center gap-2 text-sm'>
                             <span className={choice.isCorrect ? 'text-green-600 font-medium' : ''}>
                               {choice.label}. {choice.content}
                               {choice.isCorrect && ' ✓'}
@@ -364,12 +380,12 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
                         ))}
                       </div>
                     </div>
-                    <div className="flex gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(index)}>
+                    <div className='flex gap-2'>
+                      <Button variant='ghost' size='sm' onClick={() => handleEdit(index)}>
                         Edit
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(index)}>
-                        <Trash2 className="h-4 w-4" />
+                      <Button variant='ghost' size='sm' onClick={() => handleDelete(index)}>
+                        <Trash2 className='h-4 w-4' />
                       </Button>
                     </div>
                   </div>

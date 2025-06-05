@@ -11,7 +11,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Plus, Trash2 } from 'lucide-react';
 import {
   Select,
   SelectContent,
@@ -19,18 +18,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Plus, Trash2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { QuestionType } from '@/types/reading.types';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { DragDropForm } from './questions/DragDropForm';
 import { FillInBlankForm } from './questions/FillInBlankForm';
-import { Input } from '@/components/ui/input';
 import { MatchingForm } from './questions/MatchingForm';
 import { MultipleChoiceForm } from './questions/MultipleChoiceForm';
-import { QuestionType } from '@/types/reading.types';
-import { Textarea } from '@/components/ui/textarea';
-import { useForm } from 'react-hook-form';
-import { useState } from 'react';
-import { zodResolver } from '@hookform/resolvers/zod';
 
 const groupSchema = z.object({
   sectionOrder: z.number().min(1),
@@ -42,13 +42,18 @@ const groupSchema = z.object({
 type GroupFormData = z.infer<typeof groupSchema>;
 
 interface GroupQuestionFormProps {
-  passageId: string;
+  passage_id: string;
   onAddGroup: (groupData: any) => void;
   onSaveGroup: (groupData: any) => void;
   onFinish: () => void;
 }
 
-export function GroupQuestionForm({ passageId, onAddGroup, onSaveGroup, onFinish }: GroupQuestionFormProps) {
+export function GroupQuestionForm({
+  passage_id,
+  onAddGroup,
+  onSaveGroup,
+  onFinish,
+}: GroupQuestionFormProps) {
   const [groups, setGroups] = useState<any[]>([]);
   const [currentGroupIndex, setCurrentGroupIndex] = useState<number | null>(null);
 
@@ -68,8 +73,8 @@ export function GroupQuestionForm({ passageId, onAddGroup, onSaveGroup, onFinish
       questions: [],
       dragItems: data.questionType === QuestionType.DRAG_AND_DROP ? [] : undefined,
     };
-    
-    setGroups(prev => [...prev, newGroup]);
+
+    setGroups((prev) => [...prev, newGroup]);
     setCurrentGroupIndex(groups.length);
     form.reset({
       sectionOrder: groups.length + 2,
@@ -91,7 +96,7 @@ export function GroupQuestionForm({ passageId, onAddGroup, onSaveGroup, onFinish
   };
 
   const handleDeleteGroup = (index: number) => {
-    setGroups(prev => prev.filter((_, i) => i !== index));
+    setGroups((prev) => prev.filter((_, i) => i !== index));
     if (currentGroupIndex === index) {
       setCurrentGroupIndex(null);
     } else if (currentGroupIndex !== null && currentGroupIndex > index) {
@@ -101,17 +106,17 @@ export function GroupQuestionForm({ passageId, onAddGroup, onSaveGroup, onFinish
 
   const handleUpdateGroupQuestions = (questions: any[]) => {
     if (currentGroupIndex !== null) {
-      setGroups(prev => prev.map((group, index) => 
-        index === currentGroupIndex ? { ...group, questions } : group
-      ));
+      setGroups((prev) =>
+        prev.map((group, index) => (index === currentGroupIndex ? { ...group, questions } : group))
+      );
     }
   };
 
   const handleUpdateGroupDragItems = (dragItems: string[]) => {
     if (currentGroupIndex !== null) {
-      setGroups(prev => prev.map((group, index) => 
-        index === currentGroupIndex ? { ...group, dragItems } : group
-      ));
+      setGroups((prev) =>
+        prev.map((group, index) => (index === currentGroupIndex ? { ...group, dragItems } : group))
+      );
     }
   };
 
@@ -158,24 +163,28 @@ export function GroupQuestionForm({ passageId, onAddGroup, onSaveGroup, onFinish
   };
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className='space-y-6'>
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
         {/* Group Creation Form */}
-        <Card className="lg:col-span-1">
+        <Card className='lg:col-span-1'>
           <CardHeader>
             <CardTitle>Create Question Group</CardTitle>
           </CardHeader>
           <CardContent>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleCreateGroup)} className="space-y-4">
+              <form onSubmit={form.handleSubmit(handleCreateGroup)} className='space-y-4'>
                 <FormField
                   control={form.control}
-                  name="sectionOrder"
+                  name='sectionOrder'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Section Order</FormLabel>
                       <FormControl>
-                        <Input type="number" {...field} onChange={(e) => field.onChange(Number(e.target.value))} />
+                        <Input
+                          type='number'
+                          {...field}
+                          onChange={(e) => field.onChange(Number(e.target.value))}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -184,12 +193,12 @@ export function GroupQuestionForm({ passageId, onAddGroup, onSaveGroup, onFinish
 
                 <FormField
                   control={form.control}
-                  name="sectionLabel"
+                  name='sectionLabel'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Section Label</FormLabel>
                       <FormControl>
-                        <Input placeholder="e.g., Questions 1-7" {...field} />
+                        <Input placeholder='e.g., Questions 1-7' {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -198,19 +207,23 @@ export function GroupQuestionForm({ passageId, onAddGroup, onSaveGroup, onFinish
 
                 <FormField
                   control={form.control}
-                  name="questionType"
+                  name='questionType'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Question Type</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
                           <SelectTrigger>
-                            <SelectValue placeholder="Select question type" />
+                            <SelectValue placeholder='Select question type' />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value={QuestionType.MULTIPLE_CHOICE}>Multiple Choice</SelectItem>
-                          <SelectItem value={QuestionType.FILL_IN_THE_BLANKS}>Fill in Blanks</SelectItem>
+                          <SelectItem value={QuestionType.MULTIPLE_CHOICE}>
+                            Multiple Choice
+                          </SelectItem>
+                          <SelectItem value={QuestionType.FILL_IN_THE_BLANKS}>
+                            Fill in Blanks
+                          </SelectItem>
                           <SelectItem value={QuestionType.MATCHING}>Matching</SelectItem>
                           <SelectItem value={QuestionType.DRAG_AND_DROP}>Drag & Drop</SelectItem>
                         </SelectContent>
@@ -222,13 +235,13 @@ export function GroupQuestionForm({ passageId, onAddGroup, onSaveGroup, onFinish
 
                 <FormField
                   control={form.control}
-                  name="instruction"
+                  name='instruction'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Instruction</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Enter instruction for this group of questions"
+                          placeholder='Enter instruction for this group of questions'
                           {...field}
                         />
                       </FormControl>
@@ -237,8 +250,8 @@ export function GroupQuestionForm({ passageId, onAddGroup, onSaveGroup, onFinish
                   )}
                 />
 
-                <Button type="submit" className="w-full">
-                  <Plus className="h-4 w-4 mr-2" />
+                <Button type='submit' className='w-full'>
+                  <Plus className='h-4 w-4 mr-2' />
                   Add Group
                 </Button>
               </form>
@@ -247,43 +260,47 @@ export function GroupQuestionForm({ passageId, onAddGroup, onSaveGroup, onFinish
         </Card>
 
         {/* Groups List */}
-        <Card className="lg:col-span-2">
+        <Card className='lg:col-span-2'>
           <CardHeader>
             <CardTitle>Question Groups ({groups.length})</CardTitle>
           </CardHeader>
           <CardContent>
             {groups.length === 0 ? (
-              <p className="text-muted-foreground text-center py-8">
+              <p className='text-muted-foreground text-center py-8'>
                 No question groups added yet. Create your first group to get started.
               </p>
             ) : (
-              <div className="space-y-4">
+              <div className='space-y-4'>
                 {groups.map((group, index) => (
                   <div
                     key={index}
                     className={`p-4 border rounded-lg cursor-pointer transition-colors ${
-                      currentGroupIndex === index ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+                      currentGroupIndex === index
+                        ? 'border-primary bg-primary/5'
+                        : 'border-border hover:border-primary/50'
                     }`}
                     onClick={() => setCurrentGroupIndex(index)}
                   >
-                    <div className="flex items-center justify-between">
+                    <div className='flex items-center justify-between'>
                       <div>
-                        <h3 className="font-medium">{group.sectionLabel}</h3>
-                        <p className="text-sm text-muted-foreground">{group.questionType.replace('_', ' ')}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <h3 className='font-medium'>{group.sectionLabel}</h3>
+                        <p className='text-sm text-muted-foreground'>
+                          {group.questionType.replace('_', ' ')}
+                        </p>
+                        <p className='text-sm text-muted-foreground'>
                           {group.questions.length} question(s)
                         </p>
                       </div>
-                      <div className="flex gap-2">
+                      <div className='flex gap-2'>
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          variant='ghost'
+                          size='sm'
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteGroup(index);
                           }}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Trash2 className='h-4 w-4' />
                         </Button>
                       </div>
                     </div>
@@ -299,30 +316,24 @@ export function GroupQuestionForm({ passageId, onAddGroup, onSaveGroup, onFinish
       {currentGroupIndex !== null && (
         <Card>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>
-                Questions for {groups[currentGroupIndex]?.sectionLabel}
-              </CardTitle>
-              <div className="flex gap-2">
-                <Button onClick={handleSaveCurrentGroup}>
-                  Save Group
-                </Button>
-                <Button variant="outline" onClick={() => setCurrentGroupIndex(null)}>
+            <div className='flex items-center justify-between'>
+              <CardTitle>Questions for {groups[currentGroupIndex]?.sectionLabel}</CardTitle>
+              <div className='flex gap-2'>
+                <Button onClick={handleSaveCurrentGroup}>Save Group</Button>
+                <Button variant='outline' onClick={() => setCurrentGroupIndex(null)}>
                   Close
                 </Button>
               </div>
             </div>
           </CardHeader>
-          <CardContent>
-            {renderQuestionForm()}
-          </CardContent>
+          <CardContent>{renderQuestionForm()}</CardContent>
         </Card>
       )}
 
       {/* Finish Button */}
       {groups.length > 0 && (
-        <div className="flex justify-end">
-          <Button onClick={onFinish} size="lg">
+        <div className='flex justify-end'>
+          <Button onClick={onFinish} size='lg'>
             Finish Creating Passage
           </Button>
         </div>

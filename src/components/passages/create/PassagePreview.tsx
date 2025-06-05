@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { IeltsType, PassageStatus, QuestionType } from '@/types/reading.types';
+import { QuestionType, ielts_type, passage_status } from '@/types/reading.types';
 import { BookOpen, CheckCircle, Clock, Users } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -12,9 +12,9 @@ interface PassageData {
   title: string;
   instruction: string;
   content: string;
-  ieltsType: IeltsType;
-  partNumber: number;
-  passageStatus: PassageStatus;
+  ielts_type: ielts_type;
+  part_number: number;
+  passage_status: passage_status;
 }
 
 interface QuestionGroup {
@@ -32,28 +32,28 @@ interface PassagePreviewProps {
   onFinish: () => void;
 }
 
-const getIeltsTypeLabel = (type: IeltsType): string => {
+const getielts_typeLabel = (type: ielts_type): string => {
   switch (type) {
-    case IeltsType.ACADEMIC:
+    case ielts_type.ACADEMIC:
       return 'Academic';
-    case IeltsType.GENERAL_TRAINING:
+    case ielts_type.GENERAL_TRAINING:
       return 'General Training';
     default:
       return 'Unknown';
   }
 };
 
-const getStatusLabel = (status: PassageStatus): string => {
+const getStatusLabel = (status: passage_status): string => {
   switch (status) {
-    case PassageStatus.DRAFT:
+    case passage_status.DRAFT:
       return 'Draft';
-    case PassageStatus.PUBLISHED:
+    case passage_status.PUBLISHED:
       return 'Published';
-    case PassageStatus.DEACTIVATED:
+    case passage_status.DEACTIVATED:
       return 'Deactivated';
-    case PassageStatus.FINISHED:
+    case passage_status.FINISHED:
       return 'Finished';
-    case PassageStatus.TEST:
+    case passage_status.TEST:
       return 'Test';
     default:
       return 'Unknown';
@@ -88,9 +88,9 @@ export function PassagePreview({ passageData, questionGroups, onFinish }: Passag
             <div>
               <CardTitle className='text-2xl'>{passageData.title}</CardTitle>
               <div className='flex gap-2 mt-2'>
-                <Badge variant='outline'>{getIeltsTypeLabel(passageData.ieltsType)}</Badge>
-                <Badge variant='outline'>Part {passageData.partNumber}</Badge>
-                <Badge variant='outline'>{getStatusLabel(passageData.passageStatus)}</Badge>
+                <Badge variant='outline'>{getielts_typeLabel(passageData.ielts_type)}</Badge>
+                <Badge variant='outline'>Part {passageData.part_number}</Badge>
+                <Badge variant='outline'>{getStatusLabel(passageData.passage_status)}</Badge>
               </div>
             </div>
             <Button onClick={onFinish} className='gap-2'>
