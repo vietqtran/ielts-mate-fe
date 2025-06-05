@@ -2,13 +2,7 @@
 
 import * as z from 'zod';
 
-import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
@@ -17,7 +11,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { IeltsType, PassageStatus, QuestionType } from '@/types/reading.types';
 import {
   Select,
   SelectContent,
@@ -26,16 +19,18 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
+import { IeltsType, PassageStatus } from '@/types/reading.types';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
-import { GroupQuestionForm } from './GroupQuestionForm';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { TiptapEditor } from '../ui/tiptap-editor';
-import { useForm } from 'react-hook-form';
 import { usePassage } from '@/hooks/usePassage';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { TiptapEditor } from '../ui/tiptap-editor';
+import { GroupQuestionForm } from './GroupQuestionForm';
 
 const passageSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -60,7 +55,7 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
   const [currentTab, setCurrentTab] = useState('passage');
   const [createdPassageId, setCreatedPassageId] = useState<string | null>(null);
   const [questionGroups, setQuestionGroups] = useState<any[]>([]);
-
+  console.log(questionGroups);
   const form = useForm<PassageFormData>({
     resolver: zodResolver(passageSchema),
     defaultValues: {
@@ -105,10 +100,10 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
         title: data.title,
         instruction: data.instruction,
         content: data.content,
-        contentWithHighlightKeywords: data.contentWithHighlightKeywords,
-        ieltsType: Object.values(IeltsType).indexOf(data.ieltsType),
-        partNumber: data.partNumber,
-        passageStatus: Object.values(PassageStatus).indexOf(data.passageStatus),
+        content_with_highlight_keywords: data.contentWithHighlightKeywords,
+        ielts_type: Object.values(IeltsType).indexOf(data.ieltsType),
+        part_number: data.partNumber,
+        passage_status: Object.values(PassageStatus).indexOf(data.passageStatus),
       };
 
       const response = await createPassage(request);
@@ -122,7 +117,7 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
   };
 
   const handleAddQuestionGroup = (groupData: any) => {
-    setQuestionGroups(prev => [...prev, groupData]);
+    setQuestionGroups((prev) => [...prev, groupData]);
   };
 
   const handleSaveQuestionGroup = async (groupData: any) => {
@@ -151,31 +146,31 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className='max-w-6xl max-h-[90vh] overflow-y-auto'>
         <DialogHeader>
           <DialogTitle>Create New Reading Passage</DialogTitle>
         </DialogHeader>
 
-        <Tabs value={currentTab} onValueChange={setCurrentTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="passage">Passage Information</TabsTrigger>
-            <TabsTrigger value="questions" disabled={!createdPassageId}>
+        <Tabs value={currentTab} onValueChange={setCurrentTab} className='w-full'>
+          <TabsList className='grid w-full grid-cols-2'>
+            <TabsTrigger value='passage'>Passage Information</TabsTrigger>
+            <TabsTrigger value='questions' disabled={!createdPassageId}>
               Question Groups
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="passage" className="space-y-6">
+          <TabsContent value='passage' className='space-y-6'>
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmitPassage)} className="space-y-6">
-                <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={form.handleSubmit(handleSubmitPassage)} className='space-y-6'>
+                <div className='grid grid-cols-2 gap-4'>
                   <FormField
                     control={form.control}
-                    name="title"
+                    name='title'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Title</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter passage title" {...field} />
+                          <Input placeholder='Enter passage title' {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -184,19 +179,21 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
 
                   <FormField
                     control={form.control}
-                    name="ieltsType"
+                    name='ieltsType'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>IELTS Type</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select IELTS type" />
+                              <SelectValue placeholder='Select IELTS type' />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             <SelectItem value={IeltsType.ACADEMIC}>Academic</SelectItem>
-                            <SelectItem value={IeltsType.GENERAL_TRAINING}>General Training</SelectItem>
+                            <SelectItem value={IeltsType.GENERAL_TRAINING}>
+                              General Training
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -205,23 +202,26 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className='grid grid-cols-2 gap-4'>
                   <FormField
                     control={form.control}
-                    name="partNumber"
+                    name='partNumber'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Part Number</FormLabel>
-                        <Select onValueChange={(value) => field.onChange(Number(value))} defaultValue={field.value?.toString()}>
+                        <Select
+                          onValueChange={(value) => field.onChange(Number(value))}
+                          defaultValue={field.value?.toString()}
+                        >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select part number" />
+                              <SelectValue placeholder='Select part number' />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value="1">Part 1</SelectItem>
-                            <SelectItem value="2">Part 2</SelectItem>
-                            <SelectItem value="3">Part 3</SelectItem>
+                            <SelectItem value='1'>Part 1</SelectItem>
+                            <SelectItem value='2'>Part 2</SelectItem>
+                            <SelectItem value='3'>Part 3</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />
@@ -231,19 +231,21 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
 
                   <FormField
                     control={form.control}
-                    name="passageStatus"
+                    name='passageStatus'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Status</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
+                              <SelectValue placeholder='Select status' />
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
                             <SelectItem value={PassageStatus.DRAFT}>Draft</SelectItem>
                             <SelectItem value={PassageStatus.PUBLISHED}>Published</SelectItem>
+                            <SelectItem value={PassageStatus.DEACTIVATED}>Deactivated</SelectItem>
+                            <SelectItem value={PassageStatus.FINISHED}>Finished</SelectItem>
                             <SelectItem value={PassageStatus.TEST}>Test</SelectItem>
                           </SelectContent>
                         </Select>
@@ -255,14 +257,14 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
 
                 <FormField
                   control={form.control}
-                  name="instruction"
+                  name='instruction'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Instruction</FormLabel>
                       <FormControl>
                         <Textarea
-                          placeholder="Enter reading instruction"
-                          className="min-h-[100px]"
+                          placeholder='Enter reading instruction'
+                          className='min-h-[100px]'
                           {...field}
                         />
                       </FormControl>
@@ -273,7 +275,7 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
 
                 <FormField
                   control={form.control}
-                  name="content"
+                  name='content'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Content</FormLabel>
@@ -281,7 +283,7 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
                         <TiptapEditor
                           content={field.value}
                           onChange={field.onChange}
-                          placeholder="Enter the reading passage content"
+                          placeholder='Enter the reading passage content'
                         />
                       </FormControl>
                       <FormMessage />
@@ -291,7 +293,7 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
 
                 <FormField
                   control={form.control}
-                  name="contentWithHighlightKeywords"
+                  name='contentWithHighlightKeywords'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Content with Highlighted Keywords</FormLabel>
@@ -299,7 +301,7 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
                         <TiptapEditor
                           content={field.value}
                           onChange={field.onChange}
-                          placeholder="Enter the content with highlighted keywords for answer explanations"
+                          placeholder='Enter the content with highlighted keywords for answer explanations'
                         />
                       </FormControl>
                       <FormMessage />
@@ -307,8 +309,8 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
                   )}
                 />
 
-                <div className="flex justify-end">
-                  <Button type="submit" disabled={isLoading.createPassage}>
+                <div className='flex justify-end'>
+                  <Button type='submit' disabled={isLoading.createPassage}>
                     {isLoading.createPassage ? 'Creating...' : 'Create Passage & Continue'}
                   </Button>
                 </div>
@@ -316,7 +318,7 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
             </Form>
           </TabsContent>
 
-          <TabsContent value="questions" className="space-y-6">
+          <TabsContent value='questions' className='space-y-6'>
             {createdPassageId && (
               <GroupQuestionForm
                 passageId={createdPassageId}

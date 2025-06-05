@@ -15,7 +15,7 @@ export enum PassageStatus {
   PUBLISHED = 'PUBLISHED',
   DEACTIVATED = 'DEACTIVATED',
   FINISHED = 'FINISHED',
-  // TEST = 'TEST', // Commented out due to database constraint
+  TEST = 'TEST',
 }
 
 export interface UserInformation {
@@ -80,19 +80,19 @@ export interface QuestionCreationRequest {
   question_categories: string[];
   explanation: string;
   number_of_correct_answers: number;
-  
+
   // For Multiple Choice
   instruction_for_choice?: string;
   choices?: ChoiceRequest[];
-  
+
   // For Fill in Blank
   blank_index?: number;
   correct_answer?: string;
-  
+
   // For Matching
   instruction_for_matching?: string;
   correct_answer_for_matching?: string;
-  
+
   // For Drag and Drop
   zone_index?: number;
   drag_item_id?: string;
@@ -190,19 +190,19 @@ export interface QuestionFormData {
   point: number;
   explanation: string;
   numberOfCorrectAnswers: number;
-  
+
   // For Multiple Choice
   instructionForChoice?: string;
   choices?: ChoiceFormData[];
-  
+
   // For Fill in Blank
   blankIndex?: number;
   correctAnswer?: string;
-  
+
   // For Matching
   instructionForMatching?: string;
   correctAnswerForMatching?: string;
-  
+
   // For Drag and Drop
   zoneIndex?: number;
   dragItemId?: string;
