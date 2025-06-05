@@ -2,6 +2,19 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
+  BarChart3,
+  BookOpen,
+  Code2,
+  GitMerge,
+  Github,
+  LayoutDashboard,
+  LineChart,
+  LogOut,
+  Server,
+  Settings,
+  User2,
+} from 'lucide-react';
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -23,49 +36,11 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
-import {
-  BarChart3,
-  Code2,
-  GitMerge,
-  Github,
-  LayoutDashboard,
-  LineChart,
-  LogOut,
-  Server,
-  Settings,
-  User2,
-} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { authAPI } from '@/lib/api/auth';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
 
 export function AppSidebar() {
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    try {
-      // Call logout API
-      await authAPI.logout();
-
-      // Clear local storage and session storage
-      localStorage.clear();
-      sessionStorage.clear();
-
-      toast.success('Logged out successfully');
-      router.push('/sign-in');
-    } catch (error) {
-      console.error('Logout error:', error);
-
-      // Even if API call fails, still clear local storage and redirect
-      localStorage.clear();
-      sessionStorage.clear();
-      toast.error('Logout API failed, but you have been logged out locally');
-      router.push('/sign-in');
-    }
-  };
   return (
     <Sidebar>
       <SidebarHeader className='px-4 h-14'>
@@ -81,13 +56,28 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive>
-                  <a href='/dashboard'>
+                <SidebarMenuButton asChild>
+                  <a href='/'>
                     <LayoutDashboard className='h-4 w-4' />
                     <span>Dashboard</span>
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <a href='/passages'>
+                    <BookOpen className='h-4 w-4' />
+                    <span>Reading Passages</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Development</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <a href='/repositories'>
@@ -165,13 +155,13 @@ export function AppSidebar() {
             <DropdownMenuItem>
               <User2 className='mr-2 h-4 w-4' />
               <span>Profile</span>
-            </DropdownMenuItem>{' '}
+            </DropdownMenuItem>
             <DropdownMenuItem>
               <Settings className='mr-2 h-4 w-4' />
               <span>Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className='text-red-600 hover:text-red-700'>
+            <DropdownMenuItem>
               <LogOut className='mr-2 h-4 w-4' />
               <span>Log out</span>
             </DropdownMenuItem>
