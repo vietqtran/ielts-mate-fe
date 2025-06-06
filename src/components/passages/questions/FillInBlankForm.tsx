@@ -17,7 +17,6 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 
@@ -30,7 +29,6 @@ const questionSchema = z.object({
   questionOrder: z.number().min(1),
   point: z.number().min(1),
   explanation: z.string().min(1, 'Explanation is required'),
-  instructionForChoice: z.string().min(1, 'Description is required'),
   blankAnswers: z.array(blankAnswerSchema).min(1, 'At least one blank answer required'),
 });
 
@@ -50,7 +48,6 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
       questionOrder: questions.length + 1,
       point: 1,
       explanation: '',
-      instructionForChoice: '',
       blankAnswers: [{ blankIndex: 1, correctAnswer: '' }],
     },
   });
@@ -71,7 +68,7 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
       numberOfCorrectAnswers: 0, // No choices for fill in blank
       blankIndex: blank.blankIndex,
       correctAnswer: blank.correctAnswer,
-      instructionForChoice: index === 0 ? data.instructionForChoice : '', // Only first question has instruction
+      instructionForChoice: '', // Empty for fill in blanks since instruction is at group level
     }));
 
     if (editingIndex !== null) {
@@ -91,18 +88,14 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
       questionOrder: questions.length + newQuestions.length + 1,
       point: 1,
       explanation: '',
-      instructionForChoice: '',
       blankAnswers: [{ blankIndex: 1, correctAnswer: '' }],
     });
   };
 
   const handleEdit = (index: number) => {
-    // Find all questions that belong to this fill-in-blank group
     const question = questions[index];
     const groupQuestions = questions.filter(
-      (q) =>
-        q.instructionForChoice === question.instructionForChoice ||
-        (q.instructionForChoice === '' && question.instructionForChoice !== '')
+      (_, idx) => (idx >= index && idx < index + question.blankAnswers?.length) || 1
     );
 
     const blankAnswers = groupQuestions.map((q) => ({
@@ -114,22 +107,13 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
       questionOrder: question.questionOrder,
       point: question.point,
       explanation: question.explanation,
-      instructionForChoice: question.instructionForChoice,
       blankAnswers,
     });
     setEditingIndex(index);
   };
 
   const handleDelete = (index: number) => {
-    // Find and remove all questions that belong to this fill-in-blank group
-    const question = questions[index];
-    const updatedQuestions = questions.filter(
-      (q) =>
-        !(
-          q.instructionForChoice === question.instructionForChoice ||
-          (q.instructionForChoice === '' && question.instructionForChoice !== '')
-        )
-    );
+    const updatedQuestions = questions.filter((_, idx) => idx !== index);
     onQuestionsChange(updatedQuestions);
   };
 
@@ -192,27 +176,13 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
                 />
               </div>
 
-              <FormField
-                control={form.control}
-                name='instructionForChoice'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <TiptapEditor
-                        content={field.value}
-                        onChange={field.onChange}
-                        placeholder='Enter the description with blanks. Use numbered boxes like [1], [2], [3] to indicate blank positions.'
-                      />
-                    </FormControl>
-                    <FormMessage />
-                    <p className='text-sm text-muted-foreground mt-1'>
-                      Tip: Use [1], [2], [3], etc. to create numbered blank boxes in your
-                      description.
-                    </p>
-                  </FormItem>
-                )}
-              />
+              <div className='bg-blue-50 p-4 rounded-lg'>
+                <h4 className='font-medium text-blue-900 mb-2'>Fill in the Blanks Instructions</h4>
+                <p className='text-sm text-blue-700'>
+                  The instruction for fill-in-blank questions is now managed at the group level
+                  above. Each question represents one blank in the overall instruction text.
+                </p>
+              </div>
 
               <FormField
                 control={form.control}
@@ -320,47 +290,34 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
           </CardHeader>
           <CardContent>
             <div className='space-y-4'>
-              {questions
-                .filter((q) => q.instructionForChoice) // Only show questions with instructions (group headers)
-                .map((question, index) => {
-                  const relatedQuestions = questions.filter(
-                    (q) =>
-                      q.instructionForChoice === question.instructionForChoice ||
-                      (q.instructionForChoice === '' && question.instructionForChoice !== '')
-                  );
-
-                  return (
-                    <div key={index} className='p-4 border rounded-lg'>
-                      <div className='flex items-start justify-between'>
-                        <div className='flex-1'>
-                          <h4 className='font-medium'>Question {question.questionOrder}</h4>
-                          <div
-                            className='text-sm text-muted-foreground mt-1'
-                            dangerouslySetInnerHTML={{ __html: question.instructionForChoice }}
-                          />
-                          <div className='mt-2 space-y-1'>
-                            <p className='text-sm font-medium'>Answers:</p>
-                            {relatedQuestions
-                              .sort((a, b) => a.blankIndex - b.blankIndex)
-                              .map((q, qIndex) => (
-                                <div key={qIndex} className='text-sm'>
-                                  {q.blankIndex}. {q.correctAnswer}
-                                </div>
-                              ))}
-                          </div>
-                        </div>
-                        <div className='flex gap-2'>
-                          <Button variant='ghost' size='sm' onClick={() => handleEdit(index)}>
-                            Edit
-                          </Button>
-                          <Button variant='ghost' size='sm' onClick={() => handleDelete(index)}>
-                            <Trash2 className='h-4 w-4' />
-                          </Button>
-                        </div>
+              {questions.map((question, index) => (
+                <div key={index} className='p-4 border rounded-lg'>
+                  <div className='flex items-start justify-between'>
+                    <div className='flex-1'>
+                      <h4 className='font-medium'>Question {question.questionOrder}</h4>
+                      <div className='text-sm text-muted-foreground mt-1'>
+                        Blank {question.blankIndex} - Answer: {question.correctAnswer}
                       </div>
+                      <div className='text-sm text-muted-foreground mt-1'>
+                        Points: {question.point}
+                      </div>
+                      {question.explanation && (
+                        <div className='text-sm text-muted-foreground mt-1'>
+                          Explanation: {question.explanation}
+                        </div>
+                      )}
                     </div>
-                  );
-                })}
+                    <div className='flex gap-2'>
+                      <Button variant='ghost' size='sm' onClick={() => handleEdit(index)}>
+                        Edit
+                      </Button>
+                      <Button variant='ghost' size='sm' onClick={() => handleDelete(index)}>
+                        <Trash2 className='h-4 w-4' />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>

@@ -21,7 +21,7 @@ import { AddGroupQuestionRequest, QuestionType } from '@/types/reading.types';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
@@ -188,10 +188,10 @@ export function QuestionGroupForm({
               <FormItem>
                 <FormLabel>Instruction</FormLabel>
                 <FormControl>
-                  <Textarea
+                  <TiptapEditor
+                    content={field.value}
+                    onChange={field.onChange}
                     placeholder="Enter the instruction for this question group (e.g., 'Choose the correct letter A, B, C or D')"
-                    className='min-h-[80px]'
-                    {...field}
                   />
                 </FormControl>
                 <FormMessage />

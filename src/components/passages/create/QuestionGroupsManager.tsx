@@ -241,9 +241,10 @@ export function QuestionGroupsManager({
                             </span>
                           </div>
                           {group.instruction && (
-                            <p className='text-xs text-muted-foreground mt-1 max-w-md truncate'>
-                              {group.instruction}
-                            </p>
+                            <div
+                              className='text-xs text-muted-foreground mt-1 max-w-md truncate prose prose-xs'
+                              dangerouslySetInnerHTML={{ __html: group.instruction }}
+                            />
                           )}
                         </div>
                       </div>

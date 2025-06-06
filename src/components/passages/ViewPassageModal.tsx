@@ -2,7 +2,6 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { PassageGetResponse } from '@/types/reading.types';
 import { Edit, Eye, EyeOff, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -10,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { usePassage } from '@/hooks/usePassage';
+import { PassageGetResponse } from '@/types/reading.types';
 
 interface ViewPassageModalProps {
   passage: PassageGetResponse;
@@ -272,7 +272,10 @@ export function ViewPassageModal({
                         <h4 className='font-semibold text-lg'>{group.sectionLabel}</h4>
                         {group.instruction && (
                           <div className='mt-2 p-3 bg-blue-50 rounded-md'>
-                            <p className='text-sm'>{group.instruction}</p>
+                            <div
+                              className='text-sm prose prose-sm max-w-none'
+                              dangerouslySetInnerHTML={{ __html: group.instruction }}
+                            />
                           </div>
                         )}
                       </div>

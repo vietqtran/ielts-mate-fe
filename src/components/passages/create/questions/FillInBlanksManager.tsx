@@ -16,7 +16,6 @@ import { Plus, Save, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -25,7 +24,6 @@ const questionSchema = z.object({
   questionOrder: z.number().min(1),
   point: z.number().min(1),
   explanation: z.string().min(1, 'Explanation is required'),
-  instructionForChoice: z.string().min(1, 'Description is required'),
   blankIndex: z.number().min(1),
   correctAnswer: z.string().min(1, 'Correct answer is required'),
 });
@@ -57,7 +55,6 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
       questionOrder: group.questions.length + 1,
       point: 1,
       explanation: '',
-      instructionForChoice: '',
       blankIndex: 1,
       correctAnswer: '',
     },
@@ -69,6 +66,7 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
       questionType: 1, // FILL_IN_THE_BLANKS
       questionCategories: [],
       numberOfCorrectAnswers: 0, // Not applicable for fill in blanks
+      instructionForChoice: '', // Empty for fill in blanks since instruction is at group level
     };
 
     if (editingQuestionIndex !== null) {
@@ -88,7 +86,6 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
       questionOrder: group.questions.length + 2,
       point: 1,
       explanation: '',
-      instructionForChoice: '',
       blankIndex: group.questions.length + 2,
       correctAnswer: '',
     });
@@ -183,27 +180,19 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
                   />
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name='instructionForChoice'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sentence with Blank</FormLabel>
-                      <FormControl>
-                        <TiptapEditor
-                          content={field.value}
-                          onChange={field.onChange}
-                          placeholder='Enter the sentence with a blank. Use [BLANK] or _____ to indicate where students should fill in the answer.'
-                        />
-                      </FormControl>
-                      <FormMessage />
-                      <p className='text-xs text-muted-foreground'>
-                        Example: "The main cause of global warming is the increase in _____ gases in
-                        the atmosphere."
-                      </p>
-                    </FormItem>
-                  )}
-                />
+                <div className='bg-blue-50 p-4 rounded-lg'>
+                  <h4 className='font-medium text-blue-900 mb-2'>
+                    Fill in the Blanks Instructions
+                  </h4>
+                  <p className='text-sm text-blue-700'>
+                    The instruction for fill-in-blank questions is now managed at the group level
+                    above. Each question represents one blank in the overall instruction text.
+                  </p>
+                  <p className='text-xs text-blue-600 mt-2'>
+                    Example: Use the group instruction to describe the sentence with blanks, then
+                    specify which blank number this question represents.
+                  </p>
+                </div>
 
                 <FormField
                   control={form.control}
@@ -293,10 +282,11 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
                         {question.point !== 1 ? 's' : ''})
                       </span>
                     </div>
-                    <div
-                      className='prose prose-sm max-w-none mb-3'
-                      dangerouslySetInnerHTML={{ __html: question.instructionForChoice }}
-                    />
+                    <div className='mb-3'>
+                      <span className='text-sm text-muted-foreground'>
+                        Blank {question.blankIndex} for group instruction
+                      </span>
+                    </div>
                     <div className='text-sm'>
                       <p className='text-green-600 font-medium'>
                         <strong>Answer:</strong> {question.correctAnswer}

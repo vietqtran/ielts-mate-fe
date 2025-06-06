@@ -181,7 +181,10 @@ export function PassagePreview({
                       {group.questions.length} question{group.questions.length !== 1 ? 's' : ''}
                     </span>
                   </div>
-                  <p className='text-sm text-gray-600 mt-2'>{group.instruction}</p>
+                  <div
+                    className='text-sm text-gray-600 mt-2 prose prose-sm max-w-none'
+                    dangerouslySetInnerHTML={{ __html: group.instruction }}
+                  />
                 </CardHeader>
                 <CardContent className='space-y-4'>
                   {group.questionType === QuestionType.MULTIPLE_CHOICE && (
