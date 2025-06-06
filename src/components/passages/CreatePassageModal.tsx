@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { ielts_type, passage_status } from '@/types/reading.types';
+import { IeltsType, PassageStatus } from '@/types/reading.types';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';
@@ -37,9 +37,9 @@ const passageSchema = z.object({
   instruction: z.string().min(1, 'Instruction is required'),
   content: z.string().min(1, 'Content is required'),
   contentWithHighlightKeywords: z.string().min(1, 'Content with highlights is required'),
-  ielts_type: z.nativeEnum(ielts_type),
+  ielts_type: z.nativeEnum(IeltsType),
   part_number: z.number().min(1).max(3),
-  passage_status: z.nativeEnum(passage_status),
+  passage_status: z.nativeEnum(PassageStatus),
 });
 
 type PassageFormData = z.infer<typeof passageSchema>;
@@ -50,7 +50,11 @@ interface CreatePassageModalProps {
   onSuccess: () => void;
 }
 
-export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassageModalProps) {
+export function CreatePassageModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: Readonly<CreatePassageModalProps>) {
   const { createPassage, addGroupQuestion, isLoading } = usePassage();
   const [currentTab, setCurrentTab] = useState('passage');
   const [createdpassage_id, setCreatedpassage_id] = useState<string | null>(null);
@@ -63,9 +67,9 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
       instruction: '',
       content: '',
       contentWithHighlightKeywords: '',
-      ielts_type: ielts_type.ACADEMIC,
+      ielts_type: IeltsType.ACADEMIC,
       part_number: 1,
-      passage_status: passage_status.DRAFT,
+      passage_status: PassageStatus.DRAFT,
     },
   });
 
@@ -101,9 +105,9 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
         instruction: data.instruction,
         content: data.content,
         content_with_highlight_keywords: data.contentWithHighlightKeywords,
-        ielts_type: Object.values(ielts_type).indexOf(data.ielts_type),
+        ielts_type: Object.values(IeltsType).indexOf(data.ielts_type),
         part_number: data.part_number,
-        passage_status: Object.values(passage_status).indexOf(data.passage_status),
+        passage_status: Object.values(PassageStatus).indexOf(data.passage_status),
       };
 
       const response = await createPassage(request);
@@ -190,8 +194,8 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value={ielts_type.ACADEMIC}>Academic</SelectItem>
-                            <SelectItem value={ielts_type.GENERAL_TRAINING}>
+                            <SelectItem value={IeltsType.ACADEMIC}>Academic</SelectItem>
+                            <SelectItem value={IeltsType.GENERAL_TRAINING}>
                               General Training
                             </SelectItem>
                           </SelectContent>
@@ -242,11 +246,11 @@ export function CreatePassageModal({ isOpen, onClose, onSuccess }: CreatePassage
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
-                            <SelectItem value={passage_status.DRAFT}>Draft</SelectItem>
-                            <SelectItem value={passage_status.PUBLISHED}>Published</SelectItem>
-                            <SelectItem value={passage_status.DEACTIVATED}>Deactivated</SelectItem>
-                            <SelectItem value={passage_status.FINISHED}>Finished</SelectItem>
-                            <SelectItem value={passage_status.TEST}>Test</SelectItem>
+                            <SelectItem value={PassageStatus.DRAFT}>Draft</SelectItem>
+                            <SelectItem value={PassageStatus.PUBLISHED}>Published</SelectItem>
+                            <SelectItem value={PassageStatus.DEACTIVATED}>Deactivated</SelectItem>
+                            <SelectItem value={PassageStatus.FINISHED}>Finished</SelectItem>
+                            <SelectItem value={PassageStatus.TEST}>Test</SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage />

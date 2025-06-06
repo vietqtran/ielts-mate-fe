@@ -8,13 +8,14 @@ import {
   PassageDetailResponse,
   PassageGetResponse,
 } from '@/types/reading.types';
+import { useRef, useState } from 'react';
 
 import instance from '@/lib/axios';
-import { useState } from 'react';
 
 export function usePassage() {
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<Record<string, Error | null>>({});
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const setLoadingState = (key: string, value: boolean) => {
     setIsLoading((prev) => ({ ...prev, [key]: value }));
@@ -50,22 +51,65 @@ export function usePassage() {
   const getPassagesForTeacher = async (params?: {
     page?: number;
     size?: number;
-    ielts_type?: number;
-    status?: number;
-    part_number?: number;
+    ielts_type?: number[];
+    status?: number[];
+    part_number?: number[];
     questionCategory?: string;
+    sortBy?: string;
+    sortDirection?: string;
+    title?: string;
+    createdBy?: string;
   }) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    const currentController = new AbortController();
+    const requestId = Date.now();
+    abortControllerRef.current = currentController;
+
     setLoadingState('getPassagesForTeacher', true);
     setErrorState('getPassagesForTeacher', null);
 
     try {
-      const { data } = await instance.get('/reading/passages/teacher', { params });
-      return data as BaseResponse<PassageGetResponse[]>;
+      const processedParams: any = { ...params };
+
+      if (processedParams.ielts_type && Array.isArray(processedParams.ielts_type)) {
+        processedParams.ieltsType = processedParams.ielts_type.join(',');
+        delete processedParams.ielts_type;
+      }
+
+      if (processedParams.status && Array.isArray(processedParams.status)) {
+        processedParams.status = processedParams.status.join(',');
+      }
+
+      if (processedParams.part_number && Array.isArray(processedParams.part_number)) {
+        processedParams.partNumber = processedParams.part_number.join(',');
+        delete processedParams.part_number;
+      }
+
+      const { data } = await instance.get('/reading/passages/teacher', {
+        params: processedParams,
+        signal: currentController.signal,
+      });
+
+      // Only return data if this is still the current request
+      if (abortControllerRef.current === currentController) {
+        return data as BaseResponse<PassageGetResponse[]>;
+      }
     } catch (error) {
-      setErrorState('getPassagesForTeacher', error as Error);
-      throw error;
+      // Only handle error if this is still the current request
+      if (abortControllerRef.current === currentController) {
+        if ((error as any).name !== 'AbortError') {
+          setErrorState('getPassagesForTeacher', error as Error);
+          throw error;
+        }
+      }
     } finally {
-      setLoadingState('getPassagesForTeacher', false);
+      // Only set loading to false if this is still the current request
+      if (abortControllerRef.current === currentController) {
+        setLoadingState('getPassagesForTeacher', false);
+      }
     }
   };
 

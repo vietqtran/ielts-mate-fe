@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { QuestionType, ielts_type, passage_status } from '@/types/reading.types';
+import { IeltsType, PassageStatus, QuestionType } from '@/types/reading.types';
 import { BookOpen, CheckCircle, Clock, Users } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -12,9 +12,9 @@ interface PassageData {
   title: string;
   instruction: string;
   content: string;
-  ielts_type: ielts_type;
+  ielts_type: IeltsType;
   part_number: number;
-  passage_status: passage_status;
+  passage_status: PassageStatus;
 }
 
 interface QuestionGroup {
@@ -32,28 +32,28 @@ interface PassagePreviewProps {
   onFinish: () => void;
 }
 
-const getielts_typeLabel = (type: ielts_type): string => {
+const getIeltsTypeLabel = (type: IeltsType): string => {
   switch (type) {
-    case ielts_type.ACADEMIC:
+    case IeltsType.ACADEMIC:
       return 'Academic';
-    case ielts_type.GENERAL_TRAINING:
+    case IeltsType.GENERAL_TRAINING:
       return 'General Training';
     default:
       return 'Unknown';
   }
 };
 
-const getStatusLabel = (status: passage_status): string => {
+const getStatusLabel = (status: PassageStatus): string => {
   switch (status) {
-    case passage_status.DRAFT:
+    case PassageStatus.DRAFT:
       return 'Draft';
-    case passage_status.PUBLISHED:
+    case PassageStatus.PUBLISHED:
       return 'Published';
-    case passage_status.DEACTIVATED:
+    case PassageStatus.DEACTIVATED:
       return 'Deactivated';
-    case passage_status.FINISHED:
+    case PassageStatus.FINISHED:
       return 'Finished';
-    case passage_status.TEST:
+    case PassageStatus.TEST:
       return 'Test';
     default:
       return 'Unknown';
@@ -75,7 +75,11 @@ const getQuestionTypeLabel = (type: QuestionType): string => {
   }
 };
 
-export function PassagePreview({ passageData, questionGroups, onFinish }: PassagePreviewProps) {
+export function PassagePreview({
+  passageData,
+  questionGroups,
+  onFinish,
+}: Readonly<PassagePreviewProps>) {
   const totalQuestions = questionGroups.reduce((total, group) => total + group.questions.length, 0);
   const estimatedTime = Math.max(15, Math.ceil(totalQuestions * 1.5)); // Rough estimate: 1.5 min per question, min 15 min
 
@@ -88,7 +92,7 @@ export function PassagePreview({ passageData, questionGroups, onFinish }: Passag
             <div>
               <CardTitle className='text-2xl'>{passageData.title}</CardTitle>
               <div className='flex gap-2 mt-2'>
-                <Badge variant='outline'>{getielts_typeLabel(passageData.ielts_type)}</Badge>
+                <Badge variant='outline'>{getIeltsTypeLabel(passageData.ielts_type)}</Badge>
                 <Badge variant='outline'>Part {passageData.part_number}</Badge>
                 <Badge variant='outline'>{getStatusLabel(passageData.passage_status)}</Badge>
               </div>

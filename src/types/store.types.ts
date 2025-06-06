@@ -1,9 +1,11 @@
+import { PassageState } from '@/store/slices/passage-slice';
 import { User } from '.';
 
 export interface RootState {
   auth: AuthState;
   common: CommonState;
   authForm: AuthFormState;
+  passage: PassageState;
 }
 
 export interface AuthState {

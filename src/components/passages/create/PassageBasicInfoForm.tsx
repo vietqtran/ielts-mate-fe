@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ielts_type, passage_status } from '@/types/reading.types';
+import { IeltsType, PassageStatus } from '@/types/reading.types';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -33,28 +33,28 @@ interface PassageBasicInfoFormProps {
   isCompleted: boolean;
 }
 
-const getielts_typeLabel = (type: ielts_type): string => {
+const getielts_typeLabel = (type: IeltsType): string => {
   switch (type) {
-    case ielts_type.ACADEMIC:
+    case IeltsType.ACADEMIC:
       return 'Academic';
-    case ielts_type.GENERAL_TRAINING:
+    case IeltsType.GENERAL_TRAINING:
       return 'General Training';
     default:
       return 'Unknown';
   }
 };
 
-const getStatusLabel = (status: passage_status): string => {
+const getStatusLabel = (status: PassageStatus): string => {
   switch (status) {
-    case passage_status.DRAFT:
+    case PassageStatus.DRAFT:
       return 'Draft';
-    case passage_status.PUBLISHED:
+    case PassageStatus.PUBLISHED:
       return 'Published';
-    case passage_status.DEACTIVATED:
+    case PassageStatus.DEACTIVATED:
       return 'Deactivated';
-    case passage_status.FINISHED:
+    case PassageStatus.FINISHED:
       return 'Finished';
-    case passage_status.TEST:
+    case PassageStatus.TEST:
       return 'Test';
     default:
       return 'Unknown';
@@ -66,7 +66,7 @@ export function PassageBasicInfoForm({
   onSubmit,
   isLoading,
   isCompleted,
-}: PassageBasicInfoFormProps) {
+}: Readonly<PassageBasicInfoFormProps>) {
   const formData = form.getValues();
 
   if (isCompleted) {
@@ -157,10 +157,8 @@ export function PassageBasicInfoForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={ielts_type.ACADEMIC}>Academic</SelectItem>
-                        <SelectItem value={ielts_type.GENERAL_TRAINING}>
-                          General Training
-                        </SelectItem>
+                        <SelectItem value={IeltsType.ACADEMIC}>Academic</SelectItem>
+                        <SelectItem value={IeltsType.GENERAL_TRAINING}>General Training</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -213,11 +211,11 @@ export function PassageBasicInfoForm({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={passage_status.DRAFT}>Draft</SelectItem>
-                        <SelectItem value={passage_status.PUBLISHED}>Published</SelectItem>
-                        <SelectItem value={passage_status.DEACTIVATED}>Deactivated</SelectItem>
-                        <SelectItem value={passage_status.FINISHED}>Finished</SelectItem>
-                        <SelectItem value={passage_status.TEST}>Test</SelectItem>
+                        <SelectItem value={PassageStatus.DRAFT}>Draft</SelectItem>
+                        <SelectItem value={PassageStatus.PUBLISHED}>Published</SelectItem>
+                        <SelectItem value={PassageStatus.DEACTIVATED}>Deactivated</SelectItem>
+                        <SelectItem value={PassageStatus.FINISHED}>Finished</SelectItem>
+                        <SelectItem value={PassageStatus.TEST}>Test</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

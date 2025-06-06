@@ -5,12 +5,12 @@ export enum QuestionType {
   DRAG_AND_DROP = 'DRAG_AND_DROP',
 }
 
-export enum ielts_type {
+export enum IeltsType {
   ACADEMIC = 'ACADEMIC',
   GENERAL_TRAINING = 'GENERAL_TRAINING',
 }
 
-export enum passage_status {
+export enum PassageStatus {
   DRAFT = 'DRAFT',
   PUBLISHED = 'PUBLISHED',
   DEACTIVATED = 'DEACTIVATED',
@@ -166,13 +166,13 @@ export interface UpdateDragItemRequest {
 
 // Form types for frontend
 export interface PassageFormData {
-  ielts_type: ielts_type;
+  ielts_type: IeltsType;
   part_number: number;
   instruction: string;
   title: string;
   content: string;
   contentWithHighlightKeywords: string;
-  passage_status: passage_status;
+  passage_status: PassageStatus;
   groups: GroupFormData[];
 }
 

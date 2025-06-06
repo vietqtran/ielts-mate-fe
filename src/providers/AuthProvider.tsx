@@ -26,6 +26,7 @@ const AuthProvider = ({ children, isAuthPage = false }: Props) => {
         }
       } else {
         await refetchUser();
+
         if (!user) {
           replace('/sign-in');
         }

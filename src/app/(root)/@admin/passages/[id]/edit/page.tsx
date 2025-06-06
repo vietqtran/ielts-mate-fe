@@ -5,8 +5,9 @@ import * as z from 'zod';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { QuestionType, ielts_type, passage_status } from '@/types/reading.types';
+import { IeltsType, PassageStatus, QuestionType } from '@/types/reading.types';
 import { ArrowLeft, Eye, Save } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 import { PassageBasicInfoForm } from '@/components/passages/create/PassageBasicInfoForm';
@@ -16,16 +17,15 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/usePassage';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 
 const passageSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   instruction: z.string().min(1, 'Instruction is required'),
   content: z.string().min(1, 'Content is required'),
-  ielts_type: z.nativeEnum(ielts_type),
+  ielts_type: z.nativeEnum(IeltsType),
   part_number: z.number().min(1).max(3),
-  passage_status: z.nativeEnum(passage_status),
+  passage_status: z.nativeEnum(PassageStatus),
 });
 
 type PassageFormData = z.infer<typeof passageSchema>;
@@ -40,12 +40,13 @@ interface QuestionGroup {
   dragItems?: string[];
 }
 
-export default function CreatePassagePage() {
+export default function EditPassagePage() {
   const router = useRouter();
-  const { createPassage, isLoading } = usePassage();
+  const params = useParams();
+  const { updatePassage, getPassageById, getAllQuestionGroups, isLoading } = usePassage();
+  const passage_id = params.id as string;
 
   const [currentStep, setCurrentStep] = useState<'basic' | 'questions' | 'preview'>('basic');
-  const [createdpassage_id, setCreatedpassage_id] = useState<string | null>(null);
   const [questionGroups, setQuestionGroups] = useState<QuestionGroup[]>([]);
   const [activeTab, setActiveTab] = useState('passage');
 
@@ -55,62 +56,109 @@ export default function CreatePassagePage() {
       title: '',
       instruction: '',
       content: '',
-      ielts_type: ielts_type.ACADEMIC,
+      ielts_type: IeltsType.ACADEMIC,
       part_number: 1,
-      passage_status: passage_status.DRAFT,
+      passage_status: PassageStatus.DRAFT,
     },
   });
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      sessionStorage.setItem(CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES.PASSAGES.CREATE);
+      sessionStorage.setItem(CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES.PASSAGES.EDIT);
     }
   }, []);
 
-  // Auto-save functionality
+  // Load existing passage data
   useEffect(() => {
-    const interval = setInterval(() => {
-      const formData = form.getValues();
-      if (formData.title || formData.content) {
-        sessionStorage.setItem(
-          'draft-passage',
-          JSON.stringify({
-            ...formData,
-            questionGroups,
-            timestamp: Date.now(),
-          })
-        );
-      }
-    }, 30000); // Save every 30 seconds
-
-    return () => clearInterval(interval);
-  }, [form, questionGroups]);
-
-  // Load draft on mount
-  useEffect(() => {
-    const savedDraft = sessionStorage.getItem('draft-passage');
-    if (savedDraft) {
+    const loadPassageData = async () => {
       try {
-        const draft = JSON.parse(savedDraft);
-        // Check if draft is less than 24 hours old
-        if (Date.now() - draft.timestamp < 24 * 60 * 60 * 1000) {
-          form.reset(draft);
-          setQuestionGroups(draft.questionGroups || []);
+        const passageResponse = await getPassageById(passage_id);
+        if (passageResponse.data) {
+          // Map backend ordinal values to frontend enums
+          const getielts_typeEnum = (ielts_type: number) => {
+            switch (ielts_type) {
+              case 0:
+                return 'ACADEMIC' as IeltsType;
+              case 1:
+                return 'GENERAL_TRAINING' as IeltsType;
+              default:
+                return 'ACADEMIC' as IeltsType;
+            }
+          };
+
+          const getpart_numberEnum = (part_number: number) => {
+            // Convert 0,1,2 to 1,2,3
+            return part_number + 1;
+          };
+
+          const getpassage_statusEnum = (status: number) => {
+            switch (status) {
+              case 0:
+                return PassageStatus.DRAFT;
+              case 1:
+                return PassageStatus.PUBLISHED;
+              case 2:
+                return PassageStatus.DEACTIVATED;
+              case 3:
+                return PassageStatus.FINISHED;
+              case 4:
+                return PassageStatus.TEST;
+              default:
+                return PassageStatus.DRAFT;
+            }
+          };
+
+          form.reset({
+            title: passageResponse.data.title,
+            instruction: passageResponse.data.instruction,
+            content: passageResponse.data.content,
+            ielts_type: getielts_typeEnum(passageResponse.data.ielts_type),
+            part_number: getpart_numberEnum(passageResponse.data.part_number),
+            passage_status: getpassage_statusEnum(passageResponse.data.passage_status),
+          });
+
+          // Load question groups separately
+          const groupsResponse = await getAllQuestionGroups(passage_id);
+          if (groupsResponse.data) {
+            // Map the API response to QuestionGroup format
+            const mappedGroups = groupsResponse.data.map((group) => ({
+              id: group.groupId,
+              sectionOrder: group.sectionOrder,
+              sectionLabel: group.sectionLabel,
+              instruction: group.instruction,
+              // Infer questionType from the first question in the group
+              questionType:
+                group.questions[0]?.questionType === 0
+                  ? QuestionType.MULTIPLE_CHOICE
+                  : group.questions[0]?.questionType === 1
+                    ? QuestionType.FILL_IN_THE_BLANKS
+                    : group.questions[0]?.questionType === 2
+                      ? QuestionType.MATCHING
+                      : group.questions[0]?.questionType === 3
+                        ? QuestionType.DRAG_AND_DROP
+                        : QuestionType.MULTIPLE_CHOICE,
+              questions: group.questions,
+              // dragItems will be undefined unless specifically needed
+            }));
+            setQuestionGroups(mappedGroups);
+          }
         }
       } catch (error) {
-        console.error('Error loading draft:', error);
+        console.error('Failed to load passage data:', error);
       }
-    }
-  }, [form]);
+    };
+
+    loadPassageData();
+  }, []);
 
   const handleBasicInfoSubmit = async (data: PassageFormData) => {
     try {
       // Map frontend enums to backend ordinal values
-      const getielts_typeOrdinal = (ielts_type: ielts_type) => {
+      const getielts_typeOrdinal = (ielts_type: IeltsType) => {
         switch (ielts_type) {
-          case ielts_type.ACADEMIC:
+          case 'ACADEMIC':
             return 0;
-          case ielts_type.GENERAL_TRAINING:
+          case 'GENERAL_TRAINING':
             return 1;
           default:
             return 0;
@@ -122,20 +170,20 @@ export default function CreatePassagePage() {
         return part_number - 1;
       };
 
-      const getpassage_statusOrdinal = (status: passage_status) => {
+      const getpassage_statusOrdinal = (status: PassageStatus) => {
         switch (status) {
-          case passage_status.DRAFT:
+          case PassageStatus.DRAFT:
             return 0;
-          case passage_status.PUBLISHED:
+          case PassageStatus.PUBLISHED:
             return 1;
-          case passage_status.DEACTIVATED:
+          case PassageStatus.DEACTIVATED:
             return 2;
-          case passage_status.FINISHED:
+          case PassageStatus.FINISHED:
             return 3;
-          case passage_status.TEST:
-            return 4; // But this might be rejected by DB constraint
+          case PassageStatus.TEST:
+            return 4;
           default:
-            return 0; // Default to DRAFT
+            return 0;
         }
       };
 
@@ -143,22 +191,17 @@ export default function CreatePassagePage() {
         title: data.title,
         instruction: data.instruction,
         content: data.content,
-        content_with_highlight_keywords: data.content, // Use content as fallback for highlighted keywords
+        content_with_highlight_keywords: data.content,
         ielts_type: getielts_typeOrdinal(data.ielts_type),
         part_number: getpart_numberOrdinal(data.part_number),
         passage_status: getpassage_statusOrdinal(data.passage_status),
       };
 
-      const response = await createPassage(request);
-      if (response.data?.passage_id) {
-        setCreatedpassage_id(response.data.passage_id);
-        setCurrentStep('questions');
-        setActiveTab('questions');
-        // Clear draft after successful creation
-        sessionStorage.removeItem('draft-passage');
-      }
+      await updatePassage(passage_id, request);
+      setCurrentStep('questions');
+      setActiveTab('questions');
     } catch (error) {
-      console.error('Failed to create passage:', error);
+      console.error('Failed to update passage:', error);
     }
   };
 
@@ -180,20 +223,22 @@ export default function CreatePassagePage() {
   };
 
   const handleFinish = () => {
-    sessionStorage.removeItem('draft-passage');
     router.push('/passages');
   };
 
   const getStepStatus = (step: 'basic' | 'questions' | 'preview') => {
-    if (step === 'basic') return createdpassage_id ? 'completed' : 'current';
-    if (step === 'questions')
-      return questionGroups.length > 0 ? 'completed' : createdpassage_id ? 'current' : 'pending';
+    if (step === 'basic') return currentStep === 'basic' ? 'current' : 'completed';
+    if (step === 'questions') {
+      if (questionGroups.length > 0) return 'completed';
+      if (currentStep === 'questions') return 'current';
+      return 'pending';
+    }
     if (step === 'preview') return currentStep === 'preview' ? 'current' : 'pending';
     return 'pending';
   };
 
-  const canProceedToQuestions = createdpassage_id !== null;
-  const canPreview = canProceedToQuestions && questionGroups.length > 0;
+  const canProceedToQuestions = true; // Since we're editing, we can always proceed
+  const canPreview = questionGroups.length > 0;
 
   return (
     <div className='container mx-auto py-6 max-w-7xl'>
@@ -205,10 +250,8 @@ export default function CreatePassagePage() {
             Back to Passages
           </Button>
           <div>
-            <h1 className='text-3xl font-bold'>Create New Reading Passage</h1>
-            <p className='text-muted-foreground'>
-              Build a comprehensive IELTS reading passage with questions
-            </p>
+            <h1 className='text-3xl font-bold'>Edit Reading Passage</h1>
+            <p className='text-muted-foreground'>Modify your IELTS reading passage and questions</p>
           </div>
         </div>
 
@@ -233,7 +276,13 @@ export default function CreatePassagePage() {
           <div className='flex items-center justify-between'>
             <div className='flex items-center space-x-4'>
               <div
-                className={`flex items-center ${getStepStatus('basic') === 'completed' ? 'text-green-600' : getStepStatus('basic') === 'current' ? 'text-blue-600' : 'text-gray-400'}`}
+                className={`flex items-center ${
+                  getStepStatus('basic') === 'completed'
+                    ? 'text-green-600'
+                    : getStepStatus('basic') === 'current'
+                      ? 'text-blue-600'
+                      : 'text-gray-400'
+                }`}
               >
                 <div
                   className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-semibold
@@ -251,11 +300,19 @@ export default function CreatePassagePage() {
               </div>
 
               <div
-                className={`w-8 h-0.5 ${getStepStatus('questions') !== 'pending' ? 'bg-green-600' : 'bg-gray-300'}`}
+                className={`w-8 h-0.5 ${
+                  getStepStatus('questions') !== 'pending' ? 'bg-green-600' : 'bg-gray-300'
+                }`}
               />
 
               <div
-                className={`flex items-center ${getStepStatus('questions') === 'completed' ? 'text-green-600' : getStepStatus('questions') === 'current' ? 'text-blue-600' : 'text-gray-400'}`}
+                className={`flex items-center ${
+                  getStepStatus('questions') === 'completed'
+                    ? 'text-green-600'
+                    : getStepStatus('questions') === 'current'
+                      ? 'text-blue-600'
+                      : 'text-gray-400'
+                }`}
               >
                 <div
                   className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-semibold
@@ -273,15 +330,23 @@ export default function CreatePassagePage() {
               </div>
 
               <div
-                className={`w-8 h-0.5 ${getStepStatus('preview') !== 'pending' ? 'bg-green-600' : 'bg-gray-300'}`}
+                className={`w-8 h-0.5 ${
+                  getStepStatus('preview') !== 'pending' ? 'bg-green-600' : 'bg-gray-300'
+                }`}
               />
 
               <div
-                className={`flex items-center ${getStepStatus('preview') === 'current' ? 'text-blue-600' : 'text-gray-400'}`}
+                className={`flex items-center ${
+                  getStepStatus('preview') === 'current' ? 'text-blue-600' : 'text-gray-400'
+                }`}
               >
                 <div
                   className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-semibold
-                  ${getStepStatus('preview') === 'current' ? 'bg-blue-600 border-blue-600 text-white' : 'border-gray-400'}`}
+                  ${
+                    getStepStatus('preview') === 'current'
+                      ? 'bg-blue-600 border-blue-600 text-white'
+                      : 'border-gray-400'
+                  }`}
                 >
                   3
                 </div>
@@ -312,31 +377,27 @@ export default function CreatePassagePage() {
           <PassageBasicInfoForm
             form={form}
             onSubmit={handleBasicInfoSubmit}
-            isLoading={isLoading.createPassage}
-            isCompleted={!!createdpassage_id}
+            isLoading={isLoading.updatePassage}
+            isCompleted={false}
           />
         </TabsContent>
 
         <TabsContent value='questions' className='space-y-6'>
-          {createdpassage_id && (
-            <QuestionGroupsManager
-              passage_id={createdpassage_id}
-              questionGroups={questionGroups}
-              onAddGroup={handleAddQuestionGroup}
-              onUpdateGroup={handleUpdateQuestionGroup}
-              onDeleteGroup={handleDeleteQuestionGroup}
-            />
-          )}
+          <QuestionGroupsManager
+            passage_id={passage_id}
+            questionGroups={questionGroups}
+            onAddGroup={handleAddQuestionGroup}
+            onUpdateGroup={handleUpdateQuestionGroup}
+            onDeleteGroup={handleDeleteQuestionGroup}
+          />
         </TabsContent>
 
         <TabsContent value='preview' className='space-y-6'>
-          {createdpassage_id && (
-            <PassagePreview
-              passageData={form.getValues()}
-              questionGroups={questionGroups}
-              onFinish={handleFinish}
-            />
-          )}
+          <PassagePreview
+            passageData={form.getValues()}
+            questionGroups={questionGroups}
+            onFinish={handleFinish}
+          />
         </TabsContent>
       </Tabs>
     </div>

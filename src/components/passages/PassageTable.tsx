@@ -24,13 +24,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { PassageGetResponse } from '@/types/reading.types';
-import { Edit, Eye, MoreHorizontal, Trash2 } from 'lucide-react';
+import { Pagination, PassageGetResponse } from '@/types/reading.types';
+import { ArrowDownIcon, ArrowUpIcon, Edit, Eye, MoreHorizontal, Trash2 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Pagination } from '@/types/reading.types';
 import { useState } from 'react';
+import LoadingSpinner from '../ui/loading-spinner';
 
 interface PassageTableProps {
   passages: PassageGetResponse[];
@@ -40,6 +40,9 @@ interface PassageTableProps {
   onEdit: (passage: PassageGetResponse) => void;
   onDelete: (passage_id: string) => void;
   onPageChange: (page: number) => void;
+  sortBy?: string;
+  sortDirection?: string;
+  onSort?: (field: string) => void;
 }
 
 const getielts_typeLabel = (type: number): string => {
@@ -95,7 +98,10 @@ export function PassageTable({
   onEdit,
   onDelete,
   onPageChange,
-}: PassageTableProps) {
+  sortBy = 'updatedAt',
+  sortDirection = 'desc',
+  onSort,
+}: Readonly<PassageTableProps>) {
   const [deletepassage_id, setDeletepassage_id] = useState<string | null>(null);
 
   const handleDeleteClick = (passage_id: string) => {
@@ -109,13 +115,76 @@ export function PassageTable({
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className='flex items-center justify-center h-64'>
-        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-primary'></div>
-      </div>
-    );
-  }
+  const renderTableBody = () => {
+    if (isLoading) {
+      return (
+        <TableRow>
+          <TableCell colSpan={8} className='text-center py-8'>
+            <div className='flex items-center justify-center'>
+              <LoadingSpinner color='#737373' />
+              <span className='ml-2 text-muted-foreground'>Loading...</span>
+            </div>
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    if (passages.length === 0) {
+      return (
+        <TableRow>
+          <TableCell colSpan={8} className='text-center py-8 text-muted-foreground'>
+            No passages found. Create your first passage to get started.
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    return passages.map((passage) => (
+      <TableRow key={passage.passage_id}>
+        <TableCell className='font-medium'>{passage.title}</TableCell>
+        <TableCell>
+          <Badge variant='outline'>{getielts_typeLabel(passage.ielts_type)}</Badge>
+        </TableCell>
+        <TableCell>Part {passage.part_number}</TableCell>
+        <TableCell>
+          <Badge className={getStatusColor(passage.passage_status)}>
+            {getStatusLabel(passage.passage_status)}
+          </Badge>
+        </TableCell>
+        <TableCell>
+          {passage.created_by?.first_name} {passage.created_by?.last_name}
+        </TableCell>
+        <TableCell>{new Date(passage.created_at).toLocaleString()}</TableCell>
+        <TableCell>{new Date(passage.updated_at).toLocaleString()}</TableCell>
+        <TableCell className='text-right'>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant='ghost' size='sm'>
+                <MoreHorizontal className='h-4 w-4' />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='end'>
+              <DropdownMenuItem onClick={() => onView(passage)}>
+                <Eye className='h-4 w-4 mr-2' />
+                View
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onEdit(passage)}>
+                <Edit className='h-4 w-4 mr-2' />
+                Edit
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleDeleteClick(passage.passage_id)}
+                className='text-red-600'
+              >
+                <Trash2 className='h-4 w-4 mr-2' />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </TableCell>
+      </TableRow>
+    ));
+  };
 
   return (
     <>
@@ -123,73 +192,98 @@ export function PassageTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>IELTS Type</TableHead>
-              <TableHead>Part</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created By</TableHead>
-              <TableHead>Created At</TableHead>
+              <TableHead
+                className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
+                onClick={() => onSort?.('title')}
+              >
+                Title
+                {sortBy === 'title' &&
+                  (sortDirection === 'asc' ? (
+                    <ArrowUpIcon className='inline ml-2 h-4 w-4' />
+                  ) : (
+                    <ArrowDownIcon className='inline ml-2 h-4 w-4' />
+                  ))}
+              </TableHead>
+              <TableHead
+                className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
+                onClick={() => onSort?.('ieltsType')}
+              >
+                IELTS Type
+                {sortBy === 'ieltsType' &&
+                  (sortDirection === 'asc' ? (
+                    <ArrowUpIcon className='inline ml-2 h-4 w-4' />
+                  ) : (
+                    <ArrowDownIcon className='inline ml-2 h-4 w-4' />
+                  ))}
+              </TableHead>
+              <TableHead
+                className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
+                onClick={() => onSort?.('partNumber')}
+              >
+                Part
+                {sortBy === 'partNumber' &&
+                  (sortDirection === 'asc' ? (
+                    <ArrowUpIcon className='inline ml-2 h-4 w-4' />
+                  ) : (
+                    <ArrowDownIcon className='inline ml-2 h-4 w-4' />
+                  ))}
+              </TableHead>
+              <TableHead
+                className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
+                onClick={() => onSort?.('passageStatus')}
+              >
+                Status
+                {sortBy === 'passageStatus' &&
+                  (sortDirection === 'asc' ? (
+                    <ArrowUpIcon className='inline ml-2 h-4 w-4' />
+                  ) : (
+                    <ArrowDownIcon className='inline ml-2 h-4 w-4' />
+                  ))}
+              </TableHead>
+              <TableHead
+                className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
+                onClick={() => onSort?.('createdBy')}
+              >
+                Created By
+                {sortBy === 'createdBy' &&
+                  (sortDirection === 'asc' ? (
+                    <ArrowUpIcon className='inline ml-2 h-4 w-4' />
+                  ) : (
+                    <ArrowDownIcon className='inline ml-2 h-4 w-4' />
+                  ))}
+              </TableHead>
+              <TableHead
+                className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
+                onClick={() => onSort?.('createdAt')}
+              >
+                Created At
+                {sortBy === 'createdAt' &&
+                  (sortDirection === 'asc' ? (
+                    <ArrowUpIcon className='inline ml-2 h-4 w-4' />
+                  ) : (
+                    <ArrowDownIcon className='inline ml-2 h-4 w-4' />
+                  ))}
+              </TableHead>
+              <TableHead
+                className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
+                onClick={() => onSort?.('updatedAt')}
+              >
+                Updated At
+                {sortBy === 'updatedAt' &&
+                  (sortDirection === 'asc' ? (
+                    <ArrowUpIcon className='inline ml-2 h-4 w-4' />
+                  ) : (
+                    <ArrowDownIcon className='inline ml-2 h-4 w-4' />
+                  ))}
+              </TableHead>
               <TableHead className='text-right'>Actions</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
-            {passages.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className='text-center py-8 text-muted-foreground'>
-                  No passages found. Create your first passage to get started.
-                </TableCell>
-              </TableRow>
-            ) : (
-              passages.map((passage) => (
-                <TableRow key={passage.passage_id}>
-                  <TableCell className='font-medium'>{passage.title}</TableCell>
-                  <TableCell>
-                    <Badge variant='outline'>{getielts_typeLabel(passage.ielts_type)}</Badge>
-                  </TableCell>
-                  <TableCell>Part {passage.part_number}</TableCell>
-                  <TableCell>
-                    <Badge className={getStatusColor(passage.passage_status)}>
-                      {getStatusLabel(passage.passage_status)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {passage.created_by?.first_name} {passage.created_by?.last_name}
-                  </TableCell>
-                  <TableCell>{new Date(passage.created_at).toLocaleDateString()}</TableCell>
-                  <TableCell className='text-right'>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant='ghost' size='sm'>
-                          <MoreHorizontal className='h-4 w-4' />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align='end'>
-                        <DropdownMenuItem onClick={() => onView(passage)}>
-                          <Eye className='h-4 w-4 mr-2' />
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => onEdit(passage)}>
-                          <Edit className='h-4 w-4 mr-2' />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          onClick={() => handleDeleteClick(passage.passage_id)}
-                          className='text-red-600'
-                        >
-                          <Trash2 className='h-4 w-4 mr-2' />
-                          Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
+          <TableBody>{renderTableBody()}</TableBody>
         </Table>
       </div>
 
-      {passages.length > 0 && (
+      {!isLoading && passages.length > 0 && (
         <div className='flex items-center justify-between mt-4'>
           <div className='text-sm text-muted-foreground'>
             Showing {(pagination.currentPage - 1) * pagination.pageSize + 1} to{' '}

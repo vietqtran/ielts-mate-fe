@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { PassageGetResponse, ielts_type, passage_status } from '@/types/reading.types';
+import { IeltsType, PassageGetResponse, PassageStatus } from '@/types/reading.types';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,9 +35,9 @@ const passageSchema = z.object({
   instruction: z.string().min(1, 'Instruction is required'),
   content: z.string().min(1, 'Content is required'),
   contentWithHighlightKeywords: z.string().min(1, 'Content with highlights is required'),
-  ielts_type: z.nativeEnum(ielts_type),
+  ielts_type: z.nativeEnum(IeltsType),
   part_number: z.number().min(1).max(3),
-  passage_status: z.nativeEnum(passage_status),
+  passage_status: z.nativeEnum(PassageStatus),
 });
 
 type PassageFormData = z.infer<typeof passageSchema>;
@@ -49,35 +49,40 @@ interface EditPassageModalProps {
   onSuccess: () => void;
 }
 
-const getielts_typeFromNumber = (type: number): ielts_type => {
+const getielts_typeFromNumber = (type: number): IeltsType => {
   switch (type) {
     case 0:
-      return ielts_type.ACADEMIC;
+      return IeltsType.ACADEMIC;
     case 1:
-      return ielts_type.GENERAL_TRAINING;
+      return IeltsType.GENERAL_TRAINING;
     default:
-      return ielts_type.ACADEMIC;
+      return IeltsType.ACADEMIC;
   }
 };
 
-const getpassage_statusFromNumber = (status: number): passage_status => {
+const getpassage_statusFromNumber = (status: number): PassageStatus => {
   switch (status) {
     case 0:
-      return passage_status.DRAFT;
+      return PassageStatus.DRAFT;
     case 1:
-      return passage_status.PUBLISHED;
+      return PassageStatus.PUBLISHED;
     case 2:
-      return passage_status.DEACTIVATED;
+      return PassageStatus.DEACTIVATED;
     case 3:
-      return passage_status.FINISHED;
+      return PassageStatus.FINISHED;
     case 4:
-      return passage_status.TEST;
+      return PassageStatus.TEST;
     default:
-      return passage_status.DRAFT;
+      return PassageStatus.DRAFT;
   }
 };
 
-export function EditPassageModal({ passage, isOpen, onClose, onSuccess }: EditPassageModalProps) {
+export function EditPassageModal({
+  passage,
+  isOpen,
+  onClose,
+  onSuccess,
+}: Readonly<EditPassageModalProps>) {
   const { updatePassage, isLoading } = usePassage();
 
   const form = useForm<PassageFormData>({
@@ -140,9 +145,9 @@ export function EditPassageModal({ passage, isOpen, onClose, onSuccess }: EditPa
         instruction: data.instruction,
         content: data.content,
         content_with_highlight_keywords: data.contentWithHighlightKeywords,
-        ielts_type: Object.values(ielts_type).indexOf(data.ielts_type),
+        ielts_type: Object.values(IeltsType).indexOf(data.ielts_type),
         part_number: data.part_number,
-        passage_status: Object.values(passage_status).indexOf(data.passage_status),
+        passage_status: Object.values(PassageStatus).indexOf(data.passage_status),
       };
 
       await updatePassage(passage.passage_id, request);
@@ -195,10 +200,8 @@ export function EditPassageModal({ passage, isOpen, onClose, onSuccess }: EditPa
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={ielts_type.ACADEMIC}>Academic</SelectItem>
-                        <SelectItem value={ielts_type.GENERAL_TRAINING}>
-                          General Training
-                        </SelectItem>
+                        <SelectItem value={IeltsType.ACADEMIC}>Academic</SelectItem>
+                        <SelectItem value={IeltsType.GENERAL_TRAINING}>General Training</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -247,11 +250,11 @@ export function EditPassageModal({ passage, isOpen, onClose, onSuccess }: EditPa
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value={passage_status.DRAFT}>Draft</SelectItem>
-                        <SelectItem value={passage_status.PUBLISHED}>Published</SelectItem>
-                        <SelectItem value={passage_status.TEST}>Test</SelectItem>
-                        <SelectItem value={passage_status.DEACTIVATED}>Deactivated</SelectItem>
-                        <SelectItem value={passage_status.FINISHED}>Finished</SelectItem>
+                        <SelectItem value={PassageStatus.DRAFT}>Draft</SelectItem>
+                        <SelectItem value={PassageStatus.PUBLISHED}>Published</SelectItem>
+                        <SelectItem value={PassageStatus.TEST}>Test</SelectItem>
+                        <SelectItem value={PassageStatus.DEACTIVATED}>Deactivated</SelectItem>
+                        <SelectItem value={PassageStatus.FINISHED}>Finished</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

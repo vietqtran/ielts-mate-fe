@@ -23,24 +23,30 @@ import {
   SidebarRail,
   SidebarSeparator,
 } from '@/components/ui/sidebar';
-import {
-  BarChart3,
-  BookOpen,
-  Code2,
-  GitMerge,
-  Github,
-  LayoutDashboard,
-  LineChart,
-  LogOut,
-  Server,
-  Settings,
-  User2,
-} from 'lucide-react';
+import { useAppSelector, useAuth } from '@/hooks';
+import { BookOpen, LayoutDashboard, LogOut, Settings, User2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export function AppSidebar() {
+  const { signOut } = useAuth();
+  const { replace } = useRouter();
+  const { user } = useAppSelector((state) => state.auth);
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      setTimeout(() => {
+        replace('/sign-in');
+      }, 500);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className='px-4 h-14'>
@@ -57,80 +63,18 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <a href='/'>
+                  <Link href='/'>
                     <LayoutDashboard className='h-4 w-4' />
                     <span>Dashboard</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <a href='/passages'>
+                  <Link href='/passages'>
                     <BookOpen className='h-4 w-4' />
                     <span>Reading Passages</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Development</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href='/repositories'>
-                    <Github className='h-4 w-4' />
-                    <span>Repositories</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href='/infrastructure'>
-                    <Server className='h-4 w-4' />
-                    <span>Infrastructure</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href='/pipelines'>
-                    <GitMerge className='h-4 w-4' />
-                    <span>CI/CD Pipelines</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Monitoring</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href='/metrics'>
-                    <BarChart3 className='h-4 w-4' />
-                    <span>Metrics</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href='/logs'>
-                    <Code2 className='h-4 w-4' />
-                    <span>Logs</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <a href='/analytics'>
-                    <LineChart className='h-4 w-4' />
-                    <span>Analytics</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -141,12 +85,17 @@ export function AppSidebar() {
       <SidebarFooter className='p-4'>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant='ghost' className='w-full justify-start gap-2'>
+            <Button variant='ghost' className='w-full flex items-center justify-start gap-2'>
               <Avatar className='h-6 w-6'>
                 <AvatarImage src='/image.png?height=32&width=32' />
-                <AvatarFallback>JD</AvatarFallback>
+                <AvatarFallback>
+                  {user?.firstName?.charAt(0)}
+                  {user?.lastName?.charAt(0)}
+                </AvatarFallback>
               </Avatar>
-              <span>John Doe</span>
+              <span>
+                {user?.firstName} {user?.lastName}
+              </span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='end' className='w-56'>
@@ -161,7 +110,7 @@ export function AppSidebar() {
               <span>Settings</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout}>
               <LogOut className='mr-2 h-4 w-4' />
               <span>Log out</span>
             </DropdownMenuItem>

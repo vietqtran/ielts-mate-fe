@@ -63,10 +63,7 @@ export function useAuth() {
       }
       return data;
     } catch (error) {
-      if (mountedRef.current) {
-        setErrorState('fetchUser', error as Error);
-        return null;
-      }
+      setErrorState('fetchUser', error as Error);
       dispatch(setUser(null));
       return null;
     } finally {
@@ -107,15 +104,13 @@ export function useAuth() {
     const controller = createAbortController('signOut');
     try {
       const { data } = await instance.post(
-        '/identity/auth/sign-out',
-        {},
+        '/identity/auth/logout',
+        { withCredentials: true },
         {
           signal: controller.signal,
         }
       );
-      if (mountedRef.current) {
-        dispatch(setUser(null));
-      }
+      dispatch(setUser(null));
       return data;
     } catch (error) {
       setErrorState('signOut', error as Error);
