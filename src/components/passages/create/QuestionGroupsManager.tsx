@@ -1,12 +1,12 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { QuestionType } from '@/types/reading.types';
 import { Edit3, Eye, Plus, Settings, Trash2 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/usePassage';
+import { QuestionType } from '@/types/reading.types';
 import { useState } from 'react';
 import { QuestionGroupForm } from './QuestionGroupForm';
 import { DragDropManager } from './questions/DragDropManager';
@@ -76,9 +76,8 @@ export function QuestionGroupsManager({
   onAddGroup,
   onUpdateGroup,
   onDeleteGroup,
-}: QuestionGroupsManagerProps) {
+}: Readonly<QuestionGroupsManagerProps>) {
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
-  const [editingGroupIndex, setEditingGroupIndex] = useState<number | null>(null);
   const [activeGroupIndex, setActiveGroupIndex] = useState<number | null>(null);
   const { addGroupQuestion, isLoading } = usePassage();
 
@@ -88,13 +87,13 @@ export function QuestionGroupsManager({
       if (response.data) {
         // Convert backend response back to frontend format for the local state
         const frontendGroup = {
-          id: response.data.id || response.data.groupId,
+          id: response.data.id ?? response.data.groupId,
           sectionOrder: groupData.section_order,
           sectionLabel: groupData.section_label,
           instruction: groupData.instruction,
           questionType: groupData.question_type,
-          questions: groupData.questions || [],
-          dragItems: groupData.drag_items || [],
+          questions: groupData.questions ?? [],
+          dragItems: groupData.drag_items ?? [],
         };
         onAddGroup(frontendGroup);
         setIsCreatingGroup(false);
@@ -105,7 +104,6 @@ export function QuestionGroupsManager({
   };
 
   const handleEditGroup = (index: number) => {
-    setEditingGroupIndex(index);
     setActiveGroupIndex(index);
   };
 

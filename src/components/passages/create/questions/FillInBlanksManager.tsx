@@ -47,11 +47,7 @@ interface FillInBlanksManagerProps {
   onUpdateGroup: (group: QuestionGroup) => void;
 }
 
-export function FillInBlanksManager({
-  group,
-  groupIndex,
-  onUpdateGroup,
-}: FillInBlanksManagerProps) {
+export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBlanksManagerProps>) {
   const [isAddingQuestion, setIsAddingQuestion] = useState(false);
   const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
 

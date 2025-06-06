@@ -48,12 +48,7 @@ interface GroupQuestionFormProps {
   onFinish: () => void;
 }
 
-export function GroupQuestionForm({
-  passage_id,
-  onAddGroup,
-  onSaveGroup,
-  onFinish,
-}: GroupQuestionFormProps) {
+export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuestionFormProps>) {
   const [groups, setGroups] = useState<any[]>([]);
   const [currentGroupIndex, setCurrentGroupIndex] = useState<number | null>(null);
 

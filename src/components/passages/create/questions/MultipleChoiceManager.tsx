@@ -57,9 +57,8 @@ interface MultipleChoiceManagerProps {
 
 export function MultipleChoiceManager({
   group,
-  groupIndex,
   onUpdateGroup,
-}: MultipleChoiceManagerProps) {
+}: Readonly<MultipleChoiceManagerProps>) {
   const [isAddingQuestion, setIsAddingQuestion] = useState(false);
   const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
 

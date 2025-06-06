@@ -65,7 +65,6 @@ export function usePassage() {
     }
 
     const currentController = new AbortController();
-    const requestId = Date.now();
     abortControllerRef.current = currentController;
 
     setLoadingState('getPassagesForTeacher', true);

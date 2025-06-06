@@ -46,7 +46,7 @@ interface MatchingManagerProps {
   onUpdateGroup: (group: QuestionGroup) => void;
 }
 
-export function MatchingManager({ group, groupIndex, onUpdateGroup }: MatchingManagerProps) {
+export function MatchingManager({ group, onUpdateGroup }: Readonly<MatchingManagerProps>) {
   const [isAddingQuestion, setIsAddingQuestion] = useState(false);
   const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
 

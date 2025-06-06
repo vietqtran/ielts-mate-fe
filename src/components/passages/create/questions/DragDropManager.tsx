@@ -59,7 +59,7 @@ interface DragDropManagerProps {
   onUpdateGroup: (group: QuestionGroup) => void;
 }
 
-export function DragDropManager({ group, groupIndex, onUpdateGroup }: DragDropManagerProps) {
+export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) {
   const [activeTab, setActiveTab] = useState('dragItems');
 
   const form = useForm<DragDropFormData>({
