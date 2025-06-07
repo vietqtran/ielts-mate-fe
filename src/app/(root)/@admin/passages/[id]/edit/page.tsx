@@ -118,28 +118,28 @@ export default function EditPassagePage() {
             passage_status: getpassage_statusEnum(passageResponse.data.passage_status),
           });
 
-          // Load question groups separately
-          const groupsResponse = await getAllQuestionGroups(passage_id);
-          if (groupsResponse.data) {
+          // Load question groups from the passage detail response which includes question_groups
+          const passageDetail = passageResponse.data as any;
+          if (passageDetail.question_groups) {
             // Map the API response to QuestionGroup format
-            const mappedGroups = groupsResponse.data.map((group) => ({
-              id: group.groupId,
-              sectionOrder: group.sectionOrder,
-              sectionLabel: group.sectionLabel,
+            const mappedGroups = passageDetail.question_groups.map((group: any) => ({
+              id: group.group_id, // Use group_id from the API response
+              sectionOrder: group.section_order,
+              sectionLabel: group.section_label,
               instruction: group.instruction,
-              // Infer questionType from the first question in the group
+              // Infer questionType from the first question in the group, default to MULTIPLE_CHOICE
               questionType:
-                group.questions[0]?.questionType === 0
+                group.questions[0]?.question_type === 0
                   ? QuestionType.MULTIPLE_CHOICE
-                  : group.questions[0]?.questionType === 1
+                  : group.questions[0]?.question_type === 1
                     ? QuestionType.FILL_IN_THE_BLANKS
-                    : group.questions[0]?.questionType === 2
+                    : group.questions[0]?.question_type === 2
                       ? QuestionType.MATCHING
-                      : group.questions[0]?.questionType === 3
+                      : group.questions[0]?.question_type === 3
                         ? QuestionType.DRAG_AND_DROP
                         : QuestionType.MULTIPLE_CHOICE,
-              questions: group.questions,
-              // dragItems will be undefined unless specifically needed
+              questions: group.questions || [],
+              dragItems: group.drag_items || [],
             }));
             setQuestionGroups(mappedGroups);
           }
@@ -266,7 +266,7 @@ export default function EditPassagePage() {
           <Badge variant='outline' className='px-3 py-1'>
             Auto-saved
           </Badge>
-          <Button variant='outline' onClick={handlePreview} disabled={!canPreview}>
+          <Button variant='outline' onClick={() => router.push(`/passages/${passage_id}/preview`)}>
             <Eye className='h-4 w-4 mr-2' />
             Preview
           </Button>

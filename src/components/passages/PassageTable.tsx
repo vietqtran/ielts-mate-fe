@@ -25,7 +25,15 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Pagination, PassageGetResponse } from '@/types/reading.types';
-import { ArrowDownIcon, ArrowUpIcon, Edit, Eye, MoreHorizontal, Trash2 } from 'lucide-react';
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  Edit,
+  Eye,
+  Monitor,
+  MoreHorizontal,
+  Trash2,
+} from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -38,6 +46,7 @@ interface PassageTableProps {
   pagination: Pagination;
   onView: (passage: PassageGetResponse) => void;
   onEdit: (passage: PassageGetResponse) => void;
+  onPreview: (passage: PassageGetResponse) => void;
   onDelete: (passage_id: string) => void;
   onPageChange: (page: number) => void;
   sortBy?: string;
@@ -96,6 +105,7 @@ export function PassageTable({
   pagination,
   onView,
   onEdit,
+  onPreview,
   onDelete,
   onPageChange,
   sortBy = 'updatedAt',
@@ -167,6 +177,10 @@ export function PassageTable({
               <DropdownMenuItem onClick={() => onView(passage)}>
                 <Eye className='h-4 w-4 mr-2' />
                 View
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onPreview(passage)}>
+                <Monitor className='h-4 w-4 mr-2' />
+                Preview
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => onEdit(passage)}>
                 <Edit className='h-4 w-4 mr-2' />

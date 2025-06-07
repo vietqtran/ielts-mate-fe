@@ -8,7 +8,6 @@ import {
   setSortBy,
   setSortDirection,
 } from '@/store/slices/passage-slice';
-import { PlusCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -21,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/usePassage';
 import { PassageGetResponse } from '@/types/reading.types';
 import { RootState } from '@/types/store.types';
+import { PlusCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function PassagesPage() {
@@ -131,6 +131,10 @@ export default function PassagesPage() {
     router.push(`/passages/${passage.passage_id}/edit`);
   };
 
+  const handlePreviewPassage = (passage: PassageGetResponse) => {
+    router.push(`/passages/${passage.passage_id}/preview`);
+  };
+
   const handleDeletePassage = async (passage_id: string) => {
     try {
       await deletePassage(passage_id);
@@ -197,6 +201,7 @@ export default function PassagesPage() {
           pagination={pagination}
           onView={handleViewPassage}
           onEdit={handleEditPassage}
+          onPreview={handlePreviewPassage}
           onDelete={handleDeletePassage}
           onPageChange={handlePageChange}
           sortBy={sortBy}

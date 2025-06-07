@@ -85,18 +85,30 @@ export function QuestionGroupsManager({
     try {
       const response = await addGroupQuestion(passage_id, groupData);
       if (response.data) {
-        // Convert backend response back to frontend format for the local state
-        const frontendGroup = {
-          id: response.data.id ?? response.data.groupId,
-          sectionOrder: groupData.section_order,
-          sectionLabel: groupData.section_label,
-          instruction: groupData.instruction,
+        // Backend response uses camelCase for property access after JSON parsing
+        // Handle multiple possible field names for ID
+        const groupId =
+          response.data.groupId || (response.data as any).id || (response.data as any).group_id;
+
+        if (!groupId) {
+          console.error('No group ID found in response:', response.data);
+          return;
+        }
+
+        const frontendGroup: LocalQuestionGroup = {
+          id: groupId, // Use the found ID
+          sectionOrder: response.data.sectionOrder || groupData.section_order,
+          sectionLabel: response.data.sectionLabel || groupData.section_label,
+          instruction: response.data.instruction || groupData.instruction,
           questionType: groupData.question_type,
-          questions: groupData.questions ?? [],
-          dragItems: groupData.drag_items ?? [],
+          questions: response.data.questions ?? [],
+          dragItems: [], // Initialize as empty array since backend doesn't return this yet
         };
+
         onAddGroup(frontendGroup);
         setIsCreatingGroup(false);
+      } else {
+        console.error('No data in response:', response);
       }
     } catch (error) {
       console.error('Failed to create question group:', error);
