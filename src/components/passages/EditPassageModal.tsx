@@ -29,6 +29,7 @@ import { usePassage } from '@/hooks/usePassage';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 const passageSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -150,11 +151,16 @@ export function EditPassageModal({
         passage_status: Object.values(PassageStatus).indexOf(data.passage_status),
       };
 
-      await updatePassage(passage.passage_id, request);
-      onSuccess();
-      handleClose();
+      const result = await updatePassage(passage.passage_id, request);
+      if (result.status === 'SUCCESS') {
+        onSuccess();
+        handleClose();
+      } else {
+        throw new Error(result.message || 'Failed to update passage');
+      }
     } catch (error) {
       console.error('Failed to update passage:', error);
+      toast.error('Failed to update passage. Please try again.');
     }
   };
 

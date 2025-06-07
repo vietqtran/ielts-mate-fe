@@ -20,10 +20,20 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
+import instance from '@/lib/axios';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 
+interface Choice {
+  id?: string;
+  label: string;
+  content: string;
+  choiceOrder: number;
+  isCorrect: boolean;
+}
+
 const choiceSchema = z.object({
+  id: z.string().optional(),
   label: z.string().min(1, 'Label is required'),
   content: z.string().min(1, 'Content is required'),
   choiceOrder: z.number().min(1),
@@ -48,6 +58,7 @@ interface MultipleChoiceFormProps {
 
 export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleChoiceFormProps) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
@@ -72,33 +83,76 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
   const numberOfCorrectAnswers = form.watch('numberOfCorrectAnswers');
   const isMultipleChoice = numberOfCorrectAnswers > 1;
 
-  const handleSubmit = (data: QuestionFormData) => {
-    const newQuestion = {
-      ...data,
-      questionType: 0, // MULTIPLE_CHOICE
-      questionCategories: [],
-    };
+  const handleSubmit = async (data: QuestionFormData) => {
+    setIsSubmitting(true);
+    try {
+      const newQuestion = {
+        ...data,
+        questionType: 0, // MULTIPLE_CHOICE
+        questionCategories: [],
+      };
 
-    if (editingIndex !== null) {
-      const updatedQuestions = [...questions];
-      updatedQuestions[editingIndex] = newQuestion;
-      onQuestionsChange(updatedQuestions);
-      setEditingIndex(null);
-    } else {
-      onQuestionsChange([...questions, newQuestion]);
+      if (editingIndex !== null) {
+        const questionId = questions[editingIndex].id;
+
+        // Update question
+        await instance.put(`/reading/questions/${questionId}`, {
+          questionOrder: data.questionOrder,
+          point: data.point,
+          explanation: data.explanation,
+          instructionForChoice: data.instructionForChoice,
+          numberOfCorrectAnswers: data.numberOfCorrectAnswers,
+          questionType: 0,
+        });
+
+        // Update choices
+        for (const choice of data.choices) {
+          if (choice.id) {
+            await instance.put(`/reading/choices/${choice.id}`, {
+              label: choice.label,
+              content: choice.content,
+              choiceOrder: choice.choiceOrder,
+              isCorrect: choice.isCorrect,
+            });
+          } else {
+            await instance.post(`/reading/questions/${questionId}/choices`, {
+              label: choice.label,
+              content: choice.content,
+              choiceOrder: choice.choiceOrder,
+              isCorrect: choice.isCorrect,
+            });
+          }
+        }
+
+        const updatedQuestions = [...questions];
+        updatedQuestions[editingIndex] = {
+          ...newQuestion,
+          id: questionId,
+        };
+        onQuestionsChange(updatedQuestions);
+        setEditingIndex(null);
+        alert('Question and choices updated successfully');
+      } else {
+        onQuestionsChange([...questions, newQuestion]);
+      }
+
+      form.reset({
+        questionOrder: questions.length + 2,
+        point: 1,
+        explanation: '',
+        instructionForChoice: '',
+        numberOfCorrectAnswers: 1,
+        choices: [
+          { label: 'A', content: '', choiceOrder: 1, isCorrect: false },
+          { label: 'B', content: '', choiceOrder: 2, isCorrect: false },
+        ],
+      });
+    } catch (error) {
+      console.error('Failed to save question:', error);
+      alert((error as Error).message || 'Failed to save question');
+    } finally {
+      setIsSubmitting(false);
     }
-
-    form.reset({
-      questionOrder: questions.length + 2,
-      point: 1,
-      explanation: '',
-      instructionForChoice: '',
-      numberOfCorrectAnswers: 1,
-      choices: [
-        { label: 'A', content: '', choiceOrder: 1, isCorrect: false },
-        { label: 'B', content: '', choiceOrder: 2, isCorrect: false },
-      ],
-    });
   };
 
   const handleEdit = (index: number) => {
@@ -343,7 +397,7 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
                     Cancel
                   </Button>
                 )}
-                <Button type='submit'>
+                <Button type='submit' disabled={isSubmitting}>
                   {editingIndex !== null ? 'Update Question' : 'Add Question'}
                 </Button>
               </div>

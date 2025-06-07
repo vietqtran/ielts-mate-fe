@@ -119,7 +119,7 @@ export default function PassagePreviewPage() {
     if (passage_id) {
       loadPassageData();
     }
-  }, [passage_id, getPassageById]);
+  }, [passage_id]);
 
   const getIeltsTypeLabel = (type: number) => {
     return type === 0 ? 'Academic' : 'General Training';

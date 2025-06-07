@@ -5,7 +5,13 @@ import * as z from 'zod';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { IeltsType, PassageStatus, QuestionType } from '@/types/reading.types';
+import {
+  AddGroupQuestionRequest,
+  IeltsType,
+  PassageStatus,
+  QuestionCreationRequest,
+  QuestionType,
+} from '@/types/reading.types';
 import { ArrowLeft, Eye, Save } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -43,7 +49,8 @@ interface QuestionGroup {
 export default function EditPassagePage() {
   const router = useRouter();
   const params = useParams();
-  const { updatePassage, getPassageById, getAllQuestionGroups, isLoading } = usePassage();
+  const { updatePassage, getPassageById, getAllQuestionGroups, addGroupQuestion, isLoading } =
+    usePassage();
   const passage_id = params.id as string;
 
   const [currentStep, setCurrentStep] = useState<'basic' | 'questions' | 'preview'>('basic');
@@ -229,8 +236,70 @@ export default function EditPassagePage() {
     setActiveTab('preview');
   };
 
-  const handleFinish = () => {
-    router.push('/passages');
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleFinish = async () => {
+    try {
+      setIsSaving(true);
+      const formData = form.getValues();
+
+      // First save all unsaved question groups
+      const unsavedGroups = questionGroups.filter((group) => !group.id);
+
+      for (const group of unsavedGroups) {
+        try {
+          const questions: QuestionCreationRequest[] = group.questions.map((q) => ({
+            question_order: q.questionOrder,
+            point: q.point,
+            explanation: q.explanation,
+            number_of_correct_answers: q.numberOfCorrectAnswers,
+            instruction_for_choice: q.instructionForChoice,
+            question_type: Object.values(QuestionType).indexOf(group.questionType),
+            question_group_id: '', // Will be set by backend
+            question_categories: [],
+            choices: q.choices?.map(
+              (c: { label: string; content: string; choiceOrder: number; isCorrect: boolean }) => ({
+                label: c.label,
+                content: c.content,
+                choice_order: c.choiceOrder,
+                is_correct: c.isCorrect,
+              })
+            ),
+          }));
+
+          const groupRequest: AddGroupQuestionRequest = {
+            section_order: group.sectionOrder,
+            section_label: group.sectionLabel,
+            instruction: group.instruction,
+            questions: questions,
+            drag_items: group.dragItems,
+          };
+
+          await addGroupQuestion(passage_id, groupRequest);
+        } catch (groupError) {
+          console.error('Failed to save question group:', groupError);
+          throw new Error('Failed to save all question groups');
+        }
+      }
+
+      // Then save the passage with latest data
+      const passageRequest = {
+        title: formData.title,
+        instruction: formData.instruction,
+        content: formData.content,
+        content_with_highlight_keywords: formData.content,
+        ielts_type: Object.values(IeltsType).indexOf(formData.ielts_type),
+        part_number: formData.part_number - 1,
+        passage_status: Object.values(PassageStatus).indexOf(formData.passage_status),
+      };
+
+      await updatePassage(passage_id, passageRequest);
+      router.push('/passages');
+    } catch (error) {
+      console.error('Failed to save changes:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const getStepStatus = (step: 'basic' | 'questions' | 'preview') => {
@@ -270,7 +339,12 @@ export default function EditPassagePage() {
             <Eye className='h-4 w-4 mr-2' />
             Preview
           </Button>
-          <Button onClick={handleFinish} disabled={!canPreview}>
+          <Button
+            onClick={handleFinish}
+            disabled={
+              !canPreview || isLoading.updatePassage || isLoading.addGroupQuestion || isSaving
+            }
+          >
             <Save className='h-4 w-4 mr-2' />
             Finish & Save
           </Button>
