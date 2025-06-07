@@ -49,6 +49,7 @@ export default function EditPassagePage() {
   const [currentStep, setCurrentStep] = useState<'basic' | 'questions' | 'preview'>('basic');
   const [questionGroups, setQuestionGroups] = useState<QuestionGroup[]>([]);
   const [activeTab, setActiveTab] = useState('passage');
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const form = useForm<PassageFormData>({
     resolver: zodResolver(passageSchema),
@@ -143,13 +144,19 @@ export default function EditPassagePage() {
             setQuestionGroups(mappedGroups);
           }
         }
+
+        // Set data loaded state after both passage and groups are loaded
+        setIsDataLoaded(true);
       } catch (error) {
         console.error('Failed to load passage data:', error);
+        setIsDataLoaded(true); // Set to true even on error to show the form
       }
     };
 
-    loadPassageData();
-  }, []);
+    if (passage_id) {
+      loadPassageData();
+    }
+  }, [passage_id]);
 
   const handleBasicInfoSubmit = async (data: PassageFormData) => {
     try {
@@ -374,12 +381,23 @@ export default function EditPassagePage() {
         </TabsList>
 
         <TabsContent value='passage' className='space-y-6'>
-          <PassageBasicInfoForm
-            form={form}
-            onSubmit={handleBasicInfoSubmit}
-            isLoading={isLoading.updatePassage}
-            isCompleted={false}
-          />
+          {isDataLoaded && (
+            <PassageBasicInfoForm
+              key={`passage-form-${isDataLoaded}`}
+              form={form}
+              onSubmit={handleBasicInfoSubmit}
+              isLoading={isLoading.updatePassage}
+              isCompleted={false}
+            />
+          )}
+          {!isDataLoaded && (
+            <div className='flex justify-center items-center h-64'>
+              <div className='text-center'>
+                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto mb-4'></div>
+                <p className='text-muted-foreground'>Loading passage data...</p>
+              </div>
+            </div>
+          )}
         </TabsContent>
 
         <TabsContent value='questions' className='space-y-6'>

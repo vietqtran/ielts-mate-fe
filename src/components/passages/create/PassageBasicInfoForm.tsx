@@ -150,7 +150,7 @@ export function PassageBasicInfoForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>IELTS Type *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value || ''}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder='Select IELTS type' />
@@ -176,7 +176,7 @@ export function PassageBasicInfoForm({
                     <FormLabel>Part Number *</FormLabel>
                     <Select
                       onValueChange={(value) => field.onChange(Number(value))}
-                      defaultValue={field.value?.toString()}
+                      value={field.value?.toString() || ''}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -204,7 +204,7 @@ export function PassageBasicInfoForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value || ''}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder='Select status' />
