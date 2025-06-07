@@ -16,6 +16,7 @@ import { Plus, Save, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { useQuestion } from '@/hooks/useQuestion';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -60,35 +61,81 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
     },
   });
 
-  const handleSubmit = (data: QuestionFormData) => {
-    const newQuestion = {
-      ...data,
-      questionType: 1, // FILL_IN_THE_BLANKS
-      questionCategories: [],
-      numberOfCorrectAnswers: 0, // Not applicable for fill in blanks
-      instructionForChoice: '', // Empty for fill in blanks since instruction is at group level
-    };
+  const { createQuestions, isLoading } = useQuestion();
 
-    if (editingQuestionIndex !== null) {
-      const updatedQuestions = [...group.questions];
-      updatedQuestions[editingQuestionIndex] = newQuestion;
-      onUpdateGroup({ ...group, questions: updatedQuestions });
-      setEditingQuestionIndex(null);
-    } else {
-      onUpdateGroup({
-        ...group,
-        questions: [...group.questions, newQuestion],
-      });
+  const handleSubmit = async (data: QuestionFormData) => {
+    if (!group.id) {
+      console.error('Group ID is required to create questions');
+      return;
     }
 
-    setIsAddingQuestion(false);
-    form.reset({
-      questionOrder: group.questions.length + 2,
-      point: 1,
-      explanation: '',
-      blankIndex: group.questions.length + 2,
-      correctAnswer: '',
-    });
+    // Convert to API format using snake_case
+    const questionRequest = {
+      question_order: data.questionOrder,
+      point: data.point,
+      question_type: 1, // FILL_IN_THE_BLANKS
+      question_group_id: group.id,
+      question_categories: [],
+      explanation: data.explanation,
+      number_of_correct_answers: 0, // Not applicable for fill in blanks
+      blank_index: data.blankIndex,
+      correct_answer: data.correctAnswer,
+    };
+
+    try {
+      if (editingQuestionIndex !== null) {
+        // For editing, we would need an update API - for now just update local state
+        const localQuestion = {
+          questionOrder: data.questionOrder,
+          point: data.point,
+          questionType: 1,
+          questionCategories: [],
+          explanation: data.explanation,
+          numberOfCorrectAnswers: 0,
+          blankIndex: data.blankIndex,
+          correctAnswer: data.correctAnswer,
+          instructionForChoice: '',
+        };
+        const updatedQuestions = [...group.questions];
+        updatedQuestions[editingQuestionIndex] = localQuestion;
+        onUpdateGroup({ ...group, questions: updatedQuestions });
+        setEditingQuestionIndex(null);
+      } else {
+        // Create new question via API
+        const response = await createQuestions(group.id, [questionRequest]);
+        if (response.data) {
+          // Convert API response back to frontend format
+          const apiResponse = response.data[0];
+          const newQuestion = {
+            id: apiResponse?.questionId,
+            questionOrder: apiResponse?.questionOrder || data.questionOrder,
+            point: apiResponse?.point || data.point,
+            questionType: apiResponse?.questionType || 1,
+            questionCategories: [],
+            explanation: apiResponse?.explanation || data.explanation,
+            numberOfCorrectAnswers: apiResponse?.numberOfCorrectAnswers || 0,
+            blankIndex: apiResponse?.blankIndex || data.blankIndex,
+            correctAnswer: apiResponse?.correctAnswer || data.correctAnswer,
+            instructionForChoice: '',
+          };
+          onUpdateGroup({
+            ...group,
+            questions: [...group.questions, newQuestion],
+          });
+        }
+      }
+
+      setIsAddingQuestion(false);
+      form.reset({
+        questionOrder: group.questions.length + 2,
+        point: 1,
+        explanation: '',
+        blankIndex: group.questions.length + 2,
+        correctAnswer: '',
+      });
+    } catch (error) {
+      console.error('Failed to create question:', error);
+    }
   };
 
   const handleEdit = (index: number) => {
@@ -255,9 +302,13 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
                   >
                     Cancel
                   </Button>
-                  <Button type='submit' className='gap-2'>
+                  <Button type='submit' className='gap-2' disabled={isLoading.createQuestions}>
                     <Save className='h-4 w-4' />
-                    {editingQuestionIndex !== null ? 'Update Question' : 'Add Question'}
+                    {isLoading.createQuestions
+                      ? 'Creating...'
+                      : editingQuestionIndex !== null
+                        ? 'Update Question'
+                        : 'Add Question'}
                   </Button>
                 </div>
               </form>

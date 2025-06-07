@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
+import { useQuestion } from '@/hooks/useQuestion';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 
@@ -109,19 +110,82 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
 
   const dragItems = form.watch('dragItems');
 
-  const handleSubmit = (data: DragDropFormData) => {
-    const updatedGroup = {
-      ...group,
-      dragItems: data.dragItems.map((item) => item.content),
-      questions: data.questions.map((q) => ({
-        ...q,
-        questionType: 3, // DRAG_AND_DROP
-        questionCategories: [],
-        numberOfCorrectAnswers: 0,
-      })),
-    };
+  const { createQuestions, createDragItem, isLoading } = useQuestion();
 
-    onUpdateGroup(updatedGroup);
+  const handleSubmit = async (data: DragDropFormData) => {
+    if (!group.id) {
+      console.error('Group ID is required to create questions and drag items');
+      return;
+    }
+
+    try {
+      // First, create drag items if they don't exist
+      const dragItemPromises = data.dragItems.map(async (item) => {
+        try {
+          const response = await createDragItem(group.id!, {
+            content: item.content,
+            // question_id is optional based on the backend API
+          });
+          return response.data;
+        } catch (error) {
+          console.error('Failed to create drag item:', error);
+          return null;
+        }
+      });
+
+      const createdDragItems = await Promise.all(dragItemPromises);
+      const validDragItems = createdDragItems.filter((item) => item !== null);
+
+      // Map drag item content to their IDs for questions
+      const dragItemMap = new Map();
+      validDragItems.forEach((item) => {
+        if (item) {
+          dragItemMap.set(item.content, item.item_id);
+        }
+      });
+
+      // Then create questions with correct drag item IDs
+      const questionRequests = data.questions.map((question) => ({
+        question_order: question.questionOrder,
+        point: question.point,
+        question_type: 3, // DRAG_AND_DROP
+        question_group_id: group.id!,
+        question_categories: [],
+        explanation: question.explanation,
+        number_of_correct_answers: 0,
+        instruction_for_choice: question.instructionForChoice,
+        zone_index: question.zoneIndex,
+        drag_item_id: dragItemMap.get(question.dragItemId) || question.dragItemId,
+      }));
+
+      const questionsResponse = await createQuestions(group.id, questionRequests);
+
+      if (questionsResponse.data) {
+        // Convert API responses back to frontend format
+        const updatedQuestions = questionsResponse.data.map((apiResponse) => ({
+          id: apiResponse.questionId,
+          questionOrder: apiResponse.questionOrder,
+          point: apiResponse.point,
+          questionType: apiResponse.questionType,
+          questionCategories: [],
+          explanation: apiResponse.explanation,
+          numberOfCorrectAnswers: apiResponse.numberOfCorrectAnswers,
+          instructionForChoice: apiResponse.instructionForChoice,
+          zoneIndex: apiResponse.zoneIndex,
+          dragItemId: apiResponse.dragItemId,
+        }));
+
+        const updatedGroup = {
+          ...group,
+          dragItems: data.dragItems.map((item) => item.content),
+          questions: updatedQuestions,
+        };
+
+        onUpdateGroup(updatedGroup);
+      }
+    } catch (error) {
+      console.error('Failed to save drag & drop configuration:', error);
+    }
   };
 
   const addDragItem = () => {
@@ -146,9 +210,13 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
         <h3 className='font-semibold'>Drag & Drop Questions</h3>
-        <Button onClick={form.handleSubmit(handleSubmit)} className='gap-2'>
+        <Button
+          onClick={form.handleSubmit(handleSubmit)}
+          className='gap-2'
+          disabled={isLoading.createQuestions || isLoading.createDragItem}
+        >
           <Save className='h-4 w-4' />
-          Save All Changes
+          {isLoading.createQuestions || isLoading.createDragItem ? 'Saving...' : 'Save All Changes'}
         </Button>
       </div>
 

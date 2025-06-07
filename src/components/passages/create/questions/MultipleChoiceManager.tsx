@@ -19,6 +19,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
+import { useQuestion } from '@/hooks/useQuestion';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 
@@ -87,7 +88,9 @@ export function MultipleChoiceManager({
   const numberOfCorrectAnswers = form.watch('numberOfCorrectAnswers');
   const choices = form.watch('choices');
 
-  const handleSubmit = (data: QuestionFormData) => {
+  const { createQuestions, isLoading } = useQuestion();
+
+  const handleSubmit = async (data: QuestionFormData) => {
     const correctCount = data.choices.filter((choice) => choice.isCorrect).length;
 
     if (correctCount === 0) {
@@ -102,26 +105,83 @@ export function MultipleChoiceManager({
       return;
     }
 
-    const newQuestion = {
-      ...data,
-      questionType: 0, // MULTIPLE_CHOICE
-      questionCategories: [],
-    };
-
-    if (editingQuestionIndex !== null) {
-      const updatedQuestions = [...group.questions];
-      updatedQuestions[editingQuestionIndex] = newQuestion;
-      onUpdateGroup({ ...group, questions: updatedQuestions });
-      setEditingQuestionIndex(null);
-    } else {
-      onUpdateGroup({
-        ...group,
-        questions: [...group.questions, newQuestion],
-      });
+    if (!group.id) {
+      console.error('Group ID is required to create questions');
+      return;
     }
 
-    setIsAddingQuestion(false);
-    form.reset();
+    // Convert to API format using snake_case
+    const questionRequest = {
+      question_order: data.questionOrder,
+      point: data.point,
+      question_type: 0, // MULTIPLE_CHOICE
+      question_group_id: group.id,
+      question_categories: [],
+      explanation: data.explanation,
+      number_of_correct_answers: data.numberOfCorrectAnswers,
+      instruction_for_choice: data.instructionForChoice,
+      choices: data.choices.map((choice) => ({
+        label: choice.label,
+        content: choice.content,
+        choice_order: choice.choiceOrder,
+        is_correct: choice.isCorrect,
+      })),
+    };
+
+    try {
+      if (editingQuestionIndex !== null) {
+        // For editing, we would need an update API - for now just update local state
+        const localQuestion = {
+          questionOrder: data.questionOrder,
+          point: data.point,
+          questionType: 0,
+          questionCategories: [],
+          explanation: data.explanation,
+          numberOfCorrectAnswers: data.numberOfCorrectAnswers,
+          instructionForChoice: data.instructionForChoice,
+          choices: data.choices,
+        };
+        const updatedQuestions = [...group.questions];
+        updatedQuestions[editingQuestionIndex] = localQuestion;
+        onUpdateGroup({ ...group, questions: updatedQuestions });
+        setEditingQuestionIndex(null);
+      } else {
+        // Create new question via API
+        const response = await createQuestions(group.id, [questionRequest]);
+        if (response.data) {
+          // Convert API response back to frontend format
+          const apiResponse = response.data[0];
+          const newQuestion = {
+            id: apiResponse?.questionId,
+            questionOrder: apiResponse?.questionOrder || data.questionOrder,
+            point: apiResponse?.point || data.point,
+            questionType: apiResponse?.questionType || 0,
+            questionCategories: [],
+            explanation: apiResponse?.explanation || data.explanation,
+            numberOfCorrectAnswers:
+              apiResponse?.numberOfCorrectAnswers || data.numberOfCorrectAnswers,
+            instructionForChoice: apiResponse?.instructionForChoice || data.instructionForChoice,
+            choices:
+              apiResponse?.choices?.map((choice) => ({
+                id: choice.choiceId,
+                label: choice.label,
+                content: choice.content,
+                choiceOrder: choice.choiceOrder,
+                isCorrect: choice.isCorrect,
+              })) || data.choices,
+          };
+          onUpdateGroup({
+            ...group,
+            questions: [...group.questions, newQuestion],
+          });
+        }
+      }
+
+      setIsAddingQuestion(false);
+      form.reset();
+    } catch (error) {
+      console.error('Failed to create question:', error);
+    }
   };
 
   const handleEdit = (index: number) => {
@@ -363,9 +423,13 @@ export function MultipleChoiceManager({
                   >
                     Cancel
                   </Button>
-                  <Button type='submit' className='gap-2'>
+                  <Button type='submit' className='gap-2' disabled={isLoading.createQuestions}>
                     <Save className='h-4 w-4' />
-                    {editingQuestionIndex !== null ? 'Update Question' : 'Add Question'}
+                    {isLoading.createQuestions
+                      ? 'Creating...'
+                      : editingQuestionIndex !== null
+                        ? 'Update Question'
+                        : 'Add Question'}
                   </Button>
                 </div>
               </form>

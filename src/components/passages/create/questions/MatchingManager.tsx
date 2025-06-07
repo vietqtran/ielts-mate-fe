@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
+import { useQuestion } from '@/hooks/useQuestion';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -61,34 +62,81 @@ export function MatchingManager({ group, onUpdateGroup }: Readonly<MatchingManag
     },
   });
 
-  const handleSubmit = (data: QuestionFormData) => {
-    const newQuestion = {
-      ...data,
-      questionType: 2, // MATCHING
-      questionCategories: [],
-      numberOfCorrectAnswers: 0, // Not applicable for matching
-    };
+  const { createQuestions, isLoading } = useQuestion();
 
-    if (editingQuestionIndex !== null) {
-      const updatedQuestions = [...group.questions];
-      updatedQuestions[editingQuestionIndex] = newQuestion;
-      onUpdateGroup({ ...group, questions: updatedQuestions });
-      setEditingQuestionIndex(null);
-    } else {
-      onUpdateGroup({
-        ...group,
-        questions: [...group.questions, newQuestion],
-      });
+  const handleSubmit = async (data: QuestionFormData) => {
+    if (!group.id) {
+      console.error('Group ID is required to create questions');
+      return;
     }
 
-    setIsAddingQuestion(false);
-    form.reset({
-      questionOrder: group.questions.length + 2,
-      point: 1,
-      explanation: '',
-      instructionForMatching: '',
-      correctAnswerForMatching: '',
-    });
+    // Convert to API format using snake_case
+    const questionRequest = {
+      question_order: data.questionOrder,
+      point: data.point,
+      question_type: 2, // MATCHING
+      question_group_id: group.id,
+      question_categories: [],
+      explanation: data.explanation,
+      number_of_correct_answers: 0, // Not applicable for matching
+      instruction_for_matching: data.instructionForMatching,
+      correct_answer_for_matching: data.correctAnswerForMatching,
+    };
+
+    try {
+      if (editingQuestionIndex !== null) {
+        // For editing, we would need an update API - for now just update local state
+        const localQuestion = {
+          questionOrder: data.questionOrder,
+          point: data.point,
+          questionType: 2,
+          questionCategories: [],
+          explanation: data.explanation,
+          numberOfCorrectAnswers: 0,
+          instructionForMatching: data.instructionForMatching,
+          correctAnswerForMatching: data.correctAnswerForMatching,
+        };
+        const updatedQuestions = [...group.questions];
+        updatedQuestions[editingQuestionIndex] = localQuestion;
+        onUpdateGroup({ ...group, questions: updatedQuestions });
+        setEditingQuestionIndex(null);
+      } else {
+        // Create new question via API
+        const response = await createQuestions(group.id, [questionRequest]);
+        if (response.data) {
+          // Convert API response back to frontend format
+          const apiResponse = response.data[0];
+          const newQuestion = {
+            id: apiResponse?.questionId,
+            questionOrder: apiResponse?.questionOrder || data.questionOrder,
+            point: apiResponse?.point || data.point,
+            questionType: apiResponse?.questionType || 2,
+            questionCategories: [],
+            explanation: apiResponse?.explanation || data.explanation,
+            numberOfCorrectAnswers: apiResponse?.numberOfCorrectAnswers || 0,
+            instructionForMatching:
+              apiResponse?.instructionForMatching || data.instructionForMatching,
+            correctAnswerForMatching:
+              apiResponse?.correctAnswerForMatching || data.correctAnswerForMatching,
+          };
+          onUpdateGroup({
+            ...group,
+            questions: [...group.questions, newQuestion],
+          });
+        }
+      }
+
+      setIsAddingQuestion(false);
+      form.reset({
+        questionOrder: group.questions.length + 2,
+        point: 1,
+        explanation: '',
+        instructionForMatching: '',
+        correctAnswerForMatching: '',
+      });
+    } catch (error) {
+      console.error('Failed to create question:', error);
+    }
   };
 
   const handleEdit = (index: number) => {
@@ -291,9 +339,13 @@ export function MatchingManager({ group, onUpdateGroup }: Readonly<MatchingManag
                   >
                     Cancel
                   </Button>
-                  <Button type='submit' className='gap-2'>
+                  <Button type='submit' className='gap-2' disabled={isLoading.createQuestions}>
                     <Save className='h-4 w-4' />
-                    {editingQuestionIndex !== null ? 'Update Question' : 'Add Question'}
+                    {isLoading.createQuestions
+                      ? 'Creating...'
+                      : editingQuestionIndex !== null
+                        ? 'Update Question'
+                        : 'Add Question'}
                   </Button>
                 </div>
               </form>

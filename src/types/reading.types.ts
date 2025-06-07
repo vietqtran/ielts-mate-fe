@@ -145,23 +145,28 @@ export interface AddGroupQuestionResponse {
 }
 
 export interface DragItemResponse {
-  itemId: string;
+  group_id: string;
+  item_id: string;
   content: string;
-  itemOrder: number;
 }
 
 export interface DragItemListResponse {
-  items: DragItemResponse[];
+  group_id: string;
+  items: DragItemSummaryResponse[];
+}
+
+export interface DragItemSummaryResponse {
+  item_id: string;
+  item_content: string;
 }
 
 export interface CreateDragItemRequest {
   content: string;
-  itemOrder: number;
+  question_id?: string;
 }
 
 export interface UpdateDragItemRequest {
   content: string;
-  itemOrder: number;
 }
 
 // Form types for frontend
