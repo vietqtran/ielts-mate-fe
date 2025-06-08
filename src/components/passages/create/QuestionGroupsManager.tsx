@@ -137,6 +137,7 @@ export function QuestionGroupsManager({
       group: managerGroup,
       groupIndex,
       onUpdateGroup: (updatedGroup: any) => {
+        console.log('updatedGroup', updatedGroup);
         // Convert back to LocalQuestionGroup format
         const localGroup: LocalQuestionGroup = {
           ...updatedGroup,

@@ -59,7 +59,6 @@ export function CreatePassageModal({
   const [currentTab, setCurrentTab] = useState('passage');
   const [createdpassage_id, setCreatedpassage_id] = useState<string | null>(null);
   const [questionGroups, setQuestionGroups] = useState<any[]>([]);
-  console.log(questionGroups);
   const form = useForm<PassageFormData>({
     resolver: zodResolver(passageSchema),
     defaultValues: {

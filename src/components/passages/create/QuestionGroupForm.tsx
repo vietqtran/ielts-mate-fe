@@ -102,6 +102,20 @@ export function QuestionGroupForm({
         {initialData ? 'Edit Question Group' : 'Create New Question Group'}
       </h3>
 
+      {selectedQuestionType && (
+        <div className='p-3 mb-4 bg-blue-50 rounded-md'>
+          <h4 className='font-medium text-blue-900 mb-1'>
+            {QUESTION_TYPE_INFO[selectedQuestionType].label}
+          </h4>
+          <p className='text-sm text-blue-700 mb-2'>
+            {QUESTION_TYPE_INFO[selectedQuestionType].description}
+          </p>
+          <p className='text-xs text-blue-600 italic'>
+            Example: {QUESTION_TYPE_INFO[selectedQuestionType].example}
+          </p>
+        </div>
+      )}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-4'>
           <div className='grid grid-cols-2 gap-4'>
@@ -166,20 +180,6 @@ export function QuestionGroupForm({
               </FormItem>
             )}
           />
-
-          {selectedQuestionType && (
-            <div className='p-3 bg-blue-50 rounded-md'>
-              <h4 className='font-medium text-blue-900 mb-1'>
-                {QUESTION_TYPE_INFO[selectedQuestionType].label}
-              </h4>
-              <p className='text-sm text-blue-700 mb-2'>
-                {QUESTION_TYPE_INFO[selectedQuestionType].description}
-              </p>
-              <p className='text-xs text-blue-600 italic'>
-                Example: {QUESTION_TYPE_INFO[selectedQuestionType].example}
-              </p>
-            </div>
-          )}
 
           <FormField
             control={form.control}

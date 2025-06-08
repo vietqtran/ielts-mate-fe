@@ -2,9 +2,14 @@
 
 import * as z from 'zod';
 
+import { PassageBasicInfoForm } from '@/components/passages/create/PassageBasicInfoForm';
+import { PassagePreview } from '@/components/passages/create/PassagePreview';
+import { QuestionGroupsManager } from '@/components/passages/create/QuestionGroupsManager';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
+import { usePassage } from '@/hooks/usePassage';
 import {
   AddGroupQuestionRequest,
   IeltsType,
@@ -12,17 +17,10 @@ import {
   QuestionCreationRequest,
   QuestionType,
 } from '@/types/reading.types';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Eye, Save } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-
-import { PassageBasicInfoForm } from '@/components/passages/create/PassageBasicInfoForm';
-import { PassagePreview } from '@/components/passages/create/PassagePreview';
-import { QuestionGroupsManager } from '@/components/passages/create/QuestionGroupsManager';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { usePassage } from '@/hooks/usePassage';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 const passageSchema = z.object({
@@ -219,6 +217,8 @@ export default function EditPassagePage() {
     }
   };
 
+  // TODO
+
   const handleAddQuestionGroup = (group: QuestionGroup) => {
     setQuestionGroups((prev) => [...prev, group]);
   };
@@ -322,10 +322,10 @@ export default function EditPassagePage() {
   const canPreview = questionGroups.length > 0;
 
   return (
-    <div className='container mx-auto py-6 max-w-7xl'>
+    <div className='container mx-auto p-6 max-w-7xl'>
       {/* Header */}
       <div className='flex items-center justify-between mb-6'>
-        <div className='flex items-center gap-4'>
+        <div className='flex items-start flex-col gap-4'>
           <Button variant='ghost' onClick={() => router.push('/passages')}>
             <ArrowLeft className='h-4 w-4 mr-2' />
             Back to Passages
@@ -337,9 +337,6 @@ export default function EditPassagePage() {
         </div>
 
         <div className='flex items-center gap-2'>
-          <Badge variant='outline' className='px-3 py-1'>
-            Auto-saved
-          </Badge>
           <Button variant='outline' onClick={() => router.push(`/passages/${passage_id}/preview`)}>
             <Eye className='h-4 w-4 mr-2' />
             Preview
@@ -358,7 +355,7 @@ export default function EditPassagePage() {
 
       {/* Progress Steps */}
       <Card className='mb-6'>
-        <CardContent className='pt-6'>
+        <CardContent className=''>
           <div className='flex items-center justify-between'>
             <div className='flex items-center space-x-4'>
               <div
@@ -462,6 +459,7 @@ export default function EditPassagePage() {
         <TabsContent value='passage' className='space-y-6'>
           {isDataLoaded && (
             <PassageBasicInfoForm
+              isEdit={true}
               key={`passage-form-${isDataLoaded}`}
               form={form}
               onSubmit={handleBasicInfoSubmit}

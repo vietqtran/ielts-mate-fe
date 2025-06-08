@@ -54,7 +54,7 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
     const newQuestion = {
       ...data,
       question_type: 2, // MATCHING
-      questionCategories: [],
+      question_categories: [],
       number_of_correct_answers: 0, // No traditional choices for matching
     };
 

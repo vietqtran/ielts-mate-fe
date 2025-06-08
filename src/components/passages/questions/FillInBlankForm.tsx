@@ -63,7 +63,7 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
       question_order: data.question_order + index,
       point: data.point,
       question_type: 1, // FILL_IN_THE_BLANKS
-      questionCategories: [],
+      question_categories: [],
       explanation: data.explanation,
       number_of_correct_answers: 0, // No choices for fill in blank
       blank_index: blank.blank_index,

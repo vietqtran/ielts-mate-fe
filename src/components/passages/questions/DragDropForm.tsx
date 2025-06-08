@@ -113,7 +113,7 @@ export function DragDropForm({
       question_order: data.question_order + index,
       point: data.point,
       question_type: 3, // DRAG_AND_DROP
-      questionCategories: [],
+      question_categories: [],
       explanation: data.explanation,
       number_of_correct_answers: 0, // No traditional choices for drag drop
       zone_index: answer.zone_index,

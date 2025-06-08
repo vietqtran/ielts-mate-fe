@@ -27,6 +27,7 @@ import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { UseFormReturn } from 'react-hook-form';
 
 interface PassageBasicInfoFormProps {
+  isEdit: boolean;
   form: UseFormReturn<any>;
   onSubmit: (data: any) => void;
   isLoading: boolean;
@@ -62,6 +63,7 @@ const getStatusLabel = (status: PassageStatus): string => {
 };
 
 export function PassageBasicInfoForm({
+  isEdit = false,
   form,
   onSubmit,
   isLoading,
@@ -150,7 +152,7 @@ export function PassageBasicInfoForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>IELTS Type *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <Select onValueChange={field.onChange} value={field.value ?? ''}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder='Select IELTS type' />
@@ -176,7 +178,7 @@ export function PassageBasicInfoForm({
                     <FormLabel>Part Number *</FormLabel>
                     <Select
                       onValueChange={(value) => field.onChange(Number(value))}
-                      value={field.value?.toString() || ''}
+                      value={field.value?.toString() ?? ''}
                     >
                       <FormControl>
                         <SelectTrigger>
@@ -204,7 +206,7 @@ export function PassageBasicInfoForm({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value || ''}>
+                    <Select onValueChange={field.onChange} value={field.value ?? ''}>
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder='Select status' />
@@ -276,10 +278,17 @@ export function PassageBasicInfoForm({
             </div>
 
             <div className='flex justify-end'>
-              <Button type='submit' disabled={isLoading} className='gap-2'>
-                {isLoading ? 'Creating Passage...' : 'Create Passage & Continue'}
-                <ArrowRight className='h-4 w-4' />
-              </Button>
+              {isEdit ? (
+                <Button type='submit' disabled={isLoading} className='gap-2'>
+                  Go to edit Questions
+                  <ArrowRight className='h-4 w-4' />
+                </Button>
+              ) : (
+                <Button type='submit' disabled={isLoading} className='gap-2'>
+                  {isLoading ? 'Creating Passage...' : 'Create Passage & Continue'}
+                  <ArrowRight className='h-4 w-4' />
+                </Button>
+              )}
             </div>
           </form>
         </Form>

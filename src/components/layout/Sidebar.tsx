@@ -85,15 +85,15 @@ export function AppSidebar() {
       <SidebarFooter className='p-4'>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant='ghost' className='w-full flex items-center justify-start gap-2'>
-              <Avatar className='h-6 w-6'>
+            <Button variant='ghost' className='w-full p-0 flex items-center justify-start gap-2'>
+              <Avatar className='h-7 w-7'>
                 <AvatarImage src='/image.png?height=32&width=32' />
                 <AvatarFallback>
                   {user?.firstName?.charAt(0)}
                   {user?.lastName?.charAt(0)}
                 </AvatarFallback>
               </Avatar>
-              <span>
+              <span className='text-md'>
                 {user?.firstName} {user?.lastName}
               </span>
             </Button>

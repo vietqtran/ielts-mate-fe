@@ -161,13 +161,12 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
       const questionsResponse = await createQuestions(group.id, questionRequests);
 
       if (questionsResponse.data) {
-        // Convert API responses back to frontend format
         const updatedQuestions = questionsResponse.data.map((apiResponse) => ({
           id: apiResponse.question_id,
           question_order: apiResponse.question_order,
           point: apiResponse.point,
           question_type: apiResponse.question_type,
-          questionCategories: [],
+          question_categories: [],
           explanation: apiResponse.explanation,
           number_of_correct_answers: apiResponse.number_of_correct_answers,
           instruction_for_choice: apiResponse.instruction_for_choice,

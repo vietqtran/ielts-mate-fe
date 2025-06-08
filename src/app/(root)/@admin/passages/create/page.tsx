@@ -2,21 +2,19 @@
 
 import * as z from 'zod';
 
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { IeltsType, PassageStatus, QuestionType } from '@/types/reading.types';
-import { ArrowLeft, Eye, Save } from 'lucide-react';
-import { useEffect, useState } from 'react';
-
 import { PassageBasicInfoForm } from '@/components/passages/create/PassageBasicInfoForm';
 import { PassagePreview } from '@/components/passages/create/PassagePreview';
 import { QuestionGroupsManager } from '@/components/passages/create/QuestionGroupsManager';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
 import { usePassage } from '@/hooks/usePassage';
+import { IeltsType, PassageStatus, QuestionType } from '@/types/reading.types';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { ArrowLeft, Eye, Save } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 const passageSchema = z.object({
@@ -196,10 +194,10 @@ export default function CreatePassagePage() {
   const canPreview = canProceedToQuestions && questionGroups.length > 0;
 
   return (
-    <div className='container mx-auto py-6 max-w-7xl'>
+    <div className='container mx-auto p-6 max-w-7xl'>
       {/* Header */}
       <div className='flex items-center justify-between mb-6'>
-        <div className='flex items-center gap-4'>
+        <div className='flex items-start flex-col gap-4'>
           <Button variant='ghost' onClick={() => router.push('/passages')}>
             <ArrowLeft className='h-4 w-4 mr-2' />
             Back to Passages
@@ -213,9 +211,6 @@ export default function CreatePassagePage() {
         </div>
 
         <div className='flex items-center gap-2'>
-          <Badge variant='outline' className='px-3 py-1'>
-            Auto-saved
-          </Badge>
           <Button variant='outline' onClick={handlePreview} disabled={!canPreview}>
             <Eye className='h-4 w-4 mr-2' />
             Preview

@@ -129,6 +129,7 @@ export function MultipleChoiceManager({
     try {
       if (editingQuestionIndex !== null) {
         // For editing, we would need an update API - for now just update local state
+        // TODO: missing id
         const localQuestion = {
           question_order: data.question_order,
           point: data.point,
@@ -159,7 +160,7 @@ export function MultipleChoiceManager({
             number_of_correct_answers:
               apiResponse?.number_of_correct_answers || data.number_of_correct_answers,
             instruction_for_choice:
-              apiResponse?.instruction_for_choice || data.instruction_for_choice,
+              apiResponse?.instruction_for_choice ?? data.instruction_for_choice,
             choices:
               apiResponse?.choices?.map((choice) => ({
                 id: choice.choice_id,
@@ -177,7 +178,17 @@ export function MultipleChoiceManager({
       }
 
       setIsAddingQuestion(false);
-      form.reset();
+      form.reset({
+        question_order: group.questions.length + 1,
+        point: 1,
+        explanation: '',
+        instruction_for_choice: '',
+        number_of_correct_answers: 1,
+        choices: [
+          { label: 'A', content: '', choice_order: 1, is_correct: false },
+          { label: 'B', content: '', choice_order: 2, is_correct: false },
+        ],
+      });
     } catch (error) {
       console.error('Failed to create question:', error);
     }

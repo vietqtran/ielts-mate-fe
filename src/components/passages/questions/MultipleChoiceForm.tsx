@@ -91,7 +91,7 @@ export function MultipleChoiceForm({
       const newQuestion = {
         ...data,
         question_type: 0, // MULTIPLE_CHOICE
-        questionCategories: [],
+        question_categories: [],
       };
 
       if (editingIndex !== null) {
@@ -133,7 +133,6 @@ export function MultipleChoiceForm({
         };
         onQuestionsChange(updatedQuestions);
         setEditingIndex(null);
-        alert('Question and choices updated successfully');
       } else {
         onQuestionsChange([...questions, newQuestion]);
       }

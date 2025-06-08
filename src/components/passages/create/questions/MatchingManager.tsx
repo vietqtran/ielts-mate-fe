@@ -90,7 +90,7 @@ export function MatchingManager({ group, onUpdateGroup }: Readonly<MatchingManag
           question_order: data.question_order,
           point: data.point,
           question_type: 2,
-          questionCategories: [],
+          question_categories: [],
           explanation: data.explanation,
           number_of_correct_answers: 0,
           instruction_for_matching: data.instruction_for_matching,
@@ -111,7 +111,7 @@ export function MatchingManager({ group, onUpdateGroup }: Readonly<MatchingManag
             question_order: apiResponse?.question_order || data.question_order,
             point: apiResponse?.point || data.point,
             question_type: apiResponse?.question_type || 2,
-            questionCategories: [],
+            question_categories: [],
             explanation: apiResponse?.explanation || data.explanation,
             number_of_correct_answers: apiResponse?.number_of_correct_answers || 0,
             instruction_for_matching:
