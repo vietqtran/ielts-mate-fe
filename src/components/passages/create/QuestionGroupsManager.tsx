@@ -84,6 +84,7 @@ export function QuestionGroupsManager({
   const { addGroupQuestion, isLoading } = usePassage();
 
   const handleCreateGroup = async (groupData: any) => {
+    if (isLoading.addGroupQuestion) return;
     try {
       const response = await addGroupQuestion(passage_id, groupData);
       if (response.data) {
