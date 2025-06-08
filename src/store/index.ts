@@ -9,7 +9,13 @@ import {
   persistReducer,
   persistStore,
 } from 'redux-persist';
-import { authFormReducer, authReducer, commonReducer, passageReducer } from './slices';
+import {
+  authFormReducer,
+  authReducer,
+  commonReducer,
+  passageReducer,
+  userPassageReducer,
+} from './slices';
 
 import { RootState } from '@/types';
 import storage from 'redux-persist/lib/storage';
@@ -18,7 +24,7 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage,
-  whitelist: ['auth', 'authForm', 'common', 'passage'],
+  whitelist: ['auth', 'authForm', 'common', 'passage', 'userPassage'],
 };
 
 const rootReducer = combineReducers({
@@ -26,6 +32,7 @@ const rootReducer = combineReducers({
   common: commonReducer,
   authForm: authFormReducer,
   passage: passageReducer,
+  userPassage: userPassageReducer,
 });
 
 const persistedReducer = persistReducer<RootState>(persistConfig, rootReducer);

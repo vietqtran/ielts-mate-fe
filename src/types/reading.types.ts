@@ -10,6 +10,13 @@ export enum IeltsType {
   GENERAL_TRAINING = 'GENERAL_TRAINING',
 }
 
+export enum PartNumber {
+  PART_1 = 'PART_1',
+  PART_2 = 'PART_2',
+  PART_3 = 'PART_3',
+  PART_4 = 'PART_4',
+}
+
 export enum PassageStatus {
   DRAFT = 'DRAFT',
   PUBLISHED = 'PUBLISHED',
