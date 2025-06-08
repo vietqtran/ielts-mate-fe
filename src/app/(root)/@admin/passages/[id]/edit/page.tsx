@@ -2,14 +2,9 @@
 
 import * as z from 'zod';
 
-import { PassageBasicInfoForm } from '@/components/passages/create/PassageBasicInfoForm';
-import { PassagePreview } from '@/components/passages/create/PassagePreview';
-import { QuestionGroupsManager } from '@/components/passages/create/QuestionGroupsManager';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { usePassage } from '@/hooks/usePassage';
 import {
   AddGroupQuestionRequest,
   IeltsType,
@@ -17,10 +12,16 @@ import {
   QuestionCreationRequest,
   QuestionType,
 } from '@/types/reading.types';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, Eye, Save } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+
+import { PassageBasicInfoForm } from '@/components/passages/create/PassageBasicInfoForm';
+import { PassagePreview } from '@/components/passages/create/PassagePreview';
+import { QuestionGroupsManager } from '@/components/passages/create/QuestionGroupsManager';
+import { Button } from '@/components/ui/button';
+import { usePassage } from '@/hooks/usePassage';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 const passageSchema = z.object({
@@ -47,8 +48,14 @@ interface QuestionGroup {
 export default function EditPassagePage() {
   const router = useRouter();
   const params = useParams();
-  const { updatePassage, getPassageById, getAllQuestionGroups, addGroupQuestion, isLoading } =
-    usePassage();
+  const {
+    updatePassage,
+    getPassageById,
+    addGroupQuestion,
+    updateGroupQuestion,
+    deleteGroupQuestion,
+    isLoading,
+  } = usePassage();
   const passage_id = params.id as string;
 
   const [currentStep, setCurrentStep] = useState<'basic' | 'questions' | 'preview'>('basic');
@@ -74,92 +81,81 @@ export default function EditPassagePage() {
     }
   }, []);
 
-  // Load existing passage data
-  useEffect(() => {
-    const loadPassageData = async () => {
-      try {
-        const passageResponse = await getPassageById(passage_id);
-        if (passageResponse.data) {
-          // Map backend ordinal values to frontend enums
-          const getielts_typeEnum = (ielts_type: number) => {
-            switch (ielts_type) {
-              case 0:
-                return 'ACADEMIC' as IeltsType;
-              case 1:
-                return 'GENERAL_TRAINING' as IeltsType;
-              default:
-                return 'ACADEMIC' as IeltsType;
-            }
-          };
-
-          const getpart_numberEnum = (part_number: number) => {
-            // Convert 0,1,2 to 1,2,3
-            return part_number + 1;
-          };
-
-          const getpassage_statusEnum = (status: number) => {
-            switch (status) {
-              case 0:
-                return PassageStatus.DRAFT;
-              case 1:
-                return PassageStatus.PUBLISHED;
-              case 2:
-                return PassageStatus.DEACTIVATED;
-              case 3:
-                return PassageStatus.FINISHED;
-              case 4:
-                return PassageStatus.TEST;
-              default:
-                return PassageStatus.DRAFT;
-            }
-          };
-
-          form.reset({
-            title: passageResponse.data.title,
-            instruction: passageResponse.data.instruction,
-            content: passageResponse.data.content,
-            ielts_type: getielts_typeEnum(passageResponse.data.ielts_type),
-            part_number: getpart_numberEnum(passageResponse.data.part_number),
-            passage_status: getpassage_statusEnum(passageResponse.data.passage_status),
-          });
-
-          // Load question groups from the passage detail response which includes question_groups
-          const passageDetail = passageResponse.data as any;
-          if (passageDetail.question_groups) {
-            // Map the API response to QuestionGroup format
-            const mappedGroups = passageDetail.question_groups.map((group: any) => ({
-              id: group.group_id, // Use group_id from the API response
-              section_order: group.section_order,
-              section_label: group.section_label,
-              instruction: group.instruction,
-              // Infer question_type from the first question in the group, default to MULTIPLE_CHOICE
-              question_type:
-                group.questions[0]?.question_type === 0
-                  ? QuestionType.MULTIPLE_CHOICE
-                  : group.questions[0]?.question_type === 1
-                    ? QuestionType.FILL_IN_THE_BLANKS
-                    : group.questions[0]?.question_type === 2
-                      ? QuestionType.MATCHING
-                      : group.questions[0]?.question_type === 3
-                        ? QuestionType.DRAG_AND_DROP
-                        : QuestionType.MULTIPLE_CHOICE,
-              questions: group.questions || [],
-              drag_items: group.drag_items || [],
-            }));
-            setQuestionGroups(mappedGroups);
+  const refetchPassageData = async () => {
+    try {
+      const passageResponse = await getPassageById(passage_id);
+      if (passageResponse.data) {
+        const getielts_typeEnum = (ielts_type: number) => {
+          switch (ielts_type) {
+            case 0:
+              return 'ACADEMIC' as IeltsType;
+            case 1:
+              return 'GENERAL_TRAINING' as IeltsType;
+            default:
+              return 'ACADEMIC' as IeltsType;
           }
+        };
+        const getpart_numberEnum = (part_number: number) => part_number + 1;
+        const getpassage_statusEnum = (status: number) => {
+          switch (status) {
+            case 0:
+              return PassageStatus.DRAFT;
+            case 1:
+              return PassageStatus.PUBLISHED;
+            case 2:
+              return PassageStatus.DEACTIVATED;
+            case 3:
+              return PassageStatus.FINISHED;
+            case 4:
+              return PassageStatus.TEST;
+            default:
+              return PassageStatus.DRAFT;
+          }
+        };
+
+        form.reset({
+          title: passageResponse.data.title,
+          instruction: passageResponse.data.instruction,
+          content: passageResponse.data.content,
+          ielts_type: getielts_typeEnum(passageResponse.data.ielts_type),
+          part_number: getpart_numberEnum(passageResponse.data.part_number),
+          passage_status: getpassage_statusEnum(passageResponse.data.passage_status),
+        });
+
+        const passageDetail = passageResponse.data as any;
+        if (passageDetail.question_groups) {
+          const mappedGroups = passageDetail.question_groups.map((group: any) => ({
+            id: group.group_id,
+            section_order: group.section_order,
+            section_label: group.section_label,
+            instruction: group.instruction,
+            question_type:
+              group.questions[0]?.question_type === 0
+                ? QuestionType.MULTIPLE_CHOICE
+                : group.questions[0]?.question_type === 1
+                  ? QuestionType.FILL_IN_THE_BLANKS
+                  : group.questions[0]?.question_type === 2
+                    ? QuestionType.MATCHING
+                    : group.questions[0]?.question_type === 3
+                      ? QuestionType.DRAG_AND_DROP
+                      : QuestionType.MULTIPLE_CHOICE,
+            questions: group.questions || [],
+            drag_items: group.drag_items || [],
+          }));
+          setQuestionGroups(mappedGroups);
         }
-
-        // Set data loaded state after both passage and groups are loaded
-        setIsDataLoaded(true);
-      } catch (error) {
-        console.error('Failed to load passage data:', error);
-        setIsDataLoaded(true); // Set to true even on error to show the form
       }
-    };
+      setIsDataLoaded(true);
+    } catch (error) {
+      console.error('Failed to load passage data:', error);
+      setIsDataLoaded(true);
+    }
+  };
 
+  // Load existing passage data on initial render
+  useEffect(() => {
     if (passage_id) {
-      loadPassageData();
+      refetchPassageData();
     }
   }, [passage_id]);
 
@@ -217,18 +213,100 @@ export default function EditPassagePage() {
     }
   };
 
-  // TODO
+  const handleAddQuestionGroup = async (group: QuestionGroup) => {
+    try {
+      const questions: QuestionCreationRequest[] = group.questions.map((q) => ({
+        ...q,
+        question_type: Object.values(QuestionType).indexOf(group.question_type),
+        question_group_id: '', // Will be set by backend
+      }));
 
-  const handleAddQuestionGroup = (group: QuestionGroup) => {
-    setQuestionGroups((prev) => [...prev, group]);
+      const groupRequest: AddGroupQuestionRequest = {
+        section_order: group.section_order,
+        section_label: group.section_label,
+        instruction: group.instruction,
+        questions: questions,
+        drag_items: group.drag_items,
+      };
+
+      const response = await addGroupQuestion(passage_id, groupRequest);
+      if (response.data) {
+        // Update local state with the new group from the backend, which includes the ID
+        const newGroup = {
+          ...group,
+          id: response.data.group_id,
+          questions: response.data.questions.map((q) => ({
+            ...q,
+            id: q.question_id,
+          })),
+        };
+        setQuestionGroups((prev) => [...prev, newGroup]);
+      }
+    } catch (error) {
+      console.error('Failed to add question group:', error);
+      // TODO: Show a toast notification to the user
+    }
   };
 
-  const handleUpdateQuestionGroup = (index: number, group: QuestionGroup) => {
-    setQuestionGroups((prev) => prev.map((g, i) => (i === index ? group : g)));
+  const handleUpdateQuestionGroup = async (index: number, group: QuestionGroup) => {
+    console.log('handleUpdateQuestionGroup');
+    if (!group.id) {
+      console.log('group id', group.id);
+      setQuestionGroups((prev) => prev.map((g, i) => (i === index ? group : g)));
+      return;
+    }
+
+    try {
+      const questions: QuestionCreationRequest[] = group.questions.map((q) => ({
+        ...q,
+        question_type: Object.values(QuestionType).indexOf(group.question_type),
+        question_group_id: group.id, // Will be set by backend
+      }));
+
+      const groupRequest: AddGroupQuestionRequest = {
+        section_order: group.section_order,
+        section_label: group.section_label,
+        instruction: group.instruction,
+        questions: questions,
+        drag_items: group.drag_items,
+      };
+
+      const response = await updateGroupQuestion(passage_id, group.id, groupRequest);
+      if (response.data) {
+        // Update local state with the new group from the backend, which includes the ID
+        const updatedGroup = {
+          ...group,
+          id: response.data.group_id,
+          questions: response.data.questions.map((q) => ({
+            ...q,
+            id: q.question_id,
+          })),
+        };
+        setQuestionGroups((prev) => prev.map((g, i) => (i === index ? updatedGroup : g)));
+      }
+    } catch (error) {
+      console.error('Failed to update question group:', error);
+      // TODO: Show a toast notification and potentially revert the optimistic update.
+    }
   };
 
-  const handleDeleteQuestionGroup = (index: number) => {
-    setQuestionGroups((prev) => prev.filter((_, i) => i !== index));
+  const handleDeleteQuestionGroup = async (index: number) => {
+    const groupToDelete = questionGroups[index];
+    if (!groupToDelete.id) {
+      // If the group doesn't have an ID, it hasn't been saved to the backend yet.
+      // We can just remove it from the local state.
+      setQuestionGroups((prev) => prev.filter((_, i) => i !== index));
+      return;
+    }
+
+    try {
+      await deleteGroupQuestion(passage_id, groupToDelete.id);
+      // On successful deletion, update the local state.
+      setQuestionGroups((prev) => prev.filter((_, i) => i !== index));
+    } catch (error) {
+      console.error('Failed to delete question group:', error);
+      // TODO: Show a toast notification to the user.
+    }
   };
 
   const handlePreview = () => {
@@ -484,6 +562,7 @@ export default function EditPassagePage() {
             onAddGroup={handleAddQuestionGroup}
             onUpdateGroup={handleUpdateQuestionGroup}
             onDeleteGroup={handleDeleteQuestionGroup}
+            refetchPassageData={refetchPassageData}
           />
         </TabsContent>
 

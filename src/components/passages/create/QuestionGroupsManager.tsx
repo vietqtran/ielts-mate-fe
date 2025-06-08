@@ -30,6 +30,7 @@ interface QuestionGroupsManagerProps {
   onAddGroup: (group: LocalQuestionGroup) => void;
   onUpdateGroup: (index: number, group: LocalQuestionGroup) => void;
   onDeleteGroup: (index: number) => void;
+  refetchPassageData: () => void;
 }
 
 const IELTS_QUESTION_TYPES = [
@@ -76,6 +77,7 @@ export function QuestionGroupsManager({
   onAddGroup,
   onUpdateGroup,
   onDeleteGroup,
+  refetchPassageData,
 }: Readonly<QuestionGroupsManagerProps>) {
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const [activeGroupIndex, setActiveGroupIndex] = useState<number | null>(null);
@@ -145,6 +147,7 @@ export function QuestionGroupsManager({
         };
         onUpdateGroup(groupIndex, localGroup);
       },
+      refetchPassageData: refetchPassageData,
     };
 
     switch (group.question_type) {

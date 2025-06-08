@@ -2,19 +2,20 @@
 
 import * as z from 'zod';
 
+import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
+import { IeltsType, PassageStatus, QuestionType } from '@/types/reading.types';
+import { ArrowLeft, Eye, Save } from 'lucide-react';
+import { useEffect, useState } from 'react';
+
 import { PassageBasicInfoForm } from '@/components/passages/create/PassageBasicInfoForm';
 import { PassagePreview } from '@/components/passages/create/PassagePreview';
 import { QuestionGroupsManager } from '@/components/passages/create/QuestionGroupsManager';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
 import { usePassage } from '@/hooks/usePassage';
-import { IeltsType, PassageStatus, QuestionType } from '@/types/reading.types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, Eye, Save } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 const passageSchema = z.object({
@@ -305,6 +306,7 @@ export default function CreatePassagePage() {
 
         <TabsContent value='passage' className='space-y-6'>
           <PassageBasicInfoForm
+            isEdit={false}
             form={form}
             onSubmit={handleBasicInfoSubmit}
             isLoading={isLoading.createPassage}
@@ -320,6 +322,9 @@ export default function CreatePassagePage() {
               onAddGroup={handleAddQuestionGroup}
               onUpdateGroup={handleUpdateQuestionGroup}
               onDeleteGroup={handleDeleteQuestionGroup}
+              refetchPassageData={() => {
+                console.log('refetch');
+              }}
             />
           )}
         </TabsContent>

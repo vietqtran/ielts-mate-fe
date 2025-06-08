@@ -1,35 +1,12 @@
 'use client';
 
-import * as z from 'zod';
-
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Plus, Save, Trash2 } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Plus, Trash2 } from 'lucide-react';
+import { FillInBlanksForm, FillInBlanksFormData } from './FillInBlanksForm';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { useQuestion } from '@/hooks/useQuestion';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-
-const questionSchema = z.object({
-  question_order: z.number().min(1),
-  point: z.number().min(1),
-  explanation: z.string().min(1, 'Explanation is required'),
-  blank_index: z.number().min(1),
-  correct_answer: z.string().min(1, 'Correct answer is required'),
-});
-
-type QuestionFormData = z.infer<typeof questionSchema>;
 
 interface QuestionGroup {
   id?: string;
@@ -42,287 +19,105 @@ interface QuestionGroup {
 
 interface FillInBlanksManagerProps {
   group: QuestionGroup;
-  groupIndex: number;
-  onUpdateGroup: (group: QuestionGroup) => void;
+  refetchPassageData: () => void;
 }
 
-export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBlanksManagerProps>) {
-  const [isAddingQuestion, setIsAddingQuestion] = useState(false);
-  const [editingQuestionIndex, setEditingQuestionIndex] = useState<number | null>(null);
+export function FillInBlanksManager({
+  group,
+  refetchPassageData,
+}: Readonly<FillInBlanksManagerProps>) {
+  const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
 
-  const form = useForm<QuestionFormData>({
-    resolver: zodResolver(questionSchema),
-    defaultValues: {
-      question_order: group.questions.length + 1,
-      point: 1,
-      explanation: '',
-      blank_index: 1,
-      correct_answer: '',
-    },
-  });
+  const { createQuestions, updateQuestionInfo, deleteQuestion, isLoading } = useQuestion();
 
-  const { createQuestions, isLoading } = useQuestion();
-
-  const handleSubmit = async (data: QuestionFormData) => {
+  const handleFormSubmit = async (data: FillInBlanksFormData) => {
     if (!group.id) {
-      console.error('Group ID is required to create questions');
+      console.error('Group ID is required');
       return;
     }
 
-    // Convert to API format using snake_case
     const questionRequest = {
-      question_order: data.question_order,
-      point: data.point,
+      ...data,
       question_type: 1, // FILL_IN_THE_BLANKS
       question_group_id: group.id,
       question_categories: [],
-      explanation: data.explanation,
-      number_of_correct_answers: 0, // Not applicable for fill in blanks
-      blank_index: data.blank_index,
-      correct_answer: data.correct_answer,
+      number_of_correct_answers: 0, // Not applicable
     };
 
     try {
-      if (editingQuestionIndex !== null) {
-        // For editing, we would need an update API - for now just update local state
-        const localQuestion = {
-          question_order: data.question_order,
-          point: data.point,
-          question_type: 1,
-          question_categories: [],
-          explanation: data.explanation,
-          number_of_correct_answers: 0,
-          blank_index: data.blank_index,
-          correct_answer: data.correct_answer,
-          instruction_for_choice: '',
-        };
-        const updatedQuestions = [...group.questions];
-        updatedQuestions[editingQuestionIndex] = localQuestion;
-        onUpdateGroup({ ...group, questions: updatedQuestions });
-        setEditingQuestionIndex(null);
+      if (editingQuestion) {
+        // Update existing question
+        await updateQuestionInfo(group.id, editingQuestion.id, questionRequest);
+        refetchPassageData();
       } else {
-        // Create new question via API
-        const response = await createQuestions(group.id, [questionRequest]);
-        if (response.data) {
-          // Convert API response back to frontend format
-          const apiResponse = response.data[0];
-          const newQuestion = {
-            id: apiResponse?.question_id,
-            question_order: apiResponse?.question_order || data.question_order,
-            point: apiResponse?.point || data.point,
-            question_type: apiResponse?.question_type || 1,
-            question_categories: [],
-            explanation: apiResponse?.explanation || data.explanation,
-            number_of_correct_answers: apiResponse?.number_of_correct_answers || 0,
-            blank_index: apiResponse?.blank_index || data.blank_index,
-            correct_answer: apiResponse?.correct_answer || data.correct_answer,
-            instruction_for_choice: '',
-          };
-          onUpdateGroup({
-            ...group,
-            questions: [...group.questions, newQuestion],
-          });
-        }
+        // Create new question
+        await createQuestions(group.id, [questionRequest]);
+        refetchPassageData();
       }
-
-      setIsAddingQuestion(false);
-      form.reset({
-        question_order: group.questions.length + 2,
-        point: 1,
-        explanation: '',
-        blank_index: group.questions.length + 2,
-        correct_answer: '',
-      });
+      setIsAddingOrEditing(false);
+      setEditingQuestion(null);
     } catch (error) {
-      console.error('Failed to create question:', error);
+      console.error('Failed to save question:', error);
     }
   };
 
-  const handleEdit = (index: number) => {
-    const question = group.questions[index];
-    form.reset(question);
-    setEditingQuestionIndex(index);
-    setIsAddingQuestion(true);
+  const handleEdit = (question: any) => {
+    setEditingQuestion(question);
+    setIsAddingOrEditing(true);
   };
 
-  const handleDelete = (index: number) => {
-    const updatedQuestions = group.questions.filter((_, i) => i !== index);
-    onUpdateGroup({ ...group, questions: updatedQuestions });
+  const handleDelete = async (questionId: string) => {
+    if (!group.id) {
+      console.error('Group ID is required');
+      return;
+    }
+    try {
+      await deleteQuestion(group.id, questionId);
+      refetchPassageData();
+    } catch (error) {
+      console.error('Failed to delete question:', error);
+    }
+  };
+
+  const handleCancel = () => {
+    setIsAddingOrEditing(false);
+    setEditingQuestion(null);
+  };
+
+  const defaultInitialData = {
+    question_order: group.questions.length + 1,
+    point: 1,
+    explanation: '',
+    blank_index: group.questions.length + 1,
+    correct_answer: '',
   };
 
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
         <h3 className='font-semibold'>Fill in the Blanks Questions ({group.questions.length})</h3>
-        <Button onClick={() => setIsAddingQuestion(true)} className='gap-2'>
+        <Button onClick={() => setIsAddingOrEditing(true)} className='gap-2'>
           <Plus className='h-4 w-4' />
           Add Question
         </Button>
       </div>
 
-      {/* Add/Edit Question Form */}
-      {isAddingQuestion && (
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {editingQuestionIndex !== null ? 'Edit Question' : 'Add New Fill in Blanks Question'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
-                <div className='grid grid-cols-3 gap-4'>
-                  <FormField
-                    control={form.control}
-                    name='question_order'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Question Number</FormLabel>
-                        <FormControl>
-                          <Input
-                            type='number'
-                            {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name='blank_index'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Blank Number</FormLabel>
-                        <FormControl>
-                          <Input
-                            type='number'
-                            {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
-                    name='point'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Points</FormLabel>
-                        <FormControl>
-                          <Input
-                            type='number'
-                            {...field}
-                            onChange={(e) => field.onChange(Number(e.target.value))}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-
-                <div className='bg-blue-50 p-4 rounded-lg'>
-                  <h4 className='font-medium text-blue-900 mb-2'>
-                    Fill in the Blanks Instructions
-                  </h4>
-                  <p className='text-sm text-blue-700'>
-                    The instruction for fill-in-blank questions is now managed at the group level
-                    above. Each question represents one blank in the overall instruction text.
-                  </p>
-                  <p className='text-xs text-blue-600 mt-2'>
-                    Example: Use the group instruction to describe the sentence with blanks, then
-                    specify which blank number this question represents.
-                  </p>
-                </div>
-
-                <FormField
-                  control={form.control}
-                  name='correct_answer'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Correct Answer</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder='Enter the correct answer (usually 1-3 words)'
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                      <p className='text-xs text-muted-foreground'>
-                        Use the exact words from the passage. Multiple acceptable answers can be
-                        separated by commas.
-                      </p>
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name='explanation'
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Explanation</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Explain where in the passage the answer can be found and why it's correct"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <div className='bg-blue-50 p-4 rounded-lg'>
-                  <h4 className='font-medium text-blue-900 mb-2'>IELTS Fill in Blanks Tips</h4>
-                  <ul className='text-sm text-blue-700 space-y-1'>
-                    <li>• Use words directly from the passage (exact spelling matters)</li>
-                    <li>• Usually 1-3 words per blank, follow instruction word limits</li>
-                    <li>• Questions typically follow passage order</li>
-                    <li>• Test factual information, dates, names, or key terms</li>
-                    <li>• Consider synonyms that students might reasonably use</li>
-                  </ul>
-                </div>
-
-                <div className='flex justify-end gap-2'>
-                  <Button
-                    type='button'
-                    variant='outline'
-                    onClick={() => {
-                      setIsAddingQuestion(false);
-                      setEditingQuestionIndex(null);
-                      form.reset();
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                  <Button type='submit' className='gap-2' disabled={isLoading.createQuestions}>
-                    <Save className='h-4 w-4' />
-                    {isLoading.createQuestions
-                      ? 'Creating...'
-                      : editingQuestionIndex !== null
-                        ? 'Update Question'
-                        : 'Add Question'}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
+      {isAddingOrEditing && (
+        <FillInBlanksForm
+          initialData={editingQuestion || defaultInitialData}
+          onSubmit={handleFormSubmit}
+          onCancel={handleCancel}
+          isSubmitting={isLoading.createQuestions || isLoading.updateQuestionInfo}
+        />
       )}
 
       {/* Questions List */}
-      {group.questions.length > 0 && (
-        <div className='space-y-4'>
+      {!isAddingOrEditing && group.questions.length > 0 && (
+        <div className='space-y-4 mt-4'>
           <h4 className='font-medium'>Questions:</h4>
-          {group.questions.map((question, index) => (
-            <Card key={index}>
+          {group.questions.map((question) => (
+            <Card key={question.id}>
               <CardContent className='pt-4'>
                 <div className='flex items-start justify-between'>
                   <div className='flex-1'>
@@ -331,11 +126,6 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
                       <span className='text-sm text-muted-foreground'>
                         (Blank {question.blank_index}, {question.point} point
                         {question.point !== 1 ? 's' : ''})
-                      </span>
-                    </div>
-                    <div className='mb-3'>
-                      <span className='text-sm text-muted-foreground'>
-                        Blank {question.blank_index} for group instruction
                       </span>
                     </div>
                     <div className='text-sm'>
@@ -350,11 +140,20 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
                     </div>
                   </div>
                   <div className='flex gap-2'>
-                    <Button variant='ghost' size='sm' onClick={() => handleEdit(index)}>
+                    <Button variant='ghost' size='sm' onClick={() => handleEdit(question)}>
                       Edit
                     </Button>
-                    <Button variant='ghost' size='sm' onClick={() => handleDelete(index)}>
-                      <Trash2 className='h-4 w-4' />
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => handleDelete(question.id)}
+                      disabled={isLoading.deleteQuestion}
+                    >
+                      {isLoading.deleteQuestion ? (
+                        <span className='text-xs'>Deleting...</span>
+                      ) : (
+                        <Trash2 className='h-4 w-4' />
+                      )}
                     </Button>
                   </div>
                 </div>
@@ -364,8 +163,8 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
         </div>
       )}
 
-      {group.questions.length === 0 && !isAddingQuestion && (
-        <div className='text-center py-8 text-muted-foreground'>
+      {!isAddingOrEditing && group.questions.length === 0 && (
+        <div className='text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg'>
           <Plus className='h-8 w-8 mx-auto mb-2 opacity-50' />
           <p>No questions created yet.</p>
           <p className='text-sm'>Add your first fill-in-the-blanks question.</p>
