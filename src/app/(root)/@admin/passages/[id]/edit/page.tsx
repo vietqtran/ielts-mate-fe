@@ -38,12 +38,12 @@ type PassageFormData = z.infer<typeof passageSchema>;
 
 interface QuestionGroup {
   id?: string;
-  sectionOrder: number;
-  sectionLabel: string;
+  section_order: number;
+  section_label: string;
   instruction: string;
-  questionType: QuestionType;
+  question_type: QuestionType;
   questions: any[];
-  dragItems?: string[];
+  drag_items?: string[];
 }
 
 export default function EditPassagePage() {
@@ -131,11 +131,11 @@ export default function EditPassagePage() {
             // Map the API response to QuestionGroup format
             const mappedGroups = passageDetail.question_groups.map((group: any) => ({
               id: group.group_id, // Use group_id from the API response
-              sectionOrder: group.section_order,
-              sectionLabel: group.section_label,
+              section_order: group.section_order,
+              section_label: group.section_label,
               instruction: group.instruction,
-              // Infer questionType from the first question in the group, default to MULTIPLE_CHOICE
-              questionType:
+              // Infer question_type from the first question in the group, default to MULTIPLE_CHOICE
+              question_type:
                 group.questions[0]?.question_type === 0
                   ? QuestionType.MULTIPLE_CHOICE
                   : group.questions[0]?.question_type === 1
@@ -146,7 +146,7 @@ export default function EditPassagePage() {
                         ? QuestionType.DRAG_AND_DROP
                         : QuestionType.MULTIPLE_CHOICE,
               questions: group.questions || [],
-              dragItems: group.drag_items || [],
+              drag_items: group.drag_items || [],
             }));
             setQuestionGroups(mappedGroups);
           }
@@ -249,30 +249,35 @@ export default function EditPassagePage() {
       for (const group of unsavedGroups) {
         try {
           const questions: QuestionCreationRequest[] = group.questions.map((q) => ({
-            question_order: q.questionOrder,
+            question_order: q.question_order,
             point: q.point,
             explanation: q.explanation,
-            number_of_correct_answers: q.numberOfCorrectAnswers,
-            instruction_for_choice: q.instructionForChoice,
-            question_type: Object.values(QuestionType).indexOf(group.questionType),
+            number_of_correct_answers: q.number_of_correct_answers,
+            instruction_for_choice: q.instruction_for_choice,
+            question_type: Object.values(QuestionType).indexOf(group.question_type),
             question_group_id: '', // Will be set by backend
             question_categories: [],
             choices: q.choices?.map(
-              (c: { label: string; content: string; choiceOrder: number; isCorrect: boolean }) => ({
+              (c: {
+                label: string;
+                content: string;
+                choice_order: number;
+                is_correct: boolean;
+              }) => ({
                 label: c.label,
                 content: c.content,
-                choice_order: c.choiceOrder,
-                is_correct: c.isCorrect,
+                choice_order: c.choice_order,
+                is_correct: c.is_correct,
               })
             ),
           }));
 
           const groupRequest: AddGroupQuestionRequest = {
-            section_order: group.sectionOrder,
-            section_label: group.sectionLabel,
+            section_order: group.section_order,
+            section_label: group.section_label,
             instruction: group.instruction,
             questions: questions,
-            drag_items: group.dragItems,
+            drag_items: group.drag_items,
           };
 
           await addGroupQuestion(passage_id, groupRequest);

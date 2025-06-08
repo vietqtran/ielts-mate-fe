@@ -18,12 +18,12 @@ interface PassageData {
 }
 
 interface QuestionGroup {
-  sectionOrder: number;
-  sectionLabel: string;
+  section_order: number;
+  section_label: string;
   instruction: string;
-  questionType: QuestionType;
+  question_type: QuestionType;
   questions: any[];
-  dragItems?: string[];
+  drag_items?: string[];
 }
 
 interface PassagePreviewProps {
@@ -172,9 +172,9 @@ export function PassagePreview({
                 <CardHeader className='pb-3'>
                   <div className='flex items-center justify-between'>
                     <div>
-                      <h4 className='font-semibold'>{group.sectionLabel}</h4>
+                      <h4 className='font-semibold'>{group.section_label}</h4>
                       <Badge variant='secondary' className='mt-1'>
-                        {getQuestionTypeLabel(group.questionType)}
+                        {getQuestionTypeLabel(group.question_type)}
                       </Badge>
                     </div>
                     <span className='text-sm text-muted-foreground'>
@@ -187,24 +187,24 @@ export function PassagePreview({
                   />
                 </CardHeader>
                 <CardContent className='space-y-4'>
-                  {group.questionType === QuestionType.MULTIPLE_CHOICE && (
+                  {group.question_type === QuestionType.MULTIPLE_CHOICE && (
                     <div className='space-y-4'>
                       {group.questions.map((question, qIndex) => (
                         <div key={qIndex} className='space-y-2'>
                           <div
                             className='font-medium'
                             dangerouslySetInnerHTML={{
-                              __html: `${question.questionOrder}. ${question.instructionForChoice}`,
+                              __html: `${question.question_order}. ${question.instruction_for_choice}`,
                             }}
                           />
                           <div className='pl-4 space-y-1'>
                             {question.choices?.map((choice: any, cIndex: number) => (
                               <div
                                 key={cIndex}
-                                className={`text-sm ${choice.isCorrect ? 'text-green-600 font-medium' : ''}`}
+                                className={`text-sm ${choice.is_correct ? 'text-green-600 font-medium' : ''}`}
                               >
                                 {choice.label}. {choice.content}
-                                {choice.isCorrect && ' ✓'}
+                                {choice.is_correct && ' ✓'}
                               </div>
                             ))}
                           </div>
@@ -213,37 +213,37 @@ export function PassagePreview({
                     </div>
                   )}
 
-                  {group.questionType === QuestionType.FILL_IN_THE_BLANKS && (
+                  {group.question_type === QuestionType.FILL_IN_THE_BLANKS && (
                     <div className='space-y-4'>
                       {group.questions.map((question, qIndex) => (
                         <div key={qIndex} className='space-y-2'>
                           <div
                             className='font-medium'
                             dangerouslySetInnerHTML={{
-                              __html: `${question.questionOrder}. ${question.instructionForChoice}`,
+                              __html: `${question.question_order}. ${question.instruction_for_choice}`,
                             }}
                           />
                           <div className='pl-4 text-sm text-green-600'>
-                            <strong>Answer:</strong> {question.correctAnswer}
+                            <strong>Answer:</strong> {question.correct_answer}
                           </div>
                         </div>
                       ))}
                     </div>
                   )}
 
-                  {group.questionType === QuestionType.MATCHING && (
+                  {group.question_type === QuestionType.MATCHING && (
                     <div className='space-y-4'>
                       {group.questions.map((question, qIndex) => (
                         <div key={qIndex} className='space-y-2'>
                           <div
                             className='font-medium'
                             dangerouslySetInnerHTML={{
-                              __html: `${question.questionOrder}. ${question.instructionForMatching}`,
+                              __html: `${question.question_order}. ${question.instruction_for_matching}`,
                             }}
                           />
                           <div className='pl-4 text-sm'>
                             <div className='bg-green-50 p-2 rounded font-mono text-green-700'>
-                              {question.correctAnswerForMatching}
+                              {question.correct_answer_for_matching}
                             </div>
                           </div>
                         </div>
@@ -251,13 +251,13 @@ export function PassagePreview({
                     </div>
                   )}
 
-                  {group.questionType === QuestionType.DRAG_AND_DROP && (
+                  {group.question_type === QuestionType.DRAG_AND_DROP && (
                     <div className='space-y-4'>
-                      {group.dragItems && group.dragItems.length > 0 && (
+                      {group.drag_items && group.drag_items.length > 0 && (
                         <div>
                           <p className='font-medium text-sm mb-2'>Drag Items:</p>
                           <div className='flex flex-wrap gap-2'>
-                            {group.dragItems.map((item, itemIndex) => (
+                            {group.drag_items.map((item, itemIndex) => (
                               <span
                                 key={itemIndex}
                                 className='px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm'
@@ -275,11 +275,11 @@ export function PassagePreview({
                             <div
                               className='font-medium'
                               dangerouslySetInnerHTML={{
-                                __html: `${question.questionOrder}. ${question.instructionForChoice}`,
+                                __html: `${question.question_order}. ${question.instruction_for_choice}`,
                               }}
                             />
                             <div className='pl-4 text-sm text-green-600'>
-                              <strong>Zone {question.zoneIndex}:</strong> {question.dragItemId}
+                              <strong>Zone {question.zone_index}:</strong> {question.drag_item_id}
                             </div>
                           </div>
                         ))}
@@ -304,9 +304,9 @@ export function PassagePreview({
               <h4 className='font-semibold mb-3'>Question Type Distribution</h4>
               <div className='space-y-2'>
                 {Object.values(QuestionType).map((type) => {
-                  const count = questionGroups.filter((g) => g.questionType === type).length;
+                  const count = questionGroups.filter((g) => g.question_type === type).length;
                   const questionCount = questionGroups
-                    .filter((g) => g.questionType === type)
+                    .filter((g) => g.question_type === type)
                     .reduce((sum, g) => sum + g.questions.length, 0);
 
                   if (count === 0) return null;

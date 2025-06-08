@@ -22,21 +22,21 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 const questionSchema = z.object({
-  questionOrder: z.number().min(1),
+  question_order: z.number().min(1),
   point: z.number().min(1),
   explanation: z.string().min(1, 'Explanation is required'),
-  blankIndex: z.number().min(1),
-  correctAnswer: z.string().min(1, 'Correct answer is required'),
+  blank_index: z.number().min(1),
+  correct_answer: z.string().min(1, 'Correct answer is required'),
 });
 
 type QuestionFormData = z.infer<typeof questionSchema>;
 
 interface QuestionGroup {
   id?: string;
-  sectionOrder: number;
-  sectionLabel: string;
+  section_order: number;
+  section_label: string;
   instruction: string;
-  questionType: string;
+  question_type: string;
   questions: any[];
 }
 
@@ -53,11 +53,11 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
-      questionOrder: group.questions.length + 1,
+      question_order: group.questions.length + 1,
       point: 1,
       explanation: '',
-      blankIndex: 1,
-      correctAnswer: '',
+      blank_index: 1,
+      correct_answer: '',
     },
   });
 
@@ -71,30 +71,30 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
 
     // Convert to API format using snake_case
     const questionRequest = {
-      question_order: data.questionOrder,
+      question_order: data.question_order,
       point: data.point,
       question_type: 1, // FILL_IN_THE_BLANKS
       question_group_id: group.id,
       question_categories: [],
       explanation: data.explanation,
       number_of_correct_answers: 0, // Not applicable for fill in blanks
-      blank_index: data.blankIndex,
-      correct_answer: data.correctAnswer,
+      blank_index: data.blank_index,
+      correct_answer: data.correct_answer,
     };
 
     try {
       if (editingQuestionIndex !== null) {
         // For editing, we would need an update API - for now just update local state
         const localQuestion = {
-          questionOrder: data.questionOrder,
+          question_order: data.question_order,
           point: data.point,
-          questionType: 1,
+          question_type: 1,
           questionCategories: [],
           explanation: data.explanation,
-          numberOfCorrectAnswers: 0,
-          blankIndex: data.blankIndex,
-          correctAnswer: data.correctAnswer,
-          instructionForChoice: '',
+          number_of_correct_answers: 0,
+          blank_index: data.blank_index,
+          correct_answer: data.correct_answer,
+          instruction_for_choice: '',
         };
         const updatedQuestions = [...group.questions];
         updatedQuestions[editingQuestionIndex] = localQuestion;
@@ -107,16 +107,16 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
           // Convert API response back to frontend format
           const apiResponse = response.data[0];
           const newQuestion = {
-            id: apiResponse?.questionId,
-            questionOrder: apiResponse?.questionOrder || data.questionOrder,
+            id: apiResponse?.question_id,
+            question_order: apiResponse?.question_order || data.question_order,
             point: apiResponse?.point || data.point,
-            questionType: apiResponse?.questionType || 1,
+            question_type: apiResponse?.question_type || 1,
             questionCategories: [],
             explanation: apiResponse?.explanation || data.explanation,
-            numberOfCorrectAnswers: apiResponse?.numberOfCorrectAnswers || 0,
-            blankIndex: apiResponse?.blankIndex || data.blankIndex,
-            correctAnswer: apiResponse?.correctAnswer || data.correctAnswer,
-            instructionForChoice: '',
+            number_of_correct_answers: apiResponse?.number_of_correct_answers || 0,
+            blank_index: apiResponse?.blank_index || data.blank_index,
+            correct_answer: apiResponse?.correct_answer || data.correct_answer,
+            instruction_for_choice: '',
           };
           onUpdateGroup({
             ...group,
@@ -127,11 +127,11 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
 
       setIsAddingQuestion(false);
       form.reset({
-        questionOrder: group.questions.length + 2,
+        question_order: group.questions.length + 2,
         point: 1,
         explanation: '',
-        blankIndex: group.questions.length + 2,
-        correctAnswer: '',
+        blank_index: group.questions.length + 2,
+        correct_answer: '',
       });
     } catch (error) {
       console.error('Failed to create question:', error);
@@ -174,7 +174,7 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
                 <div className='grid grid-cols-3 gap-4'>
                   <FormField
                     control={form.control}
-                    name='questionOrder'
+                    name='question_order'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Question Number</FormLabel>
@@ -192,7 +192,7 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
 
                   <FormField
                     control={form.control}
-                    name='blankIndex'
+                    name='blank_index'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Blank Number</FormLabel>
@@ -243,7 +243,7 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
 
                 <FormField
                   control={form.control}
-                  name='correctAnswer'
+                  name='correct_answer'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Correct Answer</FormLabel>
@@ -327,20 +327,20 @@ export function FillInBlanksManager({ group, onUpdateGroup }: Readonly<FillInBla
                 <div className='flex items-start justify-between'>
                   <div className='flex-1'>
                     <div className='flex items-center gap-2 mb-2'>
-                      <span className='font-semibold'>Q{question.questionOrder}</span>
+                      <span className='font-semibold'>Q{question.question_order}</span>
                       <span className='text-sm text-muted-foreground'>
-                        (Blank {question.blankIndex}, {question.point} point
+                        (Blank {question.blank_index}, {question.point} point
                         {question.point !== 1 ? 's' : ''})
                       </span>
                     </div>
                     <div className='mb-3'>
                       <span className='text-sm text-muted-foreground'>
-                        Blank {question.blankIndex} for group instruction
+                        Blank {question.blank_index} for group instruction
                       </span>
                     </div>
                     <div className='text-sm'>
                       <p className='text-green-600 font-medium'>
-                        <strong>Answer:</strong> {question.correctAnswer}
+                        <strong>Answer:</strong> {question.correct_answer}
                       </p>
                       {question.explanation && (
                         <p className='text-muted-foreground mt-1'>

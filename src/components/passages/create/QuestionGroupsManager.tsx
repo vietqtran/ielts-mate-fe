@@ -16,12 +16,12 @@ import { MultipleChoiceManager } from './questions/MultipleChoiceManager';
 
 interface LocalQuestionGroup {
   id?: string;
-  sectionOrder: number;
-  sectionLabel: string;
+  section_order: number;
+  section_label: string;
   instruction: string;
-  questionType: QuestionType;
+  question_type: QuestionType;
   questions: any[];
-  dragItems?: string[];
+  drag_items?: string[];
 }
 
 interface QuestionGroupsManagerProps {
@@ -87,22 +87,22 @@ export function QuestionGroupsManager({
       if (response.data) {
         // Backend response uses camelCase for property access after JSON parsing
         // Handle multiple possible field names for ID
-        const groupId =
-          response.data.groupId || (response.data as any).id || (response.data as any).group_id;
+        const group_id =
+          response.data.group_id || (response.data as any).id || (response.data as any).group_id;
 
-        if (!groupId) {
+        if (!group_id) {
           console.error('No group ID found in response:', response.data);
           return;
         }
 
         const frontendGroup: LocalQuestionGroup = {
-          id: groupId, // Use the found ID
-          sectionOrder: response.data.sectionOrder || groupData.section_order,
-          sectionLabel: response.data.sectionLabel || groupData.section_label,
+          id: group_id, // Use the found ID
+          section_order: response.data.section_order || groupData.section_order,
+          section_label: response.data.section_label || groupData.section_label,
           instruction: response.data.instruction || groupData.instruction,
-          questionType: groupData.question_type,
+          question_type: groupData.question_type,
           questions: response.data.questions ?? [],
-          dragItems: [], // Initialize as empty array since backend doesn't return this yet
+          drag_items: [], // Initialize as empty array since backend doesn't return this yet
         };
 
         onAddGroup(frontendGroup);
@@ -130,7 +130,7 @@ export function QuestionGroupsManager({
     // Convert to the format expected by question managers
     const managerGroup = {
       ...group,
-      questionType: group.questionType as any, // Type cast to resolve interface mismatch
+      question_type: group.question_type as any, // Type cast to resolve interface mismatch
     };
 
     const commonProps = {
@@ -140,13 +140,13 @@ export function QuestionGroupsManager({
         // Convert back to LocalQuestionGroup format
         const localGroup: LocalQuestionGroup = {
           ...updatedGroup,
-          questionType: updatedGroup.questionType,
+          question_type: updatedGroup.question_type,
         };
         onUpdateGroup(groupIndex, localGroup);
       },
     };
 
-    switch (group.questionType) {
+    switch (group.question_type) {
       case QuestionType.MULTIPLE_CHOICE:
         return <MultipleChoiceManager {...commonProps} />;
       case QuestionType.FILL_IN_THE_BLANKS:
@@ -180,15 +180,17 @@ export function QuestionGroupsManager({
         </CardHeader>
         <CardContent>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-            {IELTS_QUESTION_TYPES.map((questionType) => (
-              <div key={questionType.type} className='p-4 border rounded-lg hover:bg-gray-50'>
+            {IELTS_QUESTION_TYPES.map((question_type) => (
+              <div key={question_type.type} className='p-4 border rounded-lg hover:bg-gray-50'>
                 <div className='flex items-start gap-3'>
-                  <span className='text-2xl'>{questionType.icon}</span>
+                  <span className='text-2xl'>{question_type.icon}</span>
                   <div className='flex-1'>
-                    <h4 className='font-semibold'>{questionType.label}</h4>
-                    <p className='text-sm text-muted-foreground mt-1'>{questionType.description}</p>
-                    <p className='text-xs text-blue-600 mt-2'>{questionType.explanation}</p>
-                    <p className='text-xs text-green-600 mt-1 italic'>💡 {questionType.tips}</p>
+                    <h4 className='font-semibold'>{question_type.label}</h4>
+                    <p className='text-sm text-muted-foreground mt-1'>
+                      {question_type.description}
+                    </p>
+                    <p className='text-xs text-blue-600 mt-2'>{question_type.explanation}</p>
+                    <p className='text-xs text-green-600 mt-1 italic'>💡 {question_type.tips}</p>
                   </div>
                 </div>
               </div>
@@ -229,7 +231,7 @@ export function QuestionGroupsManager({
               </div>
             ) : (
               questionGroups.map((group, index) => {
-                const typeInfo = getQuestionTypeInfo(group.questionType);
+                const typeInfo = getQuestionTypeInfo(group.question_type);
                 const isActive = activeGroupIndex === index;
 
                 return (
@@ -245,7 +247,7 @@ export function QuestionGroupsManager({
                       <div className='flex items-center gap-4'>
                         <div className='text-2xl'>{typeInfo?.icon}</div>
                         <div>
-                          <h3 className='font-semibold'>{group.sectionLabel}</h3>
+                          <h3 className='font-semibold'>{group.section_label}</h3>
                           <div className='flex items-center gap-2 mt-1'>
                             <Badge variant='outline'>{typeInfo?.label}</Badge>
                             <span className='text-sm text-muted-foreground'>

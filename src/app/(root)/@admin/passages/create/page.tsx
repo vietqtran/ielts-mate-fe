@@ -32,12 +32,12 @@ type PassageFormData = z.infer<typeof passageSchema>;
 
 interface QuestionGroup {
   id?: string;
-  sectionOrder: number;
-  sectionLabel: string;
+  section_order: number;
+  section_label: string;
   instruction: string;
-  questionType: QuestionType;
+  question_type: QuestionType;
   questions: any[];
-  dragItems?: string[];
+  drag_items?: string[];
 }
 
 export default function CreatePassagePage() {

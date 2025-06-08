@@ -217,7 +217,7 @@ export function usePassage() {
   // Update question group
   const updateGroupQuestion = async (
     passage_id: string,
-    groupId: string,
+    group_id: string,
     request: AddGroupQuestionRequest
   ) => {
     setLoadingState('updateGroupQuestion', true);
@@ -225,7 +225,7 @@ export function usePassage() {
 
     try {
       const { data } = await instance.put(
-        `/reading/passages/${passage_id}/groups/${groupId}`,
+        `/reading/passages/${passage_id}/groups/${group_id}`,
         request
       );
       return data as BaseResponse<AddGroupQuestionResponse>;
@@ -238,12 +238,12 @@ export function usePassage() {
   };
 
   // Delete question group
-  const deleteGroupQuestion = async (passage_id: string, groupId: string) => {
+  const deleteGroupQuestion = async (passage_id: string, group_id: string) => {
     setLoadingState('deleteGroupQuestion', true);
     setErrorState('deleteGroupQuestion', null);
 
     try {
-      const { data } = await instance.delete(`/reading/passages/${passage_id}/groups/${groupId}`);
+      const { data } = await instance.delete(`/reading/passages/${passage_id}/groups/${group_id}`);
       return data as BaseResponse<void>;
     } catch (error) {
       setErrorState('deleteGroupQuestion', error as Error);
@@ -254,12 +254,12 @@ export function usePassage() {
   };
 
   // Get question group by ID
-  const getGroupQuestionById = async (passage_id: string, groupId: string) => {
+  const getGroupQuestionById = async (passage_id: string, group_id: string) => {
     setLoadingState('getGroupQuestionById', true);
     setErrorState('getGroupQuestionById', null);
 
     try {
-      const { data } = await instance.get(`/reading/passages/${passage_id}/groups/${groupId}`);
+      const { data } = await instance.get(`/reading/passages/${passage_id}/groups/${group_id}`);
       return data as BaseResponse<AddGroupQuestionResponse>;
     } catch (error) {
       setErrorState('getGroupQuestionById', error as Error);

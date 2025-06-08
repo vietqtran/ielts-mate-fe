@@ -23,21 +23,21 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 const questionSchema = z.object({
-  questionOrder: z.number().min(1),
+  question_order: z.number().min(1),
   point: z.number().min(1),
   explanation: z.string().min(1, 'Explanation is required'),
-  instructionForMatching: z.string().min(1, 'Matching instruction is required'),
-  correctAnswerForMatching: z.string().min(1, 'Correct answer mapping is required'),
+  instruction_for_matching: z.string().min(1, 'Matching instruction is required'),
+  correct_answer_for_matching: z.string().min(1, 'Correct answer mapping is required'),
 });
 
 type QuestionFormData = z.infer<typeof questionSchema>;
 
 interface QuestionGroup {
   id?: string;
-  sectionOrder: number;
-  sectionLabel: string;
+  section_order: number;
+  section_label: string;
   instruction: string;
-  questionType: string;
+  question_type: string;
   questions: any[];
 }
 
@@ -54,11 +54,11 @@ export function MatchingManager({ group, onUpdateGroup }: Readonly<MatchingManag
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
-      questionOrder: group.questions.length + 1,
+      question_order: group.questions.length + 1,
       point: 1,
       explanation: '',
-      instructionForMatching: '',
-      correctAnswerForMatching: '',
+      instruction_for_matching: '',
+      correct_answer_for_matching: '',
     },
   });
 
@@ -72,29 +72,29 @@ export function MatchingManager({ group, onUpdateGroup }: Readonly<MatchingManag
 
     // Convert to API format using snake_case
     const questionRequest = {
-      question_order: data.questionOrder,
+      question_order: data.question_order,
       point: data.point,
       question_type: 2, // MATCHING
       question_group_id: group.id,
       question_categories: [],
       explanation: data.explanation,
       number_of_correct_answers: 0, // Not applicable for matching
-      instruction_for_matching: data.instructionForMatching,
-      correct_answer_for_matching: data.correctAnswerForMatching,
+      instruction_for_matching: data.instruction_for_matching,
+      correct_answer_for_matching: data.correct_answer_for_matching,
     };
 
     try {
       if (editingQuestionIndex !== null) {
         // For editing, we would need an update API - for now just update local state
         const localQuestion = {
-          questionOrder: data.questionOrder,
+          question_order: data.question_order,
           point: data.point,
-          questionType: 2,
+          question_type: 2,
           questionCategories: [],
           explanation: data.explanation,
-          numberOfCorrectAnswers: 0,
-          instructionForMatching: data.instructionForMatching,
-          correctAnswerForMatching: data.correctAnswerForMatching,
+          number_of_correct_answers: 0,
+          instruction_for_matching: data.instruction_for_matching,
+          correct_answer_for_matching: data.correct_answer_for_matching,
         };
         const updatedQuestions = [...group.questions];
         updatedQuestions[editingQuestionIndex] = localQuestion;
@@ -107,17 +107,17 @@ export function MatchingManager({ group, onUpdateGroup }: Readonly<MatchingManag
           // Convert API response back to frontend format
           const apiResponse = response.data[0];
           const newQuestion = {
-            id: apiResponse?.questionId,
-            questionOrder: apiResponse?.questionOrder || data.questionOrder,
+            id: apiResponse?.question_id,
+            question_order: apiResponse?.question_order || data.question_order,
             point: apiResponse?.point || data.point,
-            questionType: apiResponse?.questionType || 2,
+            question_type: apiResponse?.question_type || 2,
             questionCategories: [],
             explanation: apiResponse?.explanation || data.explanation,
-            numberOfCorrectAnswers: apiResponse?.numberOfCorrectAnswers || 0,
-            instructionForMatching:
-              apiResponse?.instructionForMatching || data.instructionForMatching,
-            correctAnswerForMatching:
-              apiResponse?.correctAnswerForMatching || data.correctAnswerForMatching,
+            number_of_correct_answers: apiResponse?.number_of_correct_answers || 0,
+            instruction_for_matching:
+              apiResponse?.instruction_for_matching || data.instruction_for_matching,
+            correct_answer_for_matching:
+              apiResponse?.correct_answer_for_matching || data.correct_answer_for_matching,
           };
           onUpdateGroup({
             ...group,
@@ -128,11 +128,11 @@ export function MatchingManager({ group, onUpdateGroup }: Readonly<MatchingManag
 
       setIsAddingQuestion(false);
       form.reset({
-        questionOrder: group.questions.length + 2,
+        question_order: group.questions.length + 2,
         point: 1,
         explanation: '',
-        instructionForMatching: '',
-        correctAnswerForMatching: '',
+        instruction_for_matching: '',
+        correct_answer_for_matching: '',
       });
     } catch (error) {
       console.error('Failed to create question:', error);
@@ -175,7 +175,7 @@ export function MatchingManager({ group, onUpdateGroup }: Readonly<MatchingManag
                 <div className='grid grid-cols-2 gap-4'>
                   <FormField
                     control={form.control}
-                    name='questionOrder'
+                    name='question_order'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Question Number</FormLabel>
@@ -212,7 +212,7 @@ export function MatchingManager({ group, onUpdateGroup }: Readonly<MatchingManag
 
                 <FormField
                   control={form.control}
-                  name='instructionForMatching'
+                  name='instruction_for_matching'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Matching Task Description</FormLabel>
@@ -280,7 +280,7 @@ export function MatchingManager({ group, onUpdateGroup }: Readonly<MatchingManag
 
                 <FormField
                   control={form.control}
-                  name='correctAnswerForMatching'
+                  name='correct_answer_for_matching'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Correct Answer Mapping</FormLabel>
@@ -364,14 +364,14 @@ export function MatchingManager({ group, onUpdateGroup }: Readonly<MatchingManag
                 <div className='flex items-start justify-between'>
                   <div className='flex-1'>
                     <div className='flex items-center gap-2 mb-2'>
-                      <span className='font-semibold'>Q{question.questionOrder}</span>
+                      <span className='font-semibold'>Q{question.question_order}</span>
                       <span className='text-sm text-muted-foreground'>
                         ({question.point} point{question.point !== 1 ? 's' : ''})
                       </span>
                     </div>
                     <div
                       className='prose prose-sm max-w-none mb-3'
-                      dangerouslySetInnerHTML={{ __html: question.instructionForMatching }}
+                      dangerouslySetInnerHTML={{ __html: question.instruction_for_matching }}
                     />
                     <div className='text-sm space-y-2'>
                       <div>
@@ -379,7 +379,7 @@ export function MatchingManager({ group, onUpdateGroup }: Readonly<MatchingManag
                           <strong>Correct Answers:</strong>
                         </p>
                         <p className='font-mono text-sm bg-green-50 p-2 rounded mt-1'>
-                          {question.correctAnswerForMatching}
+                          {question.correct_answer_for_matching}
                         </p>
                       </div>
                       {question.explanation && (

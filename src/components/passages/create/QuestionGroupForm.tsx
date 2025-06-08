@@ -26,10 +26,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 
 const questionGroupSchema = z.object({
-  sectionOrder: z.number().min(1),
-  sectionLabel: z.string().min(1, 'Section label is required'),
+  section_order: z.number().min(1),
+  section_label: z.string().min(1, 'Section label is required'),
   instruction: z.string().min(1, 'Instruction is required'),
-  questionType: z.nativeEnum(QuestionType),
+  question_type: z.nativeEnum(QuestionType),
 });
 
 type QuestionGroupFormData = z.infer<typeof questionGroupSchema>;
@@ -74,22 +74,22 @@ export function QuestionGroupForm({
   const form = useForm<QuestionGroupFormData>({
     resolver: zodResolver(questionGroupSchema),
     defaultValues: {
-      sectionOrder: initialData?.sectionOrder || 1,
-      sectionLabel: initialData?.sectionLabel || '',
+      section_order: initialData?.section_order || 1,
+      section_label: initialData?.section_label || '',
       instruction: initialData?.instruction || '',
-      questionType: initialData?.questionType || QuestionType.MULTIPLE_CHOICE,
+      question_type: initialData?.question_type || QuestionType.MULTIPLE_CHOICE,
     },
   });
 
-  const selectedQuestionType = form.watch('questionType');
+  const selectedQuestionType = form.watch('question_type');
 
   const handleSubmit = (data: QuestionGroupFormData) => {
     // Convert camelCase to snake_case for backend
     const requestData = {
-      section_order: data.sectionOrder,
-      section_label: data.sectionLabel,
+      section_order: data.section_order,
+      section_label: data.section_label,
       instruction: data.instruction,
-      question_type: data.questionType,
+      question_type: data.question_type,
       questions: [],
       drag_items: [],
     };
@@ -107,7 +107,7 @@ export function QuestionGroupForm({
           <div className='grid grid-cols-2 gap-4'>
             <FormField
               control={form.control}
-              name='sectionOrder'
+              name='section_order'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Section Order</FormLabel>
@@ -126,7 +126,7 @@ export function QuestionGroupForm({
 
             <FormField
               control={form.control}
-              name='sectionLabel'
+              name='section_label'
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Section Label</FormLabel>
@@ -141,7 +141,7 @@ export function QuestionGroupForm({
 
           <FormField
             control={form.control}
-            name='questionType'
+            name='question_type'
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Question Type</FormLabel>

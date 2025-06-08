@@ -33,10 +33,10 @@ import { MatchingForm } from './questions/MatchingForm';
 import { MultipleChoiceForm } from './questions/MultipleChoiceForm';
 
 const groupSchema = z.object({
-  sectionOrder: z.number().min(1),
-  sectionLabel: z.string().min(1, 'Section label is required'),
+  section_order: z.number().min(1),
+  section_label: z.string().min(1, 'Section label is required'),
   instruction: z.string().min(1, 'Instruction is required'),
-  questionType: z.nativeEnum(QuestionType),
+  question_type: z.nativeEnum(QuestionType),
 });
 
 type GroupFormData = z.infer<typeof groupSchema>;
@@ -55,10 +55,10 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
   const form = useForm<GroupFormData>({
     resolver: zodResolver(groupSchema),
     defaultValues: {
-      sectionOrder: 1,
-      sectionLabel: '',
+      section_order: 1,
+      section_label: '',
       instruction: '',
-      questionType: QuestionType.MULTIPLE_CHOICE,
+      question_type: QuestionType.MULTIPLE_CHOICE,
     },
   });
 
@@ -66,16 +66,16 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
     const newGroup = {
       ...data,
       questions: [],
-      dragItems: data.questionType === QuestionType.DRAG_AND_DROP ? [] : undefined,
+      drag_items: data.question_type === QuestionType.DRAG_AND_DROP ? [] : undefined,
     };
 
     setGroups((prev) => [...prev, newGroup]);
     setCurrentGroupIndex(groups.length);
     form.reset({
-      sectionOrder: groups.length + 2,
-      sectionLabel: '',
+      section_order: groups.length + 2,
+      section_label: '',
       instruction: '',
-      questionType: QuestionType.MULTIPLE_CHOICE,
+      question_type: QuestionType.MULTIPLE_CHOICE,
     });
   };
 
@@ -107,10 +107,10 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
     }
   };
 
-  const handleUpdateGroupDragItems = (dragItems: string[]) => {
+  const handleUpdateGroupDragItems = (drag_items: string[]) => {
     if (currentGroupIndex !== null) {
       setGroups((prev) =>
-        prev.map((group, index) => (index === currentGroupIndex ? { ...group, dragItems } : group))
+        prev.map((group, index) => (index === currentGroupIndex ? { ...group, drag_items } : group))
       );
     }
   };
@@ -119,9 +119,9 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
     if (currentGroupIndex === null) return null;
 
     const group = groups[currentGroupIndex];
-    const questionType = group.questionType;
+    const question_type = group.question_type;
 
-    switch (questionType) {
+    switch (question_type) {
       case QuestionType.MULTIPLE_CHOICE:
         return (
           <MultipleChoiceForm
@@ -147,7 +147,7 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
         return (
           <DragDropForm
             questions={group.questions}
-            dragItems={group.dragItems || []}
+            drag_items={group.drag_items || []}
             onQuestionsChange={handleUpdateGroupQuestions}
             onDragItemsChange={handleUpdateGroupDragItems}
           />
@@ -170,7 +170,7 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
               <form onSubmit={form.handleSubmit(handleCreateGroup)} className='space-y-4'>
                 <FormField
                   control={form.control}
-                  name='sectionOrder'
+                  name='section_order'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Section Order</FormLabel>
@@ -188,7 +188,7 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
 
                 <FormField
                   control={form.control}
-                  name='sectionLabel'
+                  name='section_label'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Section Label</FormLabel>
@@ -202,7 +202,7 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
 
                 <FormField
                   control={form.control}
-                  name='questionType'
+                  name='question_type'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Question Type</FormLabel>
@@ -278,9 +278,9 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
                   >
                     <div className='flex items-center justify-between'>
                       <div>
-                        <h3 className='font-medium'>{group.sectionLabel}</h3>
+                        <h3 className='font-medium'>{group.section_label}</h3>
                         <p className='text-sm text-muted-foreground'>
-                          {group.questionType.replace('_', ' ')}
+                          {group.question_type.replace('_', ' ')}
                         </p>
                         <p className='text-sm text-muted-foreground'>
                           {group.questions.length} question(s)
@@ -312,7 +312,7 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
         <Card>
           <CardHeader>
             <div className='flex items-center justify-between'>
-              <CardTitle>Questions for {groups[currentGroupIndex]?.sectionLabel}</CardTitle>
+              <CardTitle>Questions for {groups[currentGroupIndex]?.section_label}</CardTitle>
               <div className='flex gap-2'>
                 <Button onClick={handleSaveCurrentGroup}>Save Group</Button>
                 <Button variant='outline' onClick={() => setCurrentGroupIndex(null)}>

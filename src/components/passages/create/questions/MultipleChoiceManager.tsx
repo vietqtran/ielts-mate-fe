@@ -26,16 +26,16 @@ import { useState } from 'react';
 const choiceSchema = z.object({
   label: z.string().min(1, 'Label is required'),
   content: z.string().min(1, 'Content is required'),
-  choiceOrder: z.number().min(1),
-  isCorrect: z.boolean(),
+  choice_order: z.number().min(1),
+  is_correct: z.boolean(),
 });
 
 const questionSchema = z.object({
-  questionOrder: z.number().min(1),
+  question_order: z.number().min(1),
   point: z.number().min(1),
   explanation: z.string().min(1, 'Explanation is required'),
-  instructionForChoice: z.string().min(1, 'Question text is required'),
-  numberOfCorrectAnswers: z.number().min(1),
+  instruction_for_choice: z.string().min(1, 'Question text is required'),
+  number_of_correct_answers: z.number().min(1),
   choices: z.array(choiceSchema).min(2, 'At least 2 choices required'),
 });
 
@@ -43,10 +43,10 @@ type QuestionFormData = z.infer<typeof questionSchema>;
 
 interface QuestionGroup {
   id?: string;
-  sectionOrder: number;
-  sectionLabel: string;
+  section_order: number;
+  section_label: string;
   instruction: string;
-  questionType: string;
+  question_type: string;
   questions: any[];
 }
 
@@ -66,16 +66,14 @@ export function MultipleChoiceManager({
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
-      questionOrder: group.questions.length + 1,
+      question_order: group.questions.length + 1,
       point: 1,
       explanation: '',
-      instructionForChoice: '',
-      numberOfCorrectAnswers: 1,
+      instruction_for_choice: '',
+      number_of_correct_answers: 1,
       choices: [
-        { label: 'A', content: '', choiceOrder: 1, isCorrect: false },
-        { label: 'B', content: '', choiceOrder: 2, isCorrect: false },
-        { label: 'C', content: '', choiceOrder: 3, isCorrect: false },
-        { label: 'D', content: '', choiceOrder: 4, isCorrect: false },
+        { label: 'A', content: '', choice_order: 1, is_correct: false },
+        { label: 'B', content: '', choice_order: 2, is_correct: false },
       ],
     },
   });
@@ -85,22 +83,22 @@ export function MultipleChoiceManager({
     name: 'choices',
   });
 
-  const numberOfCorrectAnswers = form.watch('numberOfCorrectAnswers');
+  const number_of_correct_answers = form.watch('number_of_correct_answers');
   const choices = form.watch('choices');
 
   const { createQuestions, isLoading } = useQuestion();
 
   const handleSubmit = async (data: QuestionFormData) => {
-    const correctCount = data.choices.filter((choice) => choice.isCorrect).length;
+    const correctCount = data.choices.filter((choice) => choice.is_correct).length;
 
     if (correctCount === 0) {
       form.setError('choices', { message: 'At least one choice must be correct' });
       return;
     }
 
-    if (correctCount !== data.numberOfCorrectAnswers) {
-      form.setError('numberOfCorrectAnswers', {
-        message: `Number of correct answers (${data.numberOfCorrectAnswers}) must match selected correct choices (${correctCount})`,
+    if (correctCount !== data.number_of_correct_answers) {
+      form.setError('number_of_correct_answers', {
+        message: `Number of correct answers (${data.number_of_correct_answers}) must match selected correct choices (${correctCount})`,
       });
       return;
     }
@@ -112,19 +110,19 @@ export function MultipleChoiceManager({
 
     // Convert to API format using snake_case
     const questionRequest = {
-      question_order: data.questionOrder,
+      question_order: data.question_order,
       point: data.point,
       question_type: 0, // MULTIPLE_CHOICE
       question_group_id: group.id,
       question_categories: [],
       explanation: data.explanation,
-      number_of_correct_answers: data.numberOfCorrectAnswers,
-      instruction_for_choice: data.instructionForChoice,
+      number_of_correct_answers: data.number_of_correct_answers,
+      instruction_for_choice: data.instruction_for_choice,
       choices: data.choices.map((choice) => ({
         label: choice.label,
         content: choice.content,
-        choice_order: choice.choiceOrder,
-        is_correct: choice.isCorrect,
+        choice_order: choice.choice_order,
+        is_correct: choice.is_correct,
       })),
     };
 
@@ -132,13 +130,13 @@ export function MultipleChoiceManager({
       if (editingQuestionIndex !== null) {
         // For editing, we would need an update API - for now just update local state
         const localQuestion = {
-          questionOrder: data.questionOrder,
+          question_order: data.question_order,
           point: data.point,
-          questionType: 0,
+          question_type: 0,
           questionCategories: [],
           explanation: data.explanation,
-          numberOfCorrectAnswers: data.numberOfCorrectAnswers,
-          instructionForChoice: data.instructionForChoice,
+          number_of_correct_answers: data.number_of_correct_answers,
+          instruction_for_choice: data.instruction_for_choice,
           choices: data.choices,
         };
         const updatedQuestions = [...group.questions];
@@ -152,22 +150,23 @@ export function MultipleChoiceManager({
           // Convert API response back to frontend format
           const apiResponse = response.data[0];
           const newQuestion = {
-            id: apiResponse?.questionId,
-            questionOrder: apiResponse?.questionOrder || data.questionOrder,
+            id: apiResponse?.question_id,
+            question_order: apiResponse?.question_order || data.question_order,
             point: apiResponse?.point || data.point,
-            questionType: apiResponse?.questionType || 0,
+            question_type: apiResponse?.question_type || 0,
             questionCategories: [],
             explanation: apiResponse?.explanation || data.explanation,
-            numberOfCorrectAnswers:
-              apiResponse?.numberOfCorrectAnswers || data.numberOfCorrectAnswers,
-            instructionForChoice: apiResponse?.instructionForChoice || data.instructionForChoice,
+            number_of_correct_answers:
+              apiResponse?.number_of_correct_answers || data.number_of_correct_answers,
+            instruction_for_choice:
+              apiResponse?.instruction_for_choice || data.instruction_for_choice,
             choices:
               apiResponse?.choices?.map((choice) => ({
-                id: choice.choiceId,
+                id: choice.choice_id,
                 label: choice.label,
                 content: choice.content,
-                choiceOrder: choice.choiceOrder,
-                isCorrect: choice.isCorrect,
+                choice_order: choice.choice_order,
+                is_correct: choice.is_correct,
               })) || data.choices,
           };
           onUpdateGroup({
@@ -201,20 +200,20 @@ export function MultipleChoiceManager({
     append({
       label: nextLabel,
       content: '',
-      choiceOrder: fields.length + 1,
-      isCorrect: false,
+      choice_order: fields.length + 1,
+      is_correct: false,
     });
   };
 
   const handleCorrectAnswerChange = (choiceIndex: number, isChecked: boolean) => {
-    if (numberOfCorrectAnswers === 1) {
+    if (number_of_correct_answers === 1) {
       // Single answer: uncheck all others
       choices.forEach((_, index) => {
-        form.setValue(`choices.${index}.isCorrect`, index === choiceIndex ? isChecked : false);
+        form.setValue(`choices.${index}.is_correct`, index === choiceIndex ? isChecked : false);
       });
     } else {
       // Multiple answers: just toggle this one
-      form.setValue(`choices.${choiceIndex}.isCorrect`, isChecked);
+      form.setValue(`choices.${choiceIndex}.is_correct`, isChecked);
     }
   };
 
@@ -242,7 +241,7 @@ export function MultipleChoiceManager({
                 <div className='grid grid-cols-3 gap-4'>
                   <FormField
                     control={form.control}
-                    name='questionOrder'
+                    name='question_order'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Question Number</FormLabel>
@@ -278,7 +277,7 @@ export function MultipleChoiceManager({
 
                   <FormField
                     control={form.control}
-                    name='numberOfCorrectAnswers'
+                    name='number_of_correct_answers'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Correct Answers</FormLabel>
@@ -298,7 +297,7 @@ export function MultipleChoiceManager({
 
                 <FormField
                   control={form.control}
-                  name='instructionForChoice'
+                  name='instruction_for_choice'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Question Text</FormLabel>
@@ -328,17 +327,17 @@ export function MultipleChoiceManager({
                     {fields.map((field, index) => (
                       <div key={field.id} className='flex items-start gap-4 p-4 border rounded-lg'>
                         <div className='flex items-center mt-2'>
-                          {numberOfCorrectAnswers === 1 ? (
+                          {number_of_correct_answers === 1 ? (
                             <input
                               type='radio'
-                              name='correctAnswer'
-                              checked={choices[index]?.isCorrect || false}
+                              name='correct_answer'
+                              checked={choices[index]?.is_correct || false}
                               onChange={(e) => handleCorrectAnswerChange(index, e.target.checked)}
                               className='w-4 h-4'
                             />
                           ) : (
                             <Checkbox
-                              checked={choices[index]?.isCorrect || false}
+                              checked={choices[index]?.is_correct || false}
                               onCheckedChange={(checked) =>
                                 handleCorrectAnswerChange(index, !!checked)
                               }
@@ -448,29 +447,29 @@ export function MultipleChoiceManager({
                 <div className='flex items-start justify-between'>
                   <div className='flex-1'>
                     <div className='flex items-center gap-2 mb-2'>
-                      <span className='font-semibold'>Q{question.questionOrder}</span>
+                      <span className='font-semibold'>Q{question.question_order}</span>
                       <span className='text-sm text-muted-foreground'>
                         ({question.point} point{question.point !== 1 ? 's' : ''})
                       </span>
-                      {question.numberOfCorrectAnswers > 1 && (
+                      {question.number_of_correct_answers > 1 && (
                         <span className='text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded'>
-                          {question.numberOfCorrectAnswers} correct answers
+                          {question.number_of_correct_answers} correct answers
                         </span>
                       )}
                     </div>
                     <div
                       className='prose prose-sm max-w-none mb-3'
-                      dangerouslySetInnerHTML={{ __html: question.instructionForChoice }}
+                      dangerouslySetInnerHTML={{ __html: question.instruction_for_choice }}
                     />
                     <div className='space-y-2'>
                       {question.choices?.map((choice: any, choiceIndex: number) => (
                         <div
                           key={choiceIndex}
-                          className={`flex items-center gap-2 text-sm ${choice.isCorrect ? 'text-green-600 font-medium' : ''}`}
+                          className={`flex items-center gap-2 text-sm ${choice.is_correct ? 'text-green-600 font-medium' : ''}`}
                         >
                           <span className='font-mono'>{choice.label}.</span>
                           <span>{choice.content}</span>
-                          {choice.isCorrect && <span className='text-green-600'>✓</span>}
+                          {choice.is_correct && <span className='text-green-600'>✓</span>}
                         </div>
                       ))}
                     </div>

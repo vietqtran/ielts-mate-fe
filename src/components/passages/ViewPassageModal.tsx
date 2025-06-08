@@ -98,21 +98,21 @@ export function ViewPassageModal({
 
   const renderQuestionsByType = (questions: any[]) => {
     return questions.map((question, index) => {
-      switch (question.questionType) {
+      switch (question.question_type) {
         case 0: // Multiple Choice
           return (
             <div key={index} className='space-y-2'>
-              <h5 className='font-medium'>Question {question.questionOrder}</h5>
-              <div dangerouslySetInnerHTML={{ __html: question.instructionForChoice }} />
+              <h5 className='font-medium'>Question {question.question_order}</h5>
+              <div dangerouslySetInnerHTML={{ __html: question.instruction_for_choice }} />
               {question.choices && (
                 <div className='space-y-1 ml-4'>
                   {question.choices.map((choice: any, choiceIndex: number) => (
                     <div
                       key={choiceIndex}
-                      className={`text-sm ${choice.isCorrect ? 'text-green-600 font-medium' : ''}`}
+                      className={`text-sm ${choice.is_correct ? 'text-green-600 font-medium' : ''}`}
                     >
                       {choice.label}. {choice.content}
-                      {choice.isCorrect && ' ✓'}
+                      {choice.is_correct && ' ✓'}
                     </div>
                   ))}
                 </div>
@@ -123,20 +123,22 @@ export function ViewPassageModal({
         case 1: // Fill in Blank
           return (
             <div key={index} className='space-y-2'>
-              <h5 className='font-medium'>Blank {question.blankIndex}</h5>
-              <p className='text-sm text-green-600 font-medium'>Answer: {question.correctAnswer}</p>
+              <h5 className='font-medium'>Blank {question.blank_index}</h5>
+              <p className='text-sm text-green-600 font-medium'>
+                Answer: {question.correct_answer}
+              </p>
             </div>
           );
 
         case 2: // Matching
           return (
             <div key={index} className='space-y-2'>
-              <h5 className='font-medium'>Question {question.questionOrder}</h5>
-              <div dangerouslySetInnerHTML={{ __html: question.instructionForMatching }} />
+              <h5 className='font-medium'>Question {question.question_order}</h5>
+              <div dangerouslySetInnerHTML={{ __html: question.instruction_for_matching }} />
               <div className='text-sm'>
                 <p className='font-medium'>Correct Answers:</p>
                 <p className='font-mono bg-gray-50 p-2 rounded'>
-                  {question.correctAnswerForMatching}
+                  {question.correct_answer_for_matching}
                 </p>
               </div>
             </div>
@@ -145,7 +147,7 @@ export function ViewPassageModal({
         case 3: // Drag and Drop
           return (
             <div key={index} className='space-y-2'>
-              <h5 className='font-medium'>Zone {question.zoneIndex}</h5>
+              <h5 className='font-medium'>Zone {question.zone_index}</h5>
               <p className='text-sm text-green-600 font-medium'>
                 Correct Item: {question.dragItemContent}
               </p>
@@ -244,7 +246,9 @@ export function ViewPassageModal({
               <div
                 className='prose max-w-none'
                 dangerouslySetInnerHTML={{
-                  __html: showHighlights ? passage.contentWithHighlightKeywords : passage.content,
+                  __html: showHighlights
+                    ? passage.content_with_highlight_keywords
+                    : passage.content,
                 }}
               />
             </CardContent>
@@ -269,7 +273,7 @@ export function ViewPassageModal({
                   {questionGroups.map((group, groupIndex) => (
                     <div key={groupIndex} className='border rounded-lg p-4'>
                       <div className='mb-4'>
-                        <h4 className='font-semibold text-lg'>{group.sectionLabel}</h4>
+                        <h4 className='font-semibold text-lg'>{group.section_label}</h4>
                         {group.instruction && (
                           <div className='mt-2 p-3 bg-blue-50 rounded-md'>
                             <div
@@ -286,12 +290,12 @@ export function ViewPassageModal({
                         <div className='space-y-4'>
                           {/* Group questions by type and show instruction once */}
                           {group.questions.filter(
-                            (q: any) => q.instructionForChoice || q.instructionForMatching
+                            (q: any) => q.instruction_for_choice || q.instruction_for_matching
                           ).length > 0 && (
                             <div className='space-y-3'>
                               {group.questions
                                 .filter(
-                                  (q: any) => q.instructionForChoice || q.instructionForMatching
+                                  (q: any) => q.instruction_for_choice || q.instruction_for_matching
                                 )
                                 .slice(0, 1) // Show instruction from first question only
                                 .map((question: any, index: number) => (
@@ -299,8 +303,8 @@ export function ViewPassageModal({
                                     <div
                                       dangerouslySetInnerHTML={{
                                         __html:
-                                          question.instructionForChoice ||
-                                          question.instructionForMatching,
+                                          question.instruction_for_choice ||
+                                          question.instruction_for_matching,
                                       }}
                                     />
                                   </div>
@@ -311,7 +315,7 @@ export function ViewPassageModal({
                           <div className='grid gap-4'>{renderQuestionsByType(group.questions)}</div>
 
                           {/* Show drag items if this is a drag & drop group */}
-                          {group.questions.some((q: any) => q.questionType === 3) && (
+                          {group.questions.some((q: any) => q.question_type === 3) && (
                             <div className='mt-4 p-3 bg-blue-50 rounded-md'>
                               <p className='text-sm font-medium mb-2'>Available Drag Items:</p>
                               <div className='flex flex-wrap gap-2'>

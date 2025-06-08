@@ -28,24 +28,24 @@ interface Choice {
   id?: string;
   label: string;
   content: string;
-  choiceOrder: number;
-  isCorrect: boolean;
+  choice_order: number;
+  is_correct: boolean;
 }
 
 const choiceSchema = z.object({
   id: z.string().optional(),
   label: z.string().min(1, 'Label is required'),
   content: z.string().min(1, 'Content is required'),
-  choiceOrder: z.number().min(1),
-  isCorrect: z.boolean(),
+  choice_order: z.number().min(1),
+  is_correct: z.boolean(),
 });
 
 const questionSchema = z.object({
-  questionOrder: z.number().min(1),
+  question_order: z.number().min(1),
   point: z.number().min(1),
   explanation: z.string().min(1, 'Explanation is required'),
-  instructionForChoice: z.string().min(1, 'Instruction is required'),
-  numberOfCorrectAnswers: z.number().min(1),
+  instruction_for_choice: z.string().min(1, 'Instruction is required'),
+  number_of_correct_answers: z.number().min(1),
   choices: z.array(choiceSchema).min(2, 'At least 2 choices required'),
 });
 
@@ -56,21 +56,23 @@ interface MultipleChoiceFormProps {
   onQuestionsChange: (questions: any[]) => void;
 }
 
-export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleChoiceFormProps) {
+export function MultipleChoiceForm({
+  questions,
+  onQuestionsChange,
+}: Readonly<MultipleChoiceFormProps>) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
-      questionOrder: questions.length + 1,
+      question_order: questions.length + 1,
       point: 1,
       explanation: '',
-      instructionForChoice: '',
-      numberOfCorrectAnswers: 1,
+      instruction_for_choice: '',
+      number_of_correct_answers: 1,
       choices: [
-        { label: 'A', content: '', choiceOrder: 1, isCorrect: false },
-        { label: 'B', content: '', choiceOrder: 2, isCorrect: false },
+        { label: 'A', content: '', choice_order: 1, is_correct: false },
+        { label: 'B', content: '', choice_order: 2, is_correct: false },
       ],
     },
   });
@@ -80,29 +82,29 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
     name: 'choices',
   });
 
-  const numberOfCorrectAnswers = form.watch('numberOfCorrectAnswers');
-  const isMultipleChoice = numberOfCorrectAnswers > 1;
+  const number_of_correct_answers = form.watch('number_of_correct_answers');
+  const isMultipleChoice = number_of_correct_answers > 1;
 
   const handleSubmit = async (data: QuestionFormData) => {
     setIsSubmitting(true);
     try {
       const newQuestion = {
         ...data,
-        questionType: 0, // MULTIPLE_CHOICE
+        question_type: 0, // MULTIPLE_CHOICE
         questionCategories: [],
       };
 
       if (editingIndex !== null) {
-        const questionId = questions[editingIndex].id;
+        const question_id = questions[editingIndex].question_id;
 
         // Update question
-        await instance.put(`/reading/questions/${questionId}`, {
-          questionOrder: data.questionOrder,
+        await instance.put(`/reading/questions/${question_id}`, {
+          question_order: data.question_order,
           point: data.point,
           explanation: data.explanation,
-          instructionForChoice: data.instructionForChoice,
-          numberOfCorrectAnswers: data.numberOfCorrectAnswers,
-          questionType: 0,
+          instruction_for_choice: data.instruction_for_choice,
+          number_of_correct_answers: data.number_of_correct_answers,
+          question_type: 0,
         });
 
         // Update choices
@@ -111,15 +113,15 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
             await instance.put(`/reading/choices/${choice.id}`, {
               label: choice.label,
               content: choice.content,
-              choiceOrder: choice.choiceOrder,
-              isCorrect: choice.isCorrect,
+              choice_order: choice.choice_order,
+              is_correct: choice.is_correct,
             });
           } else {
-            await instance.post(`/reading/questions/${questionId}/choices`, {
+            await instance.post(`/reading/questions/${question_id}/choices`, {
               label: choice.label,
               content: choice.content,
-              choiceOrder: choice.choiceOrder,
-              isCorrect: choice.isCorrect,
+              choice_order: choice.choice_order,
+              is_correct: choice.is_correct,
             });
           }
         }
@@ -127,7 +129,7 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
         const updatedQuestions = [...questions];
         updatedQuestions[editingIndex] = {
           ...newQuestion,
-          id: questionId,
+          id: question_id,
         };
         onQuestionsChange(updatedQuestions);
         setEditingIndex(null);
@@ -137,14 +139,14 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
       }
 
       form.reset({
-        questionOrder: questions.length + 2,
+        question_order: questions.length + 2,
         point: 1,
         explanation: '',
-        instructionForChoice: '',
-        numberOfCorrectAnswers: 1,
+        instruction_for_choice: '',
+        number_of_correct_answers: 1,
         choices: [
-          { label: 'A', content: '', choiceOrder: 1, isCorrect: false },
-          { label: 'B', content: '', choiceOrder: 2, isCorrect: false },
+          { label: 'A', content: '', choice_order: 1, is_correct: false },
+          { label: 'B', content: '', choice_order: 2, is_correct: false },
         ],
       });
     } catch (error) {
@@ -171,21 +173,21 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
     append({
       label: nextLabel,
       content: '',
-      choiceOrder: fields.length + 1,
-      isCorrect: false,
+      choice_order: fields.length + 1,
+      is_correct: false,
     });
   };
 
-  const handleCorrectAnswerChange = (choiceIndex: number, isCorrect: boolean) => {
+  const handleCorrectAnswerChange = (choiceIndex: number, is_correct: boolean) => {
     const currentChoices = form.getValues('choices');
 
     if (isMultipleChoice) {
       // Multiple choice: allow multiple correct answers
-      form.setValue(`choices.${choiceIndex}.isCorrect`, isCorrect);
+      form.setValue(`choices.${choiceIndex}.is_correct`, is_correct);
     } else {
       // Single choice: only one correct answer
       currentChoices.forEach((_, index) => {
-        form.setValue(`choices.${index}.isCorrect`, index === choiceIndex && isCorrect);
+        form.setValue(`choices.${index}.is_correct`, index === choiceIndex && is_correct);
       });
     }
   };
@@ -203,7 +205,7 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
               <div className='grid grid-cols-3 gap-4'>
                 <FormField
                   control={form.control}
-                  name='questionOrder'
+                  name='question_order'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Question Order</FormLabel>
@@ -239,7 +241,7 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
 
                 <FormField
                   control={form.control}
-                  name='numberOfCorrectAnswers'
+                  name='number_of_correct_answers'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Correct Answers</FormLabel>
@@ -259,7 +261,7 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
 
               <FormField
                 control={form.control}
-                name='instructionForChoice'
+                name='instruction_for_choice'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Question Instruction</FormLabel>
@@ -305,14 +307,16 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
                       <div className='flex items-center gap-2'>
                         {isMultipleChoice ? (
                           <Checkbox
-                            checked={form.watch(`choices.${index}.isCorrect`)}
+                            checked={form.watch(`choices.${index}.is_correct`)}
                             onCheckedChange={(checked) =>
                               handleCorrectAnswerChange(index, !!checked)
                             }
                           />
                         ) : (
                           <RadioGroup
-                            value={form.watch(`choices.${index}.isCorrect`) ? index.toString() : ''}
+                            value={
+                              form.watch(`choices.${index}.is_correct`) ? index.toString() : ''
+                            }
                             onValueChange={(value) =>
                               handleCorrectAnswerChange(Number(value), true)
                             }
@@ -353,7 +357,7 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
 
                         <FormField
                           control={form.control}
-                          name={`choices.${index}.choiceOrder`}
+                          name={`choices.${index}.choice_order`}
                           render={({ field }) => (
                             <FormItem>
                               <FormControl>
@@ -418,17 +422,17 @@ export function MultipleChoiceForm({ questions, onQuestionsChange }: MultipleCho
                 <div key={index} className='p-4 border rounded-lg'>
                   <div className='flex items-start justify-between'>
                     <div className='flex-1'>
-                      <h4 className='font-medium'>Question {question.questionOrder}</h4>
+                      <h4 className='font-medium'>Question {question.question_order}</h4>
                       <div
                         className='text-sm text-muted-foreground mt-1'
-                        dangerouslySetInnerHTML={{ __html: question.instructionForChoice }}
+                        dangerouslySetInnerHTML={{ __html: question.instruction_for_choice }}
                       />
                       <div className='mt-2 space-y-1'>
                         {question.choices?.map((choice: any, choiceIndex: number) => (
                           <div key={choiceIndex} className='flex items-center gap-2 text-sm'>
-                            <span className={choice.isCorrect ? 'text-green-600 font-medium' : ''}>
+                            <span className={choice.is_correct ? 'text-green-600 font-medium' : ''}>
                               {choice.label}. {choice.content}
-                              {choice.isCorrect && ' ✓'}
+                              {choice.is_correct && ' ✓'}
                             </span>
                           </div>
                         ))}

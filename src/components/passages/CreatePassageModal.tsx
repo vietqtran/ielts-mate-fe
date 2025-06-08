@@ -36,7 +36,7 @@ const passageSchema = z.object({
   title: z.string().min(1, 'Title is required'),
   instruction: z.string().min(1, 'Instruction is required'),
   content: z.string().min(1, 'Content is required'),
-  contentWithHighlightKeywords: z.string().min(1, 'Content with highlights is required'),
+  content_with_highlight_keywords: z.string().min(1, 'Content with highlights is required'),
   ielts_type: z.nativeEnum(IeltsType),
   part_number: z.number().min(1).max(3),
   passage_status: z.nativeEnum(PassageStatus),
@@ -66,7 +66,7 @@ export function CreatePassageModal({
       title: '',
       instruction: '',
       content: '',
-      contentWithHighlightKeywords: '',
+      content_with_highlight_keywords: '',
       ielts_type: IeltsType.ACADEMIC,
       part_number: 1,
       passage_status: PassageStatus.DRAFT,
@@ -104,7 +104,7 @@ export function CreatePassageModal({
         title: data.title,
         instruction: data.instruction,
         content: data.content,
-        content_with_highlight_keywords: data.contentWithHighlightKeywords,
+        content_with_highlight_keywords: data.content_with_highlight_keywords,
         ielts_type: Object.values(IeltsType).indexOf(data.ielts_type),
         part_number: data.part_number,
         passage_status: Object.values(PassageStatus).indexOf(data.passage_status),
@@ -297,7 +297,7 @@ export function CreatePassageModal({
 
                 <FormField
                   control={form.control}
-                  name='contentWithHighlightKeywords'
+                  name='content_with_highlight_keywords'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Content with Highlighted Keywords</FormLabel>

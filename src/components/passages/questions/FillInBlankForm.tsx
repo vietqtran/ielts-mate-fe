@@ -21,12 +21,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 
 const blankAnswerSchema = z.object({
-  blankIndex: z.number().min(1),
-  correctAnswer: z.string().min(1, 'Correct answer is required'),
+  blank_index: z.number().min(1),
+  correct_answer: z.string().min(1, 'Correct answer is required'),
 });
 
 const questionSchema = z.object({
-  questionOrder: z.number().min(1),
+  question_order: z.number().min(1),
   point: z.number().min(1),
   explanation: z.string().min(1, 'Explanation is required'),
   blankAnswers: z.array(blankAnswerSchema).min(1, 'At least one blank answer required'),
@@ -45,10 +45,10 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
-      questionOrder: questions.length + 1,
+      question_order: questions.length + 1,
       point: 1,
       explanation: '',
-      blankAnswers: [{ blankIndex: 1, correctAnswer: '' }],
+      blankAnswers: [{ blank_index: 1, correct_answer: '' }],
     },
   });
 
@@ -60,15 +60,15 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
   const handleSubmit = (data: QuestionFormData) => {
     // Create separate questions for each blank answer
     const newQuestions = data.blankAnswers.map((blank, index) => ({
-      questionOrder: data.questionOrder + index,
+      question_order: data.question_order + index,
       point: data.point,
-      questionType: 1, // FILL_IN_THE_BLANKS
+      question_type: 1, // FILL_IN_THE_BLANKS
       questionCategories: [],
       explanation: data.explanation,
-      numberOfCorrectAnswers: 0, // No choices for fill in blank
-      blankIndex: blank.blankIndex,
-      correctAnswer: blank.correctAnswer,
-      instructionForChoice: '', // Empty for fill in blanks since instruction is at group level
+      number_of_correct_answers: 0, // No choices for fill in blank
+      blank_index: blank.blank_index,
+      correct_answer: blank.correct_answer,
+      instruction_for_choice: '', // Empty for fill in blanks since instruction is at group level
     }));
 
     if (editingIndex !== null) {
@@ -85,10 +85,10 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
     }
 
     form.reset({
-      questionOrder: questions.length + newQuestions.length + 1,
+      question_order: questions.length + newQuestions.length + 1,
       point: 1,
       explanation: '',
-      blankAnswers: [{ blankIndex: 1, correctAnswer: '' }],
+      blankAnswers: [{ blank_index: 1, correct_answer: '' }],
     });
   };
 
@@ -99,12 +99,12 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
     );
 
     const blankAnswers = groupQuestions.map((q) => ({
-      blankIndex: q.blankIndex,
-      correctAnswer: q.correctAnswer,
+      blank_index: q.blank_index,
+      correct_answer: q.correct_answer,
     }));
 
     form.reset({
-      questionOrder: question.questionOrder,
+      question_order: question.question_order,
       point: question.point,
       explanation: question.explanation,
       blankAnswers,
@@ -119,8 +119,8 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
 
   const addBlankAnswer = () => {
     append({
-      blankIndex: fields.length + 1,
-      correctAnswer: '',
+      blank_index: fields.length + 1,
+      correct_answer: '',
     });
   };
 
@@ -141,7 +141,7 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
               <div className='grid grid-cols-2 gap-4'>
                 <FormField
                   control={form.control}
-                  name='questionOrder'
+                  name='question_order'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Question Order</FormLabel>
@@ -214,7 +214,7 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
                       <div className='grid grid-cols-2 gap-4 flex-1'>
                         <FormField
                           control={form.control}
-                          name={`blankAnswers.${index}.blankIndex`}
+                          name={`blankAnswers.${index}.blank_index`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Blank Number</FormLabel>
@@ -232,7 +232,7 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
 
                         <FormField
                           control={form.control}
-                          name={`blankAnswers.${index}.correctAnswer`}
+                          name={`blankAnswers.${index}.correct_answer`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Correct Answer</FormLabel>
@@ -294,9 +294,9 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
                 <div key={index} className='p-4 border rounded-lg'>
                   <div className='flex items-start justify-between'>
                     <div className='flex-1'>
-                      <h4 className='font-medium'>Question {question.questionOrder}</h4>
+                      <h4 className='font-medium'>Question {question.question_order}</h4>
                       <div className='text-sm text-muted-foreground mt-1'>
-                        Blank {question.blankIndex} - Answer: {question.correctAnswer}
+                        Blank {question.blank_index} - Answer: {question.correct_answer}
                       </div>
                       <div className='text-sm text-muted-foreground mt-1'>
                         Points: {question.point}

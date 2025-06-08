@@ -32,7 +32,7 @@ export interface PassageDetailResponse {
   instruction: string;
   title: string;
   content: string;
-  contentWithHighlightKeywords: string;
+  content_with_highlight_keywords: string;
   passage_status: number;
   created_by: UserInformation;
   updated_by: UserInformation;
@@ -47,7 +47,7 @@ export interface PassageGetResponse {
   instruction: string;
   title: string;
   content: string;
-  contentWithHighlightKeywords: string;
+  content_with_highlight_keywords: string;
   passage_status: number;
   created_by: UserInformation;
   updated_by: UserInformation;
@@ -107,39 +107,39 @@ export interface AddGroupQuestionRequest {
 }
 
 export interface AddGroupQuestionResponse {
-  groupId: string;
+  group_id: string;
   id?: string;
 }
 
 export interface QuestionCreationResponse {
-  questionId: string;
-  questionOrder: number;
+  question_id: string;
+  question_order: number;
   point: number;
-  questionType: number;
+  question_type: number;
   explanation: string;
-  numberOfCorrectAnswers: number;
-  instructionForChoice?: string;
+  number_of_correct_answers: number;
+  instruction_for_choice?: string;
   choices?: ChoiceResponse[];
-  blankIndex?: number;
-  correctAnswer?: string;
-  instructionForMatching?: string;
-  correctAnswerForMatching?: string;
-  zoneIndex?: number;
-  dragItemId?: string;
+  blank_index?: number;
+  correct_answer?: string;
+  instruction_for_matching?: string;
+  correct_answer_for_matching?: string;
+  zone_index?: number;
+  drag_item_id?: string;
 }
 
 export interface ChoiceResponse {
-  choiceId: string;
+  choice_id: string;
   label: string;
   content: string;
-  choiceOrder: number;
-  isCorrect: boolean;
+  choice_order: number;
+  is_correct: boolean;
 }
 
 export interface AddGroupQuestionResponse {
-  groupId: string;
-  sectionOrder: number;
-  sectionLabel: string;
+  group_id: string;
+  section_order: number;
+  section_label: string;
   instruction: string;
   questions: QuestionCreationResponse[];
 }
@@ -176,48 +176,48 @@ export interface PassageFormData {
   instruction: string;
   title: string;
   content: string;
-  contentWithHighlightKeywords: string;
+  content_with_highlight_keywords: string;
   passage_status: PassageStatus;
   groups: GroupFormData[];
 }
 
 export interface GroupFormData {
-  sectionOrder: number;
-  sectionLabel: string;
+  section_order: number;
+  section_label: string;
   instruction: string;
-  questionType: QuestionType;
+  question_type: QuestionType;
   questions: QuestionFormData[];
-  dragItems?: string[];
+  drag_items?: string[];
 }
 
 export interface QuestionFormData {
-  questionOrder: number;
+  question_order: number;
   point: number;
   explanation: string;
-  numberOfCorrectAnswers: number;
+  number_of_correct_answers: number;
 
   // For Multiple Choice
-  instructionForChoice?: string;
+  instruction_for_choice?: string;
   choices?: ChoiceFormData[];
 
   // For Fill in Blank
-  blankIndex?: number;
-  correctAnswer?: string;
+  blank_index?: number;
+  correct_answer?: string;
 
   // For Matching
-  instructionForMatching?: string;
-  correctAnswerForMatching?: string;
+  instruction_for_matching?: string;
+  correct_answer_for_matching?: string;
 
   // For Drag and Drop
-  zoneIndex?: number;
-  dragItemId?: string;
+  zone_index?: number;
+  drag_item_id?: string;
 }
 
 export interface ChoiceFormData {
   label: string;
   content: string;
-  choiceOrder: number;
-  isCorrect: boolean;
+  choice_order: number;
+  is_correct: boolean;
 }
 
 export interface Pagination {

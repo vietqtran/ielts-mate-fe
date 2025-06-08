@@ -28,58 +28,58 @@ const dragItemSchema = z.object({
 });
 
 const questionAnswerSchema = z.object({
-  zoneIndex: z.number().min(1),
+  zone_index: z.number().min(1),
   dragItemContent: z.string().min(1, 'Drag item content is required'),
 });
 
 const questionSchema = z.object({
-  questionOrder: z.number().min(1),
+  question_order: z.number().min(1),
   point: z.number().min(1),
   explanation: z.string().min(1, 'Explanation is required'),
-  instructionForChoice: z.string().min(1, 'Description is required'),
+  instruction_for_choice: z.string().min(1, 'Description is required'),
   questionAnswers: z.array(questionAnswerSchema).min(1, 'At least one zone answer required'),
 });
 
-const dragItemsSchema = z.object({
-  dragItems: z.array(dragItemSchema).min(1, 'At least one drag item required'),
+const drag_itemsSchema = z.object({
+  drag_items: z.array(dragItemSchema).min(1, 'At least one drag item required'),
 });
 
 type QuestionFormData = z.infer<typeof questionSchema>;
-type DragItemsFormData = z.infer<typeof dragItemsSchema>;
+type DragItemsFormData = z.infer<typeof drag_itemsSchema>;
 
 interface DragDropFormProps {
   questions: any[];
-  dragItems: string[];
+  drag_items: string[];
   onQuestionsChange: (questions: any[]) => void;
-  onDragItemsChange: (dragItems: string[]) => void;
+  onDragItemsChange: (drag_items: string[]) => void;
 }
 
 export function DragDropForm({
   questions,
-  dragItems,
+  drag_items,
   onQuestionsChange,
   onDragItemsChange,
 }: DragDropFormProps) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [activeTab, setActiveTab] = useState('dragItems');
+  const [activeTab, setActiveTab] = useState('drag_items');
 
   const questionForm = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
-      questionOrder: questions.length + 1,
+      question_order: questions.length + 1,
       point: 1,
       explanation: '',
-      instructionForChoice: '',
-      questionAnswers: [{ zoneIndex: 1, dragItemContent: '' }],
+      instruction_for_choice: '',
+      questionAnswers: [{ zone_index: 1, dragItemContent: '' }],
     },
   });
 
-  const dragItemsForm = useForm<DragItemsFormData>({
-    resolver: zodResolver(dragItemsSchema),
+  const drag_itemsForm = useForm<DragItemsFormData>({
+    resolver: zodResolver(drag_itemsSchema),
     defaultValues: {
-      dragItems:
-        dragItems.length > 0
-          ? dragItems.map((item, index) => ({ content: item, itemOrder: index + 1 }))
+      drag_items:
+        drag_items.length > 0
+          ? drag_items.map((item, index) => ({ content: item, itemOrder: index + 1 }))
           : [{ content: '', itemOrder: 1 }],
     },
   });
@@ -98,27 +98,27 @@ export function DragDropForm({
     append: appendDragItem,
     remove: removeDragItem,
   } = useFieldArray({
-    control: dragItemsForm.control,
-    name: 'dragItems',
+    control: drag_itemsForm.control,
+    name: 'drag_items',
   });
 
   const handleDragItemsSubmit = (data: DragItemsFormData) => {
-    const newDragItems = data.dragItems.map((item) => item.content);
+    const newDragItems = data.drag_items.map((item) => item.content);
     onDragItemsChange(newDragItems);
   };
 
   const handleQuestionSubmit = (data: QuestionFormData) => {
     // Create separate questions for each zone answer
     const newQuestions = data.questionAnswers.map((answer, index) => ({
-      questionOrder: data.questionOrder + index,
+      question_order: data.question_order + index,
       point: data.point,
-      questionType: 3, // DRAG_AND_DROP
+      question_type: 3, // DRAG_AND_DROP
       questionCategories: [],
       explanation: data.explanation,
-      numberOfCorrectAnswers: 0, // No traditional choices for drag drop
-      zoneIndex: answer.zoneIndex,
-      dragItemContent: answer.dragItemContent, // We'll map this to dragItemId later
-      instructionForChoice: index === 0 ? data.instructionForChoice : '', // Only first question has instruction
+      number_of_correct_answers: 0, // No traditional choices for drag drop
+      zone_index: answer.zone_index,
+      dragItemContent: answer.dragItemContent, // We'll map this to drag_item_id later
+      instruction_for_choice: index === 0 ? data.instruction_for_choice : '', // Only first question has instruction
     }));
 
     if (editingIndex !== null) {
@@ -134,11 +134,11 @@ export function DragDropForm({
     }
 
     questionForm.reset({
-      questionOrder: questions.length + newQuestions.length + 1,
+      question_order: questions.length + newQuestions.length + 1,
       point: 1,
       explanation: '',
-      instructionForChoice: '',
-      questionAnswers: [{ zoneIndex: 1, dragItemContent: '' }],
+      instruction_for_choice: '',
+      questionAnswers: [{ zone_index: 1, dragItemContent: '' }],
     });
   };
 
@@ -146,20 +146,20 @@ export function DragDropForm({
     const question = questions[index];
     const groupQuestions = questions.filter(
       (q) =>
-        q.instructionForChoice === question.instructionForChoice ||
-        (q.instructionForChoice === '' && question.instructionForChoice !== '')
+        q.instruction_for_choice === question.instruction_for_choice ||
+        (q.instruction_for_choice === '' && question.instruction_for_choice !== '')
     );
 
     const questionAnswers = groupQuestions.map((q) => ({
-      zoneIndex: q.zoneIndex,
+      zone_index: q.zone_index,
       dragItemContent: q.dragItemContent,
     }));
 
     questionForm.reset({
-      questionOrder: question.questionOrder,
+      question_order: question.question_order,
       point: question.point,
       explanation: question.explanation,
-      instructionForChoice: question.instructionForChoice,
+      instruction_for_choice: question.instruction_for_choice,
       questionAnswers,
     });
     setEditingIndex(index);
@@ -170,8 +170,8 @@ export function DragDropForm({
     const updatedQuestions = questions.filter(
       (q) =>
         !(
-          q.instructionForChoice === question.instructionForChoice ||
-          (q.instructionForChoice === '' && question.instructionForChoice !== '')
+          q.instruction_for_choice === question.instruction_for_choice ||
+          (q.instruction_for_choice === '' && question.instruction_for_choice !== '')
         )
     );
     onQuestionsChange(updatedQuestions);
@@ -179,7 +179,7 @@ export function DragDropForm({
 
   const addQuestionAnswer = () => {
     appendAnswer({
-      zoneIndex: questionAnswerFields.length + 1,
+      zone_index: questionAnswerFields.length + 1,
       dragItemContent: '',
     });
   };
@@ -195,11 +195,11 @@ export function DragDropForm({
     <div className='space-y-6'>
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className='grid w-full grid-cols-2'>
-          <TabsTrigger value='dragItems'>Drag Items</TabsTrigger>
+          <TabsTrigger value='drag_items'>Drag Items</TabsTrigger>
           <TabsTrigger value='questions'>Questions</TabsTrigger>
         </TabsList>
 
-        <TabsContent value='dragItems' className='space-y-6'>
+        <TabsContent value='drag_items' className='space-y-6'>
           <Card>
             <CardHeader>
               <CardTitle>Manage Drag Items</CardTitle>
@@ -209,9 +209,9 @@ export function DragDropForm({
               </p>
             </CardHeader>
             <CardContent>
-              <Form {...dragItemsForm}>
+              <Form {...drag_itemsForm}>
                 <form
-                  onSubmit={dragItemsForm.handleSubmit(handleDragItemsSubmit)}
+                  onSubmit={drag_itemsForm.handleSubmit(handleDragItemsSubmit)}
                   className='space-y-6'
                 >
                   <div className='space-y-4'>
@@ -233,8 +233,8 @@ export function DragDropForm({
 
                           <div className='grid grid-cols-2 gap-4 flex-1'>
                             <FormField
-                              control={dragItemsForm.control}
-                              name={`dragItems.${index}.content`}
+                              control={drag_itemsForm.control}
+                              name={`drag_items.${index}.content`}
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Content</FormLabel>
@@ -247,8 +247,8 @@ export function DragDropForm({
                             />
 
                             <FormField
-                              control={dragItemsForm.control}
-                              name={`dragItems.${index}.itemOrder`}
+                              control={drag_itemsForm.control}
+                              name={`drag_items.${index}.itemOrder`}
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Order</FormLabel>
@@ -305,7 +305,7 @@ export function DragDropForm({
                   <div className='grid grid-cols-2 gap-4'>
                     <FormField
                       control={questionForm.control}
-                      name='questionOrder'
+                      name='question_order'
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Question Order</FormLabel>
@@ -342,7 +342,7 @@ export function DragDropForm({
 
                   <FormField
                     control={questionForm.control}
-                    name='instructionForChoice'
+                    name='instruction_for_choice'
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Description</FormLabel>
@@ -395,7 +395,7 @@ export function DragDropForm({
                           <div className='grid grid-cols-2 gap-4 flex-1'>
                             <FormField
                               control={questionForm.control}
-                              name={`questionAnswers.${index}.zoneIndex`}
+                              name={`questionAnswers.${index}.zone_index`}
                               render={({ field }) => (
                                 <FormItem>
                                   <FormLabel>Zone Number</FormLabel>
@@ -475,30 +475,33 @@ export function DragDropForm({
               <CardContent>
                 <div className='space-y-4'>
                   {questions
-                    .filter((q) => q.instructionForChoice) // Only show questions with instructions
+                    .filter((q) => q.instruction_for_choice) // Only show questions with instructions
                     .map((question, index) => {
                       const relatedQuestions = questions.filter(
                         (q) =>
-                          q.instructionForChoice === question.instructionForChoice ||
-                          (q.instructionForChoice === '' && question.instructionForChoice !== '')
+                          q.instruction_for_choice === question.instruction_for_choice ||
+                          (q.instruction_for_choice === '' &&
+                            question.instruction_for_choice !== '')
                       );
 
                       return (
                         <div key={index} className='p-4 border rounded-lg'>
                           <div className='flex items-start justify-between'>
                             <div className='flex-1'>
-                              <h4 className='font-medium'>Question {question.questionOrder}</h4>
+                              <h4 className='font-medium'>Question {question.question_order}</h4>
                               <div
                                 className='text-sm text-muted-foreground mt-1'
-                                dangerouslySetInnerHTML={{ __html: question.instructionForChoice }}
+                                dangerouslySetInnerHTML={{
+                                  __html: question.instruction_for_choice,
+                                }}
                               />
                               <div className='mt-2 space-y-1'>
                                 <p className='text-sm font-medium'>Zone Answers:</p>
                                 {relatedQuestions
-                                  .sort((a, b) => a.zoneIndex - b.zoneIndex)
+                                  .sort((a, b) => a.zone_index - b.zone_index)
                                   .map((q, qIndex) => (
                                     <div key={qIndex} className='text-sm'>
-                                      Zone {q.zoneIndex}: {q.dragItemContent}
+                                      Zone {q.zone_index}: {q.dragItemContent}
                                     </div>
                                   ))}
                               </div>
@@ -523,14 +526,14 @@ export function DragDropForm({
       </Tabs>
 
       {/* Current Drag Items Display */}
-      {dragItems.length > 0 && (
+      {drag_items.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle>Available Drag Items ({dragItems.length})</CardTitle>
+            <CardTitle>Available Drag Items ({drag_items.length})</CardTitle>
           </CardHeader>
           <CardContent>
             <div className='flex flex-wrap gap-2'>
-              {dragItems.map((item, index) => (
+              {drag_items.map((item, index) => (
                 <div
                   key={index}
                   className='px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm'

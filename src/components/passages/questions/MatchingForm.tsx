@@ -22,11 +22,11 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 const questionSchema = z.object({
-  questionOrder: z.number().min(1),
+  question_order: z.number().min(1),
   point: z.number().min(1),
   explanation: z.string().min(1, 'Explanation is required'),
-  instructionForMatching: z.string().min(1, 'Instruction is required'),
-  correctAnswerForMatching: z.string().min(1, 'Correct answer mapping is required'),
+  instruction_for_matching: z.string().min(1, 'Instruction is required'),
+  correct_answer_for_matching: z.string().min(1, 'Correct answer mapping is required'),
 });
 
 type QuestionFormData = z.infer<typeof questionSchema>;
@@ -42,20 +42,20 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
-      questionOrder: questions.length + 1,
+      question_order: questions.length + 1,
       point: 1,
       explanation: '',
-      instructionForMatching: '',
-      correctAnswerForMatching: '',
+      instruction_for_matching: '',
+      correct_answer_for_matching: '',
     },
   });
 
   const handleSubmit = (data: QuestionFormData) => {
     const newQuestion = {
       ...data,
-      questionType: 2, // MATCHING
+      question_type: 2, // MATCHING
       questionCategories: [],
-      numberOfCorrectAnswers: 0, // No traditional choices for matching
+      number_of_correct_answers: 0, // No traditional choices for matching
     };
 
     if (editingIndex !== null) {
@@ -68,11 +68,11 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
     }
 
     form.reset({
-      questionOrder: questions.length + 2,
+      question_order: questions.length + 2,
       point: 1,
       explanation: '',
-      instructionForMatching: '',
-      correctAnswerForMatching: '',
+      instruction_for_matching: '',
+      correct_answer_for_matching: '',
     });
   };
 
@@ -102,7 +102,7 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
               <div className='grid grid-cols-2 gap-4'>
                 <FormField
                   control={form.control}
-                  name='questionOrder'
+                  name='question_order'
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Question Order</FormLabel>
@@ -139,7 +139,7 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
 
               <FormField
                 control={form.control}
-                name='instructionForMatching'
+                name='instruction_for_matching'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Matching Instruction</FormLabel>
@@ -161,7 +161,7 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
 
               <FormField
                 control={form.control}
-                name='correctAnswerForMatching'
+                name='correct_answer_for_matching'
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Correct Answer Mapping</FormLabel>
@@ -243,12 +243,12 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
                 <div key={index} className='p-4 border rounded-lg'>
                   <div className='flex items-start justify-between'>
                     <div className='flex-1'>
-                      <h4 className='font-medium'>Question {question.questionOrder}</h4>
+                      <h4 className='font-medium'>Question {question.question_order}</h4>
                       <div className='mt-2'>
                         <p className='text-sm font-medium text-muted-foreground'>Instruction:</p>
                         <div
                           className='text-sm mt-1'
-                          dangerouslySetInnerHTML={{ __html: question.instructionForMatching }}
+                          dangerouslySetInnerHTML={{ __html: question.instruction_for_matching }}
                         />
                       </div>
                       <div className='mt-2'>
@@ -256,7 +256,7 @@ export function MatchingForm({ questions, onQuestionsChange }: MatchingFormProps
                           Correct Answers:
                         </p>
                         <p className='text-sm mt-1 font-mono bg-gray-50 p-2 rounded'>
-                          {question.correctAnswerForMatching}
+                          {question.correct_answer_for_matching}
                         </p>
                       </div>
                       {question.explanation && (

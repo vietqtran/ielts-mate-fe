@@ -29,16 +29,16 @@ const dragItemSchema = z.object({
 });
 
 const questionSchema = z.object({
-  questionOrder: z.number().min(1),
+  question_order: z.number().min(1),
   point: z.number().min(1),
   explanation: z.string().min(1, 'Explanation is required'),
-  instructionForChoice: z.string().min(1, 'Task description is required'),
-  zoneIndex: z.number().min(1),
-  dragItemId: z.string().min(1, 'Drag item is required'),
+  instruction_for_choice: z.string().min(1, 'Task description is required'),
+  zone_index: z.number().min(1),
+  drag_item_id: z.string().min(1, 'Drag item is required'),
 });
 
 const dragDropFormSchema = z.object({
-  dragItems: z.array(dragItemSchema).min(1, 'At least one drag item required'),
+  drag_items: z.array(dragItemSchema).min(1, 'At least one drag item required'),
   questions: z.array(questionSchema).min(1, 'At least one question required'),
 });
 
@@ -46,12 +46,12 @@ type DragDropFormData = z.infer<typeof dragDropFormSchema>;
 
 interface QuestionGroup {
   id?: string;
-  sectionOrder: number;
-  sectionLabel: string;
+  section_order: number;
+  section_label: string;
   instruction: string;
-  questionType: string;
+  question_type: string;
   questions: any[];
-  dragItems?: string[];
+  drag_items?: string[];
 }
 
 interface DragDropManagerProps {
@@ -61,12 +61,12 @@ interface DragDropManagerProps {
 }
 
 export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) {
-  const [activeTab, setActiveTab] = useState('dragItems');
+  const [activeTab, setActiveTab] = useState('drag_items');
 
   const form = useForm<DragDropFormData>({
     resolver: zodResolver(dragDropFormSchema),
     defaultValues: {
-      dragItems: group.dragItems?.map((item, index) => ({
+      drag_items: group.drag_items?.map((item, index) => ({
         content: item,
         itemOrder: index + 1,
       })) || [
@@ -79,12 +79,12 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
           ? group.questions
           : [
               {
-                questionOrder: 1,
+                question_order: 1,
                 point: 1,
                 explanation: '',
-                instructionForChoice: '',
-                zoneIndex: 1,
-                dragItemId: '',
+                instruction_for_choice: '',
+                zone_index: 1,
+                drag_item_id: '',
               },
             ],
     },
@@ -96,7 +96,7 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
     remove: removeDragItem,
   } = useFieldArray({
     control: form.control,
-    name: 'dragItems',
+    name: 'drag_items',
   });
 
   const {
@@ -108,7 +108,7 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
     name: 'questions',
   });
 
-  const dragItems = form.watch('dragItems');
+  const drag_items = form.watch('drag_items');
 
   const { createQuestions, createDragItem, isLoading } = useQuestion();
 
@@ -120,7 +120,7 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
 
     try {
       // First, create drag items if they don't exist
-      const dragItemPromises = data.dragItems.map(async (item) => {
+      const dragItemPromises = data.drag_items.map(async (item) => {
         try {
           const response = await createDragItem(group.id!, {
             content: item.content,
@@ -146,16 +146,16 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
 
       // Then create questions with correct drag item IDs
       const questionRequests = data.questions.map((question) => ({
-        question_order: question.questionOrder,
+        question_order: question.question_order,
         point: question.point,
         question_type: 3, // DRAG_AND_DROP
         question_group_id: group.id!,
         question_categories: [],
         explanation: question.explanation,
         number_of_correct_answers: 0,
-        instruction_for_choice: question.instructionForChoice,
-        zone_index: question.zoneIndex,
-        drag_item_id: dragItemMap.get(question.dragItemId) || question.dragItemId,
+        instruction_for_choice: question.instruction_for_choice,
+        zone_index: question.zone_index,
+        drag_item_id: dragItemMap.get(question.drag_item_id) || question.drag_item_id,
       }));
 
       const questionsResponse = await createQuestions(group.id, questionRequests);
@@ -163,21 +163,21 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
       if (questionsResponse.data) {
         // Convert API responses back to frontend format
         const updatedQuestions = questionsResponse.data.map((apiResponse) => ({
-          id: apiResponse.questionId,
-          questionOrder: apiResponse.questionOrder,
+          id: apiResponse.question_id,
+          question_order: apiResponse.question_order,
           point: apiResponse.point,
-          questionType: apiResponse.questionType,
+          question_type: apiResponse.question_type,
           questionCategories: [],
           explanation: apiResponse.explanation,
-          numberOfCorrectAnswers: apiResponse.numberOfCorrectAnswers,
-          instructionForChoice: apiResponse.instructionForChoice,
-          zoneIndex: apiResponse.zoneIndex,
-          dragItemId: apiResponse.dragItemId,
+          number_of_correct_answers: apiResponse.number_of_correct_answers,
+          instruction_for_choice: apiResponse.instruction_for_choice,
+          zone_index: apiResponse.zone_index,
+          drag_item_id: apiResponse.drag_item_id,
         }));
 
         const updatedGroup = {
           ...group,
-          dragItems: data.dragItems.map((item) => item.content),
+          drag_items: data.drag_items.map((item) => item.content),
           questions: updatedQuestions,
         };
 
@@ -197,12 +197,12 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
 
   const addQuestion = () => {
     appendQuestion({
-      questionOrder: questionFields.length + 1,
+      question_order: questionFields.length + 1,
       point: 1,
       explanation: '',
-      instructionForChoice: '',
-      zoneIndex: questionFields.length + 1,
-      dragItemId: '',
+      instruction_for_choice: '',
+      zone_index: questionFields.length + 1,
+      drag_item_id: '',
     });
   };
 
@@ -225,11 +225,11 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
           <Form {...form}>
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className='grid w-full grid-cols-2'>
-                <TabsTrigger value='dragItems'>Drag Items ({dragItemFields.length})</TabsTrigger>
+                <TabsTrigger value='drag_items'>Drag Items ({dragItemFields.length})</TabsTrigger>
                 <TabsTrigger value='questions'>Questions ({questionFields.length})</TabsTrigger>
               </TabsList>
 
-              <TabsContent value='dragItems' className='space-y-6'>
+              <TabsContent value='drag_items' className='space-y-6'>
                 <div className='flex items-center justify-between'>
                   <h4 className='font-medium'>Drag Items</h4>
                   <Button onClick={addDragItem} variant='outline' size='sm' className='gap-2'>
@@ -246,7 +246,7 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
                       <div className='grid grid-cols-4 gap-4 flex-1'>
                         <FormField
                           control={form.control}
-                          name={`dragItems.${index}.itemOrder`}
+                          name={`drag_items.${index}.itemOrder`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Order</FormLabel>
@@ -265,7 +265,7 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
                         <div className='col-span-3'>
                           <FormField
                             control={form.control}
-                            name={`dragItems.${index}.content`}
+                            name={`drag_items.${index}.content`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Drag Item Content</FormLabel>
@@ -338,7 +338,7 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
                         <div className='grid grid-cols-3 gap-4'>
                           <FormField
                             control={form.control}
-                            name={`questions.${index}.questionOrder`}
+                            name={`questions.${index}.question_order`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Question Number</FormLabel>
@@ -356,7 +356,7 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
 
                           <FormField
                             control={form.control}
-                            name={`questions.${index}.zoneIndex`}
+                            name={`questions.${index}.zone_index`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel>Zone Number</FormLabel>
@@ -393,7 +393,7 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
 
                         <FormField
                           control={form.control}
-                          name={`questions.${index}.instructionForChoice`}
+                          name={`questions.${index}.instruction_for_choice`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Task Description / Drop Zone Context</FormLabel>
@@ -411,7 +411,7 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
 
                         <FormField
                           control={form.control}
-                          name={`questions.${index}.dragItemId`}
+                          name={`questions.${index}.drag_item_id`}
                           render={({ field }) => (
                             <FormItem>
                               <FormLabel>Correct Drag Item</FormLabel>
@@ -421,7 +421,7 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
                                   {...field}
                                 >
                                   <option value=''>Select the correct drag item</option>
-                                  {dragItems.map((item, itemIndex) => (
+                                  {drag_items.map((item, itemIndex) => (
                                     <option key={itemIndex} value={item.content}>
                                       {item.content || `Item ${itemIndex + 1}`}
                                     </option>
@@ -471,7 +471,7 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
       </Card>
 
       {/* Summary */}
-      {(group.questions.length > 0 || group.dragItems?.length) && (
+      {(group.questions.length > 0 || group.drag_items?.length) && (
         <Card>
           <CardHeader>
             <CardTitle>Current Configuration</CardTitle>
@@ -479,9 +479,9 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
           <CardContent>
             <div className='grid grid-cols-2 gap-4 text-sm'>
               <div>
-                <h4 className='font-semibold mb-2'>Drag Items ({group.dragItems?.length || 0})</h4>
+                <h4 className='font-semibold mb-2'>Drag Items ({group.drag_items?.length || 0})</h4>
                 <ul className='space-y-1'>
-                  {group.dragItems?.map((item, index) => (
+                  {group.drag_items?.map((item, index) => (
                     <li key={index} className='text-muted-foreground'>
                       {index + 1}. {item}
                     </li>
@@ -493,7 +493,8 @@ export function DragDropManager({ group, onUpdateGroup }: DragDropManagerProps) 
                 <ul className='space-y-1'>
                   {group.questions.map((question, index) => (
                     <li key={index} className='text-muted-foreground'>
-                      Q{question.questionOrder} → Zone {question.zoneIndex}: {question.dragItemId}
+                      Q{question.question_order} → Zone {question.zone_index}:{' '}
+                      {question.drag_item_id}
                     </li>
                   ))}
                   {group.questions.length === 0 && (
