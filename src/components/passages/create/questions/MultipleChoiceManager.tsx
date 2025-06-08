@@ -19,11 +19,13 @@ interface QuestionGroup {
 
 interface MultipleChoiceManagerProps {
   group: QuestionGroup;
+  onUpdateGroup: (group: QuestionGroup) => void;
   refetchPassageData: () => void;
 }
 
 export function MultipleChoiceManager({
   group,
+  onUpdateGroup,
   refetchPassageData,
 }: Readonly<MultipleChoiceManagerProps>) {
   const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
@@ -157,8 +159,18 @@ export function MultipleChoiceManager({
           instruction_for_choice: data.instruction_for_choice,
           choices: data.choices.map(({ id, ...rest }) => rest), // Ensure no client-side IDs
         };
-        await createQuestions(group.id, [questionRequest]);
-        refetchPassageData();
+        const response = await createQuestions(group.id, [questionRequest]);
+
+        if (response.data && Array.isArray(response.data)) {
+          const newQuestions = response.data;
+          const updatedGroup = {
+            ...group,
+            questions: [...group.questions, ...newQuestions],
+          };
+          onUpdateGroup(updatedGroup);
+        } else {
+          refetchPassageData();
+        }
       }
       setIsAddingOrEditing(false);
       setEditingQuestion(null);
