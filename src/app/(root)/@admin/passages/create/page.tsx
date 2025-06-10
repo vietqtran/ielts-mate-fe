@@ -179,7 +179,30 @@ export default function CreatePassagePage() {
   };
 
   const handleFinish = () => {
+    // Clear the form fields
+    form.reset({
+      title: '',
+      instruction: '',
+      content: '',
+      ielts_type: IeltsType.ACADEMIC,
+      part_number: 1,
+      passage_status: PassageStatus.DRAFT,
+    });
+
+    // Clear the question groups
+    setQuestionGroups([]);
+
+    // Reset the created passage ID
+    setCreatedpassage_id(null);
+
+    // Reset the current step to the beginning
+    setCurrentStep('basic');
+    setActiveTab('passage');
+
+    // Clear the draft from session storage
     sessionStorage.removeItem('draft-passage');
+
+    // Navigate back to the passages list
     router.push('/passages');
   };
 
