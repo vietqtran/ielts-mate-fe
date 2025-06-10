@@ -2,11 +2,11 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { MatchingForm, MatchingFormData } from './MatchingForm';
 
 import { Button } from '@/components/ui/button';
 import { useQuestion } from '@/hooks/useQuestion';
-import { useState } from 'react';
 
 interface QuestionGroup {
   id?: string;
@@ -25,6 +25,11 @@ interface MatchingManagerProps {
 export function MatchingManager({ group, refetchPassageData }: Readonly<MatchingManagerProps>) {
   const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
+  const [localQuestions, setLocalQuestions] = useState(group.questions);
+
+  useEffect(() => {
+    setLocalQuestions(group.questions);
+  }, [group.questions]);
 
   const { createQuestions, updateQuestionInfo, deleteQuestion, isLoading } = useQuestion();
 
@@ -71,7 +76,7 @@ export function MatchingManager({ group, refetchPassageData }: Readonly<Matching
     }
     try {
       await deleteQuestion(group.id, questionId);
-      refetchPassageData();
+      setLocalQuestions((prev) => prev.filter((q) => q.id !== questionId));
     } catch (error) {
       console.error('Failed to delete question:', error);
     }
@@ -83,7 +88,7 @@ export function MatchingManager({ group, refetchPassageData }: Readonly<Matching
   };
 
   const defaultInitialData = {
-    question_order: group.questions.length + 1,
+    question_order: localQuestions.length + 1,
     point: 1,
     explanation: '',
     instruction_for_matching: '',
@@ -93,7 +98,7 @@ export function MatchingManager({ group, refetchPassageData }: Readonly<Matching
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
-        <h3 className='font-semibold'>Matching Questions ({group.questions.length})</h3>
+        <h3 className='font-semibold'>Matching Questions ({localQuestions.length})</h3>
         <Button onClick={() => setIsAddingOrEditing(true)} className='gap-2'>
           <Plus className='h-4 w-4' />
           Add Question
@@ -110,10 +115,10 @@ export function MatchingManager({ group, refetchPassageData }: Readonly<Matching
       )}
 
       {/* Questions List */}
-      {!isAddingOrEditing && group.questions.length > 0 && (
+      {!isAddingOrEditing && localQuestions.length > 0 && (
         <div className='space-y-4 mt-4'>
           <h4 className='font-medium'>Questions:</h4>
-          {group.questions.map((question) => (
+          {localQuestions.map((question) => (
             <Card key={question.id}>
               <CardContent className='pt-4'>
                 <div className='flex items-start justify-between'>
@@ -168,7 +173,7 @@ export function MatchingManager({ group, refetchPassageData }: Readonly<Matching
         </div>
       )}
 
-      {!isAddingOrEditing && group.questions.length === 0 && (
+      {!isAddingOrEditing && localQuestions.length === 0 && (
         <div className='text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg'>
           <Plus className='h-8 w-8 mx-auto mb-2 opacity-50' />
           <p>No questions created yet.</p>
