@@ -168,11 +168,7 @@ export function MultipleChoiceManager({
 
         if (response.data && Array.isArray(response.data)) {
           const newQuestions = response.data;
-          const updatedGroup = {
-            ...group,
-            questions: [...localQuestions, ...newQuestions],
-          };
-          onUpdateGroup(updatedGroup);
+          setLocalQuestions((prev) => [...prev, ...newQuestions]);
         } else {
           refetchPassageData();
         }

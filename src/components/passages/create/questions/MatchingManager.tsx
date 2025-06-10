@@ -50,12 +50,22 @@ export function MatchingManager({ group, refetchPassageData }: Readonly<Matching
     try {
       if (editingQuestion) {
         // Update existing question
-        await updateQuestionInfo(group.id, editingQuestion.id, questionRequest);
-        refetchPassageData();
+        const response = await updateQuestionInfo(group.id, editingQuestion.id, questionRequest);
+        if (response.data) {
+          setLocalQuestions((prev) =>
+            prev.map((q) => (q.id === editingQuestion.id ? response.data : q))
+          );
+        } else {
+          refetchPassageData();
+        }
       } else {
         // Create new question
-        await createQuestions(group.id, [questionRequest]);
-        refetchPassageData();
+        const response = await createQuestions(group.id, [questionRequest]);
+        if (response.data && Array.isArray(response.data)) {
+          setLocalQuestions((prev) => [...prev, ...response.data]);
+        } else {
+          refetchPassageData();
+        }
       }
       setIsAddingOrEditing(false);
       setEditingQuestion(null);

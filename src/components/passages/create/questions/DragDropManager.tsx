@@ -89,10 +89,16 @@ export function DragDropManager({ group, refetchPassageData }: Readonly<DragDrop
         .map((res) => (res && res.data ? res.data : null))
         .filter(Boolean);
 
-      const allItems = [
-        ...originalItems.filter((orig) => !deletedItemIds.includes(orig.id)),
-        ...successfulItems,
-      ];
+      // Atomically update drag items state
+      const updatedItems = [...originalItems].filter((item) => !deletedItemIds.includes(item.id));
+      successfulItems.forEach((newItem) => {
+        const index = updatedItems.findIndex((item) => item.id === newItem.id);
+        if (index > -1) {
+          updatedItems[index] = newItem; // Update existing
+        } else {
+          updatedItems.push(newItem); // Add new
+        }
+      });
 
       // 2. Handle Questions
       const questionPromises: Promise<any>[] = [];
@@ -135,14 +141,22 @@ export function DragDropManager({ group, refetchPassageData }: Readonly<DragDrop
         .flat()
         .filter(Boolean);
 
-      const finalQuestions = [
-        ...originalQuestions.filter((orig) => !deletedQuestionIds.includes(orig.id)),
-        ...successfulQuestions,
-      ];
+      // Atomically update questions state
+      const updatedQuestions = [...originalQuestions].filter(
+        (q) => !deletedQuestionIds.includes(q.id)
+      );
+      successfulQuestions.forEach((newQuestion) => {
+        const index = updatedQuestions.findIndex((q) => q.id === newQuestion.id);
+        if (index > -1) {
+          updatedQuestions[index] = newQuestion; // Update existing
+        } else {
+          updatedQuestions.push(newQuestion); // Add new
+        }
+      });
 
       // 3. Update local state
-      setLocalDragItems(allItems);
-      setLocalQuestions(finalQuestions);
+      setLocalDragItems(updatedItems);
+      setLocalQuestions(updatedQuestions);
       setIsEditing(false);
     } catch (error) {
       console.error('Failed to save Drag & Drop changes:', error);
