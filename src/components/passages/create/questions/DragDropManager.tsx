@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Edit, Plus } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { DragDropForm, DragDropFormData } from './DragDropForm';
 
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,13 @@ interface DragDropManagerProps {
 
 export function DragDropManager({ group, refetchPassageData }: Readonly<DragDropManagerProps>) {
   const [isEditing, setIsEditing] = useState(false);
+  const [localQuestions, setLocalQuestions] = useState(group.questions);
+  const [localDragItems, setLocalDragItems] = useState(group.drag_items || []);
+
+  useEffect(() => {
+    setLocalQuestions(group.questions);
+    setLocalDragItems(group.drag_items || []);
+  }, [group.questions, group.drag_items]);
   const {
     createQuestions,
     updateQuestionInfo,
@@ -42,8 +49,8 @@ export function DragDropManager({ group, refetchPassageData }: Readonly<DragDrop
     }
 
     const groupId = group.id;
-    const originalItems = group.drag_items || [];
-    const originalQuestions = group.questions || [];
+    const originalItems = localDragItems;
+    const originalQuestions = localQuestions;
 
     try {
       // 1. Handle Drag Items
@@ -78,12 +85,20 @@ export function DragDropManager({ group, refetchPassageData }: Readonly<DragDrop
       });
 
       const itemResults = await Promise.all(itemPromises);
-      const successfulItems = itemResults.map((res) => res.data).filter(Boolean);
+      const successfulItems = itemResults
+        .map((res) => (res && res.data ? res.data : null))
+        .filter(Boolean);
 
-      const allItems = [
-        ...originalItems.filter((orig) => !deletedItemIds.includes(orig.id)),
-        ...successfulItems,
-      ];
+      // Atomically update drag items state
+      const updatedItems = [...originalItems].filter((item) => !deletedItemIds.includes(item.id));
+      successfulItems.forEach((newItem) => {
+        const index = updatedItems.findIndex((item) => item.id === newItem.id);
+        if (index > -1) {
+          updatedItems[index] = newItem; // Update existing
+        } else {
+          updatedItems.push(newItem); // Add new
+        }
+      });
 
       // 2. Handle Questions
       const questionPromises: Promise<any>[] = [];
@@ -120,17 +135,28 @@ export function DragDropManager({ group, refetchPassageData }: Readonly<DragDrop
 
       const questionResults = await Promise.all(questionPromises);
       const successfulQuestions = questionResults
-        .map((res) => (Array.isArray(res.data) ? res.data : [res.data]))
+        .map((res) =>
+          res && Array.isArray(res.data) ? res.data : res && res.data ? [res.data] : []
+        )
         .flat()
         .filter(Boolean);
 
-      const finalQuestions = [
-        ...originalQuestions.filter((orig) => !deletedQuestionIds.includes(orig.id)),
-        ...successfulQuestions,
-      ];
+      // Atomically update questions state
+      const updatedQuestions = [...originalQuestions].filter(
+        (q) => !deletedQuestionIds.includes(q.id)
+      );
+      successfulQuestions.forEach((newQuestion) => {
+        const index = updatedQuestions.findIndex((q) => q.id === newQuestion.id);
+        if (index > -1) {
+          updatedQuestions[index] = newQuestion; // Update existing
+        } else {
+          updatedQuestions.push(newQuestion); // Add new
+        }
+      });
 
-      // 3. Update parent state
-      refetchPassageData();
+      // 3. Update local state
+      setLocalDragItems(updatedItems);
+      setLocalQuestions(updatedQuestions);
       setIsEditing(false);
     } catch (error) {
       console.error('Failed to save Drag & Drop changes:', error);
@@ -139,18 +165,18 @@ export function DragDropManager({ group, refetchPassageData }: Readonly<DragDrop
   };
 
   const dragItemMap = useMemo(() => {
-    return new Map(group.drag_items?.map((item) => [item.id, item.content]));
-  }, [group.drag_items]);
+    return new Map(localDragItems?.map((item) => [item.id, item.content]));
+  }, [localDragItems]);
 
   const initialFormData: DragDropFormData = {
     drag_items:
-      group.drag_items?.map((item) => ({
+      localDragItems?.map((item) => ({
         id: item.id,
         content: item.content,
         itemOrder: item.item_order,
       })) || [],
     questions:
-      group.questions?.map((q) => ({
+      localQuestions?.map((q) => ({
         id: q.id,
         question_order: q.question_order,
         point: q.point,
@@ -189,7 +215,7 @@ export function DragDropManager({ group, refetchPassageData }: Readonly<DragDrop
         </Button>
       </div>
 
-      {group.questions.length === 0 && group.drag_items?.length === 0 ? (
+      {localQuestions.length === 0 && localDragItems?.length === 0 ? (
         <div className='text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg'>
           <Plus className='h-8 w-8 mx-auto mb-2 opacity-50' />
           <p>No Drag & Drop configuration set up yet.</p>
@@ -204,10 +230,10 @@ export function DragDropManager({ group, refetchPassageData }: Readonly<DragDrop
             <div className='grid grid-cols-2 gap-6 text-sm'>
               <div>
                 <h4 className='font-semibold mb-2 border-b pb-1'>
-                  Drag Items ({group.drag_items?.length || 0})
+                  Drag Items ({localDragItems?.length || 0})
                 </h4>
                 <ul className='space-y-1 list-disc list-inside'>
-                  {group.drag_items?.map((item) => (
+                  {localDragItems?.map((item) => (
                     <li key={item.id} className='text-muted-foreground'>
                       {item.content}
                     </li>
@@ -216,10 +242,10 @@ export function DragDropManager({ group, refetchPassageData }: Readonly<DragDrop
               </div>
               <div>
                 <h4 className='font-semibold mb-2 border-b pb-1'>
-                  Questions / Drop Zones ({group.questions.length})
+                  Questions / Drop Zones ({localQuestions.length})
                 </h4>
                 <ul className='space-y-2'>
-                  {group.questions.map((question) => (
+                  {localQuestions.map((question) => (
                     <li key={question.id} className='text-muted-foreground'>
                       <span className='font-medium text-primary'>
                         Q{question.question_order} (Zone {question.zone_index}):
@@ -229,7 +255,7 @@ export function DragDropManager({ group, refetchPassageData }: Readonly<DragDrop
                       )}
                     </li>
                   ))}
-                  {group.questions.length === 0 && (
+                  {localQuestions.length === 0 && (
                     <li className='text-muted-foreground italic'>No questions created.</li>
                   )}
                 </ul>

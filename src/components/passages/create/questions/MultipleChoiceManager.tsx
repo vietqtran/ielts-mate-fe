@@ -2,11 +2,11 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { MultipleChoiceForm, QuestionFormData } from './MultipleChoiceForm';
 
 import { Button } from '@/components/ui/button';
 import { useQuestion } from '@/hooks/useQuestion';
-import { useState } from 'react';
 
 interface QuestionGroup {
   id?: string;
@@ -19,15 +19,22 @@ interface QuestionGroup {
 
 interface MultipleChoiceManagerProps {
   group: QuestionGroup;
+  onUpdateGroup: (group: QuestionGroup) => void;
   refetchPassageData: () => void;
 }
 
 export function MultipleChoiceManager({
   group,
+  onUpdateGroup,
   refetchPassageData,
 }: Readonly<MultipleChoiceManagerProps>) {
   const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
+  const [localQuestions, setLocalQuestions] = useState(group.questions);
+
+  useEffect(() => {
+    setLocalQuestions(group.questions);
+  }, [group.questions]);
 
   const {
     createQuestions,
@@ -140,10 +147,10 @@ export function MultipleChoiceManager({
         };
 
         // 5. Update local state
-        const updatedQuestions = group.questions.map((q: any) =>
+        const updatedQuestions = localQuestions.map((q: any) =>
           q.question_id === questionId ? finalUpdatedQuestion : q
         );
-        refetchPassageData();
+        setLocalQuestions(updatedQuestions);
       } else {
         // Create new question with choices
         const questionRequest = {
@@ -157,8 +164,14 @@ export function MultipleChoiceManager({
           instruction_for_choice: data.instruction_for_choice,
           choices: data.choices.map(({ id, ...rest }) => rest), // Ensure no client-side IDs
         };
-        await createQuestions(group.id, [questionRequest]);
-        refetchPassageData();
+        const response = await createQuestions(group.id, [questionRequest]);
+
+        if (response.data && Array.isArray(response.data)) {
+          const newQuestions = response.data;
+          setLocalQuestions((prev) => [...prev, ...newQuestions]);
+        } else {
+          refetchPassageData();
+        }
       }
       setIsAddingOrEditing(false);
       setEditingQuestion(null);
@@ -179,7 +192,7 @@ export function MultipleChoiceManager({
     }
     try {
       await deleteQuestion(group.id, questionId);
-      refetchPassageData();
+      setLocalQuestions((prev) => prev.filter((q) => q.question_id !== questionId));
     } catch (error) {
       console.error('Failed to delete question:', error);
     }
@@ -191,7 +204,7 @@ export function MultipleChoiceManager({
   };
 
   const defaultInitialData = {
-    question_order: group.questions.length + 1,
+    question_order: localQuestions.length + 1,
     point: 1,
     explanation: '',
     instruction_for_choice: '',
@@ -205,7 +218,7 @@ export function MultipleChoiceManager({
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
-        <h3 className='font-semibold'>Multiple Choice Questions ({group.questions.length})</h3>
+        <h3 className='font-semibold'>Multiple Choice Questions ({localQuestions.length})</h3>
         <Button onClick={() => setIsAddingOrEditing(true)} className='gap-2'>
           <Plus className='h-4 w-4' />
           Add Question
@@ -236,10 +249,10 @@ export function MultipleChoiceManager({
       )}
 
       {/* Questions List */}
-      {!isAddingOrEditing && group.questions.length > 0 && (
+      {!isAddingOrEditing && localQuestions.length > 0 && (
         <div className='space-y-4 mt-4'>
           <h4 className='font-medium'>Questions:</h4>
-          {group.questions.map((question) => (
+          {localQuestions.map((question) => (
             <Card key={question.question_id}>
               <CardContent className='pt-4'>
                 <div className='flex items-start justify-between'>
@@ -298,7 +311,7 @@ export function MultipleChoiceManager({
         </div>
       )}
 
-      {!isAddingOrEditing && group.questions.length === 0 && (
+      {!isAddingOrEditing && localQuestions.length === 0 && (
         <div className='text-center py-8 text-muted-foreground'>
           <Plus className='h-8 w-8 mx-auto mb-2 opacity-50' />
           <p>No questions created yet.</p>

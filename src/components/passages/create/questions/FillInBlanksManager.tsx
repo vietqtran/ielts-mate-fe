@@ -2,11 +2,11 @@
 
 import { Card, CardContent } from '@/components/ui/card';
 import { Plus, Trash2 } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { FillInBlanksForm, FillInBlanksFormData } from './FillInBlanksForm';
 
 import { Button } from '@/components/ui/button';
 import { useQuestion } from '@/hooks/useQuestion';
-import { useState } from 'react';
 
 interface QuestionGroup {
   id?: string;
@@ -28,6 +28,11 @@ export function FillInBlanksManager({
 }: Readonly<FillInBlanksManagerProps>) {
   const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
+  const [localQuestions, setLocalQuestions] = useState(group.questions);
+
+  useEffect(() => {
+    setLocalQuestions(group.questions);
+  }, [group.questions]);
 
   const { createQuestions, updateQuestionInfo, deleteQuestion, isLoading } = useQuestion();
 
@@ -48,12 +53,22 @@ export function FillInBlanksManager({
     try {
       if (editingQuestion) {
         // Update existing question
-        await updateQuestionInfo(group.id, editingQuestion.id, questionRequest);
-        refetchPassageData();
+        const response = await updateQuestionInfo(group.id, editingQuestion.id, questionRequest);
+        if (response.data) {
+          setLocalQuestions((prev) =>
+            prev.map((q) => (q.id === editingQuestion.id ? response.data : q))
+          );
+        } else {
+          refetchPassageData();
+        }
       } else {
         // Create new question
-        await createQuestions(group.id, [questionRequest]);
-        refetchPassageData();
+        const response = await createQuestions(group.id, [questionRequest]);
+        if (response.data && Array.isArray(response.data)) {
+          setLocalQuestions((prev) => [...prev, ...response.data]);
+        } else {
+          refetchPassageData();
+        }
       }
       setIsAddingOrEditing(false);
       setEditingQuestion(null);
@@ -74,7 +89,7 @@ export function FillInBlanksManager({
     }
     try {
       await deleteQuestion(group.id, questionId);
-      refetchPassageData();
+      setLocalQuestions((prev) => prev.filter((q) => q.id !== questionId));
     } catch (error) {
       console.error('Failed to delete question:', error);
     }
@@ -86,17 +101,17 @@ export function FillInBlanksManager({
   };
 
   const defaultInitialData = {
-    question_order: group.questions.length + 1,
+    question_order: localQuestions.length + 1,
     point: 1,
     explanation: '',
-    blank_index: group.questions.length + 1,
+    blank_index: localQuestions.length + 1,
     correct_answer: '',
   };
 
   return (
     <div className='space-y-6'>
       <div className='flex items-center justify-between'>
-        <h3 className='font-semibold'>Fill in the Blanks Questions ({group.questions.length})</h3>
+        <h3 className='font-semibold'>Fill in the Blanks Questions ({localQuestions.length})</h3>
         <Button onClick={() => setIsAddingOrEditing(true)} className='gap-2'>
           <Plus className='h-4 w-4' />
           Add Question
@@ -113,10 +128,10 @@ export function FillInBlanksManager({
       )}
 
       {/* Questions List */}
-      {!isAddingOrEditing && group.questions.length > 0 && (
+      {!isAddingOrEditing && localQuestions.length > 0 && (
         <div className='space-y-4 mt-4'>
           <h4 className='font-medium'>Questions:</h4>
-          {group.questions.map((question) => (
+          {localQuestions.map((question) => (
             <Card key={question.id}>
               <CardContent className='pt-4'>
                 <div className='flex items-start justify-between'>
@@ -163,7 +178,7 @@ export function FillInBlanksManager({
         </div>
       )}
 
-      {!isAddingOrEditing && group.questions.length === 0 && (
+      {!isAddingOrEditing && localQuestions.length === 0 && (
         <div className='text-center py-8 text-muted-foreground border-2 border-dashed rounded-lg'>
           <Plus className='h-8 w-8 mx-auto mb-2 opacity-50' />
           <p>No questions created yet.</p>

@@ -84,6 +84,7 @@ export function QuestionGroupsManager({
   const { addGroupQuestion, isLoading } = usePassage();
 
   const handleCreateGroup = async (groupData: any) => {
+    if (isLoading.addGroupQuestion) return;
     try {
       const response = await addGroupQuestion(passage_id, groupData);
       if (response.data) {
@@ -152,7 +153,7 @@ export function QuestionGroupsManager({
 
     switch (group.question_type) {
       case QuestionType.MULTIPLE_CHOICE:
-        return <MultipleChoiceManager {...commonProps} />;
+        return <MultipleChoiceManager {...commonProps} onUpdateGroup={commonProps.onUpdateGroup} />;
       case QuestionType.FILL_IN_THE_BLANKS:
         return <FillInBlanksManager {...commonProps} />;
       case QuestionType.MATCHING:

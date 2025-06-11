@@ -213,39 +213,11 @@ export default function EditPassagePage() {
     }
   };
 
-  const handleAddQuestionGroup = async (group: QuestionGroup) => {
-    try {
-      const questions: QuestionCreationRequest[] = group.questions.map((q) => ({
-        ...q,
-        question_type: Object.values(QuestionType).indexOf(group.question_type),
-        question_group_id: '', // Will be set by backend
-      }));
-
-      const groupRequest: AddGroupQuestionRequest = {
-        section_order: group.section_order,
-        section_label: group.section_label,
-        instruction: group.instruction,
-        questions: questions,
-        drag_items: group.drag_items,
-      };
-
-      const response = await addGroupQuestion(passage_id, groupRequest);
-      if (response.data) {
-        // Update local state with the new group from the backend, which includes the ID
-        const newGroup = {
-          ...group,
-          id: response.data.group_id,
-          questions: response.data.questions.map((q) => ({
-            ...q,
-            id: q.question_id,
-          })),
-        };
-        setQuestionGroups((prev) => [...prev, newGroup]);
-      }
-    } catch (error) {
-      console.error('Failed to add question group:', error);
-      // TODO: Show a toast notification to the user
-    }
+  const handleAddQuestionGroup = (group: QuestionGroup) => {
+    // The group object is now passed with the ID from the backend,
+    // as the API call is handled by the QuestionGroupsManager component.
+    // We just need to update the local state.
+    setQuestionGroups((prev) => [...prev, group]);
   };
 
   const handleUpdateQuestionGroup = async (index: number, group: QuestionGroup) => {
