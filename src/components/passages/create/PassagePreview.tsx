@@ -217,12 +217,7 @@ export function PassagePreview({
                     <div className='space-y-4'>
                       {group.questions.map((question, qIndex) => (
                         <div key={qIndex} className='space-y-2'>
-                          <div
-                            className='font-medium'
-                            dangerouslySetInnerHTML={{
-                              __html: `${question.question_order}. ${question.instruction_for_choice}`,
-                            }}
-                          />
+                          <div>Blank {qIndex + 1}:</div>
                           <div className='pl-4 text-sm text-green-600'>
                             <strong>Answer:</strong> {question.correct_answer}
                           </div>

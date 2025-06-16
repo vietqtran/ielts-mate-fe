@@ -139,8 +139,8 @@ export default function EditPassagePage() {
                     : group.questions[0]?.question_type === 3
                       ? QuestionType.DRAG_AND_DROP
                       : QuestionType.MULTIPLE_CHOICE,
-            questions: group.questions || [],
-            drag_items: group.drag_items || [],
+            questions: group.questions ?? [],
+            drag_items: group.drag_items ?? [],
           }));
           setQuestionGroups(mappedGroups);
         }

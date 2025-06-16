@@ -102,8 +102,13 @@ export function AppSidebar() {
             <DropdownMenuLabel>My Account</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
-              <User2 className='mr-2 h-4 w-4' />
-              <span>Profile</span>
+              <Link
+                href={'/profile'}
+                className='flex items-center w-full justify-start cursor-pointer'
+              >
+                <User2 className='mr-2 h-4 w-4' />
+                <span>Profile</span>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem>
               <Settings className='mr-2 h-4 w-4' />

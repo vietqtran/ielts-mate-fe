@@ -50,10 +50,14 @@ export function MatchingManager({ group, refetchPassageData }: Readonly<Matching
     try {
       if (editingQuestion) {
         // Update existing question
-        const response = await updateQuestionInfo(group.id, editingQuestion.id, questionRequest);
+        const response = await updateQuestionInfo(
+          group.id,
+          editingQuestion.question_id,
+          questionRequest
+        );
         if (response.data) {
           setLocalQuestions((prev) =>
-            prev.map((q) => (q.id === editingQuestion.id ? response.data : q))
+            prev.map((q) => (q.question_id === editingQuestion.question_id ? response.data : q))
           );
         } else {
           refetchPassageData();
@@ -86,7 +90,7 @@ export function MatchingManager({ group, refetchPassageData }: Readonly<Matching
     }
     try {
       await deleteQuestion(group.id, questionId);
-      setLocalQuestions((prev) => prev.filter((q) => q.id !== questionId));
+      setLocalQuestions((prev) => prev.filter((q) => q.question_id !== questionId));
     } catch (error) {
       console.error('Failed to delete question:', error);
     }
@@ -128,8 +132,8 @@ export function MatchingManager({ group, refetchPassageData }: Readonly<Matching
       {!isAddingOrEditing && localQuestions.length > 0 && (
         <div className='space-y-4 mt-4'>
           <h4 className='font-medium'>Questions:</h4>
-          {localQuestions.map((question) => (
-            <Card key={question.id}>
+          {localQuestions.map((question, index) => (
+            <Card key={question.question_id + '-' + index}>
               <CardContent className='pt-4'>
                 <div className='flex items-start justify-between'>
                   <div className='flex-1'>
@@ -166,7 +170,7 @@ export function MatchingManager({ group, refetchPassageData }: Readonly<Matching
                     <Button
                       variant='ghost'
                       size='sm'
-                      onClick={() => handleDelete(question.id)}
+                      onClick={() => handleDelete(question.question_id)}
                       disabled={isLoading.deleteQuestion}
                     >
                       {isLoading.deleteQuestion ? (
