@@ -28,11 +28,13 @@ import {
 import { BaseResponse, PassageGetResponse } from '@/types/reading.types';
 import { RootState } from '@/types/store.types';
 import { BookOpen, Calendar, User } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 const Reading = () => {
   const dispatch = useDispatch();
+  const router = useRouter();
   const { getActivePassages, isLoading, error } = usePassage();
   const [passages, setPassages] = useState<PassageGetResponse[]>([]);
 
@@ -311,7 +313,11 @@ const Reading = () => {
                     </div>
 
                     {/* Action Button */}
-                    <Button className='w-full' size='sm'>
+                    <Button
+                      className='w-full'
+                      size='sm'
+                      onClick={() => router.push(`/reading/${passage.passage_id}/practice`)}
+                    >
                       <BookOpen className='h-4 w-4 mr-2' />
                       Start Reading
                     </Button>
