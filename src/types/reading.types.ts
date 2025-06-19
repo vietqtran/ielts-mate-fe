@@ -145,7 +145,6 @@ export interface AddGroupQuestionResponse {
 }
 
 export interface DragItemResponse {
-  group_id: string;
   item_id: string;
   content: string;
 }
@@ -162,7 +161,6 @@ export interface DragItemSummaryResponse {
 
 export interface CreateDragItemRequest {
   content: string;
-  question_id?: string;
 }
 
 export interface UpdateDragItemRequest {

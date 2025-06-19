@@ -36,7 +36,41 @@ export function DragDropManager({
   // Reset local state when group ID changes (indicating a new passage is being created)
   useEffect(() => {
     setLocalQuestions(group.questions);
-    setLocalDragItems(group.drag_items || []);
+
+    // Extract drag items from both the group.drag_items and from any drag_items within questions
+    const dragItemsFromGroup = group.drag_items || [];
+    const dragItemsFromQuestions = [];
+
+    if (group.questions && group.questions.length > 0) {
+      group.questions.forEach((question) => {
+        if (question.drag_items && question.drag_items.length > 0) {
+          question.drag_items.forEach((item) => {
+            dragItemsFromQuestions.push({
+              id: item.drag_item_id || item.item_id,
+              drag_item_id: item.drag_item_id || item.item_id,
+              content: item.content,
+            });
+          });
+        }
+      });
+    }
+
+    // Combine both sources, avoiding duplicates
+    const combinedItems = [...dragItemsFromGroup];
+    dragItemsFromQuestions.forEach((newItem) => {
+      const exists = combinedItems.some(
+        (item) =>
+          (item.id && item.id === newItem.id) ||
+          (item.drag_item_id && item.drag_item_id === newItem.drag_item_id)
+      );
+
+      if (!exists) {
+        combinedItems.push(newItem);
+      }
+    });
+
+    console.log('Combined drag items on init:', combinedItems);
+    setLocalDragItems(combinedItems);
     setIsEditing(false);
   }, [group.questions, group.drag_items, group.id]);
   const {
@@ -64,26 +98,28 @@ export function DragDropManager({
       const itemPromises: Promise<any>[] = [];
 
       // Identify new, updated, and deleted items
-      const newItemData = data.drag_items.filter((item) => !item.id);
+      const newItemData = data.drag_items.filter((item) => !item.item_id);
       const updatedItemData = data.drag_items.filter((item) => {
-        const original = originalItems.find((orig) => orig.id === item.id);
+        const original = originalItems.find((orig) => orig.id === item.item_id);
         // NOTE: API does not support updating order, only content.
         return original && original.content !== item.content;
       });
       const deletedItemIds = originalItems
-        .filter((orig) => !data.drag_items.some((item) => item.id === orig.id))
+        .filter((orig) => !data.drag_items.some((item) => item.item_id === orig.id))
         .map((item) => item.id);
 
       // Create new items
       if (newItemData.length > 0) {
-        newItemData.forEach((item) => {
-          itemPromises.push(createDragItem(groupId, { content: item.content }));
-        });
+        // Create all new items in a single API call
+        const newItems = newItemData.map((item) => item.content);
+        if (newItems.length > 0) {
+          itemPromises.push(createDragItem(groupId, { content: newItems[0] }));
+        }
       }
 
       // Update existing items
       updatedItemData.forEach((item) => {
-        itemPromises.push(updateDragItem(groupId, item.id!, { content: item.content }));
+        itemPromises.push(updateDragItem(groupId, item.item_id!, { content: item.content }));
       });
 
       // Delete items
@@ -92,18 +128,39 @@ export function DragDropManager({
       });
 
       const itemResults = await Promise.all(itemPromises);
+
+      // Process responses, handling both single items and arrays of items
       const successfulItems = itemResults
-        .map((res) => (res && res.data ? res.data : null))
-        .filter(Boolean);
+        .map((res) => {
+          if (!res || !res.data) return null;
+          // Handle both single item and array responses
+          return Array.isArray(res.data) ? res.data : [res.data];
+        })
+        .filter(Boolean)
+        .flat();
+
+      console.log('Successful Items from API:', successfulItems);
 
       // Atomically update drag items state
       const updatedItems = [...originalItems].filter((item) => !deletedItemIds.includes(item.id));
       successfulItems.forEach((newItem) => {
-        const index = updatedItems.findIndex((item) => item.id === newItem.id);
+        // Map the API response structure to our component's structure
+        const mappedItem = {
+          id: newItem.drag_item_id || newItem.item_id,
+          drag_item_id: newItem.drag_item_id || newItem.item_id,
+          content: newItem.content,
+        };
+
+        console.log('Mapped drag item:', mappedItem);
+
+        const index = updatedItems.findIndex(
+          (item) => item.id === mappedItem.id || item.drag_item_id === mappedItem.drag_item_id
+        );
+
         if (index > -1) {
-          updatedItems[index] = newItem; // Update existing
+          updatedItems[index] = mappedItem; // Update existing
         } else {
-          updatedItems.push(newItem); // Add new
+          updatedItems.push(mappedItem); // Add new
         }
       });
 
@@ -126,6 +183,7 @@ export function DragDropManager({
           question_group_id: groupId,
           question_categories: [],
           number_of_correct_answers: 0,
+          drag_item_id: q.drag_item_id, // Ensure drag_item_id is included
         }));
         questionPromises.push(createQuestions(groupId, newQuestionRequests));
       }
@@ -152,28 +210,98 @@ export function DragDropManager({
       const updatedQuestions = [...originalQuestions].filter(
         (q) => !deletedQuestionIds.includes(q.id)
       );
+
+      console.log('Successful Questions from API:', successfulQuestions);
+
+      // Process drag items from the question response
+      const dragItemsFromQuestions = [];
+
       successfulQuestions.forEach((newQuestion) => {
-        const index = updatedQuestions.findIndex((q) => q.id === newQuestion.id);
+        // Extract drag items from the question response
+        if (newQuestion.drag_items && newQuestion.drag_items.length > 0) {
+          console.log('Found drag items in question response:', newQuestion.drag_items);
+          newQuestion.drag_items.forEach((item) => {
+            dragItemsFromQuestions.push({
+              id: item.drag_item_id || item.item_id,
+              drag_item_id: item.drag_item_id || item.item_id,
+              content: item.content,
+            });
+          });
+        }
+
+        // Map API response structure to our component's structure
+        const mappedQuestion = {
+          id: newQuestion.question_id,
+          question_id: newQuestion.question_id,
+          question_order: newQuestion.question_order,
+          point: newQuestion.point,
+          explanation: newQuestion.explanation,
+          instruction_for_choice: newQuestion.instruction_for_choice,
+          zone_index: newQuestion.zone_index,
+          drag_item_id:
+            newQuestion.drag_items && newQuestion.drag_items.length > 0
+              ? newQuestion.drag_items[0].drag_item_id
+              : newQuestion.drag_item_id,
+        };
+
+        console.log('Mapped question:', mappedQuestion);
+
+        const index = updatedQuestions.findIndex(
+          (q) => q.id === mappedQuestion.id || q.question_id === mappedQuestion.question_id
+        );
+
         if (index > -1) {
-          updatedQuestions[index] = newQuestion; // Update existing
+          updatedQuestions[index] = mappedQuestion; // Update existing
         } else {
-          updatedQuestions.push(newQuestion); // Add new
+          updatedQuestions.push(mappedQuestion); // Add new
+        }
+      });
+
+      // Add drag items from questions to the updatedItems
+      dragItemsFromQuestions.forEach((newDragItem) => {
+        const exists = updatedItems.some(
+          (item) => item.id === newDragItem.id || item.drag_item_id === newDragItem.drag_item_id
+        );
+
+        if (!exists) {
+          console.log('Adding drag item from question response:', newDragItem);
+          updatedItems.push(newDragItem);
         }
       });
 
       // 3. Update local state and propagate changes to parent
+      console.log('Setting localDragItems to:', updatedItems);
+      console.log('Setting localQuestions to:', updatedQuestions);
+
       setLocalDragItems(updatedItems);
       setLocalQuestions(updatedQuestions);
 
       // Notify parent component to update its state for preview
-      onUpdateGroup({
+      // For the updated group, ensure we're using consistent ID field names
+      const updatedGroup = {
         ...group,
-        questions: updatedQuestions.map((q) => ({
-          ...q,
-          question_id: q.id || q.question_id,
+        questions: updatedQuestions.map((q) => {
+          // Get drag_item_id from either direct property or nested drag_items array
+          let dragItemId = q.drag_item_id;
+          if (!dragItemId && q.drag_items && q.drag_items.length > 0) {
+            dragItemId = q.drag_items[0].drag_item_id || q.drag_items[0].item_id;
+          }
+
+          return {
+            ...q,
+            question_id: q.id || q.question_id,
+            drag_item_id: dragItemId,
+          };
+        }),
+        drag_items: updatedItems.map((item) => ({
+          id: item.item_id || item.id || item.drag_item_id,
+          drag_item_id: item.item_id || item.id || item.drag_item_id,
+          content: item.content,
         })),
-        drag_items: updatedItems,
-      });
+      };
+
+      console.log('Updating group with:', updatedGroup);
+      onUpdateGroup(updatedGroup);
 
       setIsEditing(false);
     } catch (error) {
@@ -183,26 +311,57 @@ export function DragDropManager({
   };
 
   const dragItemMap = useMemo(() => {
-    return new Map(localDragItems?.map((item) => [item.id, item.content]));
+    console.log('Building dragItemMap from:', localDragItems);
+    const map = new Map();
+
+    if (localDragItems && localDragItems.length > 0) {
+      localDragItems.forEach((item) => {
+        // Handle all possible ID field names
+        const itemId = item.item_id || item.id || item.drag_item_id;
+        if (itemId) {
+          map.set(itemId, item.content);
+          console.log(`Added to map: ${itemId} -> ${item.content}`);
+
+          // Add mapping for all possible ID forms to ensure we catch references
+          if (item.item_id) map.set(item.item_id, item.content);
+          if (item.id) map.set(item.id, item.content);
+          if (item.drag_item_id) map.set(item.drag_item_id, item.content);
+        }
+      });
+    }
+
+    return map;
   }, [localDragItems]);
 
   const initialFormData: DragDropFormData = {
     drag_items:
-      localDragItems?.map((item) => ({
-        id: item.id,
-        content: item.content,
-        itemOrder: item.item_order,
-      })) || [],
+      localDragItems?.map((item) => {
+        console.log('Processing drag item for form:', item);
+        return {
+          item_id: item.item_id || item.id || item.drag_item_id,
+          content: item.content,
+        };
+      }) || [],
     questions:
-      localQuestions?.map((q) => ({
-        id: q.id,
-        question_order: q.question_order,
-        point: q.point,
-        explanation: q.explanation,
-        instruction_for_choice: q.instruction_for_choice,
-        zone_index: q.zone_index,
-        drag_item_id: q.drag_item_id,
-      })) || [],
+      localQuestions?.map((q) => {
+        // Handle case where drag_items is an array in the question response
+        let dragItemId = q.drag_item_id;
+        if (!dragItemId && q.drag_items && q.drag_items.length > 0) {
+          dragItemId = q.drag_items[0].drag_item_id || q.drag_items[0].item_id;
+        }
+
+        console.log('Processing question for form:', q, 'Using drag_item_id:', dragItemId);
+
+        return {
+          id: q.id || q.question_id,
+          question_order: q.question_order,
+          point: q.point,
+          explanation: q.explanation,
+          instruction_for_choice: q.instruction_for_choice,
+          zone_index: q.zone_index,
+          drag_item_id: dragItemId,
+        };
+      }) || [],
   };
 
   if (isEditing) {
@@ -219,6 +378,7 @@ export function DragDropManager({
           isLoading.updateDragItem ||
           isLoading.deleteDragItem
         }
+        groupId={group.id}
       />
     );
   }
@@ -252,7 +412,7 @@ export function DragDropManager({
                 </h4>
                 <ul className='space-y-1 list-disc list-inside'>
                   {localDragItems?.map((item) => (
-                    <li key={item.id} className='text-muted-foreground'>
+                    <li key={item.id || item.drag_item_id} className='text-muted-foreground'>
                       {item.content}
                     </li>
                   )) || <li className='text-muted-foreground italic'>No items created.</li>}
@@ -263,16 +423,34 @@ export function DragDropManager({
                   Questions / Drop Zones ({localQuestions.length})
                 </h4>
                 <ul className='space-y-2'>
-                  {localQuestions.map((question) => (
-                    <li key={question.id} className='text-muted-foreground'>
-                      <span className='font-medium text-primary'>
-                        Q{question.question_order} (Zone {question.zone_index}):
-                      </span>{' '}
-                      {dragItemMap.get(question.drag_item_id) || (
-                        <span className='italic text-red-500'>Invalid Item</span>
-                      )}
-                    </li>
-                  ))}
+                  {localQuestions.map((question) => {
+                    // Get drag_item_id from either direct property or nested drag_items array
+                    let dragItemId = question.drag_item_id;
+                    if (!dragItemId && question.drag_items && question.drag_items.length > 0) {
+                      dragItemId =
+                        question.drag_items[0].drag_item_id || question.drag_items[0].item_id;
+                    }
+
+                    console.log('Question in rendering:', question);
+                    console.log('Using drag_item_id for display:', dragItemId);
+                    console.log('Available in map:', dragItemMap.has(dragItemId));
+
+                    return (
+                      <li
+                        key={question.id || question.question_id}
+                        className='text-muted-foreground'
+                      >
+                        <span className='font-medium text-primary'>
+                          Q{question.question_order} (Zone {question.zone_index}):
+                        </span>{' '}
+                        {dragItemMap.get(dragItemId) || (
+                          <span className='italic text-red-500'>
+                            Invalid Item (ID: {dragItemId || 'missing'})
+                          </span>
+                        )}
+                      </li>
+                    );
+                  })}
                   {localQuestions.length === 0 && (
                     <li className='text-muted-foreground italic'>No questions created.</li>
                   )}

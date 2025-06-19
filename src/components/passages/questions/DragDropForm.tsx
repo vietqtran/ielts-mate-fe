@@ -59,7 +59,7 @@ export function DragDropForm({
   drag_items,
   onQuestionsChange,
   onDragItemsChange,
-}: DragDropFormProps) {
+}: Readonly<DragDropFormProps>) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [activeTab, setActiveTab] = useState('drag_items');
 

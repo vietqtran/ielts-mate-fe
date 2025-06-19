@@ -147,7 +147,7 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
         return (
           <DragDropForm
             questions={group.questions}
-            drag_items={group.drag_items || []}
+            drag_items={group.drag_items ?? []}
             onQuestionsChange={handleUpdateGroupQuestions}
             onDragItemsChange={handleUpdateGroupDragItems}
           />
