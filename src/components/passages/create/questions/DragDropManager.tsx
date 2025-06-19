@@ -33,10 +33,12 @@ export function DragDropManager({
   const [localQuestions, setLocalQuestions] = useState(group.questions);
   const [localDragItems, setLocalDragItems] = useState(group.drag_items || []);
 
+  // Reset local state when group ID changes (indicating a new passage is being created)
   useEffect(() => {
     setLocalQuestions(group.questions);
     setLocalDragItems(group.drag_items || []);
-  }, [group.questions, group.drag_items]);
+    setIsEditing(false);
+  }, [group.questions, group.drag_items, group.id]);
   const {
     createQuestions,
     updateQuestionInfo,

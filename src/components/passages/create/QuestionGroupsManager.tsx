@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/usePassage';
 import { QuestionType } from '@/types/reading.types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { QuestionGroupForm } from './QuestionGroupForm';
 import { DragDropManager } from './questions/DragDropManager';
 import { FillInBlanksManager } from './questions/FillInBlanksManager';
@@ -82,6 +82,12 @@ export function QuestionGroupsManager({
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
   const [activeGroupIndex, setActiveGroupIndex] = useState<number | null>(null);
   const { addGroupQuestion, isLoading } = usePassage();
+
+  // Reset component state when passage_id changes (indicating a new passage is being created)
+  useEffect(() => {
+    setIsCreatingGroup(false);
+    setActiveGroupIndex(null);
+  }, [passage_id]);
 
   const handleCreateGroup = async (groupData: any) => {
     if (isLoading.addGroupQuestion) return;

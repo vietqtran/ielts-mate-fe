@@ -63,8 +63,13 @@ export default function CreatePassagePage() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem(CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES.PASSAGES.CREATE);
+
+      // Clear any previous passage data when starting a new passage creation
+      if (!createdpassage_id) {
+        sessionStorage.removeItem('draft-passage');
+      }
     }
-  }, []);
+  }, [createdpassage_id]);
 
   // Auto-save functionality
   useEffect(() => {

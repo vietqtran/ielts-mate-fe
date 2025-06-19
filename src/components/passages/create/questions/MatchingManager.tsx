@@ -32,9 +32,12 @@ export function MatchingManager({
   const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
   const [localQuestions, setLocalQuestions] = useState(group.questions);
 
+  // Reset local state when group ID changes (indicating a new passage is being created)
   useEffect(() => {
     setLocalQuestions(group.questions);
-  }, [group.questions]);
+    setIsAddingOrEditing(false);
+    setEditingQuestion(null);
+  }, [group.questions, group.id]);
 
   const { createQuestions, updateQuestionInfo, deleteQuestion, isLoading } = useQuestion();
 
