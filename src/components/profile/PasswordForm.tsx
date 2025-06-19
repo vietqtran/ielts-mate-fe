@@ -8,8 +8,10 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { ERROR_CODE } from '@/constants/error_code';
 import { useProfile } from '@/hooks/useProfile';
 import { updatePasswordSchema } from '@/schemas/profile.schema';
+import { extractAxiosErrorData } from '@/utils/error';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { z } from 'zod';
@@ -29,11 +31,19 @@ export function PasswordForm() {
 
   const handleSubmit = async (values: z.infer<typeof updatePasswordSchema>) => {
     startTransition(async () => {
-      const result = await updatePassword(values);
-      if (result) {
-        toast.success('Update successfull');
-      } else {
-        toast.error('Update failed');
+      try {
+        const result = await updatePassword(values);
+        if (result) {
+          toast.success('Update successfull');
+          form.reset();
+        } else {
+          toast.error('Update failed');
+        }
+      } catch (err) {
+        const { error_code } = extractAxiosErrorData(err);
+        if (error_code === ERROR_CODE.WRONG_OLD_PASSWORD) {
+          toast.error('Old password is wrong');
+        }
       }
     });
   };

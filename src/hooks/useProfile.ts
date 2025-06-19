@@ -38,26 +38,22 @@ export const useProfile = () => {
     confirmNewPassword: string;
     oldPassword: string;
   }) => {
-    try {
-      const { data } = await instance.put(
-        '/identity/auth/change-password',
-        {
-          newPassword,
-          confirmNewPassword,
-          oldPassword,
-        },
-        {
-          withCredentials: true,
-        }
-      );
-
-      if (data.status === 'success') {
-        return data;
+    const { data } = await instance.put(
+      '/identity/auth/change-password',
+      {
+        newPassword,
+        confirmNewPassword,
+        oldPassword,
+      },
+      {
+        withCredentials: true,
       }
-      return null;
-    } catch (error) {
-      return null;
+    );
+
+    if (data.status === 'success') {
+      return data;
     }
+    return null;
   };
 
   return {

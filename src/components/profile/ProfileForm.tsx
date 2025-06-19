@@ -9,6 +9,7 @@ import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useAuth } from '@/hooks';
 import { useProfile } from '@/hooks/useProfile';
 import { updateProfileDataSchema } from '@/schemas/profile.schema';
 import { User as UserType } from '@/types';
@@ -23,6 +24,7 @@ interface ProfileFormProps {
 export function ProfileForm({ user }: Readonly<ProfileFormProps>) {
   const [isPending, startTransition] = useTransition();
   const { updateProfile } = useProfile();
+  const { refetchUser } = useAuth();
 
   const form = useForm<z.infer<typeof updateProfileDataSchema>>({
     resolver: zodResolver(updateProfileDataSchema),
@@ -42,6 +44,7 @@ export function ProfileForm({ user }: Readonly<ProfileFormProps>) {
       const result = await updateProfile(values);
       if (result) {
         toast.success('Update successfull');
+        await refetchUser();
       } else {
         toast.error('Update failed');
       }
