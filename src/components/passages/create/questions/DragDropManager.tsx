@@ -8,14 +8,34 @@ import { DragDropForm, DragDropFormData } from './DragDropForm';
 import { Button } from '@/components/ui/button';
 import { useQuestion } from '@/hooks/useQuestion';
 
+// Define proper type interfaces
+interface DragItem {
+  id?: string;
+  drag_item_id?: string;
+  item_id?: string;
+  content: string;
+}
+
+interface Question {
+  id?: string;
+  question_id?: string;
+  question_order: number;
+  point: number;
+  explanation: string;
+  instruction_for_choice?: string;
+  zone_index: number;
+  drag_item_id?: string;
+  drag_items?: DragItem[];
+}
+
 interface QuestionGroup {
   id?: string;
   section_order: number;
   section_label: string;
   instruction: string;
   question_type: string;
-  questions: any[];
-  drag_items?: any[]; // Can be more specific with DragItemType
+  questions: Question[];
+  drag_items?: DragItem[];
 }
 
 interface DragDropManagerProps {
@@ -39,7 +59,7 @@ export function DragDropManager({
 
     // Extract drag items from both the group.drag_items and from any drag_items within questions
     const dragItemsFromGroup = group.drag_items || [];
-    const dragItemsFromQuestions = [];
+    const dragItemsFromQuestions: DragItem[] = [];
 
     if (group.questions && group.questions.length > 0) {
       group.questions.forEach((question) => {
@@ -124,7 +144,10 @@ export function DragDropManager({
 
       // Delete items
       deletedItemIds.forEach((id) => {
-        itemPromises.push(deleteDragItem(groupId, id));
+        if (id) {
+          // Only delete if id is defined
+          itemPromises.push(deleteDragItem(groupId, id));
+        }
       });
 
       const itemResults = await Promise.all(itemPromises);
@@ -177,14 +200,25 @@ export function DragDropManager({
 
       // Create new questions
       if (newQuestionData.length > 0) {
-        const newQuestionRequests = newQuestionData.map((q) => ({
-          ...q,
-          question_type: 3, // DRAG_AND_DROP
-          question_group_id: groupId,
-          question_categories: [],
-          number_of_correct_answers: 0,
-          drag_item_id: q.drag_item_id, // Ensure drag_item_id is included
-        }));
+        const newQuestionRequests = newQuestionData.map((q) => {
+          // Remove instruction_for_choice if it's present but empty
+          const questionData = {
+            ...q,
+            question_type: 3, // DRAG_AND_DROP
+            question_group_id: groupId,
+            question_categories: [],
+            number_of_correct_answers: 0,
+            drag_item_id: q.drag_item_id, // Ensure drag_item_id is included
+          };
+
+          // If instruction_for_choice is empty or undefined, don't send it to the API
+          if (!questionData.instruction_for_choice) {
+            delete questionData.instruction_for_choice;
+          }
+
+          return questionData;
+        });
+
         questionPromises.push(createQuestions(groupId, newQuestionRequests));
       }
 
@@ -195,7 +229,10 @@ export function DragDropManager({
 
       // Delete questions
       deletedQuestionIds.forEach((id) => {
-        questionPromises.push(deleteQuestion(groupId, id));
+        if (id) {
+          // Only delete if id is defined
+          questionPromises.push(deleteQuestion(groupId, id));
+        }
       });
 
       const questionResults = await Promise.all(questionPromises);
@@ -214,17 +251,17 @@ export function DragDropManager({
       console.log('Successful Questions from API:', successfulQuestions);
 
       // Process drag items from the question response
-      const dragItemsFromQuestions = [];
+      const dragItemsFromQuestions: DragItem[] = [];
 
       successfulQuestions.forEach((newQuestion) => {
         // Extract drag items from the question response
         if (newQuestion.drag_items && newQuestion.drag_items.length > 0) {
           console.log('Found drag items in question response:', newQuestion.drag_items);
-          newQuestion.drag_items.forEach((item) => {
+          newQuestion.drag_items.forEach((item: any) => {
             dragItemsFromQuestions.push({
               id: item.drag_item_id || item.item_id,
               drag_item_id: item.drag_item_id || item.item_id,
-              content: item.content,
+              content: item.content || '',
             });
           });
         }
@@ -359,7 +396,7 @@ export function DragDropManager({
           explanation: q.explanation,
           instruction_for_choice: q.instruction_for_choice,
           zone_index: q.zone_index,
-          drag_item_id: dragItemId,
+          drag_item_id: dragItemId || '', // Ensure it's never undefined
         };
       }) || [],
   };
