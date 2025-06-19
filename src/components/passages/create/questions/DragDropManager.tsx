@@ -51,13 +51,35 @@ export function DragDropManager({
 }: Readonly<DragDropManagerProps>) {
   const [isEditing, setIsEditing] = useState(false);
   const [localQuestions, setLocalQuestions] = useState(group.questions);
-  const [localDragItems, setLocalDragItems] = useState(group.drag_items || []);
+  const [localDragItems, setLocalDragItems] = useState<DragItem[]>([]);
+
+  // Function to fetch all drag items for a group
+  const fetchAllDragItems = async (groupId: string) => {
+    if (!groupId) return;
+
+    try {
+      const response = await getAllDragItemsByGroup(groupId);
+
+      if (response?.data?.items) {
+        const fetchedItems = response.data.items.map((item) => ({
+          id: item.item_id,
+          drag_item_id: item.item_id,
+          content: item.item_content,
+        }));
+
+        console.log('Fetched all drag items from API:', fetchedItems);
+        setLocalDragItems(fetchedItems);
+      }
+    } catch (error) {
+      console.error('Failed to fetch all drag items:', error);
+    }
+  };
 
   // Reset local state when group ID changes (indicating a new passage is being created)
   useEffect(() => {
     setLocalQuestions(group.questions);
 
-    // Extract drag items from both the group.drag_items and from any drag_items within questions
+    // First try to extract drag items from both the group and questions
     const dragItemsFromGroup = group.drag_items || [];
     const dragItemsFromQuestions: DragItem[] = [];
 
@@ -90,8 +112,15 @@ export function DragDropManager({
     });
 
     console.log('Combined drag items on init:', combinedItems);
+
+    // Set items from combined sources first as a fallback
     setLocalDragItems(combinedItems);
     setIsEditing(false);
+
+    // Then fetch all items from the API to ensure we have the complete list
+    if (group.id) {
+      fetchAllDragItems(group.id);
+    }
   }, [group.questions, group.drag_items, group.id]);
   const {
     createQuestions,
@@ -100,6 +129,7 @@ export function DragDropManager({
     createDragItem,
     updateDragItem,
     deleteDragItem,
+    getAllDragItemsByGroup,
     isLoading,
   } = useQuestion();
 
@@ -130,11 +160,10 @@ export function DragDropManager({
 
       // Create new items
       if (newItemData.length > 0) {
-        // Create all new items in a single API call
-        const newItems = newItemData.map((item) => item.content);
-        if (newItems.length > 0) {
-          itemPromises.push(createDragItem(groupId, { content: newItems[0] }));
-        }
+        // Create each new item with separate API calls
+        newItemData.forEach((item) => {
+          itemPromises.push(createDragItem(groupId, { content: item.content }));
+        });
       }
 
       // Update existing items
@@ -187,13 +216,10 @@ export function DragDropManager({
         }
       });
 
-      // 2. Handle Questions
+      // 2. Handle Questions - ONLY create new questions, don't update existing ones
       const questionPromises: Promise<any>[] = [];
       const newQuestionData = data.questions.filter((q) => !q.id);
-      const updatedQuestionData = data.questions.filter((q) => {
-        const original = originalQuestions.find((orig) => orig.id === q.id);
-        return original && JSON.stringify(original) !== JSON.stringify(q); // Simple deep compare
-      });
+      // We're no longer updating existing questions as per requirements
       const deletedQuestionIds = originalQuestions
         .filter((orig) => !data.questions.some((q) => q.id === orig.id))
         .map((q) => q.id);
@@ -222,12 +248,8 @@ export function DragDropManager({
         questionPromises.push(createQuestions(groupId, newQuestionRequests));
       }
 
-      // Update questions
-      updatedQuestionData.forEach((q) => {
-        questionPromises.push(updateQuestionInfo(groupId, q.id!, q));
-      });
-
-      // Delete questions
+      // We no longer update existing questions, per requirements
+      // Only handle deletions of questions
       deletedQuestionIds.forEach((id) => {
         if (id) {
           // Only delete if id is defined
@@ -339,6 +361,11 @@ export function DragDropManager({
 
       console.log('Updating group with:', updatedGroup);
       onUpdateGroup(updatedGroup);
+
+      // After successfully submitting, fetch all drag items to ensure we have the complete list
+      if (group.id) {
+        fetchAllDragItems(group.id);
+      }
 
       setIsEditing(false);
     } catch (error) {
