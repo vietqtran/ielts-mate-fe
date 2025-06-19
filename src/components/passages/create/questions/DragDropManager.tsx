@@ -21,9 +21,14 @@ interface QuestionGroup {
 interface DragDropManagerProps {
   group: QuestionGroup;
   refetchPassageData: () => void;
+  onUpdateGroup: (group: QuestionGroup) => void;
 }
 
-export function DragDropManager({ group, refetchPassageData }: Readonly<DragDropManagerProps>) {
+export function DragDropManager({
+  group,
+  refetchPassageData,
+  onUpdateGroup,
+}: Readonly<DragDropManagerProps>) {
   const [isEditing, setIsEditing] = useState(false);
   const [localQuestions, setLocalQuestions] = useState(group.questions);
   const [localDragItems, setLocalDragItems] = useState(group.drag_items || []);
@@ -154,9 +159,20 @@ export function DragDropManager({ group, refetchPassageData }: Readonly<DragDrop
         }
       });
 
-      // 3. Update local state
+      // 3. Update local state and propagate changes to parent
       setLocalDragItems(updatedItems);
       setLocalQuestions(updatedQuestions);
+
+      // Notify parent component to update its state for preview
+      onUpdateGroup({
+        ...group,
+        questions: updatedQuestions.map((q) => ({
+          ...q,
+          question_id: q.id || q.question_id,
+        })),
+        drag_items: updatedItems,
+      });
+
       setIsEditing(false);
     } catch (error) {
       console.error('Failed to save Drag & Drop changes:', error);

@@ -20,11 +20,13 @@ interface QuestionGroup {
 interface FillInBlanksManagerProps {
   group: QuestionGroup;
   refetchPassageData: () => void;
+  onUpdateGroup: (group: QuestionGroup) => void;
 }
 
 export function FillInBlanksManager({
   group,
   refetchPassageData,
+  onUpdateGroup,
 }: Readonly<FillInBlanksManagerProps>) {
   const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
@@ -59,9 +61,23 @@ export function FillInBlanksManager({
           questionRequest
         );
         if (response.data) {
-          setLocalQuestions((prev) =>
-            prev.map((q) => (q.question_id === editingQuestion.question_id ? response.data : q))
+          // Ensure we have the right ID field
+          const updatedQuestion = {
+            ...response.data,
+            question_id: response.data.question_id,
+          };
+
+          // Update local state
+          const updatedQuestions = localQuestions.map((q) =>
+            q.question_id === editingQuestion.question_id ? updatedQuestion : q
           );
+          setLocalQuestions(updatedQuestions);
+
+          // Propagate changes to parent component for preview
+          onUpdateGroup({
+            ...group,
+            questions: updatedQuestions,
+          });
         } else {
           refetchPassageData();
         }
@@ -69,7 +85,21 @@ export function FillInBlanksManager({
         // Create new question
         const response = await createQuestions(group.id, [questionRequest]);
         if (response.data && Array.isArray(response.data)) {
-          setLocalQuestions((prev) => [...prev, ...response.data]);
+          // Ensure consistent structure with question_id field
+          const newQuestions = response.data.map((q) => ({
+            ...q,
+            question_id: q.question_id,
+          }));
+
+          // Update local state
+          const updatedQuestions = [...localQuestions, ...newQuestions];
+          setLocalQuestions(updatedQuestions);
+
+          // Propagate changes to parent component for preview
+          onUpdateGroup({
+            ...group,
+            questions: updatedQuestions,
+          });
         } else {
           refetchPassageData();
         }
@@ -93,7 +123,14 @@ export function FillInBlanksManager({
     }
     try {
       await deleteQuestion(group.id, questionId);
-      setLocalQuestions((prev) => prev.filter((q) => q.question_id !== questionId));
+      const updatedQuestions = localQuestions.filter((q) => q.question_id !== questionId);
+      setLocalQuestions(updatedQuestions);
+
+      // Propagate changes to parent component for preview
+      onUpdateGroup({
+        ...group,
+        questions: updatedQuestions,
+      });
     } catch (error) {
       console.error('Failed to delete question:', error);
     }

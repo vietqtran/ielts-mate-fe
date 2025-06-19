@@ -143,14 +143,25 @@ export function MultipleChoiceManager({
           explanation: data.explanation,
           number_of_correct_answers: data.number_of_correct_answers,
           instruction_for_choice: data.instruction_for_choice,
-          choices: updatedChoicesResponse.data,
+          // Ensure choices have consistent structure with choice_id property
+          choices: (updatedChoicesResponse.data || []).map((choice: any) => ({
+            ...choice,
+            choice_id: choice.choice_id || choice.id,
+            is_correct: !!choice.is_correct, // Ensure boolean type
+          })),
         };
 
-        // 5. Update local state
+        // 5. Update local state and propagate changes to parent
         const updatedQuestions = localQuestions.map((q: any) =>
           q.question_id === questionId ? finalUpdatedQuestion : q
         );
         setLocalQuestions(updatedQuestions);
+
+        // Notify parent component to update its state for preview
+        onUpdateGroup({
+          ...group,
+          questions: updatedQuestions,
+        });
       } else {
         // Create new question with choices
         const questionRequest = {
@@ -168,7 +179,14 @@ export function MultipleChoiceManager({
 
         if (response.data && Array.isArray(response.data)) {
           const newQuestions = response.data;
-          setLocalQuestions((prev) => [...prev, ...newQuestions]);
+          const updatedQuestions = [...localQuestions, ...newQuestions];
+          setLocalQuestions(updatedQuestions);
+
+          // Notify parent component to update its state for preview
+          onUpdateGroup({
+            ...group,
+            questions: updatedQuestions,
+          });
         } else {
           refetchPassageData();
         }
@@ -192,7 +210,14 @@ export function MultipleChoiceManager({
     }
     try {
       await deleteQuestion(group.id, questionId);
-      setLocalQuestions((prev) => prev.filter((q) => q.question_id !== questionId));
+      const updatedQuestions = localQuestions.filter((q) => q.question_id !== questionId);
+      setLocalQuestions(updatedQuestions);
+
+      // Notify parent component to update its state for preview
+      onUpdateGroup({
+        ...group,
+        questions: updatedQuestions,
+      });
     } catch (error) {
       console.error('Failed to delete question:', error);
     }
@@ -252,8 +277,8 @@ export function MultipleChoiceManager({
       {!isAddingOrEditing && localQuestions.length > 0 && (
         <div className='space-y-4 mt-4'>
           <h4 className='font-medium'>Questions:</h4>
-          {localQuestions.map((question) => (
-            <Card key={question.question_id}>
+          {localQuestions.map((question, i) => (
+            <Card key={question.question_id + i}>
               <CardContent className='pt-4'>
                 <div className='flex items-start justify-between'>
                   <div className='flex-1'>

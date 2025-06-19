@@ -140,11 +140,23 @@ export function QuestionGroupsManager({
       group: managerGroup,
       groupIndex,
       onUpdateGroup: (updatedGroup: any) => {
-        console.log('updatedGroup', updatedGroup);
-        // Convert back to LocalQuestionGroup format
+        // Ensure proper data structure for preview
         const localGroup: LocalQuestionGroup = {
-          ...updatedGroup,
+          id: updatedGroup.id,
+          section_order: updatedGroup.section_order,
+          section_label: updatedGroup.section_label,
+          instruction: updatedGroup.instruction,
           question_type: updatedGroup.question_type,
+          // Ensure questions array is correctly formatted
+          questions: (updatedGroup.questions || []).map((q: any) => ({
+            ...q,
+            question_id: q.question_id || q.id,
+            choices: (q.choices || []).map((c: any) => ({
+              ...c,
+              choice_id: c.choice_id || c.id,
+            })),
+          })),
+          drag_items: updatedGroup.drag_items || [],
         };
         onUpdateGroup(groupIndex, localGroup);
       },
@@ -155,11 +167,11 @@ export function QuestionGroupsManager({
       case QuestionType.MULTIPLE_CHOICE:
         return <MultipleChoiceManager {...commonProps} onUpdateGroup={commonProps.onUpdateGroup} />;
       case QuestionType.FILL_IN_THE_BLANKS:
-        return <FillInBlanksManager {...commonProps} />;
+        return <FillInBlanksManager {...commonProps} onUpdateGroup={commonProps.onUpdateGroup} />;
       case QuestionType.MATCHING:
-        return <MatchingManager {...commonProps} />;
+        return <MatchingManager {...commonProps} onUpdateGroup={commonProps.onUpdateGroup} />;
       case QuestionType.DRAG_AND_DROP:
-        return <DragDropManager {...commonProps} />;
+        return <DragDropManager {...commonProps} onUpdateGroup={commonProps.onUpdateGroup} />;
       default:
         return (
           <div className='text-center text-muted-foreground py-8'>
