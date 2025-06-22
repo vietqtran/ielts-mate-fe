@@ -21,7 +21,7 @@ interface LocalQuestionGroup {
   instruction: string;
   question_type: QuestionType;
   questions: any[];
-  drag_items?: string[];
+  drag_items?: string[]; // Stored as string[] but converted to DragItem[] for DragDropManager
 }
 
 interface QuestionGroupsManagerProps {
@@ -140,6 +140,14 @@ export function QuestionGroupsManager({
     const managerGroup = {
       ...group,
       question_type: group.question_type as any, // Type cast to resolve interface mismatch
+      // Convert string[] drag_items to DragItem[] for DragDropManager
+      drag_items: group.drag_items
+        ? group.drag_items.map((item) => ({
+            id: item,
+            drag_item_id: item,
+            content: item,
+          }))
+        : undefined,
     };
 
     const commonProps = {
@@ -162,7 +170,10 @@ export function QuestionGroupsManager({
               choice_id: c.choice_id || c.id,
             })),
           })),
-          drag_items: updatedGroup.drag_items || [],
+          // Convert DragItem[] back to string[] when updating
+          drag_items: Array.isArray(updatedGroup.drag_items)
+            ? updatedGroup.drag_items.map((item: any) => item.content || item)
+            : [],
         };
         onUpdateGroup(groupIndex, localGroup);
       },
