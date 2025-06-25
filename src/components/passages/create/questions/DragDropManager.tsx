@@ -475,9 +475,9 @@ export function DragDropManager({
                   Drag Items ({localDragItems?.length || 0})
                 </h4>
                 <ul className='space-y-1 list-disc list-inside'>
-                  {localDragItems?.map((item) => (
-                    <li key={item.id || item.drag_item_id} className='text-muted-foreground'>
-                      {item.content}
+                  {localDragItems?.map((item, i) => (
+                    <li key={i} className='text-muted-foreground'>
+                      {typeof item.content !== 'object' && JSON.stringify(item.content)}
                     </li>
                   )) || <li className='text-muted-foreground italic'>No items created.</li>}
                 </ul>
