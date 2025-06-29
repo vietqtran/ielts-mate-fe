@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import instance from '@/lib/axios';
 import { setUser } from '@/store/slices/auth-slice';
+import { useRouter } from 'next/navigation';
 import { useAppDispatch } from './useStore';
 
 export function useAuth() {
@@ -12,7 +13,7 @@ export function useAuth() {
   const abortControllersRef = useRef(new Map());
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<Record<string, Error | null>>({});
-
+  const { replace } = useRouter();
   const createAbortController = useCallback((key: string) => {
     if (abortControllersRef.current.has(key)) {
       abortControllersRef.current.get(key).abort();
@@ -65,6 +66,7 @@ export function useAuth() {
     } catch (error) {
       setErrorState('fetchUser', error as Error);
       dispatch(setUser(null));
+      replace('/sign-in');
       return null;
     } finally {
       setLoading('fetchUser', false);

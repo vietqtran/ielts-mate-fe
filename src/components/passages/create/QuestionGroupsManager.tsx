@@ -301,6 +301,7 @@ export function QuestionGroupsManager({
 
                       <div className='flex gap-2'>
                         <Button
+                          type='button'
                           variant='ghost'
                           size='sm'
                           onClick={() => setActiveGroupIndex(isActive ? null : index)}
