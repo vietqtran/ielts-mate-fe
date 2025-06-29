@@ -186,7 +186,6 @@ export function useQuestion() {
 
     try {
       const { data } = await instance.post(`/reading/groups/${group_id}/items`, dragItems);
-      console.log(data);
       return data as BaseResponse<DragItemResponse[]>; // Now returns an array of items
     } catch (error) {
       setErrorState('createDragItem', error as Error);

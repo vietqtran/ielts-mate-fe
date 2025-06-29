@@ -96,13 +96,12 @@ export default function CreateReadingExamPage() {
       toast.success('Reading exam created successfully');
       router.push('/reading-exams');
     } catch (error) {
-      console.error('Failed to create reading exam:', error);
       toast.error('Failed to create reading exam');
     }
   };
 
   return (
-    <div className='container mx-auto py-6'>
+    <div className='container mx-auto p-6'>
       <div className='mb-6'>
         <Button variant='ghost' asChild className='mb-6'>
           <Link href='/reading-exams'>

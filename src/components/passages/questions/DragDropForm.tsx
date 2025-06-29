@@ -49,7 +49,7 @@ type DragItemsFormData = z.infer<typeof drag_itemsSchema>;
 
 interface DragDropFormProps {
   questions: any[];
-  drag_items: string[];
+  drag_items: any[];
   onQuestionsChange: (questions: any[]) => void;
   onDragItemsChange: (drag_items: string[]) => void;
 }

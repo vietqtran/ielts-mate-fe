@@ -35,6 +35,8 @@ type QuestionMode = 'viewing' | 'creating' | 'editing';
 
 const dragItemSchema = z.object({
   item_id: z.string().optional(),
+  id: z.string().optional(),
+  drag_item_id: z.string().optional(),
   content: z.string().min(1, 'Content is required'),
 });
 
@@ -61,6 +63,7 @@ interface DragDropFormProps {
   onCancel: () => void;
   isSubmitting: boolean;
   groupId?: string; // Add groupId for direct API operations
+  onUpdateQuestion?: (questionId: string, questionData: any) => Promise<boolean>;
 }
 
 export function DragDropForm({
@@ -69,6 +72,7 @@ export function DragDropForm({
   onCancel,
   isSubmitting,
   groupId,
+  onUpdateQuestion,
 }: Readonly<DragDropFormProps>) {
   const [activeTab, setActiveTab] = useState('drag_items');
   const [editingItem, setEditingItem] = useState<string | null>(null);
@@ -146,10 +150,11 @@ export function DragDropForm({
           toast.success('Drag item created successfully');
           // Update the form with the returned ID
           form.setValue(`drag_items.${index}.item_id`, result.data[0].item_id);
+
+          // Log the successful item creation for debugging
         }
       }
     } catch (error) {
-      console.error('Failed to save drag item:', error);
       toast.error('Failed to save drag item');
     } finally {
       setIsSavingItem(false);
@@ -178,7 +183,6 @@ export function DragDropForm({
       toast.success('Drag item deleted successfully');
       removeDragItem(index);
     } catch (error) {
-      console.error('Failed to delete drag item:', error);
       toast.error('Failed to delete drag item');
     } finally {
       setIsDeletingItem(false);
@@ -229,7 +233,13 @@ export function DragDropForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+          <form
+            onSubmit={(e) => {
+              console.log(form.formState.errors);
+              form.handleSubmit(onSubmit)(e);
+            }}
+            className='space-y-6'
+          >
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className='grid w-full grid-cols-2'>
                 <TabsTrigger value='drag_items'>Drag Items ({dragItemFields.length})</TabsTrigger>
@@ -420,11 +430,18 @@ export function DragDropForm({
                                         <SelectValue placeholder='Select the correct drag item' />
                                       </SelectTrigger>
                                       <SelectContent>
-                                        {drag_items.map((item, i) => (
-                                          <SelectItem key={item.item_id} value={item.item_id ?? ''}>
-                                            {item.content || `Item ${i + 1}`}
-                                          </SelectItem>
-                                        ))}
+                                        {drag_items.map((item, i) => {
+                                          // Use the first available ID from the item
+                                          const itemId = item.item_id;
+                                          // Skip items without an ID
+                                          if (!itemId) return null;
+
+                                          return (
+                                            <SelectItem key={itemId} value={itemId}>
+                                              {item.content || `Item ${i + 1}`}
+                                            </SelectItem>
+                                          );
+                                        })}
                                       </SelectContent>
                                     </Select>
                                   </FormControl>
@@ -455,10 +472,28 @@ export function DragDropForm({
                                 type='button'
                                 onClick={() => {
                                   // Save individual question
-                                  // We don't actually submit here, just go back to viewing mode
-                                  setQuestionMode('viewing');
-                                  setEditingQuestionIndex(null);
-                                  setCreatingQuestion(false);
+                                  if (
+                                    questionMode === 'editing' &&
+                                    onUpdateQuestion &&
+                                    form.getValues(`questions.${index}.id`)
+                                  ) {
+                                    const questionData = form.getValues(`questions.${index}`);
+                                    onUpdateQuestion(questionData.id as string, questionData).then(
+                                      (success) => {
+                                        if (success) {
+                                          toast.success('Question updated successfully');
+                                          setQuestionMode('viewing');
+                                          setEditingQuestionIndex(null);
+                                          setCreatingQuestion(false);
+                                        }
+                                      }
+                                    );
+                                  } else {
+                                    // Just go back to viewing mode
+                                    setQuestionMode('viewing');
+                                    setEditingQuestionIndex(null);
+                                    setCreatingQuestion(false);
+                                  }
                                 }}
                               >
                                 {questionMode === 'creating' ? 'Add Question' : 'Update Question'}
@@ -475,7 +510,10 @@ export function DragDropForm({
                       // Show preview card for this question
                       const question = form.getValues(`questions.${index}`);
                       const dragItem = drag_items.find(
-                        (item) => item.item_id === question.drag_item_id
+                        (item) =>
+                          item.item_id === question.drag_item_id ||
+                          item.id === question.drag_item_id ||
+                          item.drag_item_id === question.drag_item_id
                       );
 
                       return (
@@ -553,10 +591,27 @@ export function DragDropForm({
               <Button type='button' variant='outline' onClick={onCancel}>
                 Cancel
               </Button>
+              {/* Check if there are any unsaved drag items (items without any ID) */}
+              {form
+                .getValues('drag_items')
+                .some((item) => !item.item_id && !item.id && !item.drag_item_id) &&
+                groupId && (
+                  <div className='text-amber-500 text-sm mr-2 flex items-center'>
+                    <span>⚠️ Please save each drag item before saving all changes</span>
+                  </div>
+                )}
               <Button
                 type='submit'
                 className='gap-2'
-                disabled={isSubmitting || questionMode !== 'viewing'}
+                disabled={
+                  isSubmitting ||
+                  questionMode !== 'viewing' ||
+                  (groupId
+                    ? form
+                        .getValues('drag_items')
+                        .some((item) => !item.item_id && !item.id && !item.drag_item_id)
+                    : false)
+                }
               >
                 <Save className='h-4 w-4' />
                 {isSubmitting ? 'Saving...' : 'Save All Changes'}

@@ -93,9 +93,7 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
           hasNextPage: response.pagination.hasNextPage,
         });
       }
-    } catch (error) {
-      console.error('Failed to fetch passages:', error);
-    }
+    } catch (error) {}
   };
 
   useEffect(() => {

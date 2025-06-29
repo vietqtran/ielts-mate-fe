@@ -14,14 +14,23 @@ import { FillInBlanksManager } from './questions/FillInBlanksManager';
 import { MatchingManager } from './questions/MatchingManager';
 import { MultipleChoiceManager } from './questions/MultipleChoiceManager';
 
-interface LocalQuestionGroup {
+// Define the DragItem interface to match what DragDropManager expects
+export interface DragItem {
+  id?: string;
+  drag_item_id?: string;
+  item_id?: string;
+  content: string;
+  item_content?: string;
+}
+
+export interface LocalQuestionGroup {
   id?: string;
   section_order: number;
   section_label: string;
   instruction: string;
   question_type: QuestionType;
   questions: any[];
-  drag_items?: string[]; // Stored as string[] but converted to DragItem[] for DragDropManager
+  drag_items?: DragItem[]; // Changed from string[] to DragItem[]
 }
 
 interface QuestionGroupsManagerProps {
@@ -100,7 +109,6 @@ export function QuestionGroupsManager({
           response.data.group_id || (response.data as any).id || (response.data as any).group_id;
 
         if (!group_id) {
-          console.error('No group ID found in response:', response.data);
           return;
         }
 
@@ -111,17 +119,14 @@ export function QuestionGroupsManager({
           instruction: response.data.instruction || groupData.instruction,
           question_type: groupData.question_type,
           questions: response.data.questions ?? [],
-          drag_items: [], // Initialize as empty array since backend doesn't return this yet
+          drag_items: [], // Initialize as empty DragItem array
         };
 
         onAddGroup(frontendGroup);
         setIsCreatingGroup(false);
       } else {
-        console.error('No data in response:', response);
       }
-    } catch (error) {
-      console.error('Failed to create question group:', error);
-    }
+    } catch (error) {}
   };
 
   const handleEditGroup = (index: number) => {
@@ -136,24 +141,14 @@ export function QuestionGroupsManager({
   };
 
   const renderQuestionManager = (group: LocalQuestionGroup, groupIndex: number) => {
-    // Convert to the format expected by question managers
-    const managerGroup = {
-      ...group,
-      question_type: group.question_type as any, // Type cast to resolve interface mismatch
-      // Convert string[] drag_items to DragItem[] for DragDropManager
-      drag_items: group.drag_items
-        ? group.drag_items.map((item) => ({
-            id: item,
-            drag_item_id: item,
-            content: item,
-          }))
-        : undefined,
-    };
-
     const commonProps = {
-      group: managerGroup,
+      group: group, // Pass group directly since types now match
       groupIndex,
       onUpdateGroup: (updatedGroup: any) => {
+        // Check if this contains newly created questions that shouldn't be updated again
+        const hasJustCreatedQuestions = updatedGroup._justCreatedQuestions === true;
+        const createdQuestionIds = updatedGroup._createdQuestionIds || [];
+
         // Ensure proper data structure for preview
         const localGroup: LocalQuestionGroup = {
           id: updatedGroup.id,
@@ -170,11 +165,18 @@ export function QuestionGroupsManager({
               choice_id: c.choice_id || c.id,
             })),
           })),
-          // Convert DragItem[] back to string[] when updating
-          drag_items: Array.isArray(updatedGroup.drag_items)
-            ? updatedGroup.drag_items.map((item: any) => item.content || item)
-            : [],
+          // Keep drag_items as DragItem[] (no conversion needed)
+          drag_items: updatedGroup.drag_items || [],
         };
+
+        // Preserve the special flags to prevent redundant updates
+        if (hasJustCreatedQuestions) {
+          // @ts-ignore - These properties aren't in the type definition but we need them
+          localGroup._justCreatedQuestions = true;
+          // @ts-ignore
+          localGroup._createdQuestionIds = createdQuestionIds;
+        }
+
         onUpdateGroup(groupIndex, localGroup);
       },
       refetchPassageData: refetchPassageData,

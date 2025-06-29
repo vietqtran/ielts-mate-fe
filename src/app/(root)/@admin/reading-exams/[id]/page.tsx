@@ -29,7 +29,6 @@ export default function ReadingExamDetailsPage() {
           setExam(response.data);
         }
       } catch (error) {
-        console.error('Failed to fetch reading exam:', error);
         toast.error('Failed to fetch reading exam details');
       } finally {
         setIsPageLoading(false);
@@ -46,7 +45,6 @@ export default function ReadingExamDetailsPage() {
         toast.success('Reading exam deleted successfully');
         router.push('/reading-exams');
       } catch (error) {
-        console.error('Failed to delete reading exam:', error);
         toast.error('Failed to delete reading exam');
       }
     }
@@ -62,7 +60,7 @@ export default function ReadingExamDetailsPage() {
 
   if (!exam) {
     return (
-      <div className='container mx-auto py-6'>
+      <div className='container mx-auto p-6'>
         <div className='mb-6'>
           <Button variant='ghost' asChild className='mb-6'>
             <Link href='/reading-exams'>

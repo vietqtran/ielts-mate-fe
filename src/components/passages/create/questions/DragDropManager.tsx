@@ -14,6 +14,7 @@ interface DragItem {
   drag_item_id?: string;
   item_id?: string;
   content: string;
+  item_content?: string; // Add this for API response format
 }
 
 interface Question {
@@ -24,7 +25,7 @@ interface Question {
   explanation: string;
   instruction_for_choice?: string;
   zone_index: number;
-  drag_item_id?: string;
+  drag_item_id?: string | null; // Can be null for questions without assigned items
   drag_items?: DragItem[];
 }
 
@@ -53,71 +54,116 @@ export function DragDropManager({
   const [localQuestions, setLocalQuestions] = useState(group.questions);
   const [localDragItems, setLocalDragItems] = useState<DragItem[]>([]);
 
+  // Debug helper to analyze associations between questions and drag items
+  const debugAssociations = (questions: Question[], dragItems: DragItem[]) => {
+    // Check each question's association
+    questions.forEach((q, index) => {
+      const itemId = q.drag_item_id;
+      const foundItem = itemId
+        ? dragItems.find(
+            (item) => item.drag_item_id === itemId || item.id === itemId || item.item_id === itemId
+          )
+        : null;
+    });
+  };
+
   // Function to fetch all drag items for a group
   const fetchAllDragItems = async (groupId: string) => {
     if (!groupId) return;
 
     try {
       const response = await getAllDragItemsByGroup(groupId);
-
       if (response?.data?.items) {
+        // From the API response example:
+        // "items": [{"item_id": "...", "item_content": "..."}]
         const fetchedItems = response.data.items.map((item) => ({
+          // Store all possible ID forms to ensure compatibility
           id: item.item_id,
           drag_item_id: item.item_id,
+          item_id: item.item_id,
+          // Map item_content to content for consistency
           content: item.item_content,
+          item_content: item.item_content,
         }));
 
-        console.log('Fetched all drag items from API:', fetchedItems);
         setLocalDragItems(fetchedItems);
+
+        // Debug associations after fetching
+        debugAssociations(localQuestions, fetchedItems);
       }
-    } catch (error) {
-      console.error('Failed to fetch all drag items:', error);
-    }
+    } catch (error) {}
   };
 
-  // Reset local state when group ID changes (indicating a new passage is being created)
+  // Reset local state when group changes (indicating a new passage is being created or updated)
   useEffect(() => {
-    setLocalQuestions(group.questions);
+    // Process questions first
+    const questions = group.questions || [];
 
-    // First try to extract drag items from both the group and questions
-    const dragItemsFromGroup = group.drag_items || [];
-    const dragItemsFromQuestions: DragItem[] = [];
+    // Create a standardized collection of drag items from all sources
+    let normalizedDragItems: DragItem[] = [];
 
-    if (group.questions && group.questions.length > 0) {
-      group.questions.forEach((question) => {
-        if (question.drag_items && question.drag_items.length > 0) {
-          question.drag_items.forEach((item) => {
-            dragItemsFromQuestions.push({
-              id: item.drag_item_id || item.item_id,
-              drag_item_id: item.drag_item_id || item.item_id,
-              content: item.content,
-            });
-          });
-        }
-      });
+    // 1. Add items from group.drag_items if present
+    if (group.drag_items && group.drag_items.length > 0) {
+      // From the API response example:
+      // "drag_items": [{"drag_item_id": "...", "content": "..."}]
+      normalizedDragItems = group.drag_items.map((item) => ({
+        id: item.drag_item_id || item.id || item.item_id,
+        drag_item_id: item.drag_item_id || item.id || item.item_id,
+        item_id: item.drag_item_id || item.id || item.item_id,
+        // Ensure we handle both content formats
+        content: item.content || item.item_content || '',
+        item_content: item.content || item.item_content || '',
+      }));
     }
 
-    // Combine both sources, avoiding duplicates
-    const combinedItems = [...dragItemsFromGroup];
-    dragItemsFromQuestions.forEach((newItem) => {
-      const exists = combinedItems.some(
-        (item) =>
-          (item.id && item.id === newItem.id) ||
-          (item.drag_item_id && item.drag_item_id === newItem.drag_item_id)
-      );
+    // 2. Associate drag items with questions if they have drag_item_id
+    const processedQuestions = questions.map((question) => {
+      // Check if question has a valid drag_item_id (not null or undefined)
+      if (
+        question.drag_item_id &&
+        question.drag_item_id !== 'null' &&
+        question.drag_item_id !== 'undefined'
+      ) {
+        const matchingItem = normalizedDragItems.find(
+          (item) =>
+            item.drag_item_id === question.drag_item_id ||
+            item.id === question.drag_item_id ||
+            item.item_id === question.drag_item_id
+        );
 
-      if (!exists) {
-        combinedItems.push(newItem);
+        if (matchingItem) {
+          return {
+            ...question,
+            drag_items: [
+              {
+                drag_item_id: matchingItem.drag_item_id || matchingItem.id || matchingItem.item_id,
+                item_id: matchingItem.drag_item_id || matchingItem.id || matchingItem.item_id,
+                content: matchingItem.content || matchingItem.item_content || '',
+                item_content: matchingItem.content || matchingItem.item_content || '',
+              },
+            ],
+          };
+        }
+      } else {
+        // Explicitly handle null drag_item_id by ensuring drag_items is empty
+        return {
+          ...question,
+          drag_item_id: undefined, // Use undefined instead of null for TypeScript compatibility
+          drag_items: [],
+        };
       }
+      return question;
     });
 
-    console.log('Combined drag items on init:', combinedItems);
-
-    // Set items from combined sources first as a fallback
-    setLocalDragItems(combinedItems);
+    // Log important debug information about the initial state
+    setLocalQuestions(processedQuestions);
+    setLocalDragItems(normalizedDragItems);
     setIsEditing(false);
 
-    // Then fetch all items from the API to ensure we have the complete list
+    // Debug associations
+    debugAssociations(processedQuestions, normalizedDragItems);
+
+    // Always fetch all items from the API to ensure we have complete data
     if (group.id) {
       fetchAllDragItems(group.id);
     }
@@ -129,267 +175,215 @@ export function DragDropManager({
     createDragItem,
     updateDragItem,
     deleteDragItem,
-    getAllDragItemsByGroup,
+    getAllDragItemsByGroup, // This gets items with format {item_id, item_content}
     isLoading,
   } = useQuestion();
 
+  // Function to update a single question
+  const handleUpdateQuestion = async (questionId: string, questionData: any): Promise<boolean> => {
+    if (!group.id || !questionId) {
+      return false;
+    }
+
+    try {
+      // Convert empty string drag_item_id to undefined for API
+      const apiDragItemId =
+        questionData.drag_item_id === '' ? undefined : questionData.drag_item_id;
+
+      const result = await updateQuestionInfo(group.id, questionId, {
+        explanation: questionData.explanation,
+        point: questionData.point,
+        question_categories: [],
+        zone_index: questionData.zone_index,
+        drag_item_id: apiDragItemId,
+      });
+
+      if (result?.data) {
+        // Update the local questions state
+        setLocalQuestions((prev) =>
+          prev.map((q) =>
+            q.id === questionId || q.question_id === questionId
+              ? {
+                  ...q,
+                  explanation: questionData.explanation,
+                  point: questionData.point,
+                  zone_index: questionData.zone_index,
+                  drag_item_id: questionData.drag_item_id,
+                }
+              : q
+          )
+        );
+        return true;
+      }
+      return false;
+    } catch (error) {
+      return false;
+    }
+  };
+
   const handleSubmit = async (data: DragDropFormData) => {
     if (!group.id) {
-      console.error('Group ID is required');
       return;
     }
 
     const groupId = group.id;
-    const originalItems = localDragItems;
-    const originalQuestions = localQuestions;
 
     try {
-      // 1. Handle Drag Items
-      const itemPromises: Promise<any>[] = [];
-
-      // Identify new, updated, and deleted items
-      const newItemData = data.drag_items.filter((item) => !item.item_id);
-      const updatedItemData = data.drag_items.filter((item) => {
-        const original = originalItems.find((orig) => orig.id === item.item_id);
-        // NOTE: API does not support updating order, only content.
-        return original && original.content !== item.content;
-      });
-      const deletedItemIds = originalItems
-        .filter((orig) => !data.drag_items.some((item) => item.item_id === orig.id))
-        .map((item) => item.id);
-
-      // Create new items
-      if (newItemData.length > 0) {
-        // Create each new item with separate API calls
-        newItemData.forEach((item) => {
-          itemPromises.push(createDragItem(groupId, { content: item.content }));
-        });
-      }
-
-      // Update existing items
-      updatedItemData.forEach((item) => {
-        itemPromises.push(updateDragItem(groupId, item.item_id!, { content: item.content }));
-      });
-
-      // Delete items
-      deletedItemIds.forEach((id) => {
-        if (id) {
-          // Only delete if id is defined
-          itemPromises.push(deleteDragItem(groupId, id));
-        }
-      });
-
-      const itemResults = await Promise.all(itemPromises);
-
-      // Process responses, handling both single items and arrays of items
-      const successfulItems = itemResults
-        .map((res) => {
-          if (!res || !res.data) return null;
-          // Handle both single item and array responses
-          return Array.isArray(res.data) ? res.data : [res.data];
-        })
-        .filter(Boolean)
-        .flat();
-
-      console.log('Successful Items from API:', successfulItems);
-
-      // Atomically update drag items state
-      const updatedItems = [...originalItems].filter((item) => !deletedItemIds.includes(item.id));
-      successfulItems.forEach((newItem) => {
-        // Map the API response structure to our component's structure
-        const mappedItem = {
-          id: newItem.drag_item_id || newItem.item_id,
-          drag_item_id: newItem.drag_item_id || newItem.item_id,
-          content: newItem.content,
-        };
-
-        console.log('Mapped drag item:', mappedItem);
-
-        const index = updatedItems.findIndex(
-          (item) => item.id === mappedItem.id || item.drag_item_id === mappedItem.drag_item_id
-        );
-
-        if (index > -1) {
-          updatedItems[index] = mappedItem; // Update existing
-        } else {
-          updatedItems.push(mappedItem); // Add new
-        }
-      });
-
-      // 2. Handle Questions - ONLY create new questions, don't update existing ones
-      const questionPromises: Promise<any>[] = [];
-      const newQuestionData = data.questions.filter((q) => !q.id);
-      // We're no longer updating existing questions as per requirements
-      const deletedQuestionIds = originalQuestions
+      // 1. Identify changes to questions
+      const newQuestions = data.questions.filter((q) => !q.id);
+      const existingQuestions = data.questions.filter((q) => q.id);
+      const deletedQuestionIds = localQuestions
         .filter((orig) => !data.questions.some((q) => q.id === orig.id))
-        .map((q) => q.id);
+        .map((q) => q.id)
+        .filter(Boolean) as string[];
 
-      // Create new questions
-      if (newQuestionData.length > 0) {
-        const newQuestionRequests = newQuestionData.map((q) => {
-          // Remove instruction_for_choice if it's present but empty
-          const questionData = {
+      // 2. Create new questions
+      let createdQuestions: any[] = [];
+      if (newQuestions.length > 0) {
+        const newQuestionRequests = newQuestions.map((q) => {
+          // Convert empty string drag_item_id to undefined for API
+          const apiDragItemId = q.drag_item_id === '' ? undefined : q.drag_item_id;
+
+          return {
             ...q,
             question_type: 3, // DRAG_AND_DROP
             question_group_id: groupId,
             question_categories: [],
             number_of_correct_answers: 0,
-            drag_item_id: q.drag_item_id, // Ensure drag_item_id is included
+            drag_item_id: apiDragItemId,
+            ...(q.instruction_for_choice
+              ? { instruction_for_choice: q.instruction_for_choice }
+              : {}),
           };
-
-          // If instruction_for_choice is empty or undefined, don't send it to the API
-          if (!questionData.instruction_for_choice) {
-            delete questionData.instruction_for_choice;
-          }
-
-          return questionData;
         });
 
-        questionPromises.push(createQuestions(groupId, newQuestionRequests));
+        const result = await createQuestions(groupId, newQuestionRequests);
+        createdQuestions = Array.isArray(result.data) ? result.data : [result.data];
       }
 
-      // We no longer update existing questions, per requirements
-      // Only handle deletions of questions
-      deletedQuestionIds.forEach((id) => {
-        if (id) {
-          // Only delete if id is defined
-          questionPromises.push(deleteQuestion(groupId, id));
+      // 3. Update existing questions individually
+      for (const question of existingQuestions) {
+        if (question.id) {
+          await handleUpdateQuestion(question.id, question);
         }
-      });
+      }
 
-      const questionResults = await Promise.all(questionPromises);
-      const successfulQuestions = questionResults
-        .map((res) =>
-          res && Array.isArray(res.data) ? res.data : res && res.data ? [res.data] : []
-        )
-        .flat()
-        .filter(Boolean);
+      // 4. Delete questions
+      for (const id of deletedQuestionIds) {
+        await deleteQuestion(groupId, id);
+      }
 
-      // Atomically update questions state
-      const updatedQuestions = [...originalQuestions].filter(
-        (q) => !deletedQuestionIds.includes(q.id)
-      );
+      // 5. Map created questions to our format
+      const mappedNewQuestions = createdQuestions.map((q) => ({
+        id: q.question_id,
+        question_id: q.question_id,
+        question_order: q.question_order,
+        point: q.point,
+        explanation: q.explanation,
+        instruction_for_choice: q.instruction_for_choice,
+        zone_index: q.zone_index,
+        drag_item_id: q.drag_item_id,
+        drag_items:
+          q.drag_items && q.drag_items.length > 0
+            ? q.drag_items.map((item: any) => ({
+                drag_item_id: item.drag_item_id,
+                item_id: item.drag_item_id,
+                content: item.content || item.item_content || '',
+              }))
+            : [],
+      }));
 
-      console.log('Successful Questions from API:', successfulQuestions);
+      // 7. Create initial updated questions
+      let updatedQuestions = [
+        ...localQuestions.filter((q) => !deletedQuestionIds.includes(q.id as string)),
+        ...mappedNewQuestions,
+      ];
 
-      // Process drag items from the question response
-      const dragItemsFromQuestions: DragItem[] = [];
+      // 6. Refetch all drag items to ensure data consistency and re-associate
+      if (group.id) {
+        await fetchAllDragItems(group.id);
 
-      successfulQuestions.forEach((newQuestion) => {
-        // Extract drag items from the question response
-        if (newQuestion.drag_items && newQuestion.drag_items.length > 0) {
-          console.log('Found drag items in question response:', newQuestion.drag_items);
-          newQuestion.drag_items.forEach((item: any) => {
-            dragItemsFromQuestions.push({
-              id: item.drag_item_id || item.item_id,
-              drag_item_id: item.drag_item_id || item.item_id,
-              content: item.content || '',
-            });
-          });
-        }
+        // Re-associate drag items with questions after fetching
+        updatedQuestions = updatedQuestions.map((question) => {
+          // Only try to associate if drag_item_id exists and is not null or undefined
+          if (
+            question.drag_item_id &&
+            question.drag_item_id !== 'null' &&
+            question.drag_item_id !== 'undefined'
+          ) {
+            const matchingItem = localDragItems.find(
+              (item) =>
+                item.drag_item_id === question.drag_item_id ||
+                item.id === question.drag_item_id ||
+                item.item_id === question.drag_item_id
+            );
 
-        // Map API response structure to our component's structure
-        const mappedQuestion = {
-          id: newQuestion.question_id,
-          question_id: newQuestion.question_id,
-          question_order: newQuestion.question_order,
-          point: newQuestion.point,
-          explanation: newQuestion.explanation,
-          instruction_for_choice: newQuestion.instruction_for_choice,
-          zone_index: newQuestion.zone_index,
-          drag_item_id:
-            newQuestion.drag_items && newQuestion.drag_items.length > 0
-              ? newQuestion.drag_items[0].drag_item_id
-              : newQuestion.drag_item_id,
-        };
+            if (matchingItem) {
+              return {
+                ...question,
+                drag_items: [
+                  {
+                    drag_item_id:
+                      matchingItem.drag_item_id || matchingItem.id || matchingItem.item_id,
+                    item_id: matchingItem.drag_item_id || matchingItem.id || matchingItem.item_id,
+                    content: matchingItem.content || matchingItem.item_content || '',
+                    item_content: matchingItem.content || matchingItem.item_content || '',
+                  },
+                ],
+              };
+            }
+          } else {
+            // Explicitly clear drag_items array if there's no drag_item_id
+            return {
+              ...question,
+              drag_item_id: undefined, // Use undefined instead of null for TypeScript compatibility
+              drag_items: [],
+            };
+          }
+          return question;
+        });
+      }
 
-        console.log('Mapped question:', mappedQuestion);
-
-        const index = updatedQuestions.findIndex(
-          (q) => q.id === mappedQuestion.id || q.question_id === mappedQuestion.question_id
-        );
-
-        if (index > -1) {
-          updatedQuestions[index] = mappedQuestion; // Update existing
-        } else {
-          updatedQuestions.push(mappedQuestion); // Add new
-        }
-      });
-
-      // Add drag items from questions to the updatedItems
-      dragItemsFromQuestions.forEach((newDragItem) => {
-        const exists = updatedItems.some(
-          (item) => item.id === newDragItem.id || item.drag_item_id === newDragItem.drag_item_id
-        );
-
-        if (!exists) {
-          console.log('Adding drag item from question response:', newDragItem);
-          updatedItems.push(newDragItem);
-        }
-      });
-
-      // 3. Update local state and propagate changes to parent
-      console.log('Setting localDragItems to:', updatedItems);
-      console.log('Setting localQuestions to:', updatedQuestions);
-
-      setLocalDragItems(updatedItems);
       setLocalQuestions(updatedQuestions);
 
-      // Notify parent component to update its state for preview
-      // For the updated group, ensure we're using consistent ID field names
+      // 8. Update parent component with simple, clean group object
       const updatedGroup = {
         ...group,
-        questions: updatedQuestions.map((q) => {
-          // Get drag_item_id from either direct property or nested drag_items array
-          let dragItemId = q.drag_item_id;
-          if (!dragItemId && q.drag_items && q.drag_items.length > 0) {
-            dragItemId = q.drag_items[0].drag_item_id || q.drag_items[0].item_id;
-          }
-
-          return {
-            ...q,
-            question_id: q.id || q.question_id,
-            drag_item_id: dragItemId,
-          };
-        }),
-        drag_items: updatedItems.map((item) => ({
-          id: item.item_id || item.id || item.drag_item_id,
-          drag_item_id: item.item_id || item.id || item.drag_item_id,
-          content: item.content,
-        })),
+        questions: updatedQuestions,
       };
 
-      console.log('Updating group with:', updatedGroup);
       onUpdateGroup(updatedGroup);
-
-      // After successfully submitting, fetch all drag items to ensure we have the complete list
-      if (group.id) {
-        fetchAllDragItems(group.id);
-      }
-
       setIsEditing(false);
     } catch (error) {
-      console.error('Failed to save Drag & Drop changes:', error);
       // Optionally, show an error message to the user
     }
   };
 
   const dragItemMap = useMemo(() => {
-    console.log('Building dragItemMap from:', localDragItems);
     const map = new Map();
 
     if (localDragItems && localDragItems.length > 0) {
       localDragItems.forEach((item) => {
-        // Handle all possible ID field names
-        const itemId = item.item_id || item.id || item.drag_item_id;
-        if (itemId) {
-          map.set(itemId, item.content);
-          console.log(`Added to map: ${itemId} -> ${item.content}`);
+        const itemContent = item.content || item.item_content || '';
+        const itemId = item.drag_item_id || item.id || item.item_id;
 
-          // Add mapping for all possible ID forms to ensure we catch references
-          if (item.item_id) map.set(item.item_id, item.content);
-          if (item.id) map.set(item.id, item.content);
-          if (item.drag_item_id) map.set(item.drag_item_id, item.content);
+        if (itemId) {
+          // Use a single consistent ID and content
+          map.set(itemId, itemContent);
+        }
+      });
+    }
+
+    // Also map directly from questions if we have questions with drag_items
+    if (localQuestions && localQuestions.length > 0) {
+      localQuestions.forEach((question) => {
+        if (question.drag_items && question.drag_items.length > 0) {
+          question.drag_items.forEach((item) => {
+            const itemId = item.drag_item_id || item.item_id;
+            if (itemId) {
+              map.set(itemId, item.content);
+            }
+          });
         }
       });
     }
@@ -400,10 +394,9 @@ export function DragDropManager({
   const initialFormData: DragDropFormData = {
     drag_items:
       localDragItems?.map((item) => {
-        console.log('Processing drag item for form:', item);
         return {
-          item_id: item.item_id || item.id || item.drag_item_id,
-          content: item.content,
+          item_id: item.drag_item_id || item.id || item.item_id,
+          content: item.content || item.item_content || '',
         };
       }) || [],
     questions:
@@ -414,7 +407,9 @@ export function DragDropManager({
           dragItemId = q.drag_items[0].drag_item_id || q.drag_items[0].item_id;
         }
 
-        console.log('Processing question for form:', q, 'Using drag_item_id:', dragItemId);
+        // Convert null/undefined drag_item_id to empty string for form data
+        // since DragDropFormData expects drag_item_id to be a string
+        const formDragItemId = dragItemId || '';
 
         return {
           id: q.id || q.question_id,
@@ -423,7 +418,7 @@ export function DragDropManager({
           explanation: q.explanation,
           instruction_for_choice: q.instruction_for_choice,
           zone_index: q.zone_index,
-          drag_item_id: dragItemId || '', // Ensure it's never undefined
+          drag_item_id: formDragItemId, // Always use string (empty string instead of null)
         };
       }) || [],
   };
@@ -432,7 +427,9 @@ export function DragDropManager({
     return (
       <DragDropForm
         initialData={initialFormData}
-        onSubmit={handleSubmit}
+        onSubmit={(e) => {
+          handleSubmit(e);
+        }}
         onCancel={() => setIsEditing(false)}
         isSubmitting={
           isLoading.createQuestions ||
@@ -443,6 +440,7 @@ export function DragDropManager({
           isLoading.deleteDragItem
         }
         groupId={group.id}
+        onUpdateQuestion={handleUpdateQuestion}
       />
     );
   }
@@ -475,11 +473,32 @@ export function DragDropManager({
                   Drag Items ({localDragItems?.length || 0})
                 </h4>
                 <ul className='space-y-1 list-disc list-inside'>
-                  {localDragItems?.map((item, i) => (
-                    <li key={i} className='text-muted-foreground'>
-                      {typeof item.content !== 'object' && JSON.stringify(item.content)}
-                    </li>
-                  )) || <li className='text-muted-foreground italic'>No items created.</li>}
+                  {localDragItems?.length > 0 ? (
+                    localDragItems.map((item, i) => {
+                      // Make sure we're not displaying an ID as content
+                      let displayContent = item.content;
+                      if (
+                        typeof displayContent === 'string' &&
+                        displayContent.match(
+                          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+                        )
+                      ) {
+                        displayContent = `Drag Item ${i + 1}`;
+                      }
+                      return (
+                        <li key={i} className='text-muted-foreground'>
+                          {typeof displayContent !== 'object'
+                            ? displayContent
+                            : `Drag Item ${i + 1}`}
+                          <span className='text-xs text-muted-foreground ml-2'>
+                            (ID: {item.drag_item_id || item.id || item.item_id})
+                          </span>
+                        </li>
+                      );
+                    })
+                  ) : (
+                    <li className='text-muted-foreground italic'>No items created.</li>
+                  )}
                 </ul>
               </div>
               <div>
@@ -495,9 +514,53 @@ export function DragDropManager({
                         question.drag_items[0].drag_item_id || question.drag_items[0].item_id;
                     }
 
-                    console.log('Question in rendering:', question);
-                    console.log('Using drag_item_id for display:', dragItemId);
-                    console.log('Available in map:', dragItemMap.has(dragItemId));
+                    // Find the drag item content from all possible sources
+                    let dragItemContent = null;
+
+                    // Skip processing if there's no drag item ID (not an error condition)
+                    if (!dragItemId || dragItemId === 'null' || dragItemId === 'undefined') {
+                      dragItemContent = null;
+                    } else {
+                      // 1. First check the direct dragItemMap
+                      dragItemContent = dragItemMap.get(dragItemId);
+                      if (dragItemContent) {
+                      }
+
+                      // 2. If not found, look for it directly in localDragItems
+                      if (!dragItemContent) {
+                        const foundItem = localDragItems.find(
+                          (item) =>
+                            item.id === dragItemId ||
+                            item.drag_item_id === dragItemId ||
+                            item.item_id === dragItemId
+                        );
+
+                        if (foundItem) {
+                          dragItemContent = foundItem.content || foundItem.item_content;
+                        }
+                      }
+
+                      // 3. If still not found, check question's own drag_items array
+                      if (
+                        !dragItemContent &&
+                        question.drag_items &&
+                        question.drag_items.length > 0
+                      ) {
+                        dragItemContent =
+                          question.drag_items[0].content || question.drag_items[0].item_content;
+                      }
+
+                      // 4. Make sure the content is not an ID (guard against displaying IDs)
+                      if (
+                        dragItemContent &&
+                        typeof dragItemContent === 'string' &&
+                        dragItemContent.match(
+                          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+                        )
+                      ) {
+                        dragItemContent = `Drag Item (ID: ${dragItemContent})`;
+                      }
+                    }
 
                     return (
                       <li
@@ -507,11 +570,19 @@ export function DragDropManager({
                         <span className='font-medium text-primary'>
                           Q{question.question_order} (Zone {question.zone_index}):
                         </span>{' '}
-                        {dragItemMap.get(dragItemId) || (
-                          <span className='italic text-red-500'>
-                            Invalid Item (ID: {dragItemId || 'missing'})
+                        {dragItemContent ? (
+                          <span>{dragItemContent}</span>
+                        ) : (
+                          <span className='italic text-amber-500'>
+                            {dragItemId && dragItemId !== 'null' && dragItemId !== 'undefined'
+                              ? `Invalid Item (ID: ${dragItemId})`
+                              : 'No item assigned yet'}
                           </span>
                         )}
+                        {/* Debug info - can be removed in production */}
+                        <span className='text-xs text-muted-foreground ml-2'>
+                          (QID: {question.id || question.question_id})
+                        </span>
                       </li>
                     );
                   })}

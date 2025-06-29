@@ -267,7 +267,6 @@ export function useAuth() {
         const { data } = await instance.post('/identity/auth/verify-reset-token', payload, {
           signal: controller.signal,
         });
-        console.log('verifyResetToken response:', data);
         return data;
       } catch (error) {
         setErrorState('verifyResetToken', error as Error);

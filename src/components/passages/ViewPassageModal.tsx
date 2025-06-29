@@ -90,7 +90,6 @@ export function ViewPassageModal({
         setQuestionGroups(response.data);
       }
     } catch (error) {
-      console.error('Failed to load question groups:', error);
     } finally {
       setIsLoadingGroups(false);
     }

@@ -84,9 +84,7 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
       try {
         await onSaveGroup(groups[currentGroupIndex]);
         setCurrentGroupIndex(null);
-      } catch (error) {
-        console.error('Failed to save group:', error);
-      }
+      } catch (error) {}
     }
   };
 

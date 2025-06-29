@@ -52,7 +52,6 @@ export function MultipleChoiceManager({
 
   const handleFormSubmit = async (data: QuestionFormData) => {
     if (!group.id) {
-      console.error('Group ID is required');
       return;
     }
 
@@ -196,9 +195,7 @@ export function MultipleChoiceManager({
       }
       setIsAddingOrEditing(false);
       setEditingQuestion(null);
-    } catch (error) {
-      console.error('Failed to save question:', error);
-    }
+    } catch (error) {}
   };
 
   const handleEdit = (question: any) => {
@@ -208,7 +205,6 @@ export function MultipleChoiceManager({
 
   const handleDelete = async (questionId: string) => {
     if (!group.id) {
-      console.error('Group ID is required');
       return;
     }
     try {
@@ -221,9 +217,7 @@ export function MultipleChoiceManager({
         ...group,
         questions: updatedQuestions,
       });
-    } catch (error) {
-      console.error('Failed to delete question:', error);
-    }
+    } catch (error) {}
   };
 
   const handleCancel = () => {

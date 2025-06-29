@@ -42,9 +42,7 @@ export function AppSidebar() {
       setTimeout(() => {
         replace('/sign-in');
       }, 500);
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
+    } catch (error) {}
   };
 
   return (
@@ -73,7 +71,15 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <Link href='/passages'>
                     <BookOpen className='h-4 w-4' />
-                    <span>Reading Passages</span>
+                    <span>Passages</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href='/reading-exams'>
+                    <BookOpen className='h-4 w-4' />
+                    <span>Reading Exams</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

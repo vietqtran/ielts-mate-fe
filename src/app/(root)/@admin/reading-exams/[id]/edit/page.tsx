@@ -100,7 +100,6 @@ export default function EditReadingExamPage() {
 
         setIsPageLoading(false);
       } catch (error) {
-        console.error('Error loading data:', error);
         toast.error('Failed to load exam data');
         setIsPageLoading(false);
       }
@@ -138,7 +137,6 @@ export default function EditReadingExamPage() {
       toast.success('Reading exam updated successfully');
       router.push('/reading-exams');
     } catch (error) {
-      console.error('Failed to update reading exam:', error);
       toast.error('Failed to update reading exam');
     }
   };
@@ -152,7 +150,7 @@ export default function EditReadingExamPage() {
   }
 
   return (
-    <div className='container mx-auto py-6'>
+    <div className='container mx-auto p-6'>
       <div className='mb-6'>
         <Button variant='ghost' asChild className='mb-6'>
           <Link href='/reading-exams'>

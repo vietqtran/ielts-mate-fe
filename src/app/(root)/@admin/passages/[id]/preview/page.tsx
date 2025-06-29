@@ -111,9 +111,7 @@ export default function PassagePreviewPage() {
           };
           setPassageData(mappedData);
         }
-      } catch (error) {
-        console.error('Failed to load passage data:', error);
-      }
+      } catch (error) {}
     };
 
     if (passage_id) {

@@ -123,7 +123,6 @@ export default function OtpVerificationForm() {
         router.replace('/');
       }
     } catch (error) {
-      console.log('OTP verification error:', error);
       const { message } = extractAxiosErrorData(
         error,
         'Invalid verification code. Please try again.'

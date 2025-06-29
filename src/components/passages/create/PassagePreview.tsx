@@ -7,6 +7,7 @@ import { BookOpen, CheckCircle, Clock, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { LocalQuestionGroup } from './QuestionGroupsManager';
 
 interface PassageData {
   title: string;
@@ -28,7 +29,7 @@ interface QuestionGroup {
 
 interface PassagePreviewProps {
   passageData: PassageData;
-  questionGroups: QuestionGroup[];
+  questionGroups: LocalQuestionGroup[];
   onFinish: () => void;
 }
 
@@ -257,7 +258,7 @@ export function PassagePreview({
                                 key={itemIndex}
                                 className='px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm'
                               >
-                                {item}
+                                {item.content}
                               </span>
                             ))}
                           </div>

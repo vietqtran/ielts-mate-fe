@@ -149,7 +149,6 @@ export function MultipleChoiceForm({
         ],
       });
     } catch (error) {
-      console.error('Failed to save question:', error);
       alert((error as Error).message || 'Failed to save question');
     } finally {
       setIsSubmitting(false);

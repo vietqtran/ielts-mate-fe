@@ -70,8 +70,6 @@ export function MultipleChoiceForm({
     },
   });
 
-  console.log('initialData', initialData);
-
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'choices',
@@ -149,13 +147,7 @@ export function MultipleChoiceForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit, (errors) => {
-              console.log(choices);
-              console.error('Form validation errors:', errors);
-            })}
-            className='space-y-6'
-          >
+          <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
             <div className='grid grid-cols-3 gap-4'>
               <FormField
                 control={form.control}

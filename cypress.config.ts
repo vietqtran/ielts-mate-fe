@@ -6,7 +6,6 @@ export default defineConfig({
     setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
       on("task", {
         log(message: string) {
-          console.log(message);
           return null;
         },
       });

@@ -159,7 +159,6 @@ export function EditPassageModal({
         throw new Error(result.message || 'Failed to update passage');
       }
     } catch (error) {
-      console.error('Failed to update passage:', error);
       toast.error('Failed to update passage. Please try again.');
     }
   };

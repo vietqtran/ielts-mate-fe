@@ -5,13 +5,16 @@ import * as z from 'zod';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { IeltsType, PassageStatus, QuestionType } from '@/types/reading.types';
+import { IeltsType, PassageStatus } from '@/types/reading.types';
 import { ArrowLeft, Eye, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { PassageBasicInfoForm } from '@/components/passages/create/PassageBasicInfoForm';
 import { PassagePreview } from '@/components/passages/create/PassagePreview';
-import { QuestionGroupsManager } from '@/components/passages/create/QuestionGroupsManager';
+import {
+  LocalQuestionGroup,
+  QuestionGroupsManager,
+} from '@/components/passages/create/QuestionGroupsManager';
 import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/usePassage';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -29,23 +32,13 @@ const passageSchema = z.object({
 
 type PassageFormData = z.infer<typeof passageSchema>;
 
-interface QuestionGroup {
-  id?: string;
-  section_order: number;
-  section_label: string;
-  instruction: string;
-  question_type: QuestionType;
-  questions: any[];
-  drag_items?: string[];
-}
-
 export default function CreatePassagePage() {
   const router = useRouter();
   const { createPassage, isLoading } = usePassage();
 
   const [currentStep, setCurrentStep] = useState<'basic' | 'questions' | 'preview'>('basic');
   const [createdpassage_id, setCreatedpassage_id] = useState<string | null>(null);
-  const [questionGroups, setQuestionGroups] = useState<QuestionGroup[]>([]);
+  const [questionGroups, setQuestionGroups] = useState<LocalQuestionGroup[]>([]);
   const [activeTab, setActiveTab] = useState('passage');
 
   const form = useForm<PassageFormData>({
@@ -101,9 +94,7 @@ export default function CreatePassagePage() {
           form.reset(draft);
           setQuestionGroups(draft.questionGroups ?? []);
         }
-      } catch (error) {
-        console.error('Error loading draft:', error);
-      }
+      } catch (error) {}
     }
   }, [form]);
 
@@ -161,16 +152,20 @@ export default function CreatePassagePage() {
         // Clear draft after successful creation
         sessionStorage.removeItem('draft-passage');
       }
-    } catch (error) {
-      console.error('Failed to create passage:', error);
-    }
+    } catch (error) {}
   };
 
-  const handleAddQuestionGroup = (group: QuestionGroup) => {
+  const handleAddQuestionGroup = (group: LocalQuestionGroup) => {
     setQuestionGroups((prev) => [...prev, group]);
   };
 
-  const handleUpdateQuestionGroup = (index: number, group: QuestionGroup) => {
+  const handleUpdateQuestionGroup = (index: number, group: LocalQuestionGroup) => {
+    // Check if this contains newly created questions that shouldn't be updated again
+    // @ts-ignore - These properties aren't in the type definition but were added to prevent redundant updates
+    const hasJustCreatedQuestions = group._justCreatedQuestions === true;
+
+    // In create page, we're just updating local state without API calls,
+    // but we still need to preserve the special flags
     setQuestionGroups((prev) => prev.map((g, i) => (i === index ? group : g)));
   };
 
@@ -350,9 +345,7 @@ export default function CreatePassagePage() {
               onAddGroup={handleAddQuestionGroup}
               onUpdateGroup={handleUpdateQuestionGroup}
               onDeleteGroup={handleDeleteQuestionGroup}
-              refetchPassageData={() => {
-                console.log('refetch');
-              }}
+              refetchPassageData={() => {}}
             />
           )}
         </TabsContent>
