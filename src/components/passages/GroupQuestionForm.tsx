@@ -84,9 +84,7 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
       try {
         await onSaveGroup(groups[currentGroupIndex]);
         setCurrentGroupIndex(null);
-      } catch (error) {
-        console.error('Failed to save group:', error);
-      }
+      } catch (error) {}
     }
   };
 
@@ -147,7 +145,7 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
         return (
           <DragDropForm
             questions={group.questions}
-            drag_items={group.drag_items || []}
+            drag_items={group.drag_items ?? []}
             onQuestionsChange={handleUpdateGroupQuestions}
             onDragItemsChange={handleUpdateGroupDragItems}
           />

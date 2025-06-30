@@ -8,6 +8,7 @@ import {
   Heading3,
   Image as ImageIcon,
   Italic as ItalicIcon,
+  Table as TableIcon,
   Underline as UnderlineIcon,
 } from 'lucide-react';
 
@@ -17,6 +18,10 @@ import Bold from '@tiptap/extension-bold';
 import Heading from '@tiptap/extension-heading';
 import Image from '@tiptap/extension-image';
 import Italic from '@tiptap/extension-italic';
+import Table from '@tiptap/extension-table';
+import TableCell from '@tiptap/extension-table-cell';
+import TableHeader from '@tiptap/extension-table-header';
+import TableRow from '@tiptap/extension-table-row';
 import Underline from '@tiptap/extension-underline';
 import StarterKit from '@tiptap/starter-kit';
 
@@ -42,6 +47,23 @@ export function TiptapEditor({ content, onChange, placeholder, className }: Tipt
           class: 'max-w-full h-auto',
         },
       }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: 'border-collapse border border-gray-300',
+        },
+      }),
+      TableRow,
+      TableHeader.configure({
+        HTMLAttributes: {
+          class: 'border border-gray-300 px-3 py-2 bg-gray-50 font-bold',
+        },
+      }),
+      TableCell.configure({
+        HTMLAttributes: {
+          class: 'border border-gray-300 px-3 py-2',
+        },
+      }),
     ],
     content,
     onUpdate: ({ editor }) => {
@@ -64,9 +86,15 @@ export function TiptapEditor({ content, onChange, placeholder, className }: Tipt
     }
   };
 
+  const insertTable = () => {
+    editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+  };
+
   if (!editor) {
     return null;
   }
+
+  const isTableActive = editor.isActive('table');
 
   return (
     <div className='border border-input rounded-md'>
@@ -130,6 +158,72 @@ export function TiptapEditor({ content, onChange, placeholder, className }: Tipt
         <Button type='button' variant='ghost' size='sm' onClick={addImage} className='h-8 w-8 p-0'>
           <ImageIcon className='h-4 w-4' />
         </Button>
+        <Button
+          type='button'
+          variant='ghost'
+          size='sm'
+          onClick={insertTable}
+          className={cn('h-8 w-8 p-0', isTableActive && 'bg-muted')}
+        >
+          <TableIcon className='h-4 w-4' />
+        </Button>
+
+        {/* Table controls - only show when table is active */}
+        {isTableActive && (
+          <>
+            <div className='w-px h-8 bg-border mx-1' />
+            <Button
+              type='button'
+              variant='ghost'
+              size='sm'
+              onClick={() => editor.chain().focus().addColumnBefore().run()}
+              className='h-8 px-2 text-xs'
+              title='Add column before'
+            >
+              +Col
+            </Button>
+            <Button
+              type='button'
+              variant='ghost'
+              size='sm'
+              onClick={() => editor.chain().focus().addRowBefore().run()}
+              className='h-8 px-2 text-xs'
+              title='Add row before'
+            >
+              +Row
+            </Button>
+            <Button
+              type='button'
+              variant='ghost'
+              size='sm'
+              onClick={() => editor.chain().focus().deleteColumn().run()}
+              className='h-8 px-2 text-xs'
+              title='Delete column'
+            >
+              -Col
+            </Button>
+            <Button
+              type='button'
+              variant='ghost'
+              size='sm'
+              onClick={() => editor.chain().focus().deleteRow().run()}
+              className='h-8 px-2 text-xs'
+              title='Delete row'
+            >
+              -Row
+            </Button>
+            <Button
+              type='button'
+              variant='ghost'
+              size='sm'
+              onClick={() => editor.chain().focus().deleteTable().run()}
+              className='h-8 px-2 text-xs text-red-600 hover:text-red-700'
+              title='Delete table'
+            >
+              Del
+            </Button>
+          </>
+        )}
       </div>
       <div className='min-h-[200px]'>
         <EditorContent editor={editor} className='prose max-w-none' placeholder={placeholder} />

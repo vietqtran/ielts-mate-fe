@@ -20,22 +20,29 @@ interface QuestionGroup {
 interface MatchingManagerProps {
   group: QuestionGroup;
   refetchPassageData: () => void;
+  onUpdateGroup: (group: QuestionGroup) => void;
 }
 
-export function MatchingManager({ group, refetchPassageData }: Readonly<MatchingManagerProps>) {
+export function MatchingManager({
+  group,
+  refetchPassageData,
+  onUpdateGroup,
+}: Readonly<MatchingManagerProps>) {
   const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
   const [localQuestions, setLocalQuestions] = useState(group.questions);
 
+  // Reset local state when group ID changes (indicating a new passage is being created)
   useEffect(() => {
     setLocalQuestions(group.questions);
-  }, [group.questions]);
+    setIsAddingOrEditing(false);
+    setEditingQuestion(null);
+  }, [group.questions, group.id]);
 
   const { createQuestions, updateQuestionInfo, deleteQuestion, isLoading } = useQuestion();
 
   const handleFormSubmit = async (data: MatchingFormData) => {
     if (!group.id) {
-      console.error('Group ID is required');
       return;
     }
 
@@ -50,11 +57,29 @@ export function MatchingManager({ group, refetchPassageData }: Readonly<Matching
     try {
       if (editingQuestion) {
         // Update existing question
-        const response = await updateQuestionInfo(group.id, editingQuestion.id, questionRequest);
+        const response = await updateQuestionInfo(
+          group.id,
+          editingQuestion.question_id,
+          questionRequest
+        );
         if (response.data) {
-          setLocalQuestions((prev) =>
-            prev.map((q) => (q.id === editingQuestion.id ? response.data : q))
+          // Ensure correct data structure
+          const updatedQuestion = {
+            ...response.data,
+            question_id: response.data.question_id,
+          };
+
+          // Update local state
+          const updatedQuestions = localQuestions.map((q) =>
+            q.question_id === editingQuestion.question_id ? updatedQuestion : q
           );
+          setLocalQuestions(updatedQuestions);
+
+          // Propagate changes to parent component for preview
+          onUpdateGroup({
+            ...group,
+            questions: updatedQuestions,
+          });
         } else {
           refetchPassageData();
         }
@@ -62,16 +87,28 @@ export function MatchingManager({ group, refetchPassageData }: Readonly<Matching
         // Create new question
         const response = await createQuestions(group.id, [questionRequest]);
         if (response.data && Array.isArray(response.data)) {
-          setLocalQuestions((prev) => [...prev, ...response.data]);
+          // Ensure consistent structure with question_id field
+          const newQuestions = response.data.map((q) => ({
+            ...q,
+            question_id: q.question_id,
+          }));
+
+          // Update local state
+          const updatedQuestions = [...localQuestions, ...newQuestions];
+          setLocalQuestions(updatedQuestions);
+
+          // Propagate changes to parent component for preview
+          onUpdateGroup({
+            ...group,
+            questions: updatedQuestions,
+          });
         } else {
           refetchPassageData();
         }
       }
       setIsAddingOrEditing(false);
       setEditingQuestion(null);
-    } catch (error) {
-      console.error('Failed to save question:', error);
-    }
+    } catch (error) {}
   };
 
   const handleEdit = (question: any) => {
@@ -81,15 +118,19 @@ export function MatchingManager({ group, refetchPassageData }: Readonly<Matching
 
   const handleDelete = async (questionId: string) => {
     if (!group.id) {
-      console.error('Group ID is required');
       return;
     }
     try {
       await deleteQuestion(group.id, questionId);
-      setLocalQuestions((prev) => prev.filter((q) => q.id !== questionId));
-    } catch (error) {
-      console.error('Failed to delete question:', error);
-    }
+      const updatedQuestions = localQuestions.filter((q) => q.question_id !== questionId);
+      setLocalQuestions(updatedQuestions);
+
+      // Propagate changes to parent component for preview
+      onUpdateGroup({
+        ...group,
+        questions: updatedQuestions,
+      });
+    } catch (error) {}
   };
 
   const handleCancel = () => {
@@ -128,8 +169,8 @@ export function MatchingManager({ group, refetchPassageData }: Readonly<Matching
       {!isAddingOrEditing && localQuestions.length > 0 && (
         <div className='space-y-4 mt-4'>
           <h4 className='font-medium'>Questions:</h4>
-          {localQuestions.map((question) => (
-            <Card key={question.id}>
+          {localQuestions.map((question, index) => (
+            <Card key={question.question_id + '-' + index}>
               <CardContent className='pt-4'>
                 <div className='flex items-start justify-between'>
                   <div className='flex-1'>
@@ -166,7 +207,7 @@ export function MatchingManager({ group, refetchPassageData }: Readonly<Matching
                     <Button
                       variant='ghost'
                       size='sm'
-                      onClick={() => handleDelete(question.id)}
+                      onClick={() => handleDelete(question.question_id)}
                       disabled={isLoading.deleteQuestion}
                     >
                       {isLoading.deleteQuestion ? (

@@ -23,7 +23,6 @@ export function AuthCallback() {
           setError('Authentication failed. Please try again.');
         }
       } catch (err) {
-        console.error('Error processing callback:', err);
         setError('An error occurred during authentication.');
       } finally {
         setIsProcessing(false);

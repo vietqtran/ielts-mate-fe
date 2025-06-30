@@ -7,21 +7,30 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/usePassage';
 import { QuestionType } from '@/types/reading.types';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { QuestionGroupForm } from './QuestionGroupForm';
 import { DragDropManager } from './questions/DragDropManager';
 import { FillInBlanksManager } from './questions/FillInBlanksManager';
 import { MatchingManager } from './questions/MatchingManager';
 import { MultipleChoiceManager } from './questions/MultipleChoiceManager';
 
-interface LocalQuestionGroup {
+// Define the DragItem interface to match what DragDropManager expects
+export interface DragItem {
+  id?: string;
+  drag_item_id?: string;
+  item_id?: string;
+  content: string;
+  item_content?: string;
+}
+
+export interface LocalQuestionGroup {
   id?: string;
   section_order: number;
   section_label: string;
   instruction: string;
   question_type: QuestionType;
   questions: any[];
-  drag_items?: string[];
+  drag_items?: DragItem[]; // Changed from string[] to DragItem[]
 }
 
 interface QuestionGroupsManagerProps {
@@ -83,6 +92,12 @@ export function QuestionGroupsManager({
   const [activeGroupIndex, setActiveGroupIndex] = useState<number | null>(null);
   const { addGroupQuestion, isLoading } = usePassage();
 
+  // Reset component state when passage_id changes (indicating a new passage is being created)
+  useEffect(() => {
+    setIsCreatingGroup(false);
+    setActiveGroupIndex(null);
+  }, [passage_id]);
+
   const handleCreateGroup = async (groupData: any) => {
     if (isLoading.addGroupQuestion) return;
     try {
@@ -94,7 +109,6 @@ export function QuestionGroupsManager({
           response.data.group_id || (response.data as any).id || (response.data as any).group_id;
 
         if (!group_id) {
-          console.error('No group ID found in response:', response.data);
           return;
         }
 
@@ -105,17 +119,14 @@ export function QuestionGroupsManager({
           instruction: response.data.instruction || groupData.instruction,
           question_type: groupData.question_type,
           questions: response.data.questions ?? [],
-          drag_items: [], // Initialize as empty array since backend doesn't return this yet
+          drag_items: [], // Initialize as empty DragItem array
         };
 
         onAddGroup(frontendGroup);
         setIsCreatingGroup(false);
       } else {
-        console.error('No data in response:', response);
       }
-    } catch (error) {
-      console.error('Failed to create question group:', error);
-    }
+    } catch (error) {}
   };
 
   const handleEditGroup = (index: number) => {
@@ -130,22 +141,42 @@ export function QuestionGroupsManager({
   };
 
   const renderQuestionManager = (group: LocalQuestionGroup, groupIndex: number) => {
-    // Convert to the format expected by question managers
-    const managerGroup = {
-      ...group,
-      question_type: group.question_type as any, // Type cast to resolve interface mismatch
-    };
-
     const commonProps = {
-      group: managerGroup,
+      group: group, // Pass group directly since types now match
       groupIndex,
       onUpdateGroup: (updatedGroup: any) => {
-        console.log('updatedGroup', updatedGroup);
-        // Convert back to LocalQuestionGroup format
+        // Check if this contains newly created questions that shouldn't be updated again
+        const hasJustCreatedQuestions = updatedGroup._justCreatedQuestions === true;
+        const createdQuestionIds = updatedGroup._createdQuestionIds || [];
+
+        // Ensure proper data structure for preview
         const localGroup: LocalQuestionGroup = {
-          ...updatedGroup,
+          id: updatedGroup.id,
+          section_order: updatedGroup.section_order,
+          section_label: updatedGroup.section_label,
+          instruction: updatedGroup.instruction,
           question_type: updatedGroup.question_type,
+          // Ensure questions array is correctly formatted
+          questions: (updatedGroup.questions || []).map((q: any) => ({
+            ...q,
+            question_id: q.question_id || q.id,
+            choices: (q.choices || []).map((c: any) => ({
+              ...c,
+              choice_id: c.choice_id || c.id,
+            })),
+          })),
+          // Keep drag_items as DragItem[] (no conversion needed)
+          drag_items: updatedGroup.drag_items || [],
         };
+
+        // Preserve the special flags to prevent redundant updates
+        if (hasJustCreatedQuestions) {
+          // @ts-ignore - These properties aren't in the type definition but we need them
+          localGroup._justCreatedQuestions = true;
+          // @ts-ignore
+          localGroup._createdQuestionIds = createdQuestionIds;
+        }
+
         onUpdateGroup(groupIndex, localGroup);
       },
       refetchPassageData: refetchPassageData,
@@ -155,11 +186,11 @@ export function QuestionGroupsManager({
       case QuestionType.MULTIPLE_CHOICE:
         return <MultipleChoiceManager {...commonProps} onUpdateGroup={commonProps.onUpdateGroup} />;
       case QuestionType.FILL_IN_THE_BLANKS:
-        return <FillInBlanksManager {...commonProps} />;
+        return <FillInBlanksManager {...commonProps} onUpdateGroup={commonProps.onUpdateGroup} />;
       case QuestionType.MATCHING:
-        return <MatchingManager {...commonProps} />;
+        return <MatchingManager {...commonProps} onUpdateGroup={commonProps.onUpdateGroup} />;
       case QuestionType.DRAG_AND_DROP:
-        return <DragDropManager {...commonProps} />;
+        return <DragDropManager {...commonProps} onUpdateGroup={commonProps.onUpdateGroup} />;
       default:
         return (
           <div className='text-center text-muted-foreground py-8'>
@@ -270,6 +301,7 @@ export function QuestionGroupsManager({
 
                       <div className='flex gap-2'>
                         <Button
+                          type='button'
                           variant='ghost'
                           size='sm'
                           onClick={() => setActiveGroupIndex(isActive ? null : index)}

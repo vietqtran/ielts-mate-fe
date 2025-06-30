@@ -179,14 +179,14 @@ export function useQuestion() {
     }
   };
 
-  // Create drag item for group
-  const createDragItem = async (group_id: string, dragItem: CreateDragItemRequest) => {
+  // Create drag items for group
+  const createDragItem = async (group_id: string, dragItems: CreateDragItemRequest) => {
     setLoadingState('createDragItem', true);
     setErrorState('createDragItem', null);
 
     try {
-      const { data } = await instance.post(`/reading/groups/${group_id}/items`, dragItem);
-      return data as BaseResponse<DragItemResponse>;
+      const { data } = await instance.post(`/reading/groups/${group_id}/items`, dragItems);
+      return data as BaseResponse<DragItemResponse[]>; // Now returns an array of items
     } catch (error) {
       setErrorState('createDragItem', error as Error);
       throw error;
@@ -238,6 +238,7 @@ export function useQuestion() {
 
     try {
       const { data } = await instance.get(`/reading/groups/${group_id}/items/${itemId}`);
+      // Map the response to match our expected structure if needed
       return data as BaseResponse<DragItemResponse>;
     } catch (error) {
       setErrorState('getDragItemById', error as Error);

@@ -155,7 +155,7 @@ export function PassageTable({
         <TableCell>
           <Badge variant='outline'>{getielts_typeLabel(passage.ielts_type)}</Badge>
         </TableCell>
-        <TableCell>Part {passage.part_number}</TableCell>
+        <TableCell>Part {passage.part_number + 1}</TableCell>
         <TableCell>
           <Badge className={getStatusColor(passage.passage_status)}>
             {getStatusLabel(passage.passage_status)}

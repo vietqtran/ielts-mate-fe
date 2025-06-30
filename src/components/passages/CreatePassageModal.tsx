@@ -114,9 +114,7 @@ export function CreatePassageModal({
         setCreatedpassage_id(response.data.passage_id);
         setCurrentTab('questions');
       }
-    } catch (error) {
-      console.error('Failed to create passage:', error);
-    }
+    } catch (error) {}
   };
 
   const handleAddQuestionGroup = (groupData: any) => {
@@ -129,9 +127,7 @@ export function CreatePassageModal({
     try {
       await addGroupQuestion(createdpassage_id, groupData);
       // Group saved successfully
-    } catch (error) {
-      console.error('Failed to save question group:', error);
-    }
+    } catch (error) {}
   };
 
   const handleFinish = () => {

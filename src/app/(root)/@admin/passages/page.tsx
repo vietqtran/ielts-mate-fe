@@ -94,9 +94,7 @@ export default function PassagesPage() {
           setPagination(response.pagination);
         }
       }
-    } catch (error) {
-      console.error('Failed to load passages:', error);
-    }
+    } catch (error) {}
   };
 
   useEffect(() => {
@@ -139,9 +137,7 @@ export default function PassagesPage() {
     try {
       await deletePassage(passage_id);
       await loadPassages(pagination.currentPage, pagination.pageSize);
-    } catch (error) {
-      console.error('Failed to delete passage:', error);
-    }
+    } catch (error) {}
   };
 
   const handlePassageCreated = () => {

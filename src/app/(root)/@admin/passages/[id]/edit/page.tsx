@@ -18,7 +18,10 @@ import { useEffect, useState } from 'react';
 
 import { PassageBasicInfoForm } from '@/components/passages/create/PassageBasicInfoForm';
 import { PassagePreview } from '@/components/passages/create/PassagePreview';
-import { QuestionGroupsManager } from '@/components/passages/create/QuestionGroupsManager';
+import {
+  LocalQuestionGroup,
+  QuestionGroupsManager,
+} from '@/components/passages/create/QuestionGroupsManager';
 import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/usePassage';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,16 +38,6 @@ const passageSchema = z.object({
 
 type PassageFormData = z.infer<typeof passageSchema>;
 
-interface QuestionGroup {
-  id?: string;
-  section_order: number;
-  section_label: string;
-  instruction: string;
-  question_type: QuestionType;
-  questions: any[];
-  drag_items?: string[];
-}
-
 export default function EditPassagePage() {
   const router = useRouter();
   const params = useParams();
@@ -59,7 +52,7 @@ export default function EditPassagePage() {
   const passage_id = params.id as string;
 
   const [currentStep, setCurrentStep] = useState<'basic' | 'questions' | 'preview'>('basic');
-  const [questionGroups, setQuestionGroups] = useState<QuestionGroup[]>([]);
+  const [questionGroups, setQuestionGroups] = useState<LocalQuestionGroup[]>([]);
   const [activeTab, setActiveTab] = useState('passage');
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
@@ -139,15 +132,14 @@ export default function EditPassagePage() {
                     : group.questions[0]?.question_type === 3
                       ? QuestionType.DRAG_AND_DROP
                       : QuestionType.MULTIPLE_CHOICE,
-            questions: group.questions || [],
-            drag_items: group.drag_items || [],
+            questions: group.questions ?? [],
+            drag_items: group.drag_items ?? [],
           }));
           setQuestionGroups(mappedGroups);
         }
       }
       setIsDataLoaded(true);
     } catch (error) {
-      console.error('Failed to load passage data:', error);
       setIsDataLoaded(true);
     }
   };
@@ -208,22 +200,30 @@ export default function EditPassagePage() {
       await updatePassage(passage_id, request);
       setCurrentStep('questions');
       setActiveTab('questions');
-    } catch (error) {
-      console.error('Failed to update passage:', error);
-    }
+    } catch (error) {}
   };
 
-  const handleAddQuestionGroup = (group: QuestionGroup) => {
+  const handleAddQuestionGroup = (group: LocalQuestionGroup) => {
     // The group object is now passed with the ID from the backend,
     // as the API call is handled by the QuestionGroupsManager component.
     // We just need to update the local state.
     setQuestionGroups((prev) => [...prev, group]);
   };
 
-  const handleUpdateQuestionGroup = async (index: number, group: QuestionGroup) => {
-    console.log('handleUpdateQuestionGroup');
+  const handleUpdateQuestionGroup = async (index: number, group: LocalQuestionGroup) => {
+    // Check if this contains newly created questions that shouldn't be updated again
+    // @ts-ignore - These properties aren't in the type definition but were added to prevent redundant updates
+    const hasJustCreatedQuestions = group._justCreatedQuestions === true;
+    // @ts-ignore
+    const createdQuestionIds = group._createdQuestionIds || [];
+
+    if (hasJustCreatedQuestions) {
+      // Just update the local state without making an API call
+      setQuestionGroups((prev) => prev.map((g, i) => (i === index ? group : g)));
+      return;
+    }
+
     if (!group.id) {
-      console.log('group id', group.id);
       setQuestionGroups((prev) => prev.map((g, i) => (i === index ? group : g)));
       return;
     }
@@ -240,7 +240,7 @@ export default function EditPassagePage() {
         section_label: group.section_label,
         instruction: group.instruction,
         questions: questions,
-        drag_items: group.drag_items,
+        drag_items: group.drag_items?.map((i) => i.content),
       };
 
       const response = await updateGroupQuestion(passage_id, group.id, groupRequest);
@@ -257,7 +257,6 @@ export default function EditPassagePage() {
         setQuestionGroups((prev) => prev.map((g, i) => (i === index ? updatedGroup : g)));
       }
     } catch (error) {
-      console.error('Failed to update question group:', error);
       // TODO: Show a toast notification and potentially revert the optimistic update.
     }
   };
@@ -276,7 +275,6 @@ export default function EditPassagePage() {
       // On successful deletion, update the local state.
       setQuestionGroups((prev) => prev.filter((_, i) => i !== index));
     } catch (error) {
-      console.error('Failed to delete question group:', error);
       // TODO: Show a toast notification to the user.
     }
   };
@@ -327,12 +325,11 @@ export default function EditPassagePage() {
             section_label: group.section_label,
             instruction: group.instruction,
             questions: questions,
-            drag_items: group.drag_items,
+            drag_items: group.drag_items?.map((i) => i.content),
           };
 
           await addGroupQuestion(passage_id, groupRequest);
         } catch (groupError) {
-          console.error('Failed to save question group:', groupError);
           throw new Error('Failed to save all question groups');
         }
       }
@@ -351,7 +348,6 @@ export default function EditPassagePage() {
       await updatePassage(passage_id, passageRequest);
       router.push('/passages');
     } catch (error) {
-      console.error('Failed to save changes:', error);
     } finally {
       setIsSaving(false);
     }
