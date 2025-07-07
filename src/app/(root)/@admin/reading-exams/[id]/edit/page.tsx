@@ -106,7 +106,7 @@ export default function EditReadingExamPage() {
     };
 
     fetchData();
-  }, [examId, getExamById, form]);
+  }, [examId, form]);
 
   // Update form values when selected passages change
   useEffect(() => {
