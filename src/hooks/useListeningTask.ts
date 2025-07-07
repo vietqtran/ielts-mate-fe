@@ -37,7 +37,7 @@ export function useListeningTask() {
     setErrorState('getListeningTasks', null);
 
     try {
-      const { data } = await instance.get('/listens', {
+      const { data } = await instance.get('/listening/listens', {
         params,
         signal: currentController.signal,
       });
@@ -75,7 +75,7 @@ export function useListeningTask() {
     setErrorState('getListeningTasksByCreator', null);
 
     try {
-      const { data } = await instance.get('/listens/creator', {
+      const { data } = await instance.get('/listening/listens/creator', {
         params,
         signal: currentController.signal,
       });
@@ -141,7 +141,7 @@ export function useListeningTask() {
       // Add audio file
       formData.append('audio_file', task.audio_file);
 
-      const { data } = await instance.post('/listens', formData, {
+      const { data } = await instance.post('/listening/listens', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

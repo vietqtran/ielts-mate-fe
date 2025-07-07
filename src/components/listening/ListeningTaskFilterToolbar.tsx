@@ -47,15 +47,15 @@ export function ListeningTaskFilterToolbar({
   };
 
   const handleIeltsTypeChange = (value: string) => {
-    onFilterChange({ ielts_type: value });
+    onFilterChange({ ielts_type: value === 'all' ? undefined : value });
   };
 
   const handlePartNumberChange = (value: string) => {
-    onFilterChange({ part_number: value });
+    onFilterChange({ part_number: value === 'all' ? undefined : value });
   };
 
   const handleStatusChange = (value: string) => {
-    onFilterChange({ status: value });
+    onFilterChange({ status: value === 'all' ? undefined : value });
   };
 
   const handleSortDirectionChange = (value: string) => {
@@ -106,15 +106,15 @@ export function ListeningTaskFilterToolbar({
         </div>
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4'>
-        <div>
+      <div className='flex items-center flex-wrap gap-10'>
+        <div className='flex items-center gap-1.5'>
           <Label htmlFor='ieltsType'>IELTS Type</Label>
-          <Select value={filters.ielts_type ?? ''} onValueChange={handleIeltsTypeChange}>
+          <Select value={filters.ielts_type ?? 'all'} onValueChange={handleIeltsTypeChange}>
             <SelectTrigger id='ieltsType'>
               <SelectValue placeholder='All Types' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value=''>All Types</SelectItem>
+              <SelectItem value='all'>All Types</SelectItem>
               <SelectItem value={IeltsListeningType.ACADEMIC.toString()}>Academic</SelectItem>
               <SelectItem value={IeltsListeningType.GENERAL_TRAINING.toString()}>
                 General Training
@@ -123,14 +123,14 @@ export function ListeningTaskFilterToolbar({
           </Select>
         </div>
 
-        <div>
+        <div className='flex items-center gap-1.5'>
           <Label htmlFor='partNumber'>Part Number</Label>
-          <Select value={filters.part_number ?? ''} onValueChange={handlePartNumberChange}>
+          <Select value={filters.part_number ?? 'all'} onValueChange={handlePartNumberChange}>
             <SelectTrigger id='partNumber'>
               <SelectValue placeholder='All Parts' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value=''>All Parts</SelectItem>
+              <SelectItem value='all'>All Parts</SelectItem>
               <SelectItem value='1'>Part 1</SelectItem>
               <SelectItem value='2'>Part 2</SelectItem>
               <SelectItem value='3'>Part 3</SelectItem>
@@ -139,14 +139,14 @@ export function ListeningTaskFilterToolbar({
           </Select>
         </div>
 
-        <div>
+        <div className='flex items-center gap-1.5'>
           <Label htmlFor='status'>Status</Label>
-          <Select value={filters.status ?? ''} onValueChange={handleStatusChange}>
+          <Select value={filters.status ?? 'all'} onValueChange={handleStatusChange}>
             <SelectTrigger id='status'>
               <SelectValue placeholder='All Statuses' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value=''>All Statuses</SelectItem>
+              <SelectItem value='all'>All Statuses</SelectItem>
               <SelectItem value={ListeningTaskStatus.DRAFT.toString()}>Draft</SelectItem>
               <SelectItem value={ListeningTaskStatus.PUBLISHED.toString()}>Published</SelectItem>
               <SelectItem value={ListeningTaskStatus.DEACTIVATED.toString()}>
@@ -156,7 +156,7 @@ export function ListeningTaskFilterToolbar({
           </Select>
         </div>
 
-        <div>
+        <div className='flex items-center gap-1.5'>
           <Label htmlFor='sortBy'>Sort By</Label>
           <Select value={filters.sort_by ?? 'updatedAt'} onValueChange={handleSortByChange}>
             <SelectTrigger id='sortBy'>
@@ -170,7 +170,7 @@ export function ListeningTaskFilterToolbar({
           </Select>
         </div>
 
-        <div>
+        <div className='flex items-center gap-1.5'>
           <Label htmlFor='sortDirection'>Direction</Label>
           <Select
             value={filters.sort_direction ?? 'desc'}

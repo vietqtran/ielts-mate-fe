@@ -197,9 +197,9 @@ export function ListeningTaskTable({
               {Array.from({ length: pagination.totalPages }, (_, i) => i).map((page) => (
                 <Button
                   key={page}
-                  variant={page === pagination.currentPage ? 'default' : 'outline'}
+                  variant={page === pagination.currentPage - 1 ? 'default' : 'outline'}
                   size='sm'
-                  onClick={() => onPageChange(page)}
+                  onClick={() => onPageChange(page + 1)}
                   className='w-8 h-8'
                 >
                   {page + 1}

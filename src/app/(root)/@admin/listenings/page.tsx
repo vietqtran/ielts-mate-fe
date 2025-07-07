@@ -10,18 +10,18 @@ import { useEffect, useState } from 'react';
 
 export default function ListeningsPage() {
   const router = useRouter();
-  const { getListeningTasks, isLoading } = useListeningTask();
+  const { getListeningTasksByCreator, isLoading } = useListeningTask();
   const [listeningTasks, setListeningTasks] = useState<any[]>([]);
   const [pagination, setPagination] = useState({
-    currentPage: 0,
-    totalPages: 0,
+    currentPage: 1,
+    totalPages: 10,
     pageSize: 10,
     totalItems: 0,
     hasNextPage: false,
     hasPreviousPage: false,
   });
   const [filters, setFilters] = useState<ListeningTaskFilterParams>({
-    page: 0,
+    page: 1,
     size: 10,
     sort_by: 'updatedAt',
     sort_direction: 'desc',
@@ -29,7 +29,7 @@ export default function ListeningsPage() {
 
   const fetchListeningTasks = async () => {
     try {
-      const response = await getListeningTasks(filters);
+      const response = await getListeningTasksByCreator(filters);
       if (response) {
         setListeningTasks(response.data);
         if (response.pagination) {
@@ -49,7 +49,7 @@ export default function ListeningsPage() {
     setFilters((prev) => ({
       ...prev,
       ...newFilters,
-      page: 0, // Reset to first page when filters change
+      page: 1,
     }));
   };
 
