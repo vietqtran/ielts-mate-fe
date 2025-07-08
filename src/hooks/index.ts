@@ -5,3 +5,4 @@ export * from './use-mobile';
 export * from './useAuth';
 export * from './usePassage';
 export * from './useQuestion';
+export * from './useListeningTask';
