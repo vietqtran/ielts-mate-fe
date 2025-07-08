@@ -5,15 +5,20 @@ import { QuestionRenderer } from '@/components/passages/user/questions';
 import { Button } from '@/components/ui/button';
 import useAttempt from '@/hooks/useAttempt';
 import { AttemptData } from '@/types/attemp.types';
+import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 const ReadingPractice = () => {
   const { id }: { id: string } = useParams();
   const [passages, setPassages] = useState<AttemptData | null>(null);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
+  const [answers, setAnswers] = useState<
+    Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>
+  >({});
   const [timeLeft, setTimeLeft] = useState<number>(20 * 60); // 20 minutes in seconds
-  const { startNewAttempt } = useAttempt();
+  const { startNewAttempt, submitAttempt } = useAttempt();
+  console.log(answers);
+  console.log('Passages:', passages);
 
   const startAttempt = async () => {
     try {
@@ -30,36 +35,63 @@ const ReadingPractice = () => {
     }
   };
 
+  const handleSubmit = async () => {
+    try {
+      if (passages) {
+        const payload = {
+          answers: Object.entries(answers).map(([questionId, { answer, questionType }]) => ({
+            question_id: questionId,
+            choices: questionType === QuestionTypeEnumIndex.MULTIPLE_CHOICE ? [answer] : null,
+            data_filled: questionType === QuestionTypeEnumIndex.FILL_IN_THE_BLANKS ? answer : null,
+            drag_item_id: questionType === QuestionTypeEnumIndex.DRAG_AND_DROP ? answer : null,
+            data_matched: questionType === QuestionTypeEnumIndex.MATCHING ? answer : null,
+          })),
+          duration: timeLeft,
+        };
+        console.log('Submitting attempt with payload:', payload);
+
+        await submitAttempt({
+          attempt_id: passages.attempt_id,
+          payload,
+        });
+      }
+    } catch (error) {
+      console.error('Error submitting attempt:', error);
+    }
+  };
+
   useEffect(() => {
     startAttempt();
   }, [id]);
 
   // Timer effect
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          handleSubmit();
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+  // useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     setTimeLeft((prev) => {
+  //       if (prev <= 1) {
+  //         clearInterval(timer);
+  //         handleSubmit();
+  //         return 0;
+  //       }
+  //       return prev - 1;
+  //     });
+  //   }, 1000);
 
-    return () => clearInterval(timer);
-  }, []);
+  //   return () => clearInterval(timer);
+  // }, []);
 
-  const handleAnswerChange = (questionId: string, answer: string) => {
+  const handleAnswerChange = (
+    questionId: string,
+    answer: string,
+    questionType: QuestionTypeEnumIndex
+  ) => {
     setAnswers((prev) => ({
       ...prev,
-      [questionId]: answer,
+      [questionId]: {
+        answer,
+        questionType, // Store the question type for potential future use
+      },
     }));
-  };
-
-  const handleSubmit = () => {
-    console.log('Submitting answers:', answers);
-    // TODO: Implement submission logic
   };
 
   const formatTime = (seconds: number) => {
@@ -67,8 +99,6 @@ const ReadingPractice = () => {
     const secs = seconds % 60;
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
-
-  console.log('Passages:', passages);
 
   return (
     <div className='h-screen flex flex-col bg-gray-50'>

@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import { useState } from 'react';
 
 interface Question {
@@ -19,19 +20,23 @@ interface MatchingQuestionProps {
     instruction: string;
     questions: Question[];
   };
-  onAnswerChange: (questionId: string, answer: string) => void;
-  answers: Record<string, string>;
+  onAnswerChange: (questionId: string, answer: string, questionType: QuestionTypeEnumIndex) => void;
+  answers: Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>;
 }
 
 const MatchingQuestion = ({ questionGroup, onAnswerChange, answers }: MatchingQuestionProps) => {
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>(answers);
+  const [selectedAnswers, setSelectedAnswers] =
+    useState<Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>>(answers);
 
   const handleAnswerChange = (questionId: string, value: string) => {
     setSelectedAnswers((prev) => ({
       ...prev,
-      [questionId]: value,
+      [questionId]: {
+        answer: value,
+        questionType: QuestionTypeEnumIndex.MATCHING,
+      },
     }));
-    onAnswerChange(questionId, value);
+    onAnswerChange(questionId, value, QuestionTypeEnumIndex.MATCHING);
   };
 
   // Extract teaching styles from instruction
@@ -77,10 +82,12 @@ const MatchingQuestion = ({ questionGroup, onAnswerChange, answers }: MatchingQu
                   <div className='flex-1'>
                     <div
                       className='mb-3'
-                      dangerouslySetInnerHTML={{ __html: question.instruction_for_matching }}
+                      dangerouslySetInnerHTML={{
+                        __html: question.instruction_for_matching,
+                      }}
                     />
                     <RadioGroup
-                      value={selectedAnswers[question.question_id] || ''}
+                      value={selectedAnswers[question.question_id]?.answer || ''}
                       onValueChange={(value) => handleAnswerChange(question.question_id, value)}
                       className='flex flex-wrap gap-4'
                     >

@@ -105,8 +105,6 @@ const Reading = () => {
     }
   }, [JSON.stringify(filters.ieltsType), JSON.stringify(filters.partNumber), filters.title]);
 
-  console.log(filters);
-
   const getIeltsTypeLabel = (type: number): string => {
     switch (type) {
       case 0: // ACADEMIC

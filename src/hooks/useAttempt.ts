@@ -1,7 +1,7 @@
 'use client';
 
 import instance from '@/lib/axios';
-import { AttemptData } from '@/types/attemp.types';
+import { AnswersPayload, AttemptData } from '@/types/attemp.types';
 import { BaseResponse } from '@/types/reading.types';
 import { useRef, useState } from 'react';
 
@@ -49,8 +49,46 @@ const useAttempt = () => {
     }
   };
 
+  const submitAttempt = async ({
+    attempt_id,
+    payload,
+  }: {
+    attempt_id: string;
+    payload: AnswersPayload;
+  }) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    const currentController = abortControllerRef.current;
+
+    setLoadingState('submitAttempt', true);
+    setErrorState('submitAttempt', null);
+
+    try {
+      const { data } = await instance.put(`reading/attempts/submit/${attempt_id}`, {
+        signal: currentController.signal,
+        ...payload,
+      });
+      return data as BaseResponse<AttemptData>;
+    } catch (error) {
+      if (abortControllerRef.current === currentController) {
+        if ((error as any).name !== 'AbortError') {
+          setErrorState('submitAttempt', error as Error);
+          throw error;
+        }
+      }
+    } finally {
+      if (abortControllerRef.current === currentController) {
+        setLoadingState('submitAttempt', false);
+      }
+      abortControllerRef.current = null;
+    }
+  };
+
   return {
     startNewAttempt,
+    submitAttempt,
   };
 };
 

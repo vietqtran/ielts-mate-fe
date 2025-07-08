@@ -3,6 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import { useState } from 'react';
 
 interface Choice {
@@ -27,8 +28,8 @@ interface MultipleChoiceQuestionProps {
     instruction: string;
     questions: Question[];
   };
-  onAnswerChange: (questionId: string, answer: string) => void;
-  answers: Record<string, string>;
+  onAnswerChange: (questionId: string, answer: string, questionType: QuestionTypeEnumIndex) => void;
+  answers: Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>;
 }
 
 const MultipleChoiceQuestion = ({
@@ -36,14 +37,18 @@ const MultipleChoiceQuestion = ({
   onAnswerChange,
   answers,
 }: MultipleChoiceQuestionProps) => {
-  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>(answers);
+  const [selectedAnswers, setSelectedAnswers] =
+    useState<Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>>(answers);
 
   const handleAnswerChange = (questionId: string, value: string) => {
     setSelectedAnswers((prev) => ({
       ...prev,
-      [questionId]: value,
+      [questionId]: {
+        answer: value,
+        questionType: QuestionTypeEnumIndex.MULTIPLE_CHOICE,
+      },
     }));
-    onAnswerChange(questionId, value);
+    onAnswerChange(questionId, value, QuestionTypeEnumIndex.MULTIPLE_CHOICE);
   };
 
   return (
@@ -67,10 +72,12 @@ const MultipleChoiceQuestion = ({
                 <div className='flex-1 space-y-3'>
                   <div
                     className='font-medium'
-                    dangerouslySetInnerHTML={{ __html: question.instruction_for_choice }}
+                    dangerouslySetInnerHTML={{
+                      __html: question.instruction_for_choice,
+                    }}
                   />
                   <RadioGroup
-                    value={selectedAnswers[question.question_id] || ''}
+                    value={selectedAnswers[question.question_id]?.answer || ''}
                     onValueChange={(value) => handleAnswerChange(question.question_id, value)}
                     className='space-y-2'
                   >
@@ -79,7 +86,7 @@ const MultipleChoiceQuestion = ({
                       .map((choice) => (
                         <div key={choice.choice_id} className='flex items-center space-x-2'>
                           <RadioGroupItem
-                            value={choice.label}
+                            value={choice.choice_id}
                             id={`${question.question_id}-${choice.choice_id}`}
                           />
                           <Label

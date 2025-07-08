@@ -1,6 +1,8 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DragItem } from '@/types/attemp.types';
+import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import { useState } from 'react';
 import React from 'react';
 
@@ -18,15 +20,16 @@ interface DragDropQuestionProps {
     section_label: string;
     instruction: string;
     questions: Question[];
-    drag_items: string[];
+    drag_items: DragItem[];
   };
-  onAnswerChange: (questionId: string, answer: string) => void;
-  answers: Record<string, string>;
+  onAnswerChange: (questionId: string, answer: string, questionType: QuestionTypeEnumIndex) => void;
+  answers: Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>;
 }
 
 const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQuestionProps) => {
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
-  const [dropZoneAnswers, setDropZoneAnswers] = useState<Record<string, string>>(answers);
+  const [dropZoneAnswers, setDropZoneAnswers] =
+    useState<Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>>(answers);
 
   const handleDragStart = (item: string) => {
     setDraggedItem(item);
@@ -41,9 +44,12 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
     if (draggedItem) {
       setDropZoneAnswers((prev) => ({
         ...prev,
-        [questionId]: draggedItem,
+        [questionId]: {
+          answer: draggedItem,
+          questionType: QuestionTypeEnumIndex.DRAG_AND_DROP,
+        },
       }));
-      onAnswerChange(questionId, draggedItem);
+      onAnswerChange(questionId, draggedItem, QuestionTypeEnumIndex.DRAG_AND_DROP);
       setDraggedItem(null);
     }
   };
@@ -51,9 +57,12 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
   const handleRemoveItem = (questionId: string) => {
     setDropZoneAnswers((prev) => ({
       ...prev,
-      [questionId]: '',
+      [questionId]: {
+        answer: '',
+        questionType: QuestionTypeEnumIndex.DRAG_AND_DROP,
+      },
     }));
-    onAnswerChange(questionId, '');
+    onAnswerChange(questionId, '', QuestionTypeEnumIndex.DRAG_AND_DROP);
   };
 
   // Parse instruction to create drop zones
@@ -95,10 +104,10 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
               <div
                 key={index}
                 draggable
-                onDragStart={() => handleDragStart(item)}
+                onDragStart={() => handleDragStart(item.drag_item_id)}
                 className='px-3 py-2 bg-white border rounded cursor-move hover:shadow-md transition-shadow select-none'
               >
-                {item}
+                {item.content}
               </div>
             ))}
           </div>
@@ -134,7 +143,7 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
                           dropZoneAnswers[question.question_id] ? 'text-black' : 'text-gray-500'
                         }
                       >
-                        {dropZoneAnswers[question.question_id] || 'Drop item here'}
+                        {dropZoneAnswers[question.question_id]?.answer || 'Drop item here'}
                       </span>
                       {dropZoneAnswers[question.question_id] && (
                         <button

@@ -1,5 +1,5 @@
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
-
+// Response types for fetching attempt data
 export interface AttemptData {
   attempt_id: string;
   reading_passage_id: string;
@@ -40,4 +40,32 @@ export interface Choice {
 export interface DragItem {
   drag_item_id: string;
   content: string;
+}
+
+// Payload types for submitting an attempt
+export interface Answer {
+  question_id: string;
+  choices: string[] | null;
+  data_filled: string | null;
+  data_matched: string | null;
+  drag_item_id: string | null;
+}
+
+export interface AnswersPayload {
+  answers: Answer[];
+  duration: number;
+}
+
+// Response types for submitting an attempt
+export interface ResultSet {
+  question_index: number;
+  correct_answer: string[];
+  user_answer: string[];
+  is_correct: boolean;
+  explanation: string;
+}
+
+export interface DataResponse {
+  duration: number;
+  result_sets: ResultSet[];
 }
