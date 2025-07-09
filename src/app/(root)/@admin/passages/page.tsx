@@ -38,15 +38,12 @@ export default function PassagesPage() {
     let needsMigration = false;
 
     if (migratedFilters.ieltsType !== undefined && !Array.isArray(migratedFilters.ieltsType)) {
-      migratedFilters.ieltsType = [migratedFilters.ieltsType as any];
       needsMigration = true;
     }
     if (migratedFilters.status !== undefined && !Array.isArray(migratedFilters.status)) {
-      migratedFilters.status = [migratedFilters.status as any];
       needsMigration = true;
     }
     if (migratedFilters.partNumber !== undefined && !Array.isArray(migratedFilters.partNumber)) {
-      migratedFilters.partNumber = [migratedFilters.partNumber as any];
       needsMigration = true;
     }
 

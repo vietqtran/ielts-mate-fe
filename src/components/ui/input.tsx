@@ -32,7 +32,7 @@ function Input({
           'focus-visible:border-ring focus-visible:ring-blue-600 focus-visible:ring',
           'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
           type === 'password' && '!pr-8',
-          props.value && 'bg-[#f7fbff]',
+          !!props.value && 'bg-[#f7fbff]',
           isError && '!bg-red-50',
 
           className

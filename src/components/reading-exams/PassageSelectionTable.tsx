@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MultiSelect } from '@/components/ui/multi-select';
 import {
   Table,
   TableBody,
@@ -21,7 +20,7 @@ import { useEffect, useState } from 'react';
 import LoadingSpinner from '../ui/loading-spinner';
 
 interface PassageSelectionTableProps {
-  onSelect: (passageId: string, partNumber: number) => void;
+  onSelect: (passageId: string, passageTitle: string, partNumber: number) => void;
   selectedPassages: {
     part1: string;
     part2: string;
@@ -62,9 +61,9 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
 
   const [filters, setFilters] = useState({
     title: '',
-    ieltsType: [0, 1], // Both Academic and General Training
-    status: [4], // Test status
-    partNumber: [] as number[],
+    ieltsType: 0,
+    status: 4, // Default to Test status (4)
+    partNumber: undefined as number | undefined,
     sortBy: 'updatedAt',
     sortDirection: 'desc',
   });
@@ -76,7 +75,7 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
         size: pagination.pageSize,
         ielts_type: filters.ieltsType,
         status: filters.status,
-        part_number: filters.partNumber.length > 0 ? filters.partNumber : undefined,
+        part_number: filters.partNumber,
         title: filters.title || undefined,
         sortBy: filters.sortBy,
         sortDirection: filters.sortDirection,
@@ -122,7 +121,8 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
 
   const handleAddPassage = () => {
     if (selectedPassageId && selectedPart >= 1 && selectedPart <= 3) {
-      onSelect(selectedPassageId, selectedPart);
+      const passageTitle = getPassageTitle(selectedPassageId);
+      onSelect(selectedPassageId, passageTitle, selectedPart);
     }
   };
 
@@ -186,6 +186,11 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
     return '';
   };
 
+  const getPassageTitle = (passageId: string): string => {
+    const passage = passages.find((p) => p.passage_id === passageId);
+    return passage ? passage.title : '';
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -208,31 +213,39 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
             </div>
             <div className='flex-1'>
               <Label htmlFor='ieltsType'>IELTS Type</Label>
-              <MultiSelect
-                options={ieltsTypeOptions}
-                selected={filters.ieltsType.map(String)}
-                onChange={(values) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    ieltsType: values.length > 0 ? values.map(Number) : [0, 1],
-                  }))
+              <select
+                className='w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm'
+                value={filters.ieltsType}
+                onChange={(e) =>
+                  setFilters((prev) => ({ ...prev, ieltsType: Number(e.target.value) }))
                 }
-                placeholder='Select IELTS types'
-              />
+              >
+                {ieltsTypeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className='flex-1'>
               <Label htmlFor='partNumber'>Part Number</Label>
-              <MultiSelect
-                options={partNumberOptions}
-                selected={filters.partNumber.map(String)}
-                onChange={(values) =>
+              <select
+                className='w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm'
+                value={filters.partNumber === undefined ? '' : filters.partNumber}
+                onChange={(e) =>
                   setFilters((prev) => ({
                     ...prev,
-                    partNumber: values.map(Number),
+                    partNumber: e.target.value ? Number(e.target.value) : undefined,
                   }))
                 }
-                placeholder='Select parts'
-              />
+              >
+                <option value=''>All Parts</option>
+                {partNumberOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

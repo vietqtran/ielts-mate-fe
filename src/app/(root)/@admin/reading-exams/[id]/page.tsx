@@ -36,7 +36,7 @@ export default function ReadingExamDetailsPage() {
     };
 
     fetchExam();
-  }, [examId, getExamById]);
+  }, [examId]);
 
   const handleDelete = async () => {
     if (confirm('Are you sure you want to delete this reading exam?')) {
@@ -84,7 +84,7 @@ export default function ReadingExamDetailsPage() {
   }
 
   return (
-    <div className='container mx-auto py-6'>
+    <div className='container mx-auto p-6'>
       <div className='mb-6'>
         <Button variant='ghost' asChild className='mb-6'>
           <Link href='/reading-exams'>

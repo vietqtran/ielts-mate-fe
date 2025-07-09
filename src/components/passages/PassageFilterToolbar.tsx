@@ -6,7 +6,13 @@ import { Filter, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { MultiSelect } from '@/components/ui/multi-select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { PassageFilters } from '@/store/slices/passage-slice';
 import { useState } from 'react';
 
@@ -30,9 +36,9 @@ const statusOptions = [
 ];
 
 const partNumberOptions = [
-  { value: '1', label: 'Part 1' },
-  { value: '2', label: 'Part 2' },
-  { value: '3', label: 'Part 3' },
+  { value: '0', label: 'Part 1' },
+  { value: '1', label: 'Part 2' },
+  { value: '2', label: 'Part 3' },
 ];
 
 export function PassageFilterToolbar({
@@ -50,17 +56,11 @@ export function PassageFilterToolbar({
   };
 
   const hasActiveFilters = Object.values(filters).some((value) => {
-    if (Array.isArray(value)) {
-      return value.length > 0;
-    }
     return value !== undefined && value !== '';
   });
 
   const getActiveFilterCount = () => {
     return Object.values(filters).filter((value) => {
-      if (Array.isArray(value)) {
-        return value.length > 0;
-      }
       return value !== undefined && value !== '';
     }).length;
   };
@@ -105,34 +105,63 @@ export function PassageFilterToolbar({
 
             <div className='space-y-2'>
               <Label htmlFor='ieltsType'>IELTS Type</Label>
-              <MultiSelect
-                options={ieltsTypeOptions}
-                selected={filters.ieltsType?.map(String) || []}
-                onChange={(values) => updateFilter('ieltsType', values.map(Number))}
-                placeholder='Select IELTS types'
-              />
+              <Select
+                value={filters.ieltsType?.toString() || ''}
+                onValueChange={(value) =>
+                  updateFilter('ieltsType', value ? Number(value) : undefined)
+                }
+              >
+                <SelectTrigger className='w-full'>
+                  <SelectValue placeholder='Select IELTS type' />
+                </SelectTrigger>
+                <SelectContent>
+                  {ieltsTypeOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className='space-y-2'>
               <Label htmlFor='status'>Status</Label>
-              <MultiSelect
-                options={statusOptions}
-                selected={filters.status?.map(String) || []}
-                onChange={(values) => updateFilter('status', values.map(Number))}
-                placeholder='Select statuses'
-              />
+              <Select
+                value={filters.status?.toString() || ''}
+                onValueChange={(value) => updateFilter('status', value ? Number(value) : undefined)}
+              >
+                <SelectTrigger className='w-full'>
+                  <SelectValue placeholder='Select status' />
+                </SelectTrigger>
+                <SelectContent>
+                  {statusOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className='space-y-2'>
               <Label htmlFor='partNumber'>Part Number</Label>
-              <MultiSelect
-                options={partNumberOptions}
-                selected={Array.isArray(filters.partNumber) ? filters.partNumber.map(String) : []}
-                onChange={(values) =>
-                  updateFilter('partNumber', values.length > 0 ? values.map(Number) : undefined)
+              <Select
+                value={filters.partNumber?.toString() || ''}
+                onValueChange={(value) =>
+                  updateFilter('partNumber', value ? Number(value) : undefined)
                 }
-                placeholder='Select parts'
-              />
+              >
+                <SelectTrigger className='w-full'>
+                  <SelectValue placeholder='Select part number' />
+                </SelectTrigger>
+                <SelectContent>
+                  {partNumberOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className='space-y-2'>

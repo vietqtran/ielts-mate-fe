@@ -2,9 +2,9 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 export interface PassageFilters {
   title?: string;
-  ieltsType?: number[];
-  status?: number[];
-  partNumber?: number[];
+  ieltsType?: number;
+  status?: number;
+  partNumber?: number;
   questionCategory?: string;
   createdBy?: string;
 }
@@ -26,18 +26,7 @@ const passageSlice = createSlice({
   initialState,
   reducers: {
     setFilters: (state, action: PayloadAction<PassageFilters>) => {
-      // Migrate old single values to arrays
-      const migratedFilters = { ...action.payload };
-      if (migratedFilters.ieltsType !== undefined && !Array.isArray(migratedFilters.ieltsType)) {
-        migratedFilters.ieltsType = [migratedFilters.ieltsType as any];
-      }
-      if (migratedFilters.status !== undefined && !Array.isArray(migratedFilters.status)) {
-        migratedFilters.status = [migratedFilters.status as any];
-      }
-      if (migratedFilters.partNumber !== undefined && !Array.isArray(migratedFilters.partNumber)) {
-        migratedFilters.partNumber = [migratedFilters.partNumber as any];
-      }
-      state.filters = migratedFilters;
+      state.filters = { ...action.payload };
     },
     updateFilter: (state, action: PayloadAction<{ key: keyof PassageFilters; value: any }>) => {
       const { key, value } = action.payload;

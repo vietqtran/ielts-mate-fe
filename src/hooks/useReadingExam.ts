@@ -150,7 +150,7 @@ export function useReadingExam() {
       // Using the existing API for passages, but adding a filter for Test status
       const { data } = await instance.get('/reading/passages/teacher', {
         params: {
-          status: '2', // Test status
+          status: 4, // Test status (4)
         },
       });
       return data;

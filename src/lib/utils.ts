@@ -17,6 +17,17 @@ export function formatDate(dateString: string): string {
   }).format(date);
 }
 
-export function cn(...classes: (string | undefined | boolean)[]) {
-  return classes.filter(Boolean).join(' ');
+export function cn(...classes: Array<string | undefined | boolean | Record<string, boolean>>) {
+  return classes
+    .flatMap((cls) => {
+      if (!cls) return [];
+      if (typeof cls === 'string') return [cls];
+      if (typeof cls === 'object') {
+        return Object.entries(cls)
+          .filter(([_, value]) => value)
+          .map(([key]) => key);
+      }
+      return [];
+    })
+    .join(' ');
 }

@@ -38,7 +38,18 @@ export function useListeningTask() {
 
     try {
       const { data } = await instance.get('/listening/listens', {
-        params,
+        params: {
+          page: params?.page,
+          size: params?.size,
+          ielts_type: params?.ielts_type,
+          part_number: params?.part_number,
+          status: params?.status,
+          question_category: params?.question_category,
+          sort_by: params?.sort_by,
+          sort_direction: params?.sort_direction,
+          title: params?.title,
+          created_by: params?.created_by,
+        },
         signal: currentController.signal,
       });
 
@@ -76,7 +87,18 @@ export function useListeningTask() {
 
     try {
       const { data } = await instance.get('/listening/listens/creator', {
-        params,
+        params: {
+          page: params?.page,
+          size: params?.size,
+          ielts_type: params?.ielts_type,
+          part_number: params?.part_number,
+          status: params?.status,
+          question_category: params?.question_category,
+          sort_by: params?.sort_by,
+          sort_direction: params?.sort_direction,
+          title: params?.title,
+          created_by: params?.created_by,
+        },
         signal: currentController.signal,
       });
 
@@ -106,7 +128,7 @@ export function useListeningTask() {
     setErrorState('getListeningTaskById', null);
 
     try {
-      const { data } = await instance.get(`/listens/${taskId}`);
+      const { data } = await instance.get(`/listening/listens/${taskId}`);
       return data as BaseListeningResponse<ListeningTaskDetailResponse>;
     } catch (error) {
       setErrorState('getListeningTaskById', error as Error);
@@ -125,27 +147,26 @@ export function useListeningTask() {
       // Create FormData for multipart/form-data submission
       const formData = new FormData();
 
-      // Add form fields
+      // Add parameters as RequestParam (form fields)
       formData.append('ielts_type', task.ielts_type.toString());
       formData.append('part_number', task.part_number.toString());
       formData.append('instruction', task.instruction);
       formData.append('title', task.title);
-      formData.append('status', task.status.toString());
       formData.append('is_automatic_transcription', task.is_automatic_transcription.toString());
+
+      // Add status as a simple form field
+      formData.append('status', task.status.toString());
+
+      // Add audio file
+      formData.append('audio_file', task.audio_file);
 
       // Add transcription if provided
       if (task.transcription) {
         formData.append('transcription', task.transcription);
       }
 
-      // Add audio file
-      formData.append('audio_file', task.audio_file);
-
-      const { data } = await instance.post('/listening/listens', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      // Send request with formData body - DO NOT set Content-Type header manually
+      const { data } = await instance.post('/listening/listens', formData);
 
       return data as BaseListeningResponse<ListeningTaskDetailResponse>;
     } catch (error) {
@@ -165,32 +186,30 @@ export function useListeningTask() {
       // Create FormData for multipart/form-data submission
       const formData = new FormData();
 
-      // Add form fields
+      // Add parameters as RequestParam (form fields)
       formData.append('ielts_type', task.ielts_type.toString());
       formData.append('part_number', task.part_number.toString());
       formData.append('instruction', task.instruction);
       formData.append('title', task.title);
-      formData.append('status', task.status.toString());
       formData.append('transcription', task.transcription);
 
-      // Add audio file if provided
+      // Handle status field - using set() to ensure single value
+      formData.set('status', task.status.toString());
+
+      // Always include audio_file parameter since backend expects it as @RequestPart
+      // If no new file is provided, send an empty Blob to satisfy the multipart requirement
       if (task.audio_file) {
         formData.append('audio_file', task.audio_file);
+      } else {
+        // Create an empty file to satisfy the @RequestPart requirement
+        const emptyBlob = new Blob([], { type: 'audio/mp3' });
+        const emptyFile = new File([emptyBlob], 'empty.mp3', { type: 'audio/mp3' });
+        formData.append('audio_file', emptyFile);
       }
 
-      const { data } = await instance.put(`/listens/${taskId}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-        params: {
-          ielts_type: task.ielts_type,
-          part_number: task.part_number,
-          instruction: task.instruction,
-          status: task.status,
-          title: task.title,
-          transcription: task.transcription,
-        },
-      });
+      // Send request with formData body - DO NOT set Content-Type header manually
+      // Use task-Id with capital I to match backend controller's path variable naming
+      const { data } = await instance.put(`/listening/listens/${taskId}`, formData);
 
       return data as BaseListeningResponse<ListeningTaskDetailResponse>;
     } catch (error) {
@@ -207,7 +226,7 @@ export function useListeningTask() {
     setErrorState('deleteListeningTask', null);
 
     try {
-      const { data } = await instance.delete(`/listens/${taskId}`);
+      const { data } = await instance.delete(`/listening/listens/${taskId}`);
       return data as BaseListeningResponse<any>;
     } catch (error) {
       setErrorState('deleteListeningTask', error as Error);

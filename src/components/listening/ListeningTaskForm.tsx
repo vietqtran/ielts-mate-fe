@@ -38,6 +38,7 @@ import * as z from 'zod';
 const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
 const ACCEPTED_AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg'];
 
+// We need to conditionally validate the audio file based on mode
 const formSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
   ielts_type: z.number().int().min(1, 'IELTS type is required'),
@@ -105,6 +106,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (mode === 'create') {
+        // In create mode, audio_file is required
         const request: ListeningTaskCreationRequest = {
           title: values.title,
           ielts_type: values.ielts_type,
@@ -112,7 +114,11 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
           instruction: values.instruction,
           status: values.status,
           is_automatic_transcription: values.is_automatic_transcription,
-          transcription: values.transcription,
+          // Only include transcription if automatic is disabled and value exists
+          ...(!values.is_automatic_transcription &&
+            values.transcription && {
+              transcription: values.transcription,
+            }),
           audio_file: values.audio_file,
         };
 
@@ -121,7 +127,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
           title: 'Success',
           description: 'Listening task created successfully',
         });
-        router.push('/admin/listenings');
+        router.push('/listenings');
       } else if (mode === 'edit' && taskId) {
         const request: ListeningTaskUpdateRequest = {
           title: values.title,
@@ -130,7 +136,8 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
           instruction: values.instruction,
           status: values.status,
           transcription: values.transcription || '',
-          audio_file: values.audio_file,
+          // Only include audio_file if provided in edit mode
+          ...(values.audio_file && { audio_file: values.audio_file }),
         };
 
         await updateListeningTask(taskId, request);
@@ -138,7 +145,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
           title: 'Success',
           description: 'Listening task updated successfully',
         });
-        router.push('/admin/listenings');
+        router.push('/listenings');
       }
     } catch (error) {
       console.error('Failed to save listening task:', error);
@@ -163,7 +170,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
   };
 
   const handleCancel = () => {
-    router.push('/admin/listenings');
+    router.push('/listenings');
   };
 
   return (

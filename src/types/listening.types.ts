@@ -31,6 +31,7 @@ export interface ListeningTaskDetailResponse {
   title: string;
   audio_file_id: string;
   transcription: string;
+  status?: number;
 }
 
 export interface ListeningTaskCreationRequest {

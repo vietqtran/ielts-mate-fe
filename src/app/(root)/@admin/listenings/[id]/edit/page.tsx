@@ -32,7 +32,7 @@ export default function EditListeningTaskPage() {
     if (taskId) {
       fetchTask();
     }
-  }, [taskId, getListeningTaskById]);
+  }, [taskId]);
 
   if (isLoading['getListeningTaskById']) {
     return (
