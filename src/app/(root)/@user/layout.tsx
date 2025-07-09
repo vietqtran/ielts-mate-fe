@@ -11,7 +11,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
         <AppSidebar />
         <div className='size-full'>
           <Header />
-          {children}
+          <div className='p-6'>{children}</div>
         </div>
       </SidebarProvider>
     </AuthProvider>

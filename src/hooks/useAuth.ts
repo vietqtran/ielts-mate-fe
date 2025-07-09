@@ -56,6 +56,7 @@ export function useAuth() {
       const { data } = await instance.get('/identity/auth/me', {
         withCredentials: true,
         signal: controller.signal,
+        notify: false,
       });
       if (data.status === 'success' && mountedRef.current) {
         dispatch(setUser(data.data));
@@ -83,6 +84,7 @@ export function useAuth() {
       try {
         const { data } = await instance.post('/identity/auth/sign-in', credentials, {
           signal: controller.signal,
+          notifySuccess: false,
         });
         if (mountedRef.current) {
           dispatch(setUser(data.data.user));

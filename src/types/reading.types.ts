@@ -5,9 +5,23 @@ export enum QuestionType {
   DRAG_AND_DROP = 'DRAG_AND_DROP',
 }
 
+export enum QuestionTypeEnumIndex {
+  MULTIPLE_CHOICE = 0,
+  FILL_IN_THE_BLANKS = 1,
+  MATCHING = 2,
+  DRAG_AND_DROP = 3,
+}
+
 export enum IeltsType {
   ACADEMIC = 'ACADEMIC',
   GENERAL_TRAINING = 'GENERAL_TRAINING',
+}
+
+export enum PartNumber {
+  PART_1 = 'PART_1',
+  PART_2 = 'PART_2',
+  PART_3 = 'PART_3',
+  PART_4 = 'PART_4',
 }
 
 export enum PassageStatus {
