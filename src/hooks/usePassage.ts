@@ -44,8 +44,8 @@ export function usePassage() {
         params: {
           page: params?.page,
           size: params?.size,
-          ieltsType: params?.ielts_type,
-          partNumber: params?.part_number,
+          ieltsType: params?.ieltsType,
+          partNumber: params?.partNumber,
         },
       });
       return data as BaseResponse<PassageGetResponse[]>;
