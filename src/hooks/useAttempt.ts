@@ -87,9 +87,45 @@ const useAttempt = () => {
     }
   };
 
+  const saveAttemptProgress = async ({
+    attempt_id,
+    payload,
+  }: {
+    attempt_id: string;
+    payload: AnswersPayload;
+  }) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    const currentController = abortControllerRef.current;
+
+    setLoadingState('saveAttemptProgress', true);
+    setErrorState('saveAttemptProgress', null);
+
+    try {
+      const { data } = await instance.put(`reading/attempts/save/${attempt_id}`, {
+        ...payload,
+      });
+      return data as BaseResponse<AttemptData>;
+    } catch (error) {
+      if (abortControllerRef.current === currentController) {
+        if ((error as any).name !== 'AbortError') {
+          setErrorState('saveAttemptProgress', error as Error);
+          throw error;
+        }
+      }
+    } finally {
+      if (abortControllerRef.current === currentController) {
+        setLoadingState('saveAttemptProgress', false);
+      }
+      abortControllerRef.current = null;
+    }
+  };
   return {
     startNewAttempt,
     submitAttempt,
+    saveAttemptProgress,
   };
 };
 

@@ -1,5 +1,10 @@
 import { redirect } from 'next/navigation';
 
-export default function ReadingIdPage({ params }: { params: { id: string } }) {
-  redirect(`/reading/${params.id}/practice`);
+export default async function ReadingIdPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+  redirect(`/reading/${id}/practice`);
 }
