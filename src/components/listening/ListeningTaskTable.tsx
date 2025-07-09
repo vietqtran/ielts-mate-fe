@@ -25,8 +25,20 @@ import {
 } from '@/components/ui/table';
 import { useListeningTask } from '@/hooks';
 import { formatDate } from '@/lib/utils';
-import { ListeningTaskResponse, ListeningTaskStatus } from '@/types/listening.types';
-import { MoreHorizontal, Pencil, Play, Trash2 } from 'lucide-react';
+import {
+  ListeningTaskFilterParams,
+  ListeningTaskResponse,
+  ListeningTaskStatus,
+} from '@/types/listening.types';
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  MoreHorizontal,
+  Pencil,
+  Play,
+  Trash2,
+} from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
@@ -42,6 +54,11 @@ interface ListeningTaskTableProps {
     hasPreviousPage: boolean;
   };
   onPageChange: (page: number) => void;
+  onSortChange?: (sortParams: Partial<ListeningTaskFilterParams>) => void;
+  currentSort?: {
+    sort_by?: string;
+    sort_direction?: string;
+  };
 }
 
 export function ListeningTaskTable({
@@ -49,18 +66,20 @@ export function ListeningTaskTable({
   isLoading,
   pagination,
   onPageChange,
-}: ListeningTaskTableProps) {
+  onSortChange,
+  currentSort = { sort_by: 'updatedAt', sort_direction: 'desc' },
+}: Readonly<ListeningTaskTableProps>) {
   const router = useRouter();
   const { deleteListeningTask } = useListeningTask();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
   const handleEdit = (taskId: string) => {
-    router.push(`/admin/listenings/${taskId}/edit`);
+    router.push(`/listenings/${taskId}/edit`);
   };
 
   const handlePreview = (taskId: string) => {
-    router.push(`/admin/listenings/${taskId}/preview`);
+    router.push(`/listenings/${taskId}/preview`);
   };
 
   const handleDeleteClick = (taskId: string) => {
@@ -80,6 +99,58 @@ export function ListeningTaskTable({
     } catch (error) {
       console.error('Failed to delete listening task:', error);
     }
+  };
+
+  const handleSort = (column: string) => {
+    if (!onSortChange) return;
+
+    const fieldMapping: Record<string, string> = {
+      title: 'title',
+      type: 'ieltsType',
+      part: 'partNumber',
+      status: 'status',
+      created_by: 'createdBy',
+      created_at: 'createdAt',
+      updated_at: 'updatedAt',
+    };
+
+    const field = fieldMapping[column];
+    if (!field) return;
+
+    let direction = 'asc';
+    if (currentSort.sort_by === field) {
+      direction = currentSort.sort_direction === 'asc' ? 'desc' : 'asc';
+    }
+
+    onSortChange({
+      sort_by: field,
+      sort_direction: direction,
+    });
+  };
+
+  const getSortIcon = (column: string) => {
+    const fieldMapping: Record<string, string> = {
+      title: 'title',
+      type: 'ieltsType',
+      part: 'partNumber',
+      status: 'status',
+      created_by: 'createdBy',
+      created_at: 'createdAt',
+      updated_at: 'updatedAt',
+    };
+
+    const field = fieldMapping[column];
+    if (!field) return <ArrowUpDown className='ml-2 h-4 w-4' />;
+
+    if (currentSort.sort_by === field) {
+      return currentSort.sort_direction === 'asc' ? (
+        <ArrowUp className='ml-2 h-4 w-4' />
+      ) : (
+        <ArrowDown className='ml-2 h-4 w-4' />
+      );
+    }
+
+    return <ArrowUpDown className='ml-2 h-4 w-4' />;
   };
 
   const getStatusBadge = (status: number) => {
@@ -113,13 +184,69 @@ export function ListeningTaskTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Part</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created By</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead>Updated At</TableHead>
+              <TableHead
+                className='cursor-pointer hover:bg-gray-50'
+                onClick={() => handleSort('title')}
+              >
+                <div className='flex items-center'>
+                  Title
+                  {getSortIcon('title')}
+                </div>
+              </TableHead>
+              <TableHead
+                className='cursor-pointer hover:bg-gray-50'
+                onClick={() => handleSort('type')}
+              >
+                <div className='flex items-center'>
+                  Type
+                  {getSortIcon('type')}
+                </div>
+              </TableHead>
+              <TableHead
+                className='cursor-pointer hover:bg-gray-50'
+                onClick={() => handleSort('part')}
+              >
+                <div className='flex items-center'>
+                  Part
+                  {getSortIcon('part')}
+                </div>
+              </TableHead>
+              <TableHead
+                className='cursor-pointer hover:bg-gray-50'
+                onClick={() => handleSort('status')}
+              >
+                <div className='flex items-center'>
+                  Status
+                  {getSortIcon('status')}
+                </div>
+              </TableHead>
+              <TableHead
+                className='cursor-pointer hover:bg-gray-50'
+                onClick={() => handleSort('created_by')}
+              >
+                <div className='flex items-center'>
+                  Created By
+                  {getSortIcon('created_by')}
+                </div>
+              </TableHead>
+              <TableHead
+                className='cursor-pointer hover:bg-gray-50'
+                onClick={() => handleSort('created_at')}
+              >
+                <div className='flex items-center'>
+                  Created At
+                  {getSortIcon('created_at')}
+                </div>
+              </TableHead>
+              <TableHead
+                className='cursor-pointer hover:bg-gray-50'
+                onClick={() => handleSort('updated_at')}
+              >
+                <div className='flex items-center'>
+                  Updated At
+                  {getSortIcon('updated_at')}
+                </div>
+              </TableHead>
               <TableHead className='text-right'>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -141,7 +268,7 @@ export function ListeningTaskTable({
                 <TableRow key={task.task_id}>
                   <TableCell className='font-medium'>{task.title}</TableCell>
                   <TableCell>{task.ielts_type === 1 ? 'Academic' : 'General Training'}</TableCell>
-                  <TableCell>{task.part_number}</TableCell>
+                  <TableCell>{task.part_number + 1}</TableCell>
                   <TableCell>{getStatusBadge(task.status)}</TableCell>
                   <TableCell>
                     {task.created_by.first_name} {task.created_by.last_name}

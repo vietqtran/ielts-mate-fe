@@ -39,14 +39,14 @@ export default function PreviewListeningTaskPage() {
     if (taskId) {
       fetchTask();
     }
-  }, [taskId, getListeningTaskById]);
+  }, [taskId]);
 
   const handleBackToList = () => {
-    router.push('/admin/listenings');
+    router.push('/listenings');
   };
 
   const handleEdit = () => {
-    router.push(`/admin/listenings/${taskId}/edit`);
+    router.push(`/listenings/${taskId}/edit`);
   };
 
   if (isLoading['getListeningTaskById']) {

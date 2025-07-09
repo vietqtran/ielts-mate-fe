@@ -59,6 +59,12 @@ export default function EditReadingExamPage() {
     part3: '',
   });
 
+  const [passageTitles, setPassageTitles] = useState({
+    part1: '',
+    part2: '',
+    part3: '',
+  });
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -96,6 +102,13 @@ export default function EditReadingExamPage() {
             part2: examData.reading_passage_id_part2.reading_passage_id,
             part3: examData.reading_passage_id_part3.reading_passage_id,
           });
+
+          // Set passage titles if available in the API response
+          setPassageTitles({
+            part1: examData.reading_passage_id_part1.reading_passage_name || '',
+            part2: examData.reading_passage_id_part2.reading_passage_name || '',
+            part3: examData.reading_passage_id_part3.reading_passage_name || '',
+          });
         }
 
         setIsPageLoading(false);
@@ -115,16 +128,19 @@ export default function EditReadingExamPage() {
     form.setValue('reading_passage_id_part3', selectedPassages.part3);
   }, [selectedPassages, form]);
 
-  const handlePassageSelect = (passageId: string, partNumber: number) => {
+  const handlePassageSelect = (passageId: string, passageTitle: string, partNumber: number) => {
     switch (partNumber) {
       case 1:
         setSelectedPassages((prev) => ({ ...prev, part1: passageId }));
+        setPassageTitles((prev) => ({ ...prev, part1: passageTitle }));
         break;
       case 2:
         setSelectedPassages((prev) => ({ ...prev, part2: passageId }));
+        setPassageTitles((prev) => ({ ...prev, part2: passageTitle }));
         break;
       case 3:
         setSelectedPassages((prev) => ({ ...prev, part3: passageId }));
+        setPassageTitles((prev) => ({ ...prev, part3: passageTitle }));
         break;
       default:
         break;
@@ -238,7 +254,10 @@ export default function EditReadingExamPage() {
                           <div className='p-2 border rounded-md'>
                             {selectedPassages.part1 ? (
                               <div className='text-sm font-medium'>
-                                Selected passage ID: {selectedPassages.part1}
+                                <div>{passageTitles.part1}</div>
+                                <div className='text-xs text-muted-foreground mt-1'>
+                                  ID: {selectedPassages.part1}
+                                </div>
                               </div>
                             ) : (
                               <div className='text-sm text-muted-foreground'>
@@ -262,7 +281,10 @@ export default function EditReadingExamPage() {
                           <div className='p-2 border rounded-md'>
                             {selectedPassages.part2 ? (
                               <div className='text-sm font-medium'>
-                                Selected passage ID: {selectedPassages.part2}
+                                <div>{passageTitles.part2}</div>
+                                <div className='text-xs text-muted-foreground mt-1'>
+                                  ID: {selectedPassages.part2}
+                                </div>
                               </div>
                             ) : (
                               <div className='text-sm text-muted-foreground'>
@@ -286,7 +308,10 @@ export default function EditReadingExamPage() {
                           <div className='p-2 border rounded-md'>
                             {selectedPassages.part3 ? (
                               <div className='text-sm font-medium'>
-                                Selected passage ID: {selectedPassages.part3}
+                                <div>{passageTitles.part3}</div>
+                                <div className='text-xs text-muted-foreground mt-1'>
+                                  ID: {selectedPassages.part3}
+                                </div>
                               </div>
                             ) : (
                               <div className='text-sm text-muted-foreground'>

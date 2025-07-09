@@ -15,6 +15,7 @@ import {
   ListeningTaskFilterParams,
   ListeningTaskStatus,
 } from '@/types/listening.types';
+import { SearchIcon } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 interface ListeningTaskFilterToolbarProps {
@@ -91,11 +92,15 @@ export function ListeningTaskFilterToolbar({
                 id='title'
                 placeholder='Search by title...'
                 value={title}
+                className='bg-white'
                 onChange={handleTitleChange}
               />
             </div>
-            <Button type='submit' variant='secondary'>
-              Search
+            <Button type='submit' className='!bg-blue-500'>
+              <span>
+                <SearchIcon />
+              </span>
+              <span>Search</span>
             </Button>
             {title && (
               <Button type='button' variant='ghost' onClick={handleTitleClear}>
@@ -131,10 +136,9 @@ export function ListeningTaskFilterToolbar({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value='all'>All Parts</SelectItem>
-              <SelectItem value='1'>Part 1</SelectItem>
-              <SelectItem value='2'>Part 2</SelectItem>
-              <SelectItem value='3'>Part 3</SelectItem>
-              <SelectItem value='4'>Part 4</SelectItem>
+              <SelectItem value='0'>Part 1</SelectItem>
+              <SelectItem value='1'>Part 2</SelectItem>
+              <SelectItem value='2'>Part 3</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -159,29 +163,33 @@ export function ListeningTaskFilterToolbar({
         <div className='flex items-center gap-1.5'>
           <Label htmlFor='sortBy'>Sort By</Label>
           <Select value={filters.sort_by ?? 'updatedAt'} onValueChange={handleSortByChange}>
-            <SelectTrigger id='sortBy'>
-              <SelectValue placeholder='Sort By' />
+            <SelectTrigger id='sortBy' className='min-w-[140px]'>
+              <SelectValue placeholder='Updated At' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value='updatedAt'>Last Updated</SelectItem>
-              <SelectItem value='createdAt'>Created Date</SelectItem>
               <SelectItem value='title'>Title</SelectItem>
+              <SelectItem value='ieltsType'>IELTS Type</SelectItem>
+              <SelectItem value='partNumber'>Part Number</SelectItem>
+              <SelectItem value='status'>Status</SelectItem>
+              <SelectItem value='createdBy'>Created By</SelectItem>
+              <SelectItem value='createdAt'>Created At</SelectItem>
+              <SelectItem value='updatedAt'>Updated At</SelectItem>
             </SelectContent>
           </Select>
         </div>
 
         <div className='flex items-center gap-1.5'>
-          <Label htmlFor='sortDirection'>Direction</Label>
+          <Label htmlFor='sortDirection'>Order</Label>
           <Select
             value={filters.sort_direction ?? 'desc'}
             onValueChange={handleSortDirectionChange}
           >
-            <SelectTrigger id='sortDirection'>
-              <SelectValue placeholder='Direction' />
+            <SelectTrigger id='sortDirection' className='min-w-[120px]'>
+              <SelectValue placeholder='Descending' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value='desc'>Descending</SelectItem>
               <SelectItem value='asc'>Ascending</SelectItem>
+              <SelectItem value='desc'>Descending</SelectItem>
             </SelectContent>
           </Select>
         </div>

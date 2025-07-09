@@ -74,7 +74,7 @@ export default function CreateReadingExamPage() {
     form.setValue('reading_passage_id_part3', selectedPassages.part3);
   }, [selectedPassages, form]);
 
-  const handlePassageSelect = (passageId: string, partNumber: number) => {
+  const handlePassageSelect = (passageId: string, passageTitle: string, partNumber: number) => {
     switch (partNumber) {
       case 1:
         setSelectedPassages((prev) => ({ ...prev, part1: passageId }));

@@ -40,7 +40,14 @@ export function usePassage() {
     setErrorState('getActivePassages', null);
 
     try {
-      const { data } = await instance.get('/reading/passages', { params });
+      const { data } = await instance.get('/reading/passages', {
+        params: {
+          page: params?.page,
+          size: params?.size,
+          ieltsType: params?.ielts_type,
+          partNumber: params?.part_number,
+        },
+      });
       return data as BaseResponse<PassageGetResponse[]>;
     } catch (error) {
       setErrorState('getActivePassages', error as Error);
@@ -54,9 +61,9 @@ export function usePassage() {
   const getPassagesForTeacher = async (params?: {
     page?: number;
     size?: number;
-    ielts_type?: number[];
-    status?: number[];
-    part_number?: number[];
+    ielts_type?: number;
+    status?: number;
+    part_number?: number;
     questionCategory?: string;
     sortBy?: string;
     sortDirection?: string;
@@ -74,19 +81,26 @@ export function usePassage() {
     setErrorState('getPassagesForTeacher', null);
 
     try {
-      const processedParams: any = { ...params };
+      const processedParams: any = {
+        page: params?.page,
+        size: params?.size,
+        ieltsType: params?.ielts_type,
+        partNumber: params?.part_number,
+        status: params?.status,
+        questionCategory: params?.questionCategory,
+        sortBy: params?.sortBy,
+        sortDirection: params?.sortDirection,
+        title: params?.title,
+        createdBy: params?.createdBy,
+      };
 
-      if (processedParams.ielts_type && Array.isArray(processedParams.ielts_type)) {
-        processedParams.ieltsType = processedParams.ielts_type.join(',');
+      if (processedParams.ielts_type !== undefined) {
+        processedParams.ieltsType = processedParams.ielts_type;
         delete processedParams.ielts_type;
       }
 
-      if (processedParams.status && Array.isArray(processedParams.status)) {
-        processedParams.status = processedParams.status.join(',');
-      }
-
-      if (processedParams.part_number && Array.isArray(processedParams.part_number)) {
-        processedParams.partNumber = processedParams.part_number.join(',');
+      if (processedParams.part_number !== undefined) {
+        processedParams.partNumber = processedParams.part_number;
         delete processedParams.part_number;
       }
 

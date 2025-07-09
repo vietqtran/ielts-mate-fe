@@ -61,7 +61,7 @@ export default function ListeningsPage() {
   };
 
   const handleAddNew = () => {
-    router.push('/admin/listenings/create');
+    router.push('/listenings/create');
   };
 
   const handleRefresh = () => {
@@ -91,6 +91,11 @@ export default function ListeningsPage() {
         isLoading={isLoading['getListeningTasks']}
         pagination={pagination}
         onPageChange={handlePageChange}
+        onSortChange={handleFilterChange}
+        currentSort={{
+          sort_by: filters.sort_by,
+          sort_direction: filters.sort_direction,
+        }}
       />
     </div>
   );
