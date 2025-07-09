@@ -17,8 +17,27 @@ const ReadingPractice = () => {
   >({});
   const [timeLeft, setTimeLeft] = useState<number>(20 * 60); // 20 minutes in seconds
   const { startNewAttempt, submitAttempt } = useAttempt();
-  console.log(answers);
+  console.log('Answers:', answers);
   console.log('Passages:', passages);
+
+  // Initialize all question keys in the answers state with null values
+  const initializeAnswerState = (attemptData: AttemptData | null) => {
+    if (!attemptData) return;
+
+    const initialAnswers: Record<string, { answer: string; questionType: QuestionTypeEnumIndex }> =
+      {};
+
+    attemptData.question_groups.forEach((group) => {
+      group.questions.forEach((question) => {
+        initialAnswers[question.question_id] = {
+          answer: '', // Initialize with empty string instead of null for consistency
+          questionType: question.question_type,
+        };
+      });
+    });
+
+    setAnswers(initialAnswers);
+  };
 
   const startAttempt = async () => {
     try {
@@ -27,6 +46,8 @@ const ReadingPractice = () => {
       });
       if (res) {
         setPassages(res.data || null);
+        // Initialize all question keys in the answers state
+        initializeAnswerState(res.data);
       } else {
         setPassages(null);
       }
@@ -41,10 +62,13 @@ const ReadingPractice = () => {
         const payload = {
           answers: Object.entries(answers).map(([questionId, { answer, questionType }]) => ({
             question_id: questionId,
-            choices: questionType === QuestionTypeEnumIndex.MULTIPLE_CHOICE ? [answer] : null,
-            data_filled: questionType === QuestionTypeEnumIndex.FILL_IN_THE_BLANKS ? answer : null,
-            drag_item_id: questionType === QuestionTypeEnumIndex.DRAG_AND_DROP ? answer : null,
-            data_matched: questionType === QuestionTypeEnumIndex.MATCHING ? answer : null,
+            choices:
+              questionType === QuestionTypeEnumIndex.MULTIPLE_CHOICE && answer ? [answer] : null,
+            data_filled:
+              questionType === QuestionTypeEnumIndex.FILL_IN_THE_BLANKS && answer ? answer : null,
+            drag_item_id:
+              questionType === QuestionTypeEnumIndex.DRAG_AND_DROP && answer ? answer : null,
+            data_matched: questionType === QuestionTypeEnumIndex.MATCHING && answer ? answer : null,
           })),
           duration: timeLeft,
         };
@@ -89,7 +113,7 @@ const ReadingPractice = () => {
       ...prev,
       [questionId]: {
         answer,
-        questionType, // Store the question type for potential future use
+        questionType,
       },
     }));
   };

@@ -30,9 +30,11 @@ const useAttempt = () => {
     setErrorState('startNewAttempt', null);
 
     try {
-      const { data } = await instance.post(`reading/attempts/passages/${passageId}`, {
-        signal: currentController.signal,
-      });
+      const { data } = await instance.post(
+        `reading/attempts/passages/${passageId}`,
+        {},
+        { signal: currentController.signal, notify: false }
+      );
       return data as BaseResponse<AttemptData>;
     } catch (error) {
       if (abortControllerRef.current === currentController) {
@@ -67,7 +69,6 @@ const useAttempt = () => {
 
     try {
       const { data } = await instance.put(`reading/attempts/submit/${attempt_id}`, {
-        signal: currentController.signal,
         ...payload,
       });
       return data as BaseResponse<AttemptData>;

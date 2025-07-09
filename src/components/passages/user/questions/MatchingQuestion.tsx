@@ -1,10 +1,19 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import { useState } from 'react';
+import * as z from 'zod';
+
+// Zod schema for validating matching answers
+const matchingAnswerSchema = z
+  .string()
+  .regex(/^[A-Z](,[A-Z])*$/, {
+    message: 'Answer must be uppercase letters separated by commas (e.g., A, B, or A,B,C)',
+  })
+  .or(z.literal(''));
 
 interface Question {
   question_id: string;
@@ -28,24 +37,39 @@ const MatchingQuestion = ({ questionGroup, onAnswerChange, answers }: MatchingQu
   const [selectedAnswers, setSelectedAnswers] =
     useState<Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>>(answers);
 
-  const handleAnswerChange = (questionId: string, value: string) => {
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+  const handleAnswerChange = (questionId: string, value: string, questionOrder: number) => {
+    // Convert to uppercase for consistency
+    const upperValue = value.toUpperCase();
+
+    // Validate the input using Zod schema
+    const validationResult = matchingAnswerSchema.safeParse(upperValue);
+
+    // Update validation errors
+    setValidationErrors((prev) => ({
+      ...prev,
+      [questionId]: validationResult.success
+        ? ''
+        : validationResult.error.errors[0]?.message || 'Invalid format',
+    }));
+
+    // Format the answer as "questionOrder-userInput" (e.g., "17-A")
+    const formattedAnswer = upperValue ? `${questionOrder}-${upperValue}` : '';
+
     setSelectedAnswers((prev) => ({
       ...prev,
       [questionId]: {
-        answer: value,
+        answer: formattedAnswer,
         questionType: QuestionTypeEnumIndex.MATCHING,
       },
     }));
-    onAnswerChange(questionId, value, QuestionTypeEnumIndex.MATCHING);
-  };
 
-  // Extract teaching styles from instruction
-  const teachingStyles = [
-    { key: 'A', label: 'Formal authority' },
-    { key: 'B', label: 'Demonstrator' },
-    { key: 'C', label: 'Delegator' },
-    { key: 'D', label: 'Facilitator' },
-  ];
+    // Only call onAnswerChange if the input is valid or empty
+    if (validationResult.success) {
+      onAnswerChange(questionId, formattedAnswer, QuestionTypeEnumIndex.MATCHING);
+    }
+  };
 
   return (
     <Card className='mb-6'>
@@ -55,20 +79,12 @@ const MatchingQuestion = ({ questionGroup, onAnswerChange, answers }: MatchingQu
           className='text-sm text-muted-foreground'
           dangerouslySetInnerHTML={{ __html: questionGroup.instruction }}
         />
+        <p>
+          <strong>Note:</strong> If you want to match multiple answers to a single question,
+          separate them with commas (e.g., "A,B").
+        </p>
       </CardHeader>
       <CardContent className='space-y-6'>
-        {/* Teaching Styles Reference */}
-        <div className='bg-blue-50 p-4 rounded-lg'>
-          <h4 className='font-medium text-blue-900 mb-2'>Teaching Styles</h4>
-          <div className='grid grid-cols-2 gap-2 text-sm'>
-            {teachingStyles.map((style) => (
-              <div key={style.key}>
-                <span className='font-medium'>{style.key}.</span> {style.label}
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Questions */}
         <div className='space-y-4'>
           {questionGroup.questions
@@ -86,26 +102,46 @@ const MatchingQuestion = ({ questionGroup, onAnswerChange, answers }: MatchingQu
                         __html: question.instruction_for_matching,
                       }}
                     />
-                    <RadioGroup
-                      value={selectedAnswers[question.question_id]?.answer || ''}
-                      onValueChange={(value) => handleAnswerChange(question.question_id, value)}
-                      className='flex flex-wrap gap-4'
-                    >
-                      {teachingStyles.map((style) => (
-                        <div key={style.key} className='flex items-center space-x-2'>
-                          <RadioGroupItem
-                            value={style.key}
-                            id={`${question.question_id}-${style.key}`}
-                          />
-                          <Label
-                            htmlFor={`${question.question_id}-${style.key}`}
-                            className='text-sm font-medium cursor-pointer'
-                          >
-                            {style.key}
-                          </Label>
-                        </div>
-                      ))}
-                    </RadioGroup>
+
+                    <div className='space-y-2'>
+                      <Label
+                        htmlFor={`input-${question.question_id}`}
+                        className='text-sm font-medium'
+                      >
+                        Your answer
+                      </Label>
+                      <Input
+                        id={`input-${question.question_id}`}
+                        type='text'
+                        placeholder='Enter your answer (e.g., A or A,B,C)'
+                        value={
+                          selectedAnswers[question.question_id]?.answer
+                            ? selectedAnswers[question.question_id].answer.split('-')[1] || ''
+                            : ''
+                        }
+                        onChange={(e) =>
+                          handleAnswerChange(
+                            question.question_id,
+                            e.target.value,
+                            question.question_order
+                          )
+                        }
+                        className={`w-40 ${
+                          validationErrors[question.question_id]
+                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                            : ''
+                        }`}
+                        maxLength={32}
+                      />
+                      {validationErrors[question.question_id] && (
+                        <p className='text-sm text-red-600 mt-1'>
+                          {validationErrors[question.question_id]}
+                        </p>
+                      )}
+                      <div className='text-xs text-gray-500 mt-1'>
+                        Format: Single letter (A) or comma-separated letters (A,B,C)
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
