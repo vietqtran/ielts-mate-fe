@@ -14,7 +14,7 @@ export default function SignInPage() {
   }, []);
 
   return (
-    <div className='flex flex-1 flex-col justify-center px-8 py-12 sm:px-16 lg:px-24'>
+    <div className='flex flex-1 flex-col justify-center px-8 py-12 sm:px-16 lg:px-24 relative'>
       <div className='mx-auto w-full max-w-sm'>
         <h1 className='text-3xl font-bold tracking-tight text-[#0c1421]'>
           Welcome Back <span className='inline-block'>👋</span>

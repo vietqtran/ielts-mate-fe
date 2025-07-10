@@ -9,7 +9,15 @@ export default function RootLayout({
 }>) {
   return (
     <AuthProvider isAuthPage>
-      <div className='flex min-h-screen'>
+      <div className='flex min-h-screen relative'>
+        {/* button to back to landing */}
+        {/* <Button
+          className="absolute top-4 left-4"
+          variant={"ghost"}
+          onClick={() => (window.location.href = "/")}
+        >
+          <ArrowLeft />
+        </Button> */}
         <Image
           src='/assets/images/auth-banner.png'
           alt='Decorative background'

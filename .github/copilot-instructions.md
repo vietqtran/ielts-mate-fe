@@ -4,5 +4,5 @@
 
 # UI
 - The UI will be built using Shadcn UI components.
-- The UI should be responsive and accessible.
+- The UI should be responsive across all devices and accessible.
 - The UI should follow best practices for user experience, including clear navigation and intuitive design.
