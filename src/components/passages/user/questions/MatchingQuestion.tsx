@@ -83,8 +83,8 @@ const MatchingQuestion = ({ questionGroup, onAnswerChange, answers }: MatchingQu
         answer_id: formattedAnswer,
         questionType: QuestionTypeEnumIndex.MATCHING,
         questionOrder,
-        content: upperValue, // Assuming content is the same as answer_id for matching
-      } as HandleAnswerChangeParams);
+        content: formattedAnswer, // Assuming content is the same as answer_id for matching
+      });
     }
   };
 
@@ -131,11 +131,7 @@ const MatchingQuestion = ({ questionGroup, onAnswerChange, answers }: MatchingQu
                         id={`input-${question.question_id}`}
                         type='text'
                         placeholder='Enter your answer (e.g., A or A,B,C)'
-                        value={
-                          selectedAnswers[question.question_id]?.answer_id
-                            ? selectedAnswers[question.question_id].content.split('-')[1] || ''
-                            : ''
-                        }
+                        value={selectedAnswers[question.question_id]?.content || ''}
                         onChange={(e) =>
                           handleAnswerChange(
                             question.question_id,
