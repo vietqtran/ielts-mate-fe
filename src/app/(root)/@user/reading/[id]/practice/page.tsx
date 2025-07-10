@@ -3,46 +3,112 @@
 import AttemptProgressBox from '@/components/passages/user/AttemptProgressBox';
 import PassageBox from '@/components/passages/user/PassageBox';
 import ConfirmSubmitModal from '@/components/passages/user/finish/ConfirmSubmitModal';
+import FinishScreen from '@/components/passages/user/finish/FinishScreen';
 import { QuestionRenderer } from '@/components/passages/user/questions';
 import { Button } from '@/components/ui/button';
 import useAttempt from '@/hooks/useAttempt';
 import { formatTime, useIncrementalTimer } from '@/hooks/useTimer';
-import { AttemptData } from '@/types/attemp.types';
+import { AttemptData, DataResponse } from '@/types/attemp.types';
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+
+export interface HandleAnswerChangeParams {
+  questionId: string;
+  answer_id: string;
+  questionType: QuestionTypeEnumIndex;
+  questionOrder: number;
+  content: string;
+}
 
 const ReadingPractice = () => {
   const { id }: { id: string } = useParams();
   const [passages, setPassages] = useState<AttemptData | null>(null);
   const [answers, setAnswers] = useState<
-    Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>
+    Record<
+      string,
+      {
+        answer_id: string;
+        questionType: QuestionTypeEnumIndex;
+        questionOrder: number;
+        content: string;
+      }
+    >
   >({});
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<boolean>(false);
+  const [submittedData, setSubmittedData] = useState<DataResponse>();
   const time = useIncrementalTimer(0, startTime); // Initialize timer with 0 seconds
-  const { startNewAttempt, submitAttempt } = useAttempt();
+  const { startNewAttempt, submitAttempt, saveAttemptProgress } = useAttempt();
+  const router = useRouter();
+
   const notAnsweredQuestions = Object?.entries(answers)?.filter(
-    ([, { answer }]) => answer.trim() === ''
+    ([, { answer_id: answer }]) => answer.trim() === ''
   );
 
   // Initialize all question keys in the answers state with null values
   const initializeAnswerState = (attemptData: AttemptData | null) => {
     if (!attemptData) return;
 
-    const initialAnswers: Record<string, { answer: string; questionType: QuestionTypeEnumIndex }> =
-      {};
+    const initialAnswers: Record<
+      string,
+      {
+        answer_id: string;
+        questionType: QuestionTypeEnumIndex;
+        questionOrder: number;
+        content: string;
+      }
+    > = {};
 
     attemptData.question_groups.forEach((group) => {
       group.questions.forEach((question) => {
         initialAnswers[question.question_id] = {
-          answer: '', // Initialize with empty string instead of null for consistency
+          answer_id: '', // Initialize with empty string instead of null for consistency
           questionType: question.question_type,
+          questionOrder: question.question_order,
+          content: '', // Initialize content as empty string
         };
       });
     });
 
     setAnswers(initialAnswers);
+  };
+
+  const handleSave = async () => {
+    try {
+      if (passages) {
+        const payload = {
+          answers: Object.entries(answers).map(
+            ([questionId, { answer_id: answer, questionType }]) => ({
+              question_id: questionId,
+              choices:
+                questionType === QuestionTypeEnumIndex.MULTIPLE_CHOICE && answer ? [answer] : null,
+              data_filled:
+                questionType === QuestionTypeEnumIndex.FILL_IN_THE_BLANKS && answer ? answer : null,
+              drag_item_id:
+                questionType === QuestionTypeEnumIndex.DRAG_AND_DROP && answer ? answer : null,
+              data_matched:
+                questionType === QuestionTypeEnumIndex.MATCHING && answer ? answer : null,
+            })
+          ),
+          duration: time,
+        };
+
+        await saveAttemptProgress({
+          attempt_id: passages.attempt_id,
+          payload,
+        }).then((res) => {
+          if (res) {
+            //@ts-ignore
+          } else {
+            console.error('Failed to save attempt');
+          }
+        });
+      }
+    } catch (error) {
+      console.error('Error saving attempt:', error);
+    }
   };
 
   const startAttempt = async () => {
@@ -67,23 +133,34 @@ const ReadingPractice = () => {
     try {
       if (passages) {
         const payload = {
-          answers: Object.entries(answers).map(([questionId, { answer, questionType }]) => ({
-            question_id: questionId,
-            choices:
-              questionType === QuestionTypeEnumIndex.MULTIPLE_CHOICE && answer ? [answer] : null,
-            data_filled:
-              questionType === QuestionTypeEnumIndex.FILL_IN_THE_BLANKS && answer ? answer : null,
-            drag_item_id:
-              questionType === QuestionTypeEnumIndex.DRAG_AND_DROP && answer ? answer : null,
-            data_matched: questionType === QuestionTypeEnumIndex.MATCHING && answer ? answer : null,
-          })),
+          answers: Object.entries(answers).map(
+            ([questionId, { answer_id: answer, questionType }]) => ({
+              question_id: questionId,
+              choices:
+                questionType === QuestionTypeEnumIndex.MULTIPLE_CHOICE && answer ? [answer] : null,
+              data_filled:
+                questionType === QuestionTypeEnumIndex.FILL_IN_THE_BLANKS && answer ? answer : null,
+              drag_item_id:
+                questionType === QuestionTypeEnumIndex.DRAG_AND_DROP && answer ? answer : null,
+              data_matched:
+                questionType === QuestionTypeEnumIndex.MATCHING && answer ? answer : null,
+            })
+          ),
           duration: time,
         };
-        console.log('Submitting attempt with payload:', payload);
 
         await submitAttempt({
           attempt_id: passages.attempt_id,
           payload,
+        }).then((res) => {
+          if (res) {
+            //@ts-ignore
+            setSubmittedData(res.data);
+            setStartTime(false);
+            setIsSubmitted(true);
+          } else {
+            console.error('Failed to submit attempt');
+          }
         });
       }
     } catch (error) {
@@ -95,19 +172,33 @@ const ReadingPractice = () => {
     startAttempt();
   }, [id]);
 
-  const handleAnswerChange = (
-    questionId: string,
-    answer: string,
-    questionType: QuestionTypeEnumIndex
-  ) => {
+  const handleAnswerChange = (params: HandleAnswerChangeParams) => {
     setAnswers((prev) => ({
       ...prev,
-      [questionId]: {
-        answer,
-        questionType,
+      [params.questionId]: {
+        answer_id: params.answer_id,
+        questionType: params.questionType,
+        questionOrder: params.questionOrder,
+        content: params.content,
       },
     }));
   };
+
+  if (isSubmitted) {
+    return (
+      <FinishScreen
+        duration={submittedData?.duration}
+        key={passages?.attempt_id}
+        resultSets={submittedData?.result_sets || []}
+        score={submittedData?.result_sets?.filter((r) => r.is_correct).length || 0}
+        total={submittedData?.result_sets?.length || 0}
+        onHome={() => {
+          router.push('/reading');
+        }}
+        onReview={() => {}}
+      />
+    );
+  }
 
   return (
     <>
@@ -132,6 +223,13 @@ const ReadingPractice = () => {
               Time: {formatTime(time)}
             </div>
             <Button onClick={() => setIsModalOpen(true)}>Submit Test</Button>
+            <Button
+              onClick={() => handleSave()}
+              className='bg-green-600 text-white hover:bg-green-700'
+              variant={'ghost'}
+            >
+              Save
+            </Button>
           </div>
         </div>
 

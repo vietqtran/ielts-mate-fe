@@ -1,7 +1,7 @@
 'use client';
 
 import instance from '@/lib/axios';
-import { AnswersPayload, AttemptData } from '@/types/attemp.types';
+import { AnswersPayload, AttemptData, DataResponse } from '@/types/attemp.types';
 import { BaseResponse } from '@/types/reading.types';
 import { useRef, useState } from 'react';
 
@@ -107,7 +107,7 @@ const useAttempt = () => {
       const { data } = await instance.put(`reading/attempts/save/${attempt_id}`, {
         ...payload,
       });
-      return data as BaseResponse<AttemptData>;
+      return data as BaseResponse<DataResponse>;
     } catch (error) {
       if (abortControllerRef.current === currentController) {
         if ((error as any).name !== 'AbortError') {

@@ -1,5 +1,6 @@
 'use client';
 
+import { HandleAnswerChangeParams } from '@/app/(root)/@user/reading/[id]/practice/page';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -28,8 +29,16 @@ interface MultipleChoiceQuestionProps {
     instruction: string;
     questions: Question[];
   };
-  onAnswerChange: (questionId: string, answer: string, questionType: QuestionTypeEnumIndex) => void;
-  answers: Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>;
+  onAnswerChange: (params: HandleAnswerChangeParams) => void;
+  answers: Record<
+    string,
+    {
+      answer_id: string;
+      questionType: QuestionTypeEnumIndex;
+      questionOrder: number;
+      content: string;
+    }
+  >;
 }
 
 const MultipleChoiceQuestion = ({
@@ -38,17 +47,25 @@ const MultipleChoiceQuestion = ({
   answers,
 }: MultipleChoiceQuestionProps) => {
   const [selectedAnswers, setSelectedAnswers] =
-    useState<Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>>(answers);
+    useState<Record<string, (typeof answers)[string]>>(answers);
 
-  const handleAnswerChange = (questionId: string, value: string) => {
+  const handleAnswerChange = (questionId: string, value: string, questionOrder: number) => {
     setSelectedAnswers((prev) => ({
       ...prev,
       [questionId]: {
-        answer: value,
+        answer_id: value,
         questionType: QuestionTypeEnumIndex.MULTIPLE_CHOICE,
+        questionOrder,
+        content: value, // Assuming content is the same as answer_id for multiple choice
       },
     }));
-    onAnswerChange(questionId, value, QuestionTypeEnumIndex.MULTIPLE_CHOICE);
+    onAnswerChange({
+      questionId,
+      answer_id: value,
+      questionType: QuestionTypeEnumIndex.MULTIPLE_CHOICE,
+      questionOrder,
+      content: value,
+    } as HandleAnswerChangeParams);
   };
 
   return (
@@ -77,8 +94,10 @@ const MultipleChoiceQuestion = ({
                     }}
                   />
                   <RadioGroup
-                    value={selectedAnswers[question.question_id]?.answer || ''}
-                    onValueChange={(value) => handleAnswerChange(question.question_id, value)}
+                    value={selectedAnswers[question.question_id]?.answer_id || ''}
+                    onValueChange={(value) =>
+                      handleAnswerChange(question.question_id, value, question.question_order)
+                    }
                     className='space-y-2'
                   >
                     {question.choices

@@ -1,5 +1,6 @@
 'use client';
 
+import { HandleAnswerChangeParams } from '@/app/(root)/@user/reading/[id]/practice/page';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DragItem } from '@/types/attemp.types';
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
@@ -22,14 +23,43 @@ interface DragDropQuestionProps {
     questions: Question[];
     drag_items: DragItem[];
   };
-  onAnswerChange: (questionId: string, answer: string, questionType: QuestionTypeEnumIndex) => void;
-  answers: Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>;
+  onAnswerChange: (params: HandleAnswerChangeParams) => void;
+  answers: Record<
+    string,
+    {
+      answer_id: string;
+      questionType: QuestionTypeEnumIndex;
+      questionOrder: number;
+      content: string;
+    }
+  >;
 }
 
 const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQuestionProps) => {
   const [draggedItem, setDraggedItem] = useState<string | null>(null);
-  const [dropZoneAnswers, setDropZoneAnswers] =
-    useState<Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>>(answers);
+  const [dropZoneAnswers, setDropZoneAnswers] = useState<
+    Record<
+      string,
+      {
+        answer_id: string;
+        questionType: QuestionTypeEnumIndex;
+        questionOrder: number;
+        content: string;
+      }
+    >
+  >(
+    Object.fromEntries(
+      Object.entries(answers).map(([key, value]) => [
+        key,
+        {
+          answer_id: value.answer_id,
+          questionType: value.questionType,
+          questionOrder: value.questionOrder,
+          content: value.content,
+        },
+      ])
+    )
+  );
 
   const handleDragStart = (item: string) => {
     setDraggedItem(item);
@@ -39,30 +69,51 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
     e.preventDefault();
   };
 
-  const handleDrop = (e: React.DragEvent, questionId: string) => {
+  const handleDrop = (e: React.DragEvent, questionId: string, questionOrder: number) => {
     e.preventDefault();
     if (draggedItem) {
       setDropZoneAnswers((prev) => ({
         ...prev,
         [questionId]: {
-          answer: draggedItem,
+          answer_id: draggedItem,
           questionType: QuestionTypeEnumIndex.DRAG_AND_DROP,
+          questionOrder: questionOrder,
+          content:
+            questionGroup.drag_items.find((item) => item.drag_item_id === draggedItem)?.content ||
+            '', // Get the content of the dragged item
         },
       }));
-      onAnswerChange(questionId, draggedItem, QuestionTypeEnumIndex.DRAG_AND_DROP);
+      const params: HandleAnswerChangeParams = {
+        questionId,
+        answer_id: draggedItem,
+        questionType: QuestionTypeEnumIndex.DRAG_AND_DROP,
+        questionOrder,
+        content:
+          questionGroup.drag_items.find((item) => item.drag_item_id === draggedItem)?.content || '',
+      };
+      onAnswerChange(params);
       setDraggedItem(null);
     }
   };
 
-  const handleRemoveItem = (questionId: string) => {
+  const handleRemoveItem = (questionId: string, questionOrder: number) => {
     setDropZoneAnswers((prev) => ({
       ...prev,
       [questionId]: {
-        answer: '',
+        answer_id: '',
         questionType: QuestionTypeEnumIndex.DRAG_AND_DROP,
+        questionOrder: questionOrder,
+        content: '', // Clear the content when removing
       },
     }));
-    onAnswerChange(questionId, '', QuestionTypeEnumIndex.DRAG_AND_DROP);
+    const params: HandleAnswerChangeParams = {
+      questionId,
+      answer_id: '',
+      questionType: QuestionTypeEnumIndex.DRAG_AND_DROP,
+      questionOrder,
+      content: '',
+    };
+    onAnswerChange(params);
   };
 
   // Parse instruction to create drop zones
@@ -135,7 +186,7 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
                     <span className='text-sm font-medium'>Zone {question.zone_index}:</span>
                     <div
                       onDragOver={handleDragOver}
-                      onDrop={(e) => handleDrop(e, question.question_id)}
+                      onDrop={(e) => handleDrop(e, question.question_id, question.question_order)}
                       className='flex-1 min-h-[50px] p-3 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50 flex items-center justify-between'
                     >
                       <span
@@ -143,11 +194,13 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
                           dropZoneAnswers[question.question_id] ? 'text-black' : 'text-gray-500'
                         }
                       >
-                        {dropZoneAnswers[question.question_id]?.answer || 'Drop item here'}
+                        {dropZoneAnswers[question.question_id]?.content || 'Drop item here'}
                       </span>
                       {dropZoneAnswers[question.question_id] && (
                         <button
-                          onClick={() => handleRemoveItem(question.question_id)}
+                          onClick={() =>
+                            handleRemoveItem(question.question_id, question.question_order)
+                          }
                           className='text-red-500 hover:text-red-700 text-sm'
                         >
                           Remove

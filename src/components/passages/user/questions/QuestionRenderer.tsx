@@ -1,5 +1,6 @@
 'use client';
 
+import { HandleAnswerChangeParams } from '@/app/(root)/@user/reading/[id]/practice/page';
 import { QuestionGroup as AttemptQuestionGroup } from '@/types/attemp.types';
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import DragDropQuestion from './DragDropQuestion';
@@ -9,8 +10,16 @@ import MultipleChoiceQuestion from './MultipleChoiceQuestion';
 
 interface QuestionRendererProps {
   questionGroups: AttemptQuestionGroup[];
-  onAnswerChange: (questionId: string, answer: string, questionType: QuestionTypeEnumIndex) => void;
-  answers: Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>;
+  onAnswerChange: (params: HandleAnswerChangeParams) => void;
+  answers: Record<
+    string,
+    {
+      answer_id: string;
+      questionType: QuestionTypeEnumIndex;
+      questionOrder: number;
+      content: string;
+    }
+  >;
 }
 
 const QuestionRenderer = ({ questionGroups, onAnswerChange, answers }: QuestionRendererProps) => {
