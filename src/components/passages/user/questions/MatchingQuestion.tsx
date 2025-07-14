@@ -1,5 +1,6 @@
 'use client';
 
+import { HandleAnswerChangeParams } from '@/app/(root)/@user/reading/[id]/practice/page';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -29,13 +30,21 @@ interface MatchingQuestionProps {
     instruction: string;
     questions: Question[];
   };
-  onAnswerChange: (questionId: string, answer: string, questionType: QuestionTypeEnumIndex) => void;
-  answers: Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>;
+  onAnswerChange: (params: HandleAnswerChangeParams) => void;
+  answers: Record<
+    string,
+    {
+      answer_id: string;
+      questionType: QuestionTypeEnumIndex;
+      questionOrder: number;
+      content: string;
+    }
+  >;
 }
 
 const MatchingQuestion = ({ questionGroup, onAnswerChange, answers }: MatchingQuestionProps) => {
   const [selectedAnswers, setSelectedAnswers] =
-    useState<Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>>(answers);
+    useState<Record<string, (typeof answers)[string]>>(answers);
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
@@ -60,14 +69,22 @@ const MatchingQuestion = ({ questionGroup, onAnswerChange, answers }: MatchingQu
     setSelectedAnswers((prev) => ({
       ...prev,
       [questionId]: {
-        answer: formattedAnswer,
+        answer_id: formattedAnswer,
         questionType: QuestionTypeEnumIndex.MATCHING,
+        questionOrder,
+        content: upperValue, // Assuming content is the same as answer_id for matching
       },
     }));
 
     // Only call onAnswerChange if the input is valid or empty
     if (validationResult.success) {
-      onAnswerChange(questionId, formattedAnswer, QuestionTypeEnumIndex.MATCHING);
+      onAnswerChange({
+        questionId,
+        answer_id: formattedAnswer,
+        questionType: QuestionTypeEnumIndex.MATCHING,
+        questionOrder,
+        content: formattedAnswer, // Assuming content is the same as answer_id for matching
+      });
     }
   };
 
@@ -114,11 +131,7 @@ const MatchingQuestion = ({ questionGroup, onAnswerChange, answers }: MatchingQu
                         id={`input-${question.question_id}`}
                         type='text'
                         placeholder='Enter your answer (e.g., A or A,B,C)'
-                        value={
-                          selectedAnswers[question.question_id]?.answer
-                            ? selectedAnswers[question.question_id].answer.split('-')[1] || ''
-                            : ''
-                        }
+                        value={selectedAnswers[question.question_id]?.content || ''}
                         onChange={(e) =>
                           handleAnswerChange(
                             question.question_id,

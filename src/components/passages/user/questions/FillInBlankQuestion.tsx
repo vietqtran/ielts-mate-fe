@@ -1,5 +1,6 @@
 'use client';
 
+import { HandleAnswerChangeParams } from '@/app/(root)/@user/reading/[id]/practice/page';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,8 +22,16 @@ interface FillInBlankQuestionProps {
     instruction: string;
     questions: Question[];
   };
-  onAnswerChange: (questionId: string, answer: string, questionType: QuestionTypeEnumIndex) => void;
-  answers: Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>;
+  onAnswerChange: (params: HandleAnswerChangeParams) => void;
+  answers: Record<
+    string,
+    {
+      answer_id: string;
+      questionType: QuestionTypeEnumIndex;
+      questionOrder: number;
+      content: string;
+    }
+  >;
 }
 
 const FillInBlankQuestion = ({
@@ -30,18 +39,26 @@ const FillInBlankQuestion = ({
   onAnswerChange,
   answers,
 }: FillInBlankQuestionProps) => {
-  const [userAnswers, setUserAnswers] =
-    useState<Record<string, { answer: string; questionType: QuestionTypeEnumIndex }>>(answers);
+  const [userAnswers, setUserAnswers] = useState<Record<string, (typeof answers)[string]>>(answers);
 
-  const handleAnswerChange = (questionId: string, value: string) => {
+  const handleAnswerChange = (questionId: string, value: string, questionOrder: number) => {
     setUserAnswers((prev) => ({
       ...prev,
       [questionId]: {
-        answer: value,
+        answer_id: value,
         questionType: QuestionTypeEnumIndex.FILL_IN_THE_BLANKS,
+        questionOrder,
+        content: value, // Assuming content is the same as answer_id for fill-in-the-
       },
     }));
-    onAnswerChange(questionId, value, QuestionTypeEnumIndex.FILL_IN_THE_BLANKS);
+    const params: HandleAnswerChangeParams = {
+      questionId,
+      answer_id: value,
+      questionType: QuestionTypeEnumIndex.FILL_IN_THE_BLANKS,
+      questionOrder,
+      content: value, // Assuming content is the same as answer_id for fill-in-the-blank
+    };
+    onAnswerChange(params);
   };
 
   return (
@@ -80,8 +97,14 @@ const FillInBlankQuestion = ({
                     id={`blank-${question.question_id}`}
                     type='text'
                     placeholder='Enter your answer'
-                    value={userAnswers[question.question_id]?.answer || ''}
-                    onChange={(e) => handleAnswerChange(question.question_id, e.target.value)}
+                    value={userAnswers[question.question_id]?.content || ''}
+                    onChange={(e) =>
+                      handleAnswerChange(
+                        question.question_id,
+                        e.target.value,
+                        question.question_order
+                      )
+                    }
                     className='flex-1 max-w-xs'
                   />
                 </div>
