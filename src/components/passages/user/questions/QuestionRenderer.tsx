@@ -1,6 +1,6 @@
 'use client';
 
-import { HandleAnswerChangeParams } from '@/app/(root)/@user/reading/[id]/practice/page';
+import { HandleAnswerChangeParams } from '@/app/(root)/(user)/reading/[id]/practice/page';
 import { QuestionGroup as AttemptQuestionGroup } from '@/types/attemp.types';
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import DragDropQuestion from './DragDropQuestion';

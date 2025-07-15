@@ -12,7 +12,7 @@ export function usePassageNavigation() {
   useEffect(() => {
     // Clear passage state when navigating away from passages pages
     // Keep state when on passages list, create, or edit pages
-    if (!pathname.startsWith('/passages')) {
+    if (!pathname.startsWith('/creator/passages')) {
       dispatch(clearPassageState());
     }
   }, [pathname, dispatch]);

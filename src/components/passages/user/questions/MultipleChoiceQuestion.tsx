@@ -1,6 +1,6 @@
 'use client';
 
-import { HandleAnswerChangeParams } from '@/app/(root)/@user/reading/[id]/practice/page';
+import { HandleAnswerChangeParams } from '@/app/(root)/(user)/reading/[id]/practice/page';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';

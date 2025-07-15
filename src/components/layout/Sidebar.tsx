@@ -69,7 +69,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href='/passages'>
+                  <Link href='/creator/passages'>
                     <BookOpen className='h-4 w-4' />
                     <span>Passages</span>
                   </Link>
@@ -77,7 +77,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href='/reading-exams'>
+                  <Link href='/creator/reading-exams'>
                     <BookOpen className='h-4 w-4' />
                     <span>Reading Exams</span>
                   </Link>
@@ -93,7 +93,7 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href='/listenings'>
+                  <Link href='/creator/listenings'>
                     <BookOpen className='h-4 w-4' />
                     <span>Listening Tasks</span>
                   </Link>
@@ -125,7 +125,7 @@ export function AppSidebar() {
             <DropdownMenuSeparator />
             <DropdownMenuItem>
               <Link
-                href={'/profile'}
+                href={user?.roles.includes('CREATOR') ? '/creator/profile' : '/profile'}
                 className='flex items-center w-full justify-start cursor-pointer'
               >
                 <User2 className='mr-2 h-4 w-4' />

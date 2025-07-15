@@ -127,7 +127,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
           title: 'Success',
           description: 'Listening task created successfully',
         });
-        router.push('/listenings');
+        router.push('/creator/listenings');
       } else if (mode === 'edit' && taskId) {
         const request: ListeningTaskUpdateRequest = {
           title: values.title,
@@ -145,7 +145,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
           title: 'Success',
           description: 'Listening task updated successfully',
         });
-        router.push('/listenings');
+        router.push('/creator/listenings');
       }
     } catch (error) {
       console.error('Failed to save listening task:', error);
@@ -170,7 +170,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
   };
 
   const handleCancel = () => {
-    router.push('/listenings');
+    router.push('/creator/listenings');
   };
 
   return (
