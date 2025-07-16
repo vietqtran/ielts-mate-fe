@@ -92,7 +92,7 @@ export function PasswordForm() {
                 <FormItem>
                   <FormLabel>
                     <Label htmlFor='newPassword' className='block text-sm font-medium'>
-                      Old password
+                      New password
                     </Label>
                   </FormLabel>
                   <FormControl>
@@ -116,7 +116,7 @@ export function PasswordForm() {
                 <FormItem>
                   <FormLabel>
                     <Label htmlFor='confirmNewPassword' className='block text-sm font-medium'>
-                      Old password
+                      Confirm new password
                     </Label>
                   </FormLabel>
                   <FormControl>
