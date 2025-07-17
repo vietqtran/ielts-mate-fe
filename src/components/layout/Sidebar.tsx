@@ -93,9 +93,41 @@ export function AppSidebar() {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
+                  <Link href='/exams'>
+                    <BookOpen className='h-4 w-4' />
+                    <span>All Exams</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href='/reading-exams'>
+                    <BookOpen className='h-4 w-4' />
+                    <span>Reading Exams</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href='/listening-exams'>
+                    <BookOpen className='h-4 w-4' />
+                    <span>Listening Exams</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
                   <Link href='/creator/listenings'>
                     <BookOpen className='h-4 w-4' />
                     <span>Listening Tasks</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href='/creator/listening-exams'>
+                    <BookOpen className='h-4 w-4' />
+                    <span>Listening Exams</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -104,7 +136,30 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
       <SidebarSeparator className='mx-0' />
-      <SidebarFooter className='p-4'>
+      <SidebarFooter className='p-4 flex flex-col gap-2'>
+        {/* Role Switcher - Only show if user has both roles */}
+        {user?.roles.includes('USER') && user?.roles.includes('CREATOR') && (
+          <Button
+            variant='outline'
+            size='sm'
+            className='w-full text-sm'
+            onClick={() => {
+              // Determine the current view based on URL
+              const isCreatorView = window.location.pathname.includes('/creator');
+              // Navigate to the opposite view
+              if (isCreatorView) {
+                replace('/');
+              } else {
+                replace('/creator');
+              }
+            }}
+          >
+            {window.location.pathname.includes('/creator')
+              ? 'Switch to User View'
+              : 'Switch to Creator View'}
+          </Button>
+        )}
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant='ghost' className='w-full p-0 flex items-center justify-start gap-2'>
