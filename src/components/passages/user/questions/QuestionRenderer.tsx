@@ -1,7 +1,7 @@
 'use client';
 
 import { HandleAnswerChangeParams } from '@/app/(root)/(user)/reading/[id]/practice/page';
-import { QuestionGroup as AttemptQuestionGroup } from '@/types/attemp.types';
+import { QuestionGroup as AttemptQuestionGroup } from '@/types/attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import DragDropQuestion from './DragDropQuestion';
 import FillInBlankQuestion from './FillInBlankQuestion';

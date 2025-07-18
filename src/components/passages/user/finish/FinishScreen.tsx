@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ResultSet } from '@/types/attemp.types';
+import { ResultSet } from '@/types/attempt.types';
 import { CheckCircle2 } from 'lucide-react';
 
 const FinishScreen = ({

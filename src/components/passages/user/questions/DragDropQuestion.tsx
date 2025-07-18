@@ -2,7 +2,7 @@
 
 import { HandleAnswerChangeParams } from '@/app/(root)/(user)/reading/[id]/practice/page';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DragItem } from '@/types/attemp.types';
+import { DragItem } from '@/types/attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import { useState } from 'react';
 import React from 'react';

@@ -14,6 +14,7 @@ import {
   authReducer,
   commonReducer,
   passageReducer,
+  readingAttemptReducer,
   userPassageReducer,
 } from './slices';
 
@@ -24,7 +25,7 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage,
-  whitelist: ['auth', 'authForm', 'common', 'passage', 'userPassage'],
+  whitelist: ['auth', 'authForm', 'common', 'passage', 'userPassage', 'readingAttempt'],
 };
 
 const rootReducer = combineReducers({
@@ -33,6 +34,7 @@ const rootReducer = combineReducers({
   authForm: authFormReducer,
   passage: passageReducer,
   userPassage: userPassageReducer,
+  readingAttempt: readingAttemptReducer,
 });
 
 const persistedReducer = persistReducer<RootState>(persistConfig, rootReducer);

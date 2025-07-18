@@ -17,11 +17,23 @@ export enum IeltsType {
   GENERAL_TRAINING = 'GENERAL_TRAINING',
 }
 
+export enum IeltsTypeEnumIndex {
+  ACADEMIC = 0,
+  GENERAL_TRAINING = 1,
+}
+
 export enum PartNumber {
   PART_1 = 'PART_1',
   PART_2 = 'PART_2',
   PART_3 = 'PART_3',
   PART_4 = 'PART_4',
+}
+
+export enum PartNumberEnumIndex {
+  PART_1 = 0,
+  PART_2 = 1,
+  PART_3 = 2,
+  PART_4 = 3,
 }
 
 export enum PassageStatus {
@@ -30,6 +42,14 @@ export enum PassageStatus {
   DEACTIVATED = 'DEACTIVATED',
   FINISHED = 'FINISHED',
   TEST = 'TEST',
+}
+
+export enum PassageStatusEnumIndex {
+  DRAFT = 0,
+  PUBLISHED = 1,
+  DEACTIVATED = 2,
+  FINISHED = 3,
+  TEST = 4,
 }
 
 export interface UserInformation {

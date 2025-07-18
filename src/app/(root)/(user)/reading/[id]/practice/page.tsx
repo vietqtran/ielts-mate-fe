@@ -6,9 +6,9 @@ import ConfirmSubmitModal from '@/components/passages/user/finish/ConfirmSubmitM
 import FinishScreen from '@/components/passages/user/finish/FinishScreen';
 import { QuestionRenderer } from '@/components/passages/user/questions';
 import { Button } from '@/components/ui/button';
-import useAttempt from '@/hooks/useAttempt';
+import useReadingAttempt from '@/hooks/useReadingAttempt';
 import { formatTime, useIncrementalTimer } from '@/hooks/useTimer';
-import { AttemptData, DataResponse } from '@/types/attemp.types';
+import { AttemptData, DataResponse } from '@/types/attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -40,7 +40,7 @@ const ReadingPractice = () => {
   const [startTime, setStartTime] = useState<boolean>(false);
   const [submittedData, setSubmittedData] = useState<DataResponse>();
   const time = useIncrementalTimer(0, startTime); // Initialize timer with 0 seconds
-  const { startNewAttempt, submitAttempt, saveAttemptProgress } = useAttempt();
+  const { startNewAttempt, submitAttempt, saveAttemptProgress } = useReadingAttempt();
   const router = useRouter();
 
   const notAnsweredQuestions = Object?.entries(answers)?.filter(

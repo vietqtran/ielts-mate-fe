@@ -18,6 +18,8 @@ interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
  * import axios from "@/lib/axios";
  *  axios.get("/api/some-endpoint"); // Will show toast on success/error
  *  axios.post("/api/another-endpoint", { foo: "bar" }, { notify: false }); // No toast will be shown
+ *  // GET request with params and no toast
+ *  axios.get("/api/some-endpoint", { params: { foo: "bar" }, notify: false });
  * ```
  */
 const instance: AxiosInstance = axios.create({

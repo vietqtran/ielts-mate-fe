@@ -1,11 +1,17 @@
 'use client';
 
 import instance from '@/lib/axios';
-import { AnswersPayload, AttemptData, DataResponse } from '@/types/attemp.types';
+import {
+  AnswersPayload,
+  AttemptData,
+  DataResponse,
+  GetReadingAttemptHistoryRequest,
+  ReadingAttemptHistoryResponse,
+} from '@/types/attempt.types';
 import { BaseResponse } from '@/types/reading.types';
 import { useRef, useState } from 'react';
 
-const useAttempt = () => {
+const useReadingAttempt = () => {
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<Record<string, Error | null>>({});
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -122,11 +128,81 @@ const useAttempt = () => {
       abortControllerRef.current = null;
     }
   };
+
+  const getAllReadingAttemptHistory = async (params: GetReadingAttemptHistoryRequest) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    const currentController = abortControllerRef.current;
+
+    setLoadingState('getAllReadingAttemptHistory', true);
+    setErrorState('getAllReadingAttemptHistory', null);
+
+    try {
+      const { data } = await instance.get(`reading/attempts`, {
+        params: {
+          ...params,
+        },
+        notify: false,
+        signal: currentController.signal,
+      });
+      return data as BaseResponse<ReadingAttemptHistoryResponse[]>;
+    } catch (error) {
+      if (abortControllerRef.current === currentController) {
+        if ((error as any).name !== 'AbortError') {
+          setErrorState('getAllReadingAttemptHistory', error as Error);
+          throw error;
+        }
+      }
+    } finally {
+      if (abortControllerRef.current === currentController) {
+        setLoadingState('getAllReadingAttemptHistory', false);
+      }
+      abortControllerRef.current = null;
+    }
+  };
+
+  const loadAttemptById = async (params: { attempt_id: string }) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    const currentController = abortControllerRef.current;
+
+    setLoadingState('loadAttemptById', true);
+    setErrorState('loadAttemptById', null);
+
+    try {
+      const { data } = await instance.get(`reading/attempts/${params.attempt_id}`, {
+        notify: false,
+        signal: currentController.signal,
+      });
+      return data as BaseResponse<ReadingAttemptHistoryResponse[]>;
+    } catch (error) {
+      if (abortControllerRef.current === currentController) {
+        if ((error as any).name !== 'AbortError') {
+          setErrorState('loadAttemptById', error as Error);
+          throw error;
+        }
+      }
+    } finally {
+      if (abortControllerRef.current === currentController) {
+        setLoadingState('loadAttemptById', false);
+      }
+      abortControllerRef.current = null;
+    }
+  };
+
   return {
     startNewAttempt,
     submitAttempt,
     saveAttemptProgress,
+    getAllReadingAttemptHistory,
+    loadAttemptById,
+    isLoading,
+    error,
   };
 };
 
-export default useAttempt;
+export default useReadingAttempt;

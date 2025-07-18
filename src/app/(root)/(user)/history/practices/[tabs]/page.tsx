@@ -1,0 +1,21 @@
+import ListeningHistory from '@/components/history/practice/listening/ListeningHistory';
+import ReadingHistory from '@/components/history/practice/reading/ReadingHistory';
+
+interface AttemptPracticeProps {
+  params: Promise<{ tabs: string }>;
+}
+
+const AttemptPractice = async ({ params }: AttemptPracticeProps) => {
+  const { tabs } = await params;
+
+  switch (tabs) {
+    case 'reading':
+      return <ReadingHistory />; // reading exams component
+    case 'listening':
+      return <ListeningHistory />; // listening exams component
+    default:
+      return <div>Practice History</div>; // default case if needed
+  }
+};
+
+export default AttemptPractice;

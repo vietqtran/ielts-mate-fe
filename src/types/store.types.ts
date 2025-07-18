@@ -1,4 +1,5 @@
 import { PassageState } from '@/store/slices/passage-slice';
+import { ReadingAttemptState } from '@/store/slices/reading-attempt-slice';
 import { UserPassageState } from '@/store/slices/user-passage-slice';
 import { User } from '.';
 
@@ -8,6 +9,7 @@ export interface RootState {
   authForm: AuthFormState;
   passage: PassageState;
   userPassage: UserPassageState;
+  readingAttempt: ReadingAttemptState;
 }
 
 export interface AuthState {
