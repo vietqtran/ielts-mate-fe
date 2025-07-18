@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { usePassage } from '@/hooks/usePassage';
+import { usePassage } from '@/hooks/apis/reading/usePassage';
 
 // Use backend response types
 interface PassagePreviewData {

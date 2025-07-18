@@ -13,8 +13,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useListeningExam } from '@/hooks/useListeningExam';
-import { useReadingExam } from '@/hooks/useReadingExam';
+import { useReadingExam } from '@/hooks/apis/admin/useReadingExam';
+import { useListeningExam } from '@/hooks/apis/listening/useListeningExam';
 import { BookOpen, Eye, Headphones } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';

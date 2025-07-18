@@ -12,12 +12,12 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { NavigationHandler } from '@/components/layout/NavigationHandler';
-import { CreatePassageModal } from '@/components/passages/CreatePassageModal';
-import { PassageFilterToolbar } from '@/components/passages/PassageFilterToolbar';
-import { PassageTable } from '@/components/passages/PassageTable';
-import { ViewPassageModal } from '@/components/passages/ViewPassageModal';
+import { CreatePassageModal } from '@/components/reading/CreatePassageModal';
+import { PassageFilterToolbar } from '@/components/reading/PassageFilterToolbar';
+import { PassageTable } from '@/components/reading/PassageTable';
+import { ViewPassageModal } from '@/components/reading/ViewPassageModal';
 import { Button } from '@/components/ui/button';
-import { usePassage } from '@/hooks/usePassage';
+import { usePassage } from '@/hooks/apis/reading/usePassage';
 import { PassageGetResponse } from '@/types/reading.types';
 import { RootState } from '@/types/store.types';
 import { PlusCircle } from 'lucide-react';

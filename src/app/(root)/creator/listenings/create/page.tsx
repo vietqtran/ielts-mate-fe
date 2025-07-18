@@ -1,5 +1,5 @@
 'use client';
-import { ListeningTaskForm } from '@/components/listening/ListeningTaskForm';
+import { ListeningTaskForm } from '@/components/features/admin/listening/ListeningTaskForm';
 import { ToastProvider } from '@/components/ui/toast';
 
 export default function CreateListeningTaskPage() {

@@ -1,5 +1,5 @@
-import ListeningHistory from '@/components/history/practice/listening/ListeningHistory';
-import ReadingHistory from '@/components/history/practice/reading/ReadingHistory';
+import ListeningHistory from '@/components/features/user/history/practice/listening/ListeningHistory';
+import ReadingHistory from '@/components/features/user/history/practice/reading/ReadingHistory';
 
 interface AttemptPracticeProps {
   params: Promise<{ tabs: string }>;

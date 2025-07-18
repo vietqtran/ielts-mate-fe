@@ -1,13 +1,13 @@
 'use client';
 
-import AttemptProgressBox from '@/components/passages/user/AttemptProgressBox';
-import PassageBox from '@/components/passages/user/PassageBox';
-import ConfirmSubmitModal from '@/components/passages/user/finish/ConfirmSubmitModal';
-import FinishScreen from '@/components/passages/user/finish/FinishScreen';
-import { QuestionRenderer } from '@/components/passages/user/questions';
+import AttemptProgressBox from '@/components/features/user/reading/AttemptProgressBox';
+import PassageBox from '@/components/features/user/reading/PassageBox';
+import ConfirmSubmitModal from '@/components/features/user/reading/finish/ConfirmSubmitModal';
+import FinishScreen from '@/components/features/user/reading/finish/FinishScreen';
+import { QuestionRenderer } from '@/components/features/user/reading/questions';
 import { Button } from '@/components/ui/button';
-import useReadingAttempt from '@/hooks/useReadingAttempt';
-import { formatTime, useIncrementalTimer } from '@/hooks/useTimer';
+import useReadingAttempt from '@/hooks/apis/reading/useReadingAttempt';
+import { formatTime, useIncrementalTimer } from '@/hooks/utils/useTimer';
 import { AttemptData, DataResponse } from '@/types/attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import { useParams, useRouter } from 'next/navigation';

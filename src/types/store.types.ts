@@ -1,6 +1,6 @@
 import { PassageState } from '@/store/slices/passage-slice';
-import { ReadingAttemptState } from '@/store/slices/reading-attempt-slice';
-import { UserPassageState } from '@/store/slices/user-passage-slice';
+import { ReadingAttemptState } from '@/store/slices/reading-attempt-filter-slice';
+import { UserPassageState } from '@/store/slices/reading-filter-slices';
 import { User } from '.';
 
 export interface RootState {

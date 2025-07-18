@@ -3,8 +3,8 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import LoadingSpinner from '@/components/ui/loading-spinner';
-import { useReadingExam } from '@/hooks/useReadingExam';
-import { ReadingExamResponse } from '@/types/reading-exam';
+import { useReadingExam } from '@/hooks/apis/admin/useReadingExam';
+import { ReadingExamResponse } from '@/types/reading-exam.types';
 import { ArrowLeft, BookOpen, Timer } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';

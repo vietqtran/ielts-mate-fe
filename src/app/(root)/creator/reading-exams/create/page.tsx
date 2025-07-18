@@ -1,6 +1,6 @@
 'use client';
 
-import { PassageSelectionTable } from '@/components/reading-exams/PassageSelectionTable';
+import { PassageSelectionTable } from '@/components/features/reading-exams/PassageSelectionTable';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -21,7 +21,7 @@ import {
 import { Input } from '@/components/ui/input';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { Textarea } from '@/components/ui/textarea';
-import { useReadingExam } from '@/hooks/useReadingExam';
+import { useReadingExam } from '@/hooks/apis/admin/useReadingExam';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';

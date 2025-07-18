@@ -1,6 +1,6 @@
 'use client';
 
-import { ListeningTaskForm } from '@/components/listening/ListeningTaskForm';
+import { ListeningTaskForm } from '@/components/features/admin/listening/ListeningTaskForm';
 import { Card, CardContent } from '@/components/ui/card';
 import { ToastProvider } from '@/components/ui/toast';
 import { useListeningTask } from '@/hooks';

@@ -3,11 +3,11 @@
 import {
   ListeningQuestionGroupsManager,
   LocalListeningQuestionGroup,
-} from '@/components/listening/ListeningQuestionGroupsManager';
-import { ListeningTaskBasicInfoForm } from '@/components/listening/ListeningTaskBasicInfoForm';
-import { ListeningTaskPreview } from '@/components/listening/ListeningTaskPreview';
+} from '@/components/features/admin/listening/ListeningQuestionGroupsManager';
+import { ListeningTaskBasicInfoForm } from '@/components/features/admin/listening/ListeningTaskBasicInfoForm';
+import { ListeningTaskPreview } from '@/components/features/admin/listening/ListeningTaskPreview';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useListeningTask } from '@/hooks/useListeningTask';
+import { useListeningTask } from '@/hooks/apis/listening/useListeningTask';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';

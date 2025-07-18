@@ -9,14 +9,14 @@ import { IeltsType, PassageStatus } from '@/types/reading.types';
 import { ArrowLeft, Eye, Save } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-import { PassageBasicInfoForm } from '@/components/passages/create/PassageBasicInfoForm';
-import { PassagePreview } from '@/components/passages/create/PassagePreview';
+import { PassageBasicInfoForm } from '@/components/reading/create/PassageBasicInfoForm';
+import { PassagePreview } from '@/components/reading/create/PassagePreview';
 import {
   LocalQuestionGroup,
   QuestionGroupsManager,
-} from '@/components/passages/create/QuestionGroupsManager';
+} from '@/components/reading/create/QuestionGroupsManager';
 import { Button } from '@/components/ui/button';
-import { usePassage } from '@/hooks/usePassage';
+import { usePassage } from '@/hooks/apis/reading/usePassage';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';

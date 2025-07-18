@@ -1,6 +1,6 @@
 'use client';
 
-import { UserPassageFilterToolbar } from '@/components/passages/UserPassageFilterToolbar';
+import { UserPassageFilterToolbar } from '@/components/features/user/reading/UserPassageFilterToolbar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,8 +13,8 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { Separator } from '@/components/ui/separator';
-import { usePassage } from '@/hooks/usePassage';
-import { useUserPassageNavigation } from '@/hooks/useUserPassageNavigation';
+import { usePassage } from '@/hooks/apis/reading/usePassage';
+import { useUserPassageNavigation } from '@/hooks/apis/reading/useUserPassageNavigation';
 import {
   UserPassageFilters,
   clearUserFilters,
@@ -24,7 +24,7 @@ import {
   setUserPagination,
   setUserSortBy,
   setUserSortDirection,
-} from '@/store/slices/user-passage-slice';
+} from '@/store/slices/reading-filter-slices';
 import { BaseResponse, PassageGetResponse } from '@/types/reading.types';
 import { RootState } from '@/types/store.types';
 import { BookOpen, Calendar, User } from 'lucide-react';

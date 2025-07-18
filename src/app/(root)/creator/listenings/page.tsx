@@ -1,7 +1,7 @@
 'use client';
 
-import { ListeningTaskFilterToolbar } from '@/components/listening/ListeningTaskFilterToolbar';
-import { ListeningTaskTable } from '@/components/listening/ListeningTaskTable';
+import { ListeningTaskFilterToolbar } from '@/components/features/admin/listening/ListeningTaskFilterToolbar';
+import { ListeningTaskTable } from '@/components/features/admin/listening/ListeningTaskTable';
 import { Button } from '@/components/ui/button';
 import { useListeningTask } from '@/hooks';
 import { ListeningTaskFilterParams } from '@/types/listening.types';

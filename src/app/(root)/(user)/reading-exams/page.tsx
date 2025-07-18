@@ -11,8 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useReadingExam } from '@/hooks/useReadingExam';
-import { ReadingExamResponse } from '@/types/reading-exam';
+import { useReadingExam } from '@/hooks/apis/admin/useReadingExam';
+import { ReadingExamResponse } from '@/types/reading-exam.types';
 import { Eye } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';

@@ -3,7 +3,7 @@ import 'ldrs/react/Ring.css';
 
 import React, { Suspense } from 'react';
 
-import FullPageLoading from '@/components/layout/FullPageLoading';
+import FullPageLoading from '@/components/common/loader/FullPageLoading';
 import { Toaster } from '@/components/ui/sonner';
 import StoreProvider from '@/providers/StoreProvider';
 import type { Metadata } from 'next';
