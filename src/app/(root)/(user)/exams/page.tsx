@@ -69,7 +69,7 @@ export default function AllExamsPage() {
   useEffect(() => {
     fetchReadingExams();
     fetchListeningExams();
-  }, [fetchReadingExams, fetchListeningExams]);
+  }, []);
 
   useEffect(() => {
     const combinedExams: Exam[] = [];
