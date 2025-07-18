@@ -2,7 +2,7 @@
 
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
 
-import { SignUpForm } from '@/components/auth/SignUpForm';
+import { SignUpForm } from '@/components/features/public/auth/SignUpForm';
 import CustomLink from '@/components/ui/link';
 import { useEffect } from 'react';
 

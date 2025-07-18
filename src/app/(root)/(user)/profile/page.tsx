@@ -1,9 +1,9 @@
 'use client';
 
+import { PasswordForm } from '@/components/features/profile/PasswordForm';
+import { ProfileForm } from '@/components/features/profile/ProfileForm';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
-import { PasswordForm } from '@/components/profile/PasswordForm';
-import { ProfileForm } from '@/components/profile/ProfileForm';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAppSelector } from '@/hooks';
 import { XCircle } from 'lucide-react';

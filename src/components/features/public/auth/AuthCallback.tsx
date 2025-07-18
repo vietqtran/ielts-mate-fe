@@ -3,8 +3,8 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import LoadingSpinner from '@/components/ui/loading-spinner';
 import { useAuth } from '@/hooks';
-import LoadingSpinner from '../ui/loading-spinner';
 
 export function AuthCallback() {
   const router = useRouter();

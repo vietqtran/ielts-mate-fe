@@ -1,15 +1,25 @@
 'use client';
 
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
 import { emailValidation, passwordSignInValidation } from '@/constants/validate';
 import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
 import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
 import { useEffect, useState } from 'react';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 
+import GoogleSocialButton from '@/components/common/social/GoogleSocialButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import CustomLink from '@/components/ui/link';
+import LoadingSpinner from '@/components/ui/loading-spinner';
 import { ERROR_CODE } from '@/constants/error_code';
 import { setSignInForm } from '@/store/slices/auth-form-slice';
 import { extractAxiosErrorData } from '@/utils/error';
@@ -17,9 +27,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import GoogleSocialButton from '../common/social/GoogleSocialButton';
-import CustomLink from '../ui/link';
-import LoadingSpinner from '../ui/loading-spinner';
 
 const signInSchema = z.object({
   email: emailValidation,

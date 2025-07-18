@@ -3,9 +3,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, Lock } from 'lucide-react';
 import { useTransition } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 
 import { Button } from '@/components/ui/button';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ERROR_CODE } from '@/constants/error_code';

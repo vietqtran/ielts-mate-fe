@@ -37,8 +37,8 @@ import {
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import LoadingSpinner from '@/components/ui/loading-spinner';
 import { useState } from 'react';
-import LoadingSpinner from '../ui/loading-spinner';
 
 interface PassageTableProps {
   passages: PassageGetResponse[];

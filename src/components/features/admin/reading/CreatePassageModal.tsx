@@ -26,10 +26,10 @@ import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { usePassage } from '@/hooks/apis/reading/usePassage';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { TiptapEditor } from '../ui/tiptap-editor';
 import { GroupQuestionForm } from './GroupQuestionForm';
 
 const passageSchema = z.object({

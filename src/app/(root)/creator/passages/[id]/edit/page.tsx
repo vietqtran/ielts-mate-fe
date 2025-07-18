@@ -16,12 +16,12 @@ import { ArrowLeft, Eye, Save } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import { PassageBasicInfoForm } from '@/components/reading/create/PassageBasicInfoForm';
-import { PassagePreview } from '@/components/reading/create/PassagePreview';
+import { PassageBasicInfoForm } from '@/components/features/admin/reading/create/PassageBasicInfoForm';
+import { PassagePreview } from '@/components/features/admin/reading/create/PassagePreview';
 import {
   LocalQuestionGroup,
   QuestionGroupsManager,
-} from '@/components/reading/create/QuestionGroupsManager';
+} from '@/components/features/admin/reading/create/QuestionGroupsManager';
 import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/apis/reading/usePassage';
 import { zodResolver } from '@hookform/resolvers/zod';

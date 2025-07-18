@@ -12,10 +12,11 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { NavigationHandler } from '@/components/layout/NavigationHandler';
-import { CreatePassageModal } from '@/components/reading/CreatePassageModal';
-import { PassageFilterToolbar } from '@/components/reading/PassageFilterToolbar';
-import { PassageTable } from '@/components/reading/PassageTable';
-import { ViewPassageModal } from '@/components/reading/ViewPassageModal';
+
+import { CreatePassageModal } from '@/components/features/admin/reading/CreatePassageModal';
+import { PassageFilterToolbar } from '@/components/features/admin/reading/PassageFilterToolbar';
+import { PassageTable } from '@/components/features/admin/reading/PassageTable';
+import { ViewPassageModal } from '@/components/features/admin/reading/ViewPassageModal';
 import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/apis/reading/usePassage';
 import { PassageGetResponse } from '@/types/reading.types';

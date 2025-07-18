@@ -1,9 +1,5 @@
 'use client';
 
-import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
-import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
-import { useEffect, useState } from 'react';
 import {
   Form,
   FormControl,
@@ -12,11 +8,17 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '../ui/form';
+} from '@/components/ui/form';
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
+import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
+import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
+import { useEffect, useState } from 'react';
 
+import GoogleSocialButton from '@/components/common/social/GoogleSocialButton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import LoadingSpinner from '@/components/ui/loading-spinner';
 import { signUpSchema } from '@/schemas/auth.schema';
 import { setSignUpForm } from '@/store/slices/auth-form-slice';
 import { extractAxiosErrorData } from '@/utils/error';
@@ -24,8 +26,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import GoogleSocialButton from '../common/social/GoogleSocialButton';
-import LoadingSpinner from '../ui/loading-spinner';
 
 export function SignUpForm() {
   const router = useRouter();
