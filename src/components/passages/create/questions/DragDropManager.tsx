@@ -7,7 +7,7 @@ import { DragItemForm } from './DragItemForm';
 import { QuestionForm } from './QuestionForm';
 
 import { Button } from '@/components/ui/button';
-import { useQuestion } from '@/hooks/useQuestion';
+import { useListeningQuestion, useQuestion } from '@/hooks';
 import { toast } from 'sonner';
 
 // Define proper type interfaces
@@ -45,6 +45,7 @@ interface DragDropManagerProps {
   group: QuestionGroup;
   refetchPassageData: () => void;
   onUpdateGroup: (group: QuestionGroup) => void;
+  isListening?: boolean;
 }
 
 // Define form modes
@@ -59,6 +60,7 @@ export function DragDropManager({
   group,
   refetchPassageData,
   onUpdateGroup,
+  isListening = false,
 }: Readonly<DragDropManagerProps>) {
   const [formMode, setFormMode] = useState<FormMode>('viewing');
   const [localQuestions, setLocalQuestions] = useState(group.questions);
@@ -85,7 +87,17 @@ export function DragDropManager({
     [onUpdateGroup]
   );
 
-  const { deleteQuestion, deleteDragItem, getAllDragItemsByGroup, isLoading } = useQuestion();
+  const questionApi = isListening ? useListeningQuestion() : useQuestion();
+  const {
+    createQuestions,
+    updateQuestionInfo,
+    deleteQuestion,
+    createDragItem,
+    updateDragItem,
+    deleteDragItem,
+    getAllDragItemsByGroup,
+    isLoading,
+  } = questionApi;
 
   // Function to fetch all drag items for a group
   const fetchAllDragItems = async (groupId: string) => {

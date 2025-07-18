@@ -75,11 +75,11 @@ export function ListeningTaskTable({
   const [taskToDelete, setTaskToDelete] = useState<string | null>(null);
 
   const handleEdit = (taskId: string) => {
-    router.push(`/listenings/${taskId}/edit`);
+    router.push(`/creator/listenings/${taskId}/edit`);
   };
 
   const handlePreview = (taskId: string) => {
-    router.push(`/listenings/${taskId}/preview`);
+    router.push(`/creator/listenings/${taskId}/preview`);
   };
 
   const handleDeleteClick = (taskId: string) => {

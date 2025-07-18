@@ -26,13 +26,27 @@ export function useQuestion() {
     setError((prev) => ({ ...prev, [key]: value }));
   };
 
+  // Helper: xác định group_id là của listening hay reading (ví dụ: truyền thêm isListening hoặc prefix group_id)
+  function isListeningGroup(group_id: string) {
+    // Nếu group_id có prefix đặc biệt hoặc truyền thêm flag, có thể sửa lại logic này
+    // Ở đây giả sử group_id là UUID, ta cần truyền thêm isListening vào các hàm
+    return false; // Mặc định là reading, sẽ sửa lại ở các hàm bên dưới
+  }
+
   // Create questions for a group
-  const createQuestions = async (group_id: string, questions: QuestionCreationRequest[]) => {
+  const createQuestions = async (
+    group_id: string,
+    questions: QuestionCreationRequest[],
+    isListening = false
+  ) => {
     setLoadingState('createQuestions', true);
     setErrorState('createQuestions', null);
 
     try {
-      const { data } = await instance.post(`/reading/groups/${group_id}/questions`, questions);
+      const endpoint = isListening
+        ? `/listening/groups/${group_id}/questions`
+        : `/reading/groups/${group_id}/questions`;
+      const { data } = await instance.post(endpoint, questions);
       return data as BaseResponse<QuestionCreationResponse[]>;
     } catch (error) {
       setErrorState('createQuestions', error as Error);
@@ -46,16 +60,17 @@ export function useQuestion() {
   const updateQuestionOrder = async (
     group_id: string,
     question_id: string,
-    orderRequest: { question_order: number }
+    orderRequest: { question_order: number },
+    isListening = false
   ) => {
     setLoadingState('updateQuestionOrder', true);
     setErrorState('updateQuestionOrder', null);
 
     try {
-      const { data } = await instance.put(
-        `/reading/groups/${group_id}/questions/${question_id}/order`,
-        orderRequest
-      );
+      const endpoint = isListening
+        ? `/listening/groups/${group_id}/questions/${question_id}/order`
+        : `/reading/groups/${group_id}/questions/${question_id}/order`;
+      const { data } = await instance.put(endpoint, orderRequest);
       return data as BaseResponse<QuestionCreationResponse>;
     } catch (error) {
       setErrorState('updateQuestionOrder', error as Error);
@@ -69,16 +84,17 @@ export function useQuestion() {
   const updateQuestionInfo = async (
     group_id: string,
     question_id: string,
-    infoRequest: Partial<QuestionCreationRequest>
+    infoRequest: Partial<QuestionCreationRequest>,
+    isListening = false
   ) => {
     setLoadingState('updateQuestionInfo', true);
     setErrorState('updateQuestionInfo', null);
 
     try {
-      const { data } = await instance.put(
-        `/reading/groups/${group_id}/questions/${question_id}/info`,
-        infoRequest
-      );
+      const endpoint = isListening
+        ? `/listening/groups/${group_id}/questions/${question_id}/info`
+        : `/reading/groups/${group_id}/questions/${question_id}/info`;
+      const { data } = await instance.put(endpoint, infoRequest);
       return data as BaseResponse<QuestionCreationResponse>;
     } catch (error) {
       setErrorState('updateQuestionInfo', error as Error);
@@ -89,14 +105,15 @@ export function useQuestion() {
   };
 
   // Delete question
-  const deleteQuestion = async (group_id: string, question_id: string) => {
+  const deleteQuestion = async (group_id: string, question_id: string, isListening = false) => {
     setLoadingState('deleteQuestion', true);
     setErrorState('deleteQuestion', null);
 
     try {
-      const { data } = await instance.delete(
-        `/reading/groups/${group_id}/questions/${question_id}`
-      );
+      const endpoint = isListening
+        ? `/listening/groups/${group_id}/questions/${question_id}`
+        : `/reading/groups/${group_id}/questions/${question_id}`;
+      const { data } = await instance.delete(endpoint);
       return data as BaseResponse<void>;
     } catch (error) {
       setErrorState('deleteQuestion', error as Error);
@@ -180,12 +197,19 @@ export function useQuestion() {
   };
 
   // Create drag items for group
-  const createDragItem = async (group_id: string, dragItems: CreateDragItemRequest) => {
+  const createDragItem = async (
+    group_id: string,
+    dragItems: CreateDragItemRequest,
+    isListening = false
+  ) => {
     setLoadingState('createDragItem', true);
     setErrorState('createDragItem', null);
 
     try {
-      const { data } = await instance.post(`/reading/groups/${group_id}/items`, dragItems);
+      const endpoint = isListening
+        ? `/listening/groups/${group_id}/items`
+        : `/reading/groups/${group_id}/items`;
+      const { data } = await instance.post(endpoint, dragItems);
       return data as BaseResponse<DragItemResponse[]>; // Now returns an array of items
     } catch (error) {
       setErrorState('createDragItem', error as Error);
@@ -199,13 +223,17 @@ export function useQuestion() {
   const updateDragItem = async (
     group_id: string,
     itemId: string,
-    dragItem: UpdateDragItemRequest
+    dragItem: UpdateDragItemRequest,
+    isListening = false
   ) => {
     setLoadingState('updateDragItem', true);
     setErrorState('updateDragItem', null);
 
     try {
-      const { data } = await instance.put(`/reading/groups/${group_id}/items/${itemId}`, dragItem);
+      const endpoint = isListening
+        ? `/listening/groups/${group_id}/items/${itemId}`
+        : `/reading/groups/${group_id}/items/${itemId}`;
+      const { data } = await instance.put(endpoint, dragItem);
       return data as BaseResponse<DragItemResponse>;
     } catch (error) {
       setErrorState('updateDragItem', error as Error);
@@ -216,12 +244,15 @@ export function useQuestion() {
   };
 
   // Delete drag item
-  const deleteDragItem = async (group_id: string, itemId: string) => {
+  const deleteDragItem = async (group_id: string, itemId: string, isListening = false) => {
     setLoadingState('deleteDragItem', true);
     setErrorState('deleteDragItem', null);
 
     try {
-      const { data } = await instance.delete(`/reading/groups/${group_id}/items/${itemId}`);
+      const endpoint = isListening
+        ? `/listening/groups/${group_id}/items/${itemId}`
+        : `/reading/groups/${group_id}/items/${itemId}`;
+      const { data } = await instance.delete(endpoint);
       return data as BaseResponse<void>;
     } catch (error) {
       setErrorState('deleteDragItem', error as Error);
@@ -232,12 +263,15 @@ export function useQuestion() {
   };
 
   // Get drag item by ID
-  const getDragItemById = async (group_id: string, itemId: string) => {
+  const getDragItemById = async (group_id: string, itemId: string, isListening = false) => {
     setLoadingState('getDragItemById', true);
     setErrorState('getDragItemById', null);
 
     try {
-      const { data } = await instance.get(`/reading/groups/${group_id}/items/${itemId}`);
+      const endpoint = isListening
+        ? `/listening/groups/${group_id}/items/${itemId}`
+        : `/reading/groups/${group_id}/items/${itemId}`;
+      const { data } = await instance.get(endpoint);
       // Map the response to match our expected structure if needed
       return data as BaseResponse<DragItemResponse>;
     } catch (error) {
@@ -249,12 +283,15 @@ export function useQuestion() {
   };
 
   // Get all drag items by group ID
-  const getAllDragItemsByGroup = async (group_id: string) => {
+  const getAllDragItemsByGroup = async (group_id: string, isListening = false) => {
     setLoadingState('getAllDragItemsByGroup', true);
     setErrorState('getAllDragItemsByGroup', null);
 
     try {
-      const { data } = await instance.get(`/reading/groups/${group_id}/items`);
+      const endpoint = isListening
+        ? `/listening/groups/${group_id}/items`
+        : `/reading/groups/${group_id}/items`;
+      const { data } = await instance.get(endpoint);
       return data as BaseResponse<DragItemListResponse>;
     } catch (error) {
       setErrorState('getAllDragItemsByGroup', error as Error);

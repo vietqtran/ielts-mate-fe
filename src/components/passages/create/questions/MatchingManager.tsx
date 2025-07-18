@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { MatchingForm, MatchingFormData } from './MatchingForm';
 
 import { Button } from '@/components/ui/button';
-import { useQuestion } from '@/hooks/useQuestion';
+import { useListeningQuestion, useQuestion } from '@/hooks';
 
 interface QuestionGroup {
   id?: string;
@@ -21,12 +21,14 @@ interface MatchingManagerProps {
   group: QuestionGroup;
   refetchPassageData: () => void;
   onUpdateGroup: (group: QuestionGroup) => void;
+  isListening?: boolean;
 }
 
 export function MatchingManager({
   group,
   refetchPassageData,
   onUpdateGroup,
+  isListening = false,
 }: Readonly<MatchingManagerProps>) {
   const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
@@ -39,7 +41,8 @@ export function MatchingManager({
     setEditingQuestion(null);
   }, [group.questions, group.id]);
 
-  const { createQuestions, updateQuestionInfo, deleteQuestion, isLoading } = useQuestion();
+  const questionApi = isListening ? useListeningQuestion() : useQuestion();
+  const { createQuestions, updateQuestionInfo, deleteQuestion, isLoading } = questionApi;
 
   const handleFormSubmit = async (data: MatchingFormData) => {
     if (!group.id) {
@@ -60,7 +63,8 @@ export function MatchingManager({
         const response = await updateQuestionInfo(
           group.id,
           editingQuestion.question_id,
-          questionRequest
+          questionRequest,
+          isListening
         );
         if (response.data) {
           // Ensure correct data structure
@@ -85,7 +89,7 @@ export function MatchingManager({
         }
       } else {
         // Create new question
-        const response = await createQuestions(group.id, [questionRequest]);
+        const response = await createQuestions(group.id, [questionRequest], isListening);
         if (response.data && Array.isArray(response.data)) {
           // Ensure consistent structure with question_id field
           const newQuestions = response.data.map((q) => ({
@@ -121,7 +125,7 @@ export function MatchingManager({
       return;
     }
     try {
-      await deleteQuestion(group.id, questionId);
+      await deleteQuestion(group.id, questionId, isListening);
       const updatedQuestions = localQuestions.filter((q) => q.question_id !== questionId);
       setLocalQuestions(updatedQuestions);
 

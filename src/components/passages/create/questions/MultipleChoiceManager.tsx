@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { MultipleChoiceForm, QuestionFormData } from './MultipleChoiceForm';
 
 import { Button } from '@/components/ui/button';
+import { useListeningQuestion } from '@/hooks';
 import { useQuestion } from '@/hooks/useQuestion';
 
 interface QuestionGroup {
@@ -21,12 +22,14 @@ interface MultipleChoiceManagerProps {
   group: QuestionGroup;
   onUpdateGroup: (group: QuestionGroup) => void;
   refetchPassageData: () => void;
+  isListening?: boolean;
 }
 
 export function MultipleChoiceManager({
   group,
   onUpdateGroup,
   refetchPassageData,
+  isListening = false,
 }: Readonly<MultipleChoiceManagerProps>) {
   const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
@@ -39,6 +42,7 @@ export function MultipleChoiceManager({
     setEditingQuestion(null);
   }, [group.questions, group.id]);
 
+  const questionApi = isListening ? useListeningQuestion() : useQuestion();
   const {
     createQuestions,
     updateQuestionInfo,
@@ -48,7 +52,7 @@ export function MultipleChoiceManager({
     deleteChoice,
     getChoicesByQuestionId,
     isLoading,
-  } = useQuestion();
+  } = questionApi;
 
   const handleFormSubmit = async (data: QuestionFormData) => {
     if (!group.id) {
@@ -67,7 +71,7 @@ export function MultipleChoiceManager({
           number_of_correct_answers: data.number_of_correct_answers,
           instruction_for_choice: data.instruction_for_choice,
         };
-        await updateQuestionInfo(group.id, questionId, questionInfoRequest);
+        await updateQuestionInfo(group.id, questionId, questionInfoRequest, isListening);
 
         // 2. Sequentially process choice changes to avoid race conditions
         const originalChoices = editingQuestion.choices || [];
@@ -177,7 +181,7 @@ export function MultipleChoiceManager({
           instruction_for_choice: data.instruction_for_choice,
           choices: data.choices.map(({ id, ...rest }) => rest), // Ensure no client-side IDs
         };
-        const response = await createQuestions(group.id, [questionRequest]);
+        const response = await createQuestions(group.id, [questionRequest], isListening);
 
         if (response.data && Array.isArray(response.data)) {
           const newQuestions = response.data;
@@ -208,7 +212,7 @@ export function MultipleChoiceManager({
       return;
     }
     try {
-      await deleteQuestion(group.id, questionId);
+      await deleteQuestion(group.id, questionId, isListening);
       const updatedQuestions = localQuestions.filter((q) => q.question_id !== questionId);
       setLocalQuestions(updatedQuestions);
 

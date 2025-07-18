@@ -74,3 +74,19 @@ export interface BaseListeningResponse<T> {
   data: T;
   pagination?: Pagination;
 }
+
+export interface AddGroupQuestionRequest {
+  section_order: number;
+  section_label: string;
+  instruction: string;
+  questions: any[]; // Sử dụng any hoặc định nghĩa lại nếu cần
+  drag_items?: string[];
+}
+
+export interface AddGroupQuestionResponse {
+  group_id: string;
+  section_order: number;
+  section_label: string;
+  instruction: string;
+  questions: any[]; // Sử dụng any hoặc định nghĩa lại nếu cần
+}

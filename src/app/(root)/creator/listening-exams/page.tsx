@@ -26,7 +26,14 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
-import instance from '@/lib/axios';
+import {
+  ListeningExamRequest,
+  activateListeningExam,
+  createListeningExam,
+  deleteListeningExam,
+  fetchListeningExams,
+  updateListeningExam,
+} from '@/lib/api/listening-exams';
 import { Eye, Pencil, PlusCircle, Trash2 } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -42,28 +49,11 @@ export default function CreatorListeningExamsPage() {
   });
   const [editingExam, setEditingExam] = useState<any>(null);
 
-  const fetchListeningTasks = async () => {
+  const fetchExams = async () => {
     try {
       setIsLoading(true);
-      const { data } = await instance.get('/listening/tasks');
-      if (data && data.data) {
-        setTasks(data.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch listening tasks:', error);
-      toast.error('Failed to fetch listening tasks');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchListeningExams = async () => {
-    try {
-      setIsLoading(true);
-      const { data } = await instance.get('/listening/exams');
-      if (data && data.data) {
-        setExams(data.data);
-      }
+      const data = await fetchListeningExams();
+      setExams(data || []);
     } catch (error) {
       console.error('Failed to fetch listening exams:', error);
       toast.error('Failed to fetch listening exams');
@@ -73,8 +63,7 @@ export default function CreatorListeningExamsPage() {
   };
 
   useEffect(() => {
-    fetchListeningTasks();
-    fetchListeningExams();
+    fetchExams();
   }, []);
 
   const handleTaskSelection = (taskId: string) => {
@@ -104,44 +93,35 @@ export default function CreatorListeningExamsPage() {
     setEditingExam(null);
   };
 
-  const createExam = async () => {
+  const createOrUpdateExam = async () => {
     if (!formData.title) {
       toast.error('Exam title is required');
       return;
     }
-
     if (selectedTasks.length === 0) {
       toast.error('Please select at least one listening task');
       return;
     }
-
     try {
       setIsLoading(true);
-
-      // Map selected tasks to the format expected by the API
       const tasksWithPartNumbers = selectedTasks.map((taskId, index) => ({
         id: taskId,
-        partNumber: index, // Assign part numbers based on selection order (0-based)
+        partNumber: index,
       }));
-
-      const payload = {
+      const payload: ListeningExamRequest = {
         title: formData.title,
         description: formData.description,
         tasks: tasksWithPartNumbers,
       };
-
       if (editingExam) {
-        // Update existing exam
-        await instance.put(`/listening/exams/${editingExam.id}`, payload);
+        await updateListeningExam(editingExam.id, payload);
         toast.success('Listening exam updated successfully');
       } else {
-        // Create new exam
-        await instance.post('/listening/exams', payload);
+        await createListeningExam(payload);
         toast.success('Listening exam created successfully');
       }
-
       resetForm();
-      fetchListeningExams();
+      fetchExams();
     } catch (error) {
       console.error('Failed to save listening exam:', error);
       toast.error('Failed to save listening exam');
@@ -150,16 +130,13 @@ export default function CreatorListeningExamsPage() {
     }
   };
 
-  const deleteExam = async (examId: string) => {
-    if (!confirm('Are you sure you want to delete this exam?')) {
-      return;
-    }
-
+  const removeExam = async (examId: string) => {
+    if (!confirm('Are you sure you want to delete this exam?')) return;
     try {
       setIsLoading(true);
-      await instance.delete(`/listening/exams/${examId}`);
+      await deleteListeningExam(examId);
       toast.success('Listening exam deleted successfully');
-      fetchListeningExams();
+      fetchExams();
     } catch (error) {
       console.error('Failed to delete listening exam:', error);
       toast.error('Failed to delete listening exam');
@@ -171,23 +148,22 @@ export default function CreatorListeningExamsPage() {
   const editExam = (exam: any) => {
     setEditingExam(exam);
     setFormData({
-      title: exam.title || '',
-      description: exam.description || '',
+      title: exam.exam_name || '',
+      description: exam.exam_description || '',
     });
-
-    // Set selected tasks based on exam tasks
-    if (exam.tasks && exam.tasks.length > 0) {
-      const taskIds = exam.tasks.map((task: any) => task.id);
-      setSelectedTasks(taskIds);
-    }
+    // Set selected tasks based on part1-4
+    const taskIds = [exam.part1, exam.part2, exam.part3, exam.part4]
+      .filter((part) => part && part.task_id)
+      .map((part) => part.task_id);
+    setSelectedTasks(taskIds);
   };
 
-  const activateExam = async (examId: string, active: boolean) => {
+  const activateExamHandler = async (examId: string, active: boolean) => {
     try {
       setIsLoading(true);
-      await instance.patch(`/listening/exams/${examId}/activate`, { isActive: active });
+      await activateListeningExam(examId, active);
       toast.success(`Exam ${active ? 'activated' : 'deactivated'} successfully`);
-      fetchListeningExams();
+      fetchExams();
     } catch (error) {
       console.error('Failed to update exam status:', error);
       toast.error('Failed to update exam status');
@@ -297,7 +273,7 @@ export default function CreatorListeningExamsPage() {
               <DialogClose asChild>
                 <Button variant='outline'>Cancel</Button>
               </DialogClose>
-              <Button onClick={createExam} disabled={isLoading}>
+              <Button onClick={createOrUpdateExam} disabled={isLoading}>
                 {isLoading ? (
                   <div className='mr-2'>
                     <LoadingSpinner />
@@ -340,27 +316,27 @@ export default function CreatorListeningExamsPage() {
                   </TableRow>
                 ) : (
                   exams.map((exam) => (
-                    <TableRow key={exam.id}>
-                      <TableCell className='font-medium'>{exam.title || 'Untitled Exam'}</TableCell>
+                    <TableRow key={exam.listening_exam_id}>
+                      <TableCell className='font-medium'>
+                        {exam.exam_name || 'Untitled Exam'}
+                      </TableCell>
                       <TableCell className='max-w-xs truncate'>
-                        {exam.description || 'No description'}
+                        {exam.exam_description || 'No description'}
                       </TableCell>
                       <TableCell>
-                        <div className='flex flex-wrap gap-1'>
-                          {exam.tasks && exam.tasks.length > 0 ? (
-                            exam.tasks.map((task: any, index: number) => (
-                              <Badge key={task.id} variant='outline'>
-                                Part {index + 1}
+                        <div className='flex flex-col gap-1'>
+                          {[exam.part1, exam.part2, exam.part3, exam.part4].map((part, idx) =>
+                            part && part.task_id ? (
+                              <Badge key={part.task_id} variant='outline'>
+                                Part {idx + 1}: {part.title || 'No title'}
                               </Badge>
-                            ))
-                          ) : (
-                            <span className='text-muted-foreground'>No tasks</span>
+                            ) : null
                           )}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={exam.isActive ? 'default' : 'secondary'}>
-                          {exam.isActive ? 'Active' : 'Inactive'}
+                        <Badge variant={exam.is_current ? 'default' : 'secondary'}>
+                          {exam.is_current ? 'Active' : 'Inactive'}
                         </Badge>
                       </TableCell>
                       <TableCell className='text-right'>
@@ -368,9 +344,11 @@ export default function CreatorListeningExamsPage() {
                           <Button
                             variant='outline'
                             size='icon'
-                            onClick={() => activateExam(exam.id, !exam.isActive)}
+                            onClick={() =>
+                              activateExamHandler(exam.listening_exam_id, !exam.is_current)
+                            }
                           >
-                            <Eye className={`h-4 w-4 ${exam.isActive ? 'text-green-500' : ''}`} />
+                            <Eye className={`h-4 w-4 ${exam.is_current ? 'text-green-500' : ''}`} />
                           </Button>
                           <Dialog onOpenChange={(open) => !open && resetForm()}>
                             <DialogTrigger asChild>
@@ -379,7 +357,11 @@ export default function CreatorListeningExamsPage() {
                               </Button>
                             </DialogTrigger>
                           </Dialog>
-                          <Button variant='outline' size='icon' onClick={() => deleteExam(exam.id)}>
+                          <Button
+                            variant='outline'
+                            size='icon'
+                            onClick={() => removeExam(exam.listening_exam_id)}
+                          >
                             <Trash2 className='h-4 w-4' />
                           </Button>
                         </div>

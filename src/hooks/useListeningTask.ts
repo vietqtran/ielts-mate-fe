@@ -2,6 +2,8 @@
 
 import instance from '@/lib/axios';
 import {
+  AddGroupQuestionRequest,
+  AddGroupQuestionResponse,
   BaseListeningResponse,
   ListeningTaskCreationRequest,
   ListeningTaskDetailResponse,
@@ -236,6 +238,88 @@ export function useListeningTask() {
     }
   };
 
+  // Add question group to listening task
+  const addGroupQuestion = async (taskId: string, request: AddGroupQuestionRequest) => {
+    setLoadingState('addGroupQuestion', true);
+    setErrorState('addGroupQuestion', null);
+    try {
+      const { data } = await instance.post(`/listening/listens/${taskId}/groups`, request);
+      return data as BaseListeningResponse<AddGroupQuestionResponse>;
+    } catch (error) {
+      setErrorState('addGroupQuestion', error as Error);
+      throw error;
+    } finally {
+      setLoadingState('addGroupQuestion', false);
+    }
+  };
+
+  // Get all question groups for listening task
+  const getAllQuestionGroups = async (taskId: string) => {
+    setLoadingState('getAllQuestionGroups', true);
+    setErrorState('getAllQuestionGroups', null);
+    try {
+      const { data } = await instance.get(`/listening/listens/${taskId}/groups`);
+      return data as BaseListeningResponse<AddGroupQuestionResponse[]>;
+    } catch (error) {
+      setErrorState('getAllQuestionGroups', error as Error);
+      throw error;
+    } finally {
+      setLoadingState('getAllQuestionGroups', false);
+    }
+  };
+
+  // Update question group
+  const updateGroupQuestion = async (
+    taskId: string,
+    groupId: string,
+    request: AddGroupQuestionRequest
+  ) => {
+    setLoadingState('updateGroupQuestion', true);
+    setErrorState('updateGroupQuestion', null);
+    try {
+      const { data } = await instance.put(
+        `/listening/listens/${taskId}/groups/${groupId}`,
+        request
+      );
+      return data as BaseListeningResponse<AddGroupQuestionResponse>;
+    } catch (error) {
+      setErrorState('updateGroupQuestion', error as Error);
+      throw error;
+    } finally {
+      setLoadingState('updateGroupQuestion', false);
+    }
+  };
+
+  // Delete question group
+  const deleteGroupQuestion = async (taskId: string, groupId: string) => {
+    setLoadingState('deleteGroupQuestion', true);
+    setErrorState('deleteGroupQuestion', null);
+    try {
+      const { data } = await instance.delete(`/listening/listens/${taskId}/groups/${groupId}`);
+      return data as BaseListeningResponse<void>;
+    } catch (error) {
+      setErrorState('deleteGroupQuestion', error as Error);
+      throw error;
+    } finally {
+      setLoadingState('deleteGroupQuestion', false);
+    }
+  };
+
+  // Get group question by ID
+  const getGroupQuestionById = async (taskId: string, groupId: string) => {
+    setLoadingState('getGroupQuestionById', true);
+    setErrorState('getGroupQuestionById', null);
+    try {
+      const { data } = await instance.get(`/listening/listens/${taskId}/groups/${groupId}`);
+      return data as BaseListeningResponse<AddGroupQuestionResponse>;
+    } catch (error) {
+      setErrorState('getGroupQuestionById', error as Error);
+      throw error;
+    } finally {
+      setLoadingState('getGroupQuestionById', false);
+    }
+  };
+
   return {
     getListeningTasks,
     getListeningTasksByCreator,
@@ -243,6 +327,11 @@ export function useListeningTask() {
     createListeningTask,
     updateListeningTask,
     deleteListeningTask,
+    addGroupQuestion,
+    getAllQuestionGroups,
+    updateGroupQuestion,
+    deleteGroupQuestion,
+    getGroupQuestionById,
     isLoading,
     error,
   };

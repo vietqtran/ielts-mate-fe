@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { FillInBlanksForm, FillInBlanksFormData } from './FillInBlanksForm';
 
 import { Button } from '@/components/ui/button';
-import { useQuestion } from '@/hooks/useQuestion';
+import { useListeningQuestion, useQuestion } from '@/hooks';
 
 interface QuestionGroup {
   id?: string;
@@ -21,12 +21,14 @@ interface FillInBlanksManagerProps {
   group: QuestionGroup;
   refetchPassageData: () => void;
   onUpdateGroup: (group: QuestionGroup) => void;
+  isListening?: boolean;
 }
 
 export function FillInBlanksManager({
   group,
   refetchPassageData,
   onUpdateGroup,
+  isListening = false,
 }: Readonly<FillInBlanksManagerProps>) {
   const [isAddingOrEditing, setIsAddingOrEditing] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<any | null>(null);
@@ -39,7 +41,8 @@ export function FillInBlanksManager({
     setEditingQuestion(null);
   }, [group.questions, group.id]);
 
-  const { createQuestions, updateQuestionInfo, deleteQuestion, isLoading } = useQuestion();
+  const questionApi = isListening ? useListeningQuestion() : useQuestion();
+  const { createQuestions, updateQuestionInfo, deleteQuestion, isLoading } = questionApi;
 
   const handleFormSubmit = async (data: FillInBlanksFormData) => {
     if (!group.id) {
@@ -60,7 +63,8 @@ export function FillInBlanksManager({
         const response = await updateQuestionInfo(
           group.id,
           editingQuestion.question_id,
-          questionRequest
+          questionRequest,
+          isListening
         );
         if (response.data) {
           // Ensure we have the right ID field
@@ -85,7 +89,7 @@ export function FillInBlanksManager({
         }
       } else {
         // Create new question
-        const response = await createQuestions(group.id, [questionRequest]);
+        const response = await createQuestions(group.id, [questionRequest], isListening);
         if (response.data && Array.isArray(response.data)) {
           // Ensure consistent structure with question_id field
           const newQuestions = response.data.map((q) => ({
@@ -121,7 +125,7 @@ export function FillInBlanksManager({
       return;
     }
     try {
-      await deleteQuestion(group.id, questionId);
+      await deleteQuestion(group.id, questionId, isListening);
       const updatedQuestions = localQuestions.filter((q) => q.question_id !== questionId);
       setLocalQuestions(updatedQuestions);
 

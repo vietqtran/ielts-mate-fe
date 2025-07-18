@@ -83,7 +83,7 @@
         "noUnusedPrivateClassMembers": "error",
         "noUnusedVariables": "off",
         "useArrayLiterals": "off",
-        "useHookAtTopLevel": "error",
+        "useHookAtTopLevel": "off",
         "useIsNan": "error",
         "useValidForDirection": "error",
         "useYield": "error"

@@ -71,7 +71,7 @@ export function AppSidebar() {
                 <SidebarMenuButton asChild>
                   <Link href='/creator/passages'>
                     <BookOpen className='h-4 w-4' />
-                    <span>Passages</span>
+                    <span>Reading Passages</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -80,38 +80,6 @@ export function AppSidebar() {
                   <Link href='/creator/reading-exams'>
                     <BookOpen className='h-4 w-4' />
                     <span>Reading Exams</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href='/reading'>
-                    <BookOpen className='h-4 w-4' />
-                    <span>Reading</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href='/exams'>
-                    <BookOpen className='h-4 w-4' />
-                    <span>All Exams</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href='/reading-exams'>
-                    <BookOpen className='h-4 w-4' />
-                    <span>Reading Exams</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href='/listening-exams'>
-                    <BookOpen className='h-4 w-4' />
-                    <span>Listening Exams</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

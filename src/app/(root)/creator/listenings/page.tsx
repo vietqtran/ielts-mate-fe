@@ -61,7 +61,7 @@ export default function ListeningsPage() {
   };
 
   const handleAddNew = () => {
-    router.push('/listenings/create');
+    router.push('/creator/listenings/create');
   };
 
   const handleRefresh = () => {

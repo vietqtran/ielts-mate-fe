@@ -114,7 +114,7 @@ export default function PassagesPage() {
   }, [filters, sortBy, sortDirection]);
 
   const handleCreatePassage = () => {
-    router.push('/passages/create');
+    router.push('/creator/passages/create');
   };
 
   const handleViewPassage = (passage: PassageGetResponse) => {
@@ -123,11 +123,11 @@ export default function PassagesPage() {
   };
 
   const handleEditPassage = (passage: PassageGetResponse) => {
-    router.push(`/passages/${passage.passage_id}/edit`);
+    router.push(`/creator/passages/${passage.passage_id}/edit`);
   };
 
   const handlePreviewPassage = (passage: PassageGetResponse) => {
-    router.push(`/passages/${passage.passage_id}/preview`);
+    router.push(`/creator/passages/${passage.passage_id}/preview`);
   };
 
   const handleDeletePassage = async (passage_id: string) => {
@@ -219,7 +219,7 @@ export default function PassagesPage() {
             onEdit={() => {
               setIsViewModalOpen(false);
               if (selectedPassage) {
-                router.push(`/passages/${selectedPassage.passage_id}/edit`);
+                router.push(`/creator/passages/${selectedPassage.passage_id}/edit`);
               }
             }}
             onDelete={() => handleDeletePassage(selectedPassage.passage_id)}

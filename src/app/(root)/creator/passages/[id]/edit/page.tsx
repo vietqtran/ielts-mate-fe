@@ -383,7 +383,10 @@ export default function EditPassagePage() {
         </div>
 
         <div className='flex items-center gap-2'>
-          <Button variant='outline' onClick={() => router.push(`/passages/${passage_id}/preview`)}>
+          <Button
+            variant='outline'
+            onClick={() => router.push(`/creator/passages/${passage_id}/preview`)}
+          >
             <Eye className='h-4 w-4 mr-2' />
             Preview
           </Button>

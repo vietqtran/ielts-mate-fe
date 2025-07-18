@@ -34,6 +34,10 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
+import {
+  ListeningQuestionGroupsManager,
+  LocalListeningQuestionGroup,
+} from './ListeningQuestionGroupsManager';
 
 const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
 const ACCEPTED_AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg'];
@@ -81,6 +85,8 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
 
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
   const [useAutomaticTranscription, setUseAutomaticTranscription] = useState(true);
+  const [createdTaskId, setCreatedTaskId] = useState<string | undefined>(taskId);
+  const [questionGroups, setQuestionGroups] = useState<LocalListeningQuestionGroup[]>([]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -103,6 +109,38 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
     }
   }, [initialData, mode, form]);
 
+  // Khi vào edit, nếu có initialData và taskId, tự động fetch group/question
+  useEffect(() => {
+    if (mode === 'edit' && taskId) {
+      // Giả sử có API getAllQuestionGroups(taskId) trả về danh sách group
+      (async () => {
+        try {
+          const { getAllQuestionGroups } = useListeningTask();
+          const response: { data?: any[] } = await getAllQuestionGroups(taskId);
+          if (response?.data) {
+            // Map AddGroupQuestionResponse[] to LocalListeningQuestionGroup[]
+            const groups = (response.data as any[]).map((g) => ({
+              id: g.group_id,
+              section_order: g.section_order,
+              section_label: g.section_label,
+              instruction: g.instruction,
+              question_type: g.questions && g.questions[0]?.question_type,
+              questions: g.questions ?? [],
+              drag_items: g.drag_items ?? [],
+            }));
+            setQuestionGroups(groups);
+          }
+        } catch (e) {
+          setQuestionGroups([]);
+        }
+      })();
+      setCreatedTaskId(taskId);
+    } else if (mode === 'create') {
+      setQuestionGroups([]);
+      setCreatedTaskId(undefined);
+    }
+  }, [mode, taskId]);
+
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       if (mode === 'create') {
@@ -122,12 +160,15 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
           audio_file: values.audio_file,
         };
 
-        await createListeningTask(request);
+        const response = await createListeningTask(request);
+        // Lưu lại taskId để hiển thị phần tạo group/question
+        if (response?.data?.task_id) {
+          setCreatedTaskId(response.data.task_id);
+        }
         toast({
           title: 'Success',
           description: 'Listening task created successfully',
         });
-        router.push('/creator/listenings');
       } else if (mode === 'edit' && taskId) {
         const request: ListeningTaskUpdateRequest = {
           title: values.title,
@@ -141,6 +182,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
         };
 
         await updateListeningTask(taskId, request);
+        setCreatedTaskId(taskId);
         toast({
           title: 'Success',
           description: 'Listening task updated successfully',
@@ -171,6 +213,16 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
 
   const handleCancel = () => {
     router.push('/creator/listenings');
+  };
+
+  const handleAddGroup = (group: LocalListeningQuestionGroup) => {
+    setQuestionGroups((prev) => [...prev, group]);
+  };
+  const handleUpdateGroup = (index: number, group: LocalListeningQuestionGroup) => {
+    setQuestionGroups((prev) => prev.map((g, i) => (i === index ? group : g)));
+  };
+  const handleDeleteGroup = (index: number) => {
+    setQuestionGroups((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
@@ -388,6 +440,37 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
             </div>
           </form>
         </Form>
+        {/* Sau khi tạo xong task hoặc khi edit, hiển thị quản lý group/question */}
+        {createdTaskId && (
+          <div className='mt-8'>
+            <ListeningQuestionGroupsManager
+              task_id={createdTaskId}
+              questionGroups={questionGroups}
+              onAddGroup={handleAddGroup}
+              onUpdateGroup={handleUpdateGroup}
+              onDeleteGroup={handleDeleteGroup}
+              refetchTaskData={async () => {
+                if (createdTaskId) {
+                  const { getAllQuestionGroups } = useListeningTask();
+                  const response: { data?: any[] } = await getAllQuestionGroups(createdTaskId);
+                  if (response?.data) {
+                    // Map AddGroupQuestionResponse[] to LocalListeningQuestionGroup[]
+                    const groups = (response.data as any[]).map((g) => ({
+                      id: g.group_id,
+                      section_order: g.section_order,
+                      section_label: g.section_label,
+                      instruction: g.instruction,
+                      question_type: g.questions && g.questions[0]?.question_type,
+                      questions: g.questions ?? [],
+                      drag_items: g.drag_items ?? [],
+                    }));
+                    setQuestionGroups(groups);
+                  }
+                }
+              }}
+            />
+          </div>
+        )}
       </CardContent>
     </Card>
   );

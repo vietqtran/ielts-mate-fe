@@ -23,10 +23,29 @@ export default function PreviewListeningTaskPage() {
         if (response && response.data) {
           setTask(response.data);
 
-          // In a real application, you would construct the audio URL based on how
-          // your backend serves audio files
-          // For example: setAudioUrl(`${process.env.NEXT_PUBLIC_API_BASE_URL}/listens/audio/${response.data.audio_file_id}`);
-          setAudioUrl(`/api/listening/audio/${response.data.audio_file_id}`);
+          // Nếu có audio_file_id, gọi API lấy link thực tế
+          if (response.data.audio_file_id) {
+            try {
+              // Gọi API download file, nếu trả về file trực tiếp thì dùng url này
+              const audioRes = await fetch(
+                `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/resource/files/download/${response.data.audio_file_id}`,
+                {
+                  credentials: 'include',
+                }
+              );
+              if (audioRes.ok) {
+                // Nếu trả về file trực tiếp, tạo object url
+                const blob = await audioRes.blob();
+                setAudioUrl(URL.createObjectURL(blob));
+              } else {
+                setAudioUrl(null);
+              }
+            } catch (e) {
+              setAudioUrl(null);
+            }
+          } else {
+            setAudioUrl(null);
+          }
         } else {
           setError('Failed to load listening task');
         }
@@ -46,7 +65,7 @@ export default function PreviewListeningTaskPage() {
   };
 
   const handleEdit = () => {
-    router.push(`/listenings/${taskId}/edit`);
+    router.push(`/creator/listenings/${taskId}/edit`);
   };
 
   if (isLoading['getListeningTaskById']) {
