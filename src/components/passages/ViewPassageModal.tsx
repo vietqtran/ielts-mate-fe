@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { usePassage } from '@/hooks/usePassage';
-import { PassageGetResponse } from '@/types/reading.types';
+import { PassageGetResponse, QuestionTypeEnumIndex } from '@/types/reading.types';
 
 interface ViewPassageModalProps {
   passage: PassageGetResponse;
@@ -98,7 +98,7 @@ export function ViewPassageModal({
   const renderQuestionsByType = (questions: any[]) => {
     return questions.map((question, index) => {
       switch (question.question_type) {
-        case 0: // Multiple Choice
+        case QuestionTypeEnumIndex.MULTIPLE_CHOICE: // Multiple Choice
           return (
             <div key={index} className='space-y-2'>
               <h5 className='font-medium'>Question {question.question_order}</h5>
@@ -118,8 +118,7 @@ export function ViewPassageModal({
               )}
             </div>
           );
-
-        case 1: // Fill in Blank
+        case QuestionTypeEnumIndex.FILL_IN_THE_BLANKS: // Fill in Blank
           return (
             <div key={index} className='space-y-2'>
               <h5 className='font-medium'>Blank {question.blank_index}</h5>
@@ -128,8 +127,7 @@ export function ViewPassageModal({
               </p>
             </div>
           );
-
-        case 2: // Matching
+        case QuestionTypeEnumIndex.MATCHING: // Matching
           return (
             <div key={index} className='space-y-2'>
               <h5 className='font-medium'>Question {question.question_order}</h5>
@@ -142,8 +140,7 @@ export function ViewPassageModal({
               </div>
             </div>
           );
-
-        case 3: // Drag and Drop
+        case QuestionTypeEnumIndex.DRAG_AND_DROP: // Drag and Drop
           return (
             <div key={index} className='space-y-2'>
               <h5 className='font-medium'>Zone {question.zone_index}</h5>
@@ -152,7 +149,6 @@ export function ViewPassageModal({
               </p>
             </div>
           );
-
         default:
           return null;
       }

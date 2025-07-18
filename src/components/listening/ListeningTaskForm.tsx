@@ -29,6 +29,7 @@ import {
   ListeningTaskStatus,
   ListeningTaskUpdateRequest,
 } from '@/types/listening.types';
+import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
@@ -74,6 +75,7 @@ interface ListeningTaskFormProps {
     title: string;
     transcription?: string;
     status: number;
+    audio_file_id?: string;
   };
   mode: 'create' | 'edit';
 }
@@ -84,6 +86,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
   const { createListeningTask, updateListeningTask, isLoading } = useListeningTask();
 
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
+  const [serverAudioUrl, setServerAudioUrl] = useState<string | null>(null);
   const [useAutomaticTranscription, setUseAutomaticTranscription] = useState(true);
   const [createdTaskId, setCreatedTaskId] = useState<string | undefined>(taskId);
   const [questionGroups, setQuestionGroups] = useState<LocalListeningQuestionGroup[]>([]);
@@ -106,40 +109,52 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
     if (initialData && mode === 'edit') {
       // In edit mode, we only need to validate the audio file if it's changed
       form.clearErrors('audio_file');
+
+      // Fetch audio from server if audio_file_id exists and no local preview
+      if (initialData.audio_file_id) {
+        const fetchAudio = async () => {
+          try {
+            const audioRes = await fetch(
+              `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/resource/files/download/${initialData.audio_file_id}`,
+              { credentials: 'include' }
+            );
+            if (audioRes.ok) {
+              const blob = await audioRes.blob();
+              setServerAudioUrl(URL.createObjectURL(blob));
+            } else {
+              setServerAudioUrl(null);
+            }
+          } catch {
+            setServerAudioUrl(null);
+          }
+        };
+        fetchAudio();
+      } else {
+        setServerAudioUrl(null);
+      }
     }
   }, [initialData, mode, form]);
 
   // Khi vào edit, nếu có initialData và taskId, tự động fetch group/question
   useEffect(() => {
-    if (mode === 'edit' && taskId) {
-      // Giả sử có API getAllQuestionGroups(taskId) trả về danh sách group
-      (async () => {
-        try {
-          const { getAllQuestionGroups } = useListeningTask();
-          const response: { data?: any[] } = await getAllQuestionGroups(taskId);
-          if (response?.data) {
-            // Map AddGroupQuestionResponse[] to LocalListeningQuestionGroup[]
-            const groups = (response.data as any[]).map((g) => ({
-              id: g.group_id,
-              section_order: g.section_order,
-              section_label: g.section_label,
-              instruction: g.instruction,
-              question_type: g.questions && g.questions[0]?.question_type,
-              questions: g.questions ?? [],
-              drag_items: g.drag_items ?? [],
-            }));
-            setQuestionGroups(groups);
-          }
-        } catch (e) {
-          setQuestionGroups([]);
-        }
-      })();
-      setCreatedTaskId(taskId);
+    if (mode === 'edit' && initialData && Array.isArray((initialData as any).question_groups)) {
+      // Map from initialData.question_groups to LocalListeningQuestionGroup[]
+      const groups = (initialData as any).question_groups.map((g: any) => ({
+        id: g.group_id,
+        section_order: g.section_order,
+        section_label: g.section_label,
+        instruction: g.instruction,
+        question_type: g.questions && g.questions[0]?.question_type,
+        questions: g.questions ?? [],
+        drag_items: g.drag_items ?? [],
+      }));
+      setQuestionGroups(groups);
+      setCreatedTaskId(initialData.task_id || taskId);
     } else if (mode === 'create') {
       setQuestionGroups([]);
       setCreatedTaskId(undefined);
     }
-  }, [mode, taskId]);
+  }, [mode, initialData, taskId]);
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -367,11 +382,15 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
                         onChange={(e) => handleFileChange(e, onChange)}
                         {...fieldProps}
                       />
-                      {audioPreview && (
+                      {audioPreview ? (
                         <div className='mt-2'>
                           <audio controls src={audioPreview} className='w-full' />
                         </div>
-                      )}
+                      ) : serverAudioUrl ? (
+                        <div className='mt-2'>
+                          <audio controls src={serverAudioUrl} className='w-full' />
+                        </div>
+                      ) : null}
                     </div>
                   </FormControl>
                   <FormDescription>
@@ -469,6 +488,115 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
                 }
               }}
             />
+            {/* Render question groups and questions in edit mode */}
+            {mode === 'edit' && questionGroups.length > 0 && (
+              <div className='mt-8'>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Question Groups</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {questionGroups.map((group, groupIdx) => (
+                      <div key={group.id || groupIdx} className='mb-8'>
+                        <h4 className='font-semibold mb-2'>{group.section_label}</h4>
+                        <div
+                          className='mb-2'
+                          dangerouslySetInnerHTML={{ __html: group.instruction }}
+                        />
+                        {group.questions && group.questions.length > 0 ? (
+                          <div className='space-y-4'>
+                            {group.questions.map((q: any) => {
+                              switch (q.question_type) {
+                                case QuestionTypeEnumIndex.MULTIPLE_CHOICE: // Multiple Choice
+                                  return (
+                                    <div key={q.question_id} className='p-4 border rounded'>
+                                      <div
+                                        dangerouslySetInnerHTML={{
+                                          __html: q.instruction_for_choice,
+                                        }}
+                                      />
+                                      <ul className='list-disc ml-6'>
+                                        {Array.isArray(q.choices) &&
+                                          q.choices.map((c: any) => (
+                                            <li key={c.choice_id}>
+                                              <span className='font-semibold'>{c.label}:</span>{' '}
+                                              {c.content}
+                                              {c.is_correct && (
+                                                <span className='ml-2 text-green-600 font-bold'>
+                                                  (Correct)
+                                                </span>
+                                              )}
+                                            </li>
+                                          ))}
+                                      </ul>
+                                      <div className='mt-2 text-sm text-gray-500'>
+                                        Explanation: {q.explanation}
+                                      </div>
+                                    </div>
+                                  );
+                                case QuestionTypeEnumIndex.FILL_IN_THE_BLANKS: // Fill in the Blanks
+                                  return (
+                                    <div key={q.question_id} className='p-4 border rounded'>
+                                      <div>
+                                        <span className='font-semibold'>
+                                          Blank {q.blank_index}:
+                                        </span>{' '}
+                                        {q.correct_answer}
+                                      </div>
+                                      <div className='mt-2 text-sm text-gray-500'>
+                                        Explanation: {q.explanation}
+                                      </div>
+                                    </div>
+                                  );
+                                case QuestionTypeEnumIndex.MATCHING: // Matching
+                                  return (
+                                    <div key={q.question_id} className='p-4 border rounded'>
+                                      <div
+                                        dangerouslySetInnerHTML={{
+                                          __html: q.instruction_for_matching,
+                                        }}
+                                      />
+                                      <div>
+                                        <span className='font-semibold'>Answer:</span>{' '}
+                                        {q.correct_answer_for_matching}
+                                      </div>
+                                      <div className='mt-2 text-sm text-gray-500'>
+                                        Explanation: {q.explanation}
+                                      </div>
+                                    </div>
+                                  );
+                                case QuestionTypeEnumIndex.DRAG_AND_DROP: // Drag & Drop
+                                  return (
+                                    <div key={q.question_id} className='p-4 border rounded'>
+                                      <div>
+                                        <span className='font-semibold'>Zone {q.zone_index}:</span>{' '}
+                                        {q.drag_item_id}
+                                      </div>
+                                      <div className='mt-2 text-sm text-gray-500'>
+                                        Explanation: {q.explanation}
+                                      </div>
+                                    </div>
+                                  );
+                                default:
+                                  return (
+                                    <div key={q.question_id} className='p-4 border rounded'>
+                                      Unknown question type
+                                    </div>
+                                  );
+                              }
+                            })}
+                          </div>
+                        ) : (
+                          <div className='text-muted-foreground italic'>
+                            No questions in this group.
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
           </div>
         )}
       </CardContent>

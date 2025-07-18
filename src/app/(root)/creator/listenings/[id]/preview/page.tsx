@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useListeningTask } from '@/hooks';
 import { ListeningTaskDetailResponse, ListeningTaskStatus } from '@/types/listening.types';
+import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -167,6 +168,100 @@ export default function PreviewListeningTaskPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Render question groups and questions */}
+      {Array.isArray((task as any).question_groups) && (task as any).question_groups.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Question Groups</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {(task as any).question_groups.map((group: any) => (
+              <div key={group.group_id} className='mb-8'>
+                <h4 className='font-semibold mb-2'>{group.section_label}</h4>
+                <div className='mb-2' dangerouslySetInnerHTML={{ __html: group.instruction }} />
+                {Array.isArray(group.questions) && group.questions.length > 0 ? (
+                  <div className='space-y-4'>
+                    {group.questions.map((q: any) => {
+                      switch (q.question_type) {
+                        case QuestionTypeEnumIndex.MULTIPLE_CHOICE: // Multiple Choice
+                          return (
+                            <div key={q.question_id} className='p-4 border rounded'>
+                              <div dangerouslySetInnerHTML={{ __html: q.instruction_for_choice }} />
+                              <ul className='list-disc ml-6'>
+                                {Array.isArray(q.choices) &&
+                                  q.choices.map((c: any) => (
+                                    <li key={c.choice_id}>
+                                      <span className='font-semibold'>{c.label}:</span> {c.content}
+                                      {c.is_correct && (
+                                        <span className='ml-2 text-green-600 font-bold'>
+                                          (Correct)
+                                        </span>
+                                      )}
+                                    </li>
+                                  ))}
+                              </ul>
+                              <div className='mt-2 text-sm text-gray-500'>
+                                Explanation: {q.explanation}
+                              </div>
+                            </div>
+                          );
+                        case QuestionTypeEnumIndex.FILL_IN_THE_BLANKS: // Fill in the Blanks
+                          return (
+                            <div key={q.question_id} className='p-4 border rounded'>
+                              <div>
+                                <span className='font-semibold'>Blank {q.blank_index}:</span>{' '}
+                                {q.correct_answer}
+                              </div>
+                              <div className='mt-2 text-sm text-gray-500'>
+                                Explanation: {q.explanation}
+                              </div>
+                            </div>
+                          );
+                        case QuestionTypeEnumIndex.MATCHING: // Matching
+                          return (
+                            <div key={q.question_id} className='p-4 border rounded'>
+                              <div
+                                dangerouslySetInnerHTML={{ __html: q.instruction_for_matching }}
+                              />
+                              <div>
+                                <span className='font-semibold'>Answer:</span>{' '}
+                                {q.correct_answer_for_matching}
+                              </div>
+                              <div className='mt-2 text-sm text-gray-500'>
+                                Explanation: {q.explanation}
+                              </div>
+                            </div>
+                          );
+                        case QuestionTypeEnumIndex.DRAG_AND_DROP: // Drag & Drop
+                          return (
+                            <div key={q.question_id} className='p-4 border rounded'>
+                              <div>
+                                <span className='font-semibold'>Zone {q.zone_index}:</span>{' '}
+                                {q.drag_item_id}
+                              </div>
+                              <div className='mt-2 text-sm text-gray-500'>
+                                Explanation: {q.explanation}
+                              </div>
+                            </div>
+                          );
+                        default:
+                          return (
+                            <div key={q.question_id} className='p-4 border rounded'>
+                              Unknown question type
+                            </div>
+                          );
+                      }
+                    })}
+                  </div>
+                ) : (
+                  <div className='text-muted-foreground italic'>No questions in this group.</div>
+                )}
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

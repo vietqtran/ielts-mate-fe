@@ -6,7 +6,7 @@ import { Edit3, Eye, Plus, Settings, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/usePassage';
-import { QuestionType } from '@/types/reading.types';
+import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import { useEffect, useState } from 'react';
 import { QuestionGroupForm } from './QuestionGroupForm';
 import { DragDropManager } from './questions/DragDropManager';
@@ -28,7 +28,7 @@ export interface LocalQuestionGroup {
   section_order: number;
   section_label: string;
   instruction: string;
-  question_type: QuestionType;
+  question_type: number; // QuestionTypeEnumIndex
   questions: any[];
   drag_items?: DragItem[]; // Changed from string[] to DragItem[]
 }
@@ -44,7 +44,7 @@ interface QuestionGroupsManagerProps {
 
 const IELTS_QUESTION_TYPES = [
   {
-    type: QuestionType.MULTIPLE_CHOICE,
+    type: QuestionTypeEnumIndex.MULTIPLE_CHOICE,
     label: 'Multiple Choice',
     description: 'Choose the correct answer from multiple options',
     icon: '●',
@@ -53,7 +53,7 @@ const IELTS_QUESTION_TYPES = [
     tips: 'Use for testing specific information, opinions, or main ideas. Provide 3-4 plausible options.',
   },
   {
-    type: QuestionType.FILL_IN_THE_BLANKS,
+    type: QuestionTypeEnumIndex.FILL_IN_THE_BLANKS,
     label: 'Fill in the Blanks',
     description: 'Complete sentences with missing words from the passage',
     icon: '___',
@@ -62,7 +62,7 @@ const IELTS_QUESTION_TYPES = [
     tips: 'Test factual information, dates, names, or key terms. Blanks should follow passage order.',
   },
   {
-    type: QuestionType.MATCHING,
+    type: QuestionTypeEnumIndex.MATCHING,
     label: 'Matching',
     description: 'Match items to categories, headings, or passage sections',
     icon: '⟷',
@@ -71,7 +71,7 @@ const IELTS_QUESTION_TYPES = [
     tips: 'Divide passage into clear sections (A, B, C, etc.). Use for testing understanding of main ideas.',
   },
   {
-    type: QuestionType.DRAG_AND_DROP,
+    type: QuestionTypeEnumIndex.DRAG_AND_DROP,
     label: 'Drag & Drop',
     description: 'Drag items to correct positions in diagrams or text',
     icon: '🔄',
@@ -183,13 +183,13 @@ export function QuestionGroupsManager({
     };
 
     switch (group.question_type) {
-      case QuestionType.MULTIPLE_CHOICE:
+      case QuestionTypeEnumIndex.MULTIPLE_CHOICE:
         return <MultipleChoiceManager {...commonProps} onUpdateGroup={commonProps.onUpdateGroup} />;
-      case QuestionType.FILL_IN_THE_BLANKS:
+      case QuestionTypeEnumIndex.FILL_IN_THE_BLANKS:
         return <FillInBlanksManager {...commonProps} onUpdateGroup={commonProps.onUpdateGroup} />;
-      case QuestionType.MATCHING:
+      case QuestionTypeEnumIndex.MATCHING:
         return <MatchingManager {...commonProps} onUpdateGroup={commonProps.onUpdateGroup} />;
-      case QuestionType.DRAG_AND_DROP:
+      case QuestionTypeEnumIndex.DRAG_AND_DROP:
         return <DragDropManager {...commonProps} onUpdateGroup={commonProps.onUpdateGroup} />;
       default:
         return (
@@ -200,7 +200,7 @@ export function QuestionGroupsManager({
     }
   };
 
-  const getQuestionTypeInfo = (type: QuestionType) => {
+  const getQuestionTypeInfo = (type: number) => {
     return IELTS_QUESTION_TYPES.find((qt) => qt.type === type);
   };
 

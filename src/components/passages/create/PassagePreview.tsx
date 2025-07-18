@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { IeltsType, PassageStatus, QuestionType } from '@/types/reading.types';
+import { IeltsType, PassageStatus, QuestionTypeEnumIndex } from '@/types/reading.types';
 import { BookOpen, CheckCircle, Clock, Users } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
@@ -22,7 +22,7 @@ interface QuestionGroup {
   section_order: number;
   section_label: string;
   instruction: string;
-  question_type: QuestionType;
+  question_type: number;
   questions: any[];
   drag_items?: string[];
 }
@@ -61,15 +61,15 @@ const getStatusLabel = (status: PassageStatus): string => {
   }
 };
 
-const getQuestionTypeLabel = (type: QuestionType): string => {
+const getQuestionTypeLabel = (type: number): string => {
   switch (type) {
-    case QuestionType.MULTIPLE_CHOICE:
+    case QuestionTypeEnumIndex.MULTIPLE_CHOICE:
       return 'Multiple Choice';
-    case QuestionType.FILL_IN_THE_BLANKS:
+    case QuestionTypeEnumIndex.FILL_IN_THE_BLANKS:
       return 'Fill in the Blanks';
-    case QuestionType.MATCHING:
+    case QuestionTypeEnumIndex.MATCHING:
       return 'Matching';
-    case QuestionType.DRAG_AND_DROP:
+    case QuestionTypeEnumIndex.DRAG_AND_DROP:
       return 'Drag & Drop';
     default:
       return 'Unknown';
@@ -175,7 +175,7 @@ export function PassagePreview({
                     <div>
                       <h4 className='font-semibold'>{group.section_label}</h4>
                       <Badge variant='secondary' className='mt-1'>
-                        {getQuestionTypeLabel(group.question_type)}
+                        {getQuestionTypeLabel(Number(group.question_type))}
                       </Badge>
                     </div>
                     <span className='text-sm text-muted-foreground'>
@@ -188,7 +188,7 @@ export function PassagePreview({
                   />
                 </CardHeader>
                 <CardContent className='space-y-4'>
-                  {group.question_type === QuestionType.MULTIPLE_CHOICE && (
+                  {Number(group.question_type) === QuestionTypeEnumIndex.MULTIPLE_CHOICE && (
                     <div className='space-y-4'>
                       {group.questions.map((question, qIndex) => (
                         <div key={qIndex} className='space-y-2'>
@@ -214,7 +214,7 @@ export function PassagePreview({
                     </div>
                   )}
 
-                  {group.question_type === QuestionType.FILL_IN_THE_BLANKS && (
+                  {Number(group.question_type) === QuestionTypeEnumIndex.FILL_IN_THE_BLANKS && (
                     <div className='space-y-4'>
                       {group.questions.map((question, qIndex) => (
                         <div key={qIndex} className='space-y-2'>
@@ -227,7 +227,7 @@ export function PassagePreview({
                     </div>
                   )}
 
-                  {group.question_type === QuestionType.MATCHING && (
+                  {Number(group.question_type) === QuestionTypeEnumIndex.MATCHING && (
                     <div className='space-y-4'>
                       {group.questions.map((question, qIndex) => (
                         <div key={qIndex} className='space-y-2'>
@@ -247,7 +247,7 @@ export function PassagePreview({
                     </div>
                   )}
 
-                  {group.question_type === QuestionType.DRAG_AND_DROP && (
+                  {Number(group.question_type) === QuestionTypeEnumIndex.DRAG_AND_DROP && (
                     <div className='space-y-4'>
                       {group.drag_items && group.drag_items.length > 0 && (
                         <div>
@@ -299,24 +299,28 @@ export function PassagePreview({
             <div>
               <h4 className='font-semibold mb-3'>Question Type Distribution</h4>
               <div className='space-y-2'>
-                {Object.values(QuestionType).map((type) => {
-                  const count = questionGroups.filter((g) => g.question_type === type).length;
-                  const questionCount = questionGroups
-                    .filter((g) => g.question_type === type)
-                    .reduce((sum, g) => sum + g.questions.length, 0);
+                {Object.values(QuestionTypeEnumIndex)
+                  .filter((v) => typeof v === 'number')
+                  .map((type) => {
+                    const count = questionGroups.filter(
+                      (g) => Number(g.question_type) === type
+                    ).length;
+                    const questionCount = questionGroups
+                      .filter((g) => Number(g.question_type) === type)
+                      .reduce((sum, g) => sum + g.questions.length, 0);
 
-                  if (count === 0) return null;
+                    if (count === 0) return null;
 
-                  return (
-                    <div key={type} className='flex justify-between text-sm'>
-                      <span>{getQuestionTypeLabel(type)}</span>
-                      <span className='text-muted-foreground'>
-                        {count} group{count !== 1 ? 's' : ''}, {questionCount} question
-                        {questionCount !== 1 ? 's' : ''}
-                      </span>
-                    </div>
-                  );
-                })}
+                    return (
+                      <div key={type} className='flex justify-between text-sm'>
+                        <span>{getQuestionTypeLabel(Number(type))}</span>
+                        <span className='text-muted-foreground'>
+                          {count} group{count !== 1 ? 's' : ''}, {questionCount} question
+                          {questionCount !== 1 ? 's' : ''}
+                        </span>
+                      </div>
+                    );
+                  })}
               </div>
             </div>
 

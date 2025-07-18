@@ -10,7 +10,7 @@ import {
   IeltsType,
   PassageStatus,
   QuestionCreationRequest,
-  QuestionType,
+  QuestionTypeEnumIndex,
 } from '@/types/reading.types';
 import { ArrowLeft, Eye, Save } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
@@ -124,14 +124,14 @@ export default function EditPassagePage() {
             instruction: group.instruction,
             question_type:
               group.questions[0]?.question_type === 0
-                ? QuestionType.MULTIPLE_CHOICE
+                ? QuestionTypeEnumIndex.MULTIPLE_CHOICE
                 : group.questions[0]?.question_type === 1
-                  ? QuestionType.FILL_IN_THE_BLANKS
+                  ? QuestionTypeEnumIndex.FILL_IN_THE_BLANKS
                   : group.questions[0]?.question_type === 2
-                    ? QuestionType.MATCHING
+                    ? QuestionTypeEnumIndex.MATCHING
                     : group.questions[0]?.question_type === 3
-                      ? QuestionType.DRAG_AND_DROP
-                      : QuestionType.MULTIPLE_CHOICE,
+                      ? QuestionTypeEnumIndex.DRAG_AND_DROP
+                      : QuestionTypeEnumIndex.MULTIPLE_CHOICE,
             questions: group.questions ?? [],
             drag_items: group.drag_items ?? [],
           }));
@@ -231,7 +231,7 @@ export default function EditPassagePage() {
     try {
       const questions: QuestionCreationRequest[] = group.questions.map((q) => ({
         ...q,
-        question_type: Object.values(QuestionType).indexOf(group.question_type),
+        question_type: group.question_type,
         question_group_id: group.id, // Will be set by backend
       }));
 
@@ -302,7 +302,7 @@ export default function EditPassagePage() {
             explanation: q.explanation,
             number_of_correct_answers: q.number_of_correct_answers,
             instruction_for_choice: q.instruction_for_choice,
-            question_type: Object.values(QuestionType).indexOf(group.question_type),
+            question_type: group.question_type,
             question_group_id: '', // Will be set by backend
             question_categories: [],
             choices: q.choices?.map(
