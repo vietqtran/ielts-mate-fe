@@ -79,6 +79,9 @@ export function DragDropManager({
     drag_items: group.drag_items || [],
   });
 
+  // Add a dummy state to force re-render
+  const [formClosedKey, setFormClosedKey] = useState(0);
+
   // Stable callback for updating parent
   const updateParentGroup = useCallback(
     (updatedGroup: QuestionGroup) => {
@@ -102,13 +105,9 @@ export function DragDropManager({
   // Function to fetch all drag items for a group
   const fetchAllDragItems = async (groupId: string) => {
     if (!groupId) return;
-
-    // Don't fetch if we already have drag items to avoid unnecessary API calls
-    if (localDragItems.length > 0) return;
-
     try {
-      const response = await getAllDragItemsByGroup(groupId);
-      if (response?.data?.items && response.data.items.length > 0) {
+      const response = await getAllDragItemsByGroup(groupId, isListening);
+      if (response?.data?.items) {
         const fetchedItems = response.data.items.map((item) => ({
           id: item.item_id,
           drag_item_id: item.item_id,
@@ -116,7 +115,6 @@ export function DragDropManager({
           content: item.item_content,
           item_content: item.item_content,
         }));
-
         setLocalDragItems(fetchedItems);
       }
     } catch (error) {
@@ -222,32 +220,13 @@ export function DragDropManager({
 
   // Handle drag item creation/update success
   const handleDragItemSuccess = (dragItem: { item_id: string; content: string }) => {
-    // Don't mark as user changes since this is handled by individual API calls
-    // hasUserChanges.current = true; // Mark that user has made changes
-
-    if (editingDragItem) {
-      // Update existing item
-      setLocalDragItems((prev) =>
-        prev.map((item) =>
-          item.item_id === editingDragItem.item_id ? { ...item, content: dragItem.content } : item
-        )
-      );
-      setEditingDragItem(null);
-    } else {
-      // Add new item
-      setLocalDragItems((prev) => [
-        ...prev,
-        {
-          item_id: dragItem.item_id,
-          drag_item_id: dragItem.item_id,
-          id: dragItem.item_id,
-          content: dragItem.content,
-          item_content: dragItem.content,
-        },
-      ]);
-    }
-
     setFormMode('viewing');
+    setEditingDragItem(null);
+    setFormClosedKey((k) => k + 1); // force re-render
+    // Fetch the latest drag items from backend after create/edit
+    if (group.id && typeof group.id === 'string') {
+      setTimeout(() => fetchAllDragItems(group.id as string), 0);
+    }
   };
 
   // Handle question creation/update success
@@ -423,12 +402,14 @@ export function DragDropManager({
   if (formMode === 'creating_drag_item' || formMode === 'editing_drag_item') {
     return (
       <DragItemForm
+        key={formClosedKey}
         groupId={group.id || ''}
         onSuccess={handleDragItemSuccess}
         onCancel={cancelForm}
         initialData={editingDragItem ? { content: editingDragItem.content } : undefined}
         isEditing={formMode === 'editing_drag_item'}
         itemId={editingDragItem?.item_id}
+        isListening={isListening}
       />
     );
   }

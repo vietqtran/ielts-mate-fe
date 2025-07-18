@@ -61,7 +61,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link href='/'>
+                  <Link href='/creator'>
                     <LayoutDashboard className='h-4 w-4' />
                     <span>Dashboard</span>
                   </Link>

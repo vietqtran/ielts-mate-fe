@@ -32,6 +32,7 @@ interface DragItemFormProps {
   initialData?: { content: string };
   isEditing?: boolean;
   itemId?: string;
+  isListening?: boolean;
 }
 
 export function DragItemForm({
@@ -41,6 +42,7 @@ export function DragItemForm({
   initialData,
   isEditing = false,
   itemId,
+  isListening = false,
 }: Readonly<DragItemFormProps>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { createDragItem, updateDragItem, isLoading } = useQuestion();
@@ -61,9 +63,15 @@ export function DragItemForm({
 
       if (isEditing && itemId) {
         // Update existing item
-        const result = await updateDragItem(groupId, itemId, { content: data.content });
+        const result = await updateDragItem(
+          groupId,
+          itemId,
+          { content: data.content },
+          isListening
+        );
         if (result?.data) {
           toast.success('Drag item updated successfully');
+          form.reset();
           onSuccess({
             item_id: itemId,
             content: data.content,
@@ -71,12 +79,23 @@ export function DragItemForm({
         }
       } else {
         // Create new item
-        const result = await createDragItem(groupId, { content: data.content });
-        if (result?.data && Array.isArray(result.data) && result.data.length > 0) {
+        const result = await createDragItem(groupId, { content: data.content }, isListening);
+        if (result?.data) {
+          // Support both listening (object) and reading (array) response
+          let dragItemId: string = '';
+          let content: string = '';
+          if (Array.isArray(result.data) && result.data.length > 0) {
+            dragItemId = result.data[0]?.item_id || '';
+            content = result.data[0]?.content || '';
+          } else if (typeof result.data === 'object' && result.data !== null) {
+            dragItemId = (result.data as any).drag_item_id || '';
+            content = (result.data as any).content || '';
+          }
           toast.success('Drag item created successfully');
+          form.reset();
           onSuccess({
-            item_id: result.data[0].item_id,
-            content: data.content,
+            item_id: dragItemId,
+            content: content,
           });
         }
       }
