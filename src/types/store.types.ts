@@ -1,3 +1,5 @@
+import { ListeningAttemptState } from '@/store/slices/listening-attempt-filter-slice';
+import { ListeningTasksStates } from '@/store/slices/listening-filter-slice';
 import { PassageState } from '@/store/slices/passage-slice';
 import { ReadingAttemptState } from '@/store/slices/reading-attempt-filter-slice';
 import { UserPassageState } from '@/store/slices/reading-filter-slices';
@@ -9,7 +11,9 @@ export interface RootState {
   authForm: AuthFormState;
   passage: PassageState;
   userPassage: UserPassageState;
+  listeningTasks: ListeningTasksStates;
   readingAttempt: ReadingAttemptState;
+  listeningAttempt: ListeningAttemptState;
 }
 
 export interface AuthState {

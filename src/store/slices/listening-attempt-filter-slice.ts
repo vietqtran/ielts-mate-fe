@@ -1,14 +1,14 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-export interface ReadingAttemptFilters {
+export interface ListeningAttemptFilters {
   title?: string;
   ieltsType?: number[];
   partNumber?: number[];
   status?: number[];
 }
 
-export interface ReadingAttemptState {
-  filters: ReadingAttemptFilters;
+export interface ListeningAttemptState {
+  filters: ListeningAttemptFilters;
   currentPage: number;
   sortBy: string;
   sortDirection: 'asc' | 'desc';
@@ -22,7 +22,7 @@ export interface ReadingAttemptState {
   };
 }
 
-const initialState: ReadingAttemptState = {
+const initialState: ListeningAttemptState = {
   filters: {},
   currentPage: 1,
   sortBy: 'createdAt',
@@ -37,29 +37,29 @@ const initialState: ReadingAttemptState = {
   },
 };
 
-const readingAttemptSlice = createSlice({
-  name: 'readingAttempt',
+const listeningAttemptSlice = createSlice({
+  name: 'listeningAttempt',
   initialState,
   reducers: {
-    setReadingAttemptFilters: (state, action: PayloadAction<ReadingAttemptFilters>) => {
+    setListeningAttemptFilters: (state, action: PayloadAction<ListeningAttemptFilters>) => {
       state.filters = action.payload;
     },
-    clearReadingAttemptFilters: (state) => {
+    clearListeningAttemptFilters: (state) => {
       state.filters = {};
     },
-    setReadingAttemptCurrentPage: (state, action: PayloadAction<number>) => {
+    setListeningAttemptCurrentPage: (state, action: PayloadAction<number>) => {
       state.currentPage = action.payload;
     },
-    setReadingAttemptSortBy: (state, action: PayloadAction<string>) => {
+    setListeningAttemptSortBy: (state, action: PayloadAction<string>) => {
       state.sortBy = action.payload;
     },
-    setReadingAttemptSortDirection: (state, action: PayloadAction<'asc' | 'desc'>) => {
+    setListeningAttemptSortDirection: (state, action: PayloadAction<'asc' | 'desc'>) => {
       state.sortDirection = action.payload;
     },
-    setReadingAttemptLoading: (state, action: PayloadAction<boolean>) => {
+    setListeningAttemptLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-    setReadingAttemptPagination: (
+    setListeningAttemptPagination: (
       state,
       action: PayloadAction<{
         totalPages: number;
@@ -75,13 +75,13 @@ const readingAttemptSlice = createSlice({
 });
 
 export const {
-  setReadingAttemptFilters,
-  clearReadingAttemptFilters,
-  setReadingAttemptCurrentPage,
-  setReadingAttemptSortBy,
-  setReadingAttemptSortDirection,
-  setReadingAttemptLoading,
-  setReadingAttemptPagination,
-} = readingAttemptSlice.actions;
+  setListeningAttemptFilters,
+  clearListeningAttemptFilters,
+  setListeningAttemptCurrentPage,
+  setListeningAttemptSortBy,
+  setListeningAttemptSortDirection,
+  setListeningAttemptLoading,
+  setListeningAttemptPagination,
+} = listeningAttemptSlice.actions;
 
-export default readingAttemptSlice.reducer;
+export default listeningAttemptSlice.reducer;

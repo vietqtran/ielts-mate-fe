@@ -1,13 +1,10 @@
 'use client';
-
-import ReadingPractice from '@/components/features/user/reading/practice/ReadingPractice';
-
 const ReadingPracticePage = ({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) => {
-  return <ReadingPractice />;
+  const searchParams = new URLSearchParams();
 };
 
 export default ReadingPracticePage;

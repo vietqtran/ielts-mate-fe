@@ -1,6 +1,6 @@
 'use client';
 
-import { HandleAnswerChangeParams } from '@/app/(root)/(user)/reading/[id]/practice/page';
+import { HandleAnswerChangeParams } from '@/components/features/user/reading/practice/ReadingPractice';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -34,7 +34,7 @@ interface MatchingQuestionProps {
   answers: Record<
     string,
     {
-      answer_id: string;
+      answer_id: string | string[];
       questionType: QuestionTypeEnumIndex;
       questionOrder: number;
       content: string;
@@ -43,8 +43,17 @@ interface MatchingQuestionProps {
 }
 
 const MatchingQuestion = ({ questionGroup, onAnswerChange, answers }: MatchingQuestionProps) => {
-  const [selectedAnswers, setSelectedAnswers] =
-    useState<Record<string, (typeof answers)[string]>>(answers);
+  const [selectedAnswers, setSelectedAnswers] = useState<Record<string, (typeof answers)[string]>>(
+    Object.fromEntries(
+      Object.entries(answers).map(([key, value]) => [
+        key,
+        {
+          ...value,
+          answer_id: Array.isArray(value.answer_id) ? value.answer_id.join(', ') : value.answer_id,
+        },
+      ])
+    )
+  );
 
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 

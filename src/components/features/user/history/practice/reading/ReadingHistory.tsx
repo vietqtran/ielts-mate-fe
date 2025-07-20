@@ -23,7 +23,6 @@ import {
   setReadingAttemptSortDirection,
 } from '@/store/slices/reading-attempt-filter-slice';
 import { AttemptStatusEnumIndex, ReadingAttemptHistoryResponse } from '@/types/attempt.types';
-import { IeltsTypeEnumIndex, PartNumberEnumIndex } from '@/types/reading.types';
 import { RootState } from '@/types/store.types';
 import { BookOpen, Calendar, CheckCircle, Clock, Eye, PlayCircle, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -45,6 +44,8 @@ const ReadingHistory = () => {
   const reduxIsLoading = useSelector((state: RootState) => state.readingAttempt.isLoading);
   const pagination = useSelector((state: RootState) => state.readingAttempt.pagination);
 
+  console.log('reduxIsLoading', reduxIsLoading);
+
   // Load attempts when dependencies change
   useEffect(() => {
     const loadAttempts = async () => {
@@ -53,9 +54,9 @@ const ReadingHistory = () => {
         const response = await getAllReadingAttemptHistory({
           page: currentPage,
           size: pagination?.pageSize || 12,
-          ieltsTypeList: filters.ieltsTypeList,
-          partNumberList: filters.partNumberList,
-          statusList: filters.statusList,
+          ieltsType: filters.ieltsType,
+          partNumber: filters.partNumber,
+          status: filters.status,
           title: filters.title,
           sortBy,
           sortDirection,
@@ -86,9 +87,9 @@ const ReadingHistory = () => {
 
     loadAttempts();
   }, [
-    filters.ieltsTypeList,
-    filters.partNumberList,
-    filters.statusList,
+    filters.ieltsType,
+    filters.partNumber,
+    filters.status,
     filters.title,
     sortBy,
     sortDirection,
@@ -103,9 +104,9 @@ const ReadingHistory = () => {
         const response = await getAllReadingAttemptHistory({
           page: currentPage,
           size: pagination?.pageSize || 12,
-          ieltsTypeList: filters.ieltsTypeList,
-          partNumberList: filters.partNumberList,
-          statusList: filters.statusList,
+          ieltsType: filters.ieltsType,
+          partNumber: filters.partNumber,
+          status: filters.status,
           title: filters.title,
           sortBy,
           sortDirection,
@@ -136,30 +137,6 @@ const ReadingHistory = () => {
 
     loadAttempts();
   }, [currentPage]);
-
-  const getIeltsTypeLabel = (type: number): string => {
-    switch (type) {
-      case IeltsTypeEnumIndex.ACADEMIC:
-        return 'Academic';
-      case IeltsTypeEnumIndex.GENERAL_TRAINING:
-        return 'General Training';
-      default:
-        return 'Unknown';
-    }
-  };
-
-  const getPartNumberLabel = (partNumber: number): string => {
-    switch (partNumber) {
-      case PartNumberEnumIndex.PART_1:
-        return 'Part 1';
-      case PartNumberEnumIndex.PART_2:
-        return 'Part 2';
-      case PartNumberEnumIndex.PART_3:
-        return 'Part 3';
-      default:
-        return `Part ${partNumber + 1}`;
-    }
-  };
 
   const getStatusLabel = (status: number | null): string => {
     if (status === null) return 'Unknown';

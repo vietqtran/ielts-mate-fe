@@ -1,6 +1,6 @@
 'use client';
 
-import { HandleAnswerChangeParams } from '@/app/(root)/(user)/reading/[id]/practice/page';
+import { HandleAnswerChangeParams } from '@/components/features/user/reading/practice/ReadingPractice';
 import { QuestionGroup as AttemptQuestionGroup } from '@/types/attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import DragDropQuestion from './DragDropQuestion';
@@ -14,7 +14,7 @@ interface QuestionRendererProps {
   answers: Record<
     string,
     {
-      answer_id: string;
+      answer_id: string | string[];
       questionType: QuestionTypeEnumIndex;
       questionOrder: number;
       content: string;

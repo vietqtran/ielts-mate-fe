@@ -42,6 +42,15 @@ export default function AllExamsPage() {
   const isListeningLoading = listeningExamHook.isLoading;
   const listeningError = listeningExamHook.error;
 
+  const fetchExams = async () => {
+    try {
+      await fetchListeningExams();
+      await fetchReadingExams();
+    } catch (error) {
+      console.error('Failed to fetch exams:', error);
+    }
+  };
+
   // Fetch reading exams
   const fetchReadingExams = async () => {
     try {
@@ -137,13 +146,12 @@ export default function AllExamsPage() {
               </div>
             ) : hasError ? (
               <div className='text-center py-6'>
-                <p className='text-red-500'>Failed to load exams. Please try again later.</p>
+                <p className='text-red-500'>
+                  Failed to load exams. Please try again or contact support.
+                </p>
                 <div className='flex gap-2 justify-center mt-4'>
-                  <Button variant='outline' onClick={() => fetchReadingExams()}>
-                    Retry Reading Exams
-                  </Button>
-                  <Button variant='outline' onClick={() => fetchListeningExams()}>
-                    Retry Listening Exams
+                  <Button variant='outline' onClick={() => fetchExams()}>
+                    Retry
                   </Button>
                 </div>
               </div>

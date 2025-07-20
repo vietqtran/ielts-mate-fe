@@ -13,6 +13,8 @@ import {
   authFormReducer,
   authReducer,
   commonReducer,
+  listeningAttemptReducer,
+  listeningTasksReducer,
   passageReducer,
   readingAttemptReducer,
   userPassageReducer,
@@ -34,7 +36,9 @@ const rootReducer = combineReducers({
   authForm: authFormReducer,
   passage: passageReducer,
   userPassage: userPassageReducer,
+  listeningTasks: listeningTasksReducer,
   readingAttempt: readingAttemptReducer,
+  listeningAttempt: listeningAttemptReducer,
 });
 
 const persistedReducer = persistReducer<RootState>(persistConfig, rootReducer);

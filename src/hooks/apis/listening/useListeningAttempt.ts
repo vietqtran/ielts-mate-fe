@@ -5,13 +5,14 @@ import {
   AnswersPayload,
   AttemptData,
   DataResponse,
-  GetReadingAttemptHistoryRequest,
+  ListeningAttemptHistoryRequest,
+  ListeningAttemptHistoryResponse,
   ReadingAttemptHistoryResponse,
 } from '@/types/attempt.types';
 import { BaseResponse } from '@/types/reading.types';
 import { useRef, useState } from 'react';
 
-const useReadingAttempt = () => {
+const useListeningAttempt = () => {
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
   const [error, setError] = useState<Record<string, Error | null>>({});
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -37,7 +38,7 @@ const useReadingAttempt = () => {
 
     try {
       const { data } = await instance.post(
-        `reading/attempts/passages/${passageId}`,
+        `listening/attempts/passages/${passageId}`,
         {},
         { signal: currentController.signal, notify: false }
       );
@@ -74,7 +75,7 @@ const useReadingAttempt = () => {
     setErrorState('submitAttempt', null);
 
     try {
-      const { data } = await instance.put(`reading/attempts/submit/${attempt_id}`, {
+      const { data } = await instance.put(`listening/attempts/submit/${attempt_id}`, {
         ...payload,
       });
       return data as BaseResponse<AttemptData>;
@@ -110,7 +111,7 @@ const useReadingAttempt = () => {
     setErrorState('saveAttemptProgress', null);
 
     try {
-      const { data } = await instance.put(`reading/attempts/save/${attempt_id}`, {
+      const { data } = await instance.put(`listening/attempts/save/${attempt_id}`, {
         ...payload,
       });
       return data as BaseResponse<DataResponse>;
@@ -129,15 +130,15 @@ const useReadingAttempt = () => {
     }
   };
 
-  const getAllReadingAttemptHistory = async (params: GetReadingAttemptHistoryRequest) => {
+  const getAllListeningAttemptHistory = async (params: ListeningAttemptHistoryRequest) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
     abortControllerRef.current = new AbortController();
     const currentController = abortControllerRef.current;
 
-    setLoadingState('getAllReadingAttemptHistory', true);
-    setErrorState('getAllReadingAttemptHistory', null);
+    setLoadingState('getAllListeningAttemptHistory', true);
+    setErrorState('getAllListeningAttemptHistory', null);
 
     try {
       // Transform array parameters to comma-separated strings
@@ -148,22 +149,22 @@ const useReadingAttempt = () => {
         status: params.status?.length ? params.status.join(',') : undefined,
       };
 
-      const { data } = await instance.get(`reading/attempts`, {
+      const { data } = await instance.get(`listening/attempts`, {
         params: transformedParams,
         notify: false,
         signal: currentController.signal,
       });
-      return data as BaseResponse<ReadingAttemptHistoryResponse[]>;
+      return data as BaseResponse<ListeningAttemptHistoryResponse[]>;
     } catch (error) {
       if (abortControllerRef.current === currentController) {
         if ((error as any).name !== 'AbortError') {
-          setErrorState('getAllAttemptHistory', error as Error);
+          setErrorState('getAllListeningAttemptHistory', error as Error);
           throw error;
         }
       }
     } finally {
       if (abortControllerRef.current === currentController) {
-        setLoadingState('getAllReadingAttemptHistory', false);
+        setLoadingState('getAllListeningAttemptHistory', false);
       }
       abortControllerRef.current = null;
     }
@@ -180,7 +181,7 @@ const useReadingAttempt = () => {
     setErrorState('loadAttemptById', null);
 
     try {
-      const { data } = await instance.get(`reading/attempts/${params.attempt_id}`, {
+      const { data } = await instance.get(`listening/attempts/${params.attempt_id}`, {
         notify: false,
         signal: currentController.signal,
       });
@@ -204,11 +205,11 @@ const useReadingAttempt = () => {
     startNewAttempt,
     submitAttempt,
     saveAttemptProgress,
-    getAllReadingAttemptHistory,
+    getAllListeningAttemptHistory,
     loadAttemptById,
     isLoading,
     error,
   };
 };
 
-export default useReadingAttempt;
+export default useListeningAttempt;

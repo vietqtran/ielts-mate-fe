@@ -48,15 +48,15 @@ export function ListeningTaskFilterToolbar({
   };
 
   const handleIeltsTypeChange = (value: string) => {
-    onFilterChange({ ielts_type: value === 'all' ? undefined : value });
+    onFilterChange({ ielts_type: value === 'all' ? undefined : [value] });
   };
 
   const handlePartNumberChange = (value: string) => {
-    onFilterChange({ part_number: value === 'all' ? undefined : value });
+    onFilterChange({ part_number: value === 'all' ? undefined : [value] });
   };
 
   const handleStatusChange = (value: string) => {
-    onFilterChange({ status: value === 'all' ? undefined : value });
+    onFilterChange({ status: value === 'all' ? undefined : [value] });
   };
 
   const handleSortDirectionChange = (value: string) => {
@@ -114,7 +114,14 @@ export function ListeningTaskFilterToolbar({
       <div className='flex items-center flex-wrap gap-10'>
         <div className='flex items-center gap-1.5'>
           <Label htmlFor='ieltsType'>IELTS Type</Label>
-          <Select value={filters.ielts_type ?? 'all'} onValueChange={handleIeltsTypeChange}>
+          <Select
+            value={
+              Array.isArray(filters.ielts_type)
+                ? (filters.ielts_type[0] ?? 'all')
+                : (filters.ielts_type ?? 'all')
+            }
+            onValueChange={handleIeltsTypeChange}
+          >
             <SelectTrigger id='ieltsType'>
               <SelectValue placeholder='All Types' />
             </SelectTrigger>
@@ -130,7 +137,14 @@ export function ListeningTaskFilterToolbar({
 
         <div className='flex items-center gap-1.5'>
           <Label htmlFor='partNumber'>Part Number</Label>
-          <Select value={filters.part_number ?? 'all'} onValueChange={handlePartNumberChange}>
+          <Select
+            value={
+              Array.isArray(filters.part_number)
+                ? (filters.part_number[0] ?? 'all')
+                : (filters.part_number ?? 'all')
+            }
+            onValueChange={handlePartNumberChange}
+          >
             <SelectTrigger id='partNumber'>
               <SelectValue placeholder='All Parts' />
             </SelectTrigger>
@@ -145,7 +159,14 @@ export function ListeningTaskFilterToolbar({
 
         <div className='flex items-center gap-1.5'>
           <Label htmlFor='status'>Status</Label>
-          <Select value={filters.status ?? 'all'} onValueChange={handleStatusChange}>
+          <Select
+            value={
+              Array.isArray(filters.status)
+                ? (filters.status[0] ?? 'all')
+                : (filters.status ?? 'all')
+            }
+            onValueChange={handleStatusChange}
+          >
             <SelectTrigger id='status'>
               <SelectValue placeholder='All Statuses' />
             </SelectTrigger>

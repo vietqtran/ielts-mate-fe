@@ -1,6 +1,6 @@
 'use client';
 
-import { HandleAnswerChangeParams } from '@/app/(root)/(user)/reading/[id]/practice/page';
+import { HandleAnswerChangeParams } from '@/components/features/user/reading/practice/ReadingPractice';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DragItem } from '@/types/attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
@@ -27,7 +27,7 @@ interface DragDropQuestionProps {
   answers: Record<
     string,
     {
-      answer_id: string;
+      answer_id: string | string[];
       questionType: QuestionTypeEnumIndex;
       questionOrder: number;
       content: string;
@@ -52,7 +52,7 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
       Object.entries(answers).map(([key, value]) => [
         key,
         {
-          answer_id: value.answer_id,
+          answer_id: Array.isArray(value.answer_id) ? value.answer_id.join(', ') : value.answer_id,
           questionType: value.questionType,
           questionOrder: value.questionOrder,
           content: value.content,

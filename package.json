@@ -72,6 +72,7 @@
     "@tiptap/pm": "^2.13.0",
     "@tiptap/react": "^2.13.0",
     "@tiptap/starter-kit": "^2.13.0",
+    "@uidotdev/usehooks": "^2.4.1",
     "axios": "^1.8.3",
     "class-variance-authority": "^0.7.1",
     "cmdk": "^1.0.4",

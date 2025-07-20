@@ -14,15 +14,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ReadingAttemptFilters } from '@/store/slices/reading-attempt-filter-slice';
+import { ListeningAttemptFilters } from '@/store/slices/listening-attempt-filter-slice';
 import { AttemptStatusEnumIndex } from '@/types/attempt.types';
 import { IeltsTypeEnumIndex, PartNumberEnumIndex } from '@/types/reading.types';
 import { useDebounce } from '@uidotdev/usehooks';
 import React, { useState, useCallback, useMemo, memo, useEffect } from 'react';
 
-interface ReadingAttemptFilterToolbarProps {
-  filters: ReadingAttemptFilters;
-  onFiltersChange: (filters: ReadingAttemptFilters) => void;
+interface ListeningAttemptFilterToolbarProps {
+  filters: ListeningAttemptFilters;
+  onFiltersChange: (filters: ListeningAttemptFilters) => void;
   onClearFilters: () => void;
   sortBy: string;
   sortDirection: 'asc' | 'desc';
@@ -58,7 +58,7 @@ const sortOptions = [
   { value: 'createdAt', label: 'Created At' },
 ];
 
-export const ReadingAttemptFilterToolbar = memo(function ReadingAttemptFilterToolbar({
+export const ListeningAttemptFilterToolbar = memo(function ListeningAttemptFilterToolbar({
   filters,
   onFiltersChange,
   onClearFilters,
@@ -67,13 +67,13 @@ export const ReadingAttemptFilterToolbar = memo(function ReadingAttemptFilterToo
   onSortByChange,
   onSortDirectionChange,
   isLoading = false,
-}: Readonly<ReadingAttemptFilterToolbarProps>) {
+}: Readonly<ListeningAttemptFilterToolbarProps>) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters.title || '');
   const debouncedSearchTerm = useDebounce(searchTerm, 800);
 
   const updateFilter = useCallback(
-    (key: keyof ReadingAttemptFilters, value: any) => {
+    (key: keyof ListeningAttemptFilters, value: any) => {
       onFiltersChange({
         ...filters,
         [key]: value === '' || (Array.isArray(value) && value.length === 0) ? undefined : value,
@@ -265,4 +265,4 @@ export const ReadingAttemptFilterToolbar = memo(function ReadingAttemptFilterToo
   );
 });
 
-export default ReadingAttemptFilterToolbar;
+export default ListeningAttemptFilterToolbar;

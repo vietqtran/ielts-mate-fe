@@ -1,7 +1,8 @@
 'use client';
 
-import { HandleAnswerChangeParams } from '@/app/(root)/(user)/reading/[id]/practice/page';
+import { HandleAnswerChangeParams } from '@/components/features/user/reading/practice/ReadingPractice';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
@@ -17,6 +18,8 @@ interface Choice {
 interface Question {
   question_id: string;
   question_order: number;
+  question_type: number;
+  number_of_correct_answers: number;
   instruction_for_choice: string;
   choices: Choice[];
 }
@@ -33,7 +36,7 @@ interface MultipleChoiceQuestionProps {
   answers: Record<
     string,
     {
-      answer_id: string;
+      answer_id: string | string[]; // Support both single and multiple answers
       questionType: QuestionTypeEnumIndex;
       questionOrder: number;
       content: string;
@@ -68,6 +71,56 @@ const MultipleChoiceQuestion = ({
     } as HandleAnswerChangeParams);
   };
 
+  const handleMultipleAnswerChange = (
+    questionId: string,
+    choiceId: string,
+    isChecked: boolean,
+    questionOrder: number
+  ) => {
+    setSelectedAnswers((prev) => {
+      const currentAnswers = Array.isArray(prev[questionId]?.answer_id)
+        ? (prev[questionId].answer_id as string[])
+        : prev[questionId]?.answer_id
+          ? [prev[questionId].answer_id as string]
+          : [];
+
+      const newAnswers = isChecked
+        ? [...currentAnswers, choiceId]
+        : currentAnswers.filter((id) => id !== choiceId);
+
+      const updatedAnswer = {
+        answer_id: newAnswers,
+        questionType: QuestionTypeEnumIndex.MULTIPLE_CHOICE,
+        questionOrder,
+        content: newAnswers.join(', '), // Join multiple answers for content
+      };
+
+      return {
+        ...prev,
+        [questionId]: updatedAnswer,
+      };
+    });
+
+    // Get the updated answers for the callback
+    const currentAnswers = Array.isArray(selectedAnswers[questionId]?.answer_id)
+      ? (selectedAnswers[questionId].answer_id as string[])
+      : selectedAnswers[questionId]?.answer_id
+        ? [selectedAnswers[questionId].answer_id as string]
+        : [];
+
+    const newAnswers = isChecked
+      ? [...currentAnswers, choiceId]
+      : currentAnswers.filter((id) => id !== choiceId);
+
+    onAnswerChange({
+      questionId,
+      answer_id: newAnswers,
+      questionType: QuestionTypeEnumIndex.MULTIPLE_CHOICE,
+      questionOrder,
+      content: newAnswers.join(', '),
+    } as HandleAnswerChangeParams);
+  };
+
   return (
     <Card className='mb-6'>
       <CardHeader>
@@ -93,31 +146,92 @@ const MultipleChoiceQuestion = ({
                       __html: question.instruction_for_choice,
                     }}
                   />
-                  <RadioGroup
-                    value={selectedAnswers[question.question_id]?.answer_id || ''}
-                    onValueChange={(value) =>
-                      handleAnswerChange(question.question_id, value, question.question_order)
-                    }
-                    className='space-y-2'
-                  >
-                    {question.choices
-                      .sort((a, b) => a.choice_order - b.choice_order)
-                      .map((choice) => (
-                        <div key={choice.choice_id} className='flex items-center space-x-2'>
-                          <RadioGroupItem
-                            value={choice.choice_id}
-                            id={`${question.question_id}-${choice.choice_id}`}
-                          />
-                          <Label
-                            htmlFor={`${question.question_id}-${choice.choice_id}`}
-                            className='text-sm cursor-pointer flex-1'
-                          >
-                            <span className='font-medium mr-2'>{choice.label}.</span>
-                            {choice.content}
-                          </Label>
-                        </div>
-                      ))}
-                  </RadioGroup>
+                  {question.number_of_correct_answers > 1 ? (
+                    // Multiple choice (checkboxes)
+                    <div className='space-y-2'>
+                      {question.choices
+                        .sort((a, b) => a.choice_order - b.choice_order)
+                        .map((choice) => {
+                          const currentAnswers = Array.isArray(
+                            selectedAnswers[question.question_id]?.answer_id
+                          )
+                            ? (selectedAnswers[question.question_id].answer_id as string[])
+                            : selectedAnswers[question.question_id]?.answer_id
+                              ? [selectedAnswers[question.question_id].answer_id as string]
+                              : [];
+                          const isChecked = currentAnswers.includes(choice.choice_id);
+
+                          return (
+                            <div key={choice.choice_id} className='flex items-center space-x-2'>
+                              <Checkbox
+                                id={`${question.question_id}-${choice.choice_id}`}
+                                checked={isChecked}
+                                onCheckedChange={(checked) =>
+                                  handleMultipleAnswerChange(
+                                    question.question_id,
+                                    choice.choice_id,
+                                    checked as boolean,
+                                    question.question_order
+                                  )
+                                }
+                                disabled={
+                                  !isChecked &&
+                                  currentAnswers.length >= question.number_of_correct_answers
+                                }
+                              />
+                              <Label
+                                htmlFor={`${question.question_id}-${choice.choice_id}`}
+                                className='text-sm cursor-pointer flex-1'
+                              >
+                                <span className='font-medium mr-2'>{choice.label}.</span>
+                                {choice.content}
+                              </Label>
+                            </div>
+                          );
+                        })}
+                      <div className='text-xs text-muted-foreground mt-2'>
+                        Select {question.number_of_correct_answers} answer
+                        {question.number_of_correct_answers > 1 ? 's' : ''}
+                        {Array.isArray(selectedAnswers[question.question_id]?.answer_id) && (
+                          <span className='ml-2'>
+                            ({(selectedAnswers[question.question_id].answer_id as string[]).length}{' '}
+                            of {question.number_of_correct_answers} selected)
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ) : (
+                    // Single choice (radio buttons)
+                    <RadioGroup
+                      value={
+                        Array.isArray(selectedAnswers[question.question_id]?.answer_id)
+                          ? ''
+                          : (selectedAnswers[question.question_id]?.answer_id as string) || ''
+                      }
+                      onValueChange={(value) =>
+                        handleAnswerChange(question.question_id, value, question.question_order)
+                      }
+                      className='space-y-2'
+                    >
+                      {question.choices
+                        .sort((a, b) => a.choice_order - b.choice_order)
+                        .map((choice) => (
+                          <div key={choice.choice_id} className='flex items-center space-x-2'>
+                            <RadioGroupItem
+                              value={choice.choice_id}
+                              id={`${question.question_id}-${choice.choice_id}`}
+                            />
+                            <Label
+                              htmlFor={`${question.question_id}-${choice.choice_id}`}
+                              className='text-sm cursor-pointer flex-1'
+                            >
+                              <span className='font-medium mr-2'>{choice.label}.</span>
+                              {choice.content}
+                            </Label>
+                          </div>
+                        ))}
+                    </RadioGroup>
+                  )}
                 </div>
               </div>
             </div>

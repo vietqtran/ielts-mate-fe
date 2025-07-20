@@ -43,9 +43,9 @@ export function useListeningTask() {
         params: {
           page: params?.page,
           size: params?.size,
-          ielts_type: params?.ielts_type,
-          part_number: params?.part_number,
-          status: params?.status,
+          ielts_type: params?.ielts_type?.length ? params?.ielts_type?.join(',') : undefined,
+          part_number: params?.part_number?.length ? params?.part_number?.join(',') : undefined,
+          status: params?.status?.length ? params?.status.join(',') : undefined,
           question_category: params?.question_category,
           sort_by: params?.sort_by,
           sort_direction: params?.sort_direction,
@@ -205,7 +205,9 @@ export function useListeningTask() {
       } else {
         // Create an empty file to satisfy the @RequestPart requirement
         const emptyBlob = new Blob([], { type: 'audio/mp3' });
-        const emptyFile = new File([emptyBlob], 'empty.mp3', { type: 'audio/mp3' });
+        const emptyFile = new File([emptyBlob], 'empty.mp3', {
+          type: 'audio/mp3',
+        });
         formData.append('audio_file', emptyFile);
       }
 

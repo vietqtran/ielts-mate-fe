@@ -29,8 +29,8 @@ export function usePassage() {
   const getActivePassages = async (params?: {
     page?: number;
     size?: number;
-    ieltsType?: number;
-    partNumber?: number;
+    ieltsType?: string[];
+    partNumber?: string[];
     questionCategory?: string;
     title?: string;
     sortBy?: string;
@@ -44,8 +44,9 @@ export function usePassage() {
         params: {
           page: params?.page,
           size: params?.size,
-          ieltsType: params?.ieltsType,
-          partNumber: params?.partNumber,
+          ieltsType: params?.ieltsType?.length ? params?.ieltsType?.join(',') : undefined,
+          partNumber: params?.partNumber?.length ? params?.partNumber?.join(',') : undefined,
+          title: params?.title,
         },
       });
       return data as BaseResponse<PassageGetResponse[]>;

@@ -1,6 +1,6 @@
 'use client';
 
-import { UserPassageFilterToolbar } from '@/components/features/user/reading/UserPassageFilterToolbar';
+import { ListeningTasksFilterToolbar } from '@/components/features/user/listening/UserListeningTasksFilterToolbar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +12,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from '@/components/ui/pagination';
-import { Separator } from '@/components/ui/separator';
-import { usePassage } from '@/hooks/apis/reading/usePassage';
+import { useListeningTask } from '@/hooks';
 import {
   UserPassageFilters,
   clearUserFilters,
@@ -24,18 +23,19 @@ import {
   setUserSortBy,
   setUserSortDirection,
 } from '@/store/slices/reading-filter-slices';
-import { BaseResponse, PassageGetResponse } from '@/types/reading.types';
+import { ListeningTaskResponse } from '@/types/listening.types';
+import { BaseResponse } from '@/types/reading.types';
 import { RootState } from '@/types/store.types';
 import { BookOpen, Calendar, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-const Reading = () => {
+const Listening = () => {
   const dispatch = useDispatch();
   const router = useRouter();
-  const { getActivePassages, isLoading, error } = usePassage();
-  const [passages, setPassages] = useState<PassageGetResponse[]>([]);
+  const { getListeningTasks, isLoading, error } = useListeningTask();
+  const [listenings, setListenings] = useState<ListeningTaskResponse[]>([]);
 
   // Get state from Redux - using separate selectors to prevent unnecessary re-renders
   const filters = useSelector((state: RootState) => state.userPassage.filters);
@@ -46,23 +46,23 @@ const Reading = () => {
   const pagination = useSelector((state: RootState) => state.userPassage.pagination);
 
   // Pagination states
-  const isGridLoading = reduxIsLoading || isLoading.getActivePassages;
+  const isGridLoading = reduxIsLoading || isLoading.getListeningTasks;
 
-  // Load passages when dependencies change
   useEffect(() => {
     const loadPassages = async () => {
       try {
         dispatch(setUserLoading(true));
-        const response: BaseResponse<PassageGetResponse[]> = await getActivePassages({
+        //@ts-ignore
+        const response: BaseResponse<ListeningTaskResponse[]> = await getListeningTasks({
           page: currentPage,
           size: pagination?.pageSize || 12,
-          ieltsType: filters.ieltsType,
-          partNumber: filters.partNumber,
+          ielts_type: filters.ieltsType,
+          part_number: filters.partNumber,
           title: filters.title,
-          sortBy,
-          sortDirection,
+          sort_by: sortBy,
+          sort_direction: sortDirection,
         });
-        setPassages(response.data || []);
+        setListenings(response.data || []);
 
         // Update pagination state from response
         if (response.pagination) {
@@ -77,7 +77,7 @@ const Reading = () => {
           );
         }
       } catch (err) {
-        console.error('Failed to load passages:', err);
+        console.error('Failed to load listenings:', err);
       } finally {
         dispatch(setUserLoading(false));
       }
@@ -173,14 +173,14 @@ const Reading = () => {
     });
   };
 
-  if (error.getActivePassages) {
+  if (error.getActiveListenings) {
     return (
       <div className='container mx-auto p-6'>
         <Card className='border-red-200'>
           <CardContent className='pt-6'>
             <div className='text-center text-red-600'>
-              <p className='text-lg font-semibold'>Error loading passages</p>
-              <p className='text-sm mt-1'>{error.getActivePassages.message}</p>
+              <p className='text-lg font-semibold'>Error loading listening task</p>
+              <p className='text-sm mt-1'>{error.getActiveListenings.message}</p>
               <Button variant='outline' className='mt-4' onClick={() => window.location.reload()}>
                 Try Again
               </Button>
@@ -197,20 +197,20 @@ const Reading = () => {
         {/* Header */}
         <div className='flex items-center justify-between'>
           <div>
-            <h1 className='text-2xl font-bold tracking-tight'>Reading Passages</h1>
+            <h1 className='text-2xl font-bold tracking-tight'>Listening Tasks</h1>
             <p className='text-muted-foreground'>
-              Practice with IELTS reading passages and improve your skills
+              Practice with IELTS listening tasks and improve your skills
             </p>
           </div>
           <div className='flex items-center gap-2'>
             <Badge variant='secondary'>
-              {pagination?.totalItems || 0} passage
+              {pagination?.totalItems || 0} task
               {(pagination?.totalItems || 0) !== 1 ? 's' : ''}
             </Badge>
           </div>
         </div>
 
-        <UserPassageFilterToolbar
+        <ListeningTasksFilterToolbar
           filters={filters}
           onFiltersChange={handleFiltersChange}
           onClearFilters={handleClearFilters}
@@ -220,8 +220,7 @@ const Reading = () => {
           onSortDirectionChange={handleSortDirectionChange}
           isLoading={reduxIsLoading || isLoading.getActivePassages}
         />
-
-        {/* Passages Grid */}
+        {/* Listening Tasks Grid */}
         {isGridLoading ? (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             {Array.from({ length: 6 }).map((_, i) => (
@@ -247,16 +246,18 @@ const Reading = () => {
               </Card>
             ))}
           </div>
-        ) : passages.length === 0 ? (
+        ) : listenings.length === 0 ? (
           <Card>
             <CardContent className='pt-6'>
               <div className='text-center py-12'>
                 <BookOpen className='h-12 w-12 mx-auto text-gray-400 mb-4' />
-                <h3 className='text-lg font-semibold text-gray-900 mb-2'>No passages found</h3>
+                <h3 className='text-lg font-semibold text-gray-900 mb-2'>
+                  No listening tasks found
+                </h3>
                 <p className='text-gray-600 mb-4'>
                   {hasActiveFilters()
                     ? 'Try adjusting your search criteria or filters'
-                    : 'There are no active passages available at the moment'}
+                    : 'There are no active listening tasks available at the moment'}
                 </p>
                 {hasActiveFilters() && (
                   <Button variant='outline' onClick={clearFilters}>
@@ -268,41 +269,35 @@ const Reading = () => {
           </Card>
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {passages.map((passage) => (
-              <Card key={passage.passage_id} className='hover:shadow-md transition-shadow'>
+            {listenings.map((listening) => (
+              <Card key={listening.task_id} className='hover:shadow-md transition-shadow'>
                 <CardHeader>
                   <div className='flex items-start justify-between'>
                     <div className='flex-1'>
-                      <CardTitle className='text-lg leading-tight mb-2'>{passage.title}</CardTitle>
+                      <CardTitle className='text-lg leading-tight mb-2'>
+                        {listening.title}
+                      </CardTitle>
                       <div className='flex items-center gap-2 mb-2'>
-                        <Badge className={getIeltsTypeBadgeColor(passage.ielts_type)}>
-                          {getIeltsTypeLabel(passage.ielts_type)}
+                        <Badge className={getIeltsTypeBadgeColor(listening.ielts_type)}>
+                          {getIeltsTypeLabel(listening.ielts_type)}
                         </Badge>
-                        <Badge variant='outline'>{getPartNumberLabel(passage.part_number)}</Badge>
+                        <Badge variant='outline'>{getPartNumberLabel(listening.part_number)}</Badge>
                       </div>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className='space-y-3'>
-                    {/* Content Preview */}
-                    <div>
-                      <p className='text-sm line-clamp-3'>{passage.content}</p>
-                    </div>
-
-                    <Separator />
-
-                    {/* Metadata */}
                     <div className='flex items-center justify-between text-xs text-muted-foreground'>
                       <div className='flex items-center gap-1'>
                         <User className='h-3 w-3' />
                         <span>
-                          {passage.created_by.first_name} {passage.created_by.last_name}
+                          {listening.created_by.first_name} {listening.created_by.last_name}
                         </span>
                       </div>
                       <div className='flex items-center gap-1'>
                         <Calendar className='h-3 w-3' />
-                        <span>{new Date(passage.created_at).toLocaleDateString()}</span>
+                        <span>{new Date(listening.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
 
@@ -310,10 +305,10 @@ const Reading = () => {
                     <Button
                       className='w-full'
                       size='sm'
-                      onClick={() => router.push(`/reading/${passage.passage_id}/practice`)}
+                      onClick={() => router.push(`/listening/${listening.task_id}/practice`)}
                     >
                       <BookOpen className='h-4 w-4 mr-2' />
-                      Start Reading
+                      Start Listening
                     </Button>
                   </div>
                 </CardContent>
@@ -323,7 +318,7 @@ const Reading = () => {
         )}
 
         {/* Pagination */}
-        {!isGridLoading && passages.length > 0 && (pagination?.totalPages || 0) > 1 && (
+        {!isGridLoading && listenings.length > 0 && (pagination?.totalPages || 0) > 1 && (
           <div className='flex items-center justify-between mt-8'>
             <div className='text-sm text-muted-foreground'>
               Showing {(currentPage - 1) * (pagination?.pageSize || 12) + 1} to{' '}
@@ -383,4 +378,4 @@ const Reading = () => {
   );
 };
 
-export default Reading;
+export default Listening;

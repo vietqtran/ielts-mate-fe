@@ -1,13 +1,13 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-export interface UserPassageFilters {
+export interface ListeningTasksFilters {
   title?: string;
-  ieltsType?: string[];
-  partNumber?: string[];
+  ieltsType?: number[];
+  partNumber?: number[];
 }
 
-export interface UserPassageState {
-  filters: UserPassageFilters;
+export interface ListeningTasksStates {
+  filters: ListeningTasksFilters;
   currentPage: number;
   sortBy: string;
   sortDirection: 'asc' | 'desc';
@@ -21,7 +21,7 @@ export interface UserPassageState {
   };
 }
 
-const initialState: UserPassageState = {
+const initialState: ListeningTasksStates = {
   filters: {},
   currentPage: 1,
   sortBy: 'createdAt',
@@ -36,11 +36,11 @@ const initialState: UserPassageState = {
   },
 };
 
-const userPassageSlice = createSlice({
-  name: 'userPassage',
+const listeningTasksSlice = createSlice({
+  name: 'listeningTasks',
   initialState,
   reducers: {
-    setUserFilters: (state, action: PayloadAction<UserPassageFilters>) => {
+    setFilters: (state, action: PayloadAction<ListeningTasksFilters>) => {
       // Migrate old single values to arrays
       const migratedFilters = { ...action.payload };
       if (migratedFilters.ieltsType !== undefined && !Array.isArray(migratedFilters.ieltsType)) {
@@ -51,9 +51,9 @@ const userPassageSlice = createSlice({
       }
       state.filters = migratedFilters;
     },
-    updateUserFilter: (
+    updateFilter: (
       state,
-      action: PayloadAction<{ key: keyof UserPassageFilters; value: any }>
+      action: PayloadAction<{ key: keyof ListeningTasksFilters; value: any }>
     ) => {
       const { key, value } = action.payload;
       if (value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
@@ -62,30 +62,27 @@ const userPassageSlice = createSlice({
         state.filters[key] = value;
       }
     },
-    clearUserFilters: (state) => {
+    clearFilters: (state) => {
       state.filters = {};
       state.currentPage = 1;
     },
-    setUserCurrentPage: (state, action: PayloadAction<number>) => {
+    setCurrentPage: (state, action: PayloadAction<number>) => {
       state.currentPage = action.payload;
     },
-    setUserSort: (
-      state,
-      action: PayloadAction<{ sortBy: string; sortDirection: 'asc' | 'desc' }>
-    ) => {
+    setSort: (state, action: PayloadAction<{ sortBy: string; sortDirection: 'asc' | 'desc' }>) => {
       state.sortBy = action.payload.sortBy;
       state.sortDirection = action.payload.sortDirection;
     },
-    setUserSortBy: (state, action: PayloadAction<string>) => {
+    setSortBy: (state, action: PayloadAction<string>) => {
       state.sortBy = action.payload;
     },
-    setUserSortDirection: (state, action: PayloadAction<'asc' | 'desc'>) => {
+    setSortDirection: (state, action: PayloadAction<'asc' | 'desc'>) => {
       state.sortDirection = action.payload;
     },
-    setUserLoading: (state, action: PayloadAction<boolean>) => {
+    setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-    setUserPagination: (
+    setPagination: (
       state,
       action: PayloadAction<{
         totalPages: number;
@@ -97,7 +94,7 @@ const userPassageSlice = createSlice({
     ) => {
       state.pagination = action.payload;
     },
-    clearUserPassageState: (state) => {
+    clearState: (state) => {
       state.filters = {};
       state.currentPage = 1;
       state.sortBy = 'createdAt';
@@ -115,16 +112,16 @@ const userPassageSlice = createSlice({
 });
 
 export const {
-  setUserFilters,
-  updateUserFilter,
-  clearUserFilters,
-  setUserCurrentPage,
-  setUserSort,
-  setUserSortBy,
-  setUserSortDirection,
-  setUserLoading,
-  setUserPagination,
-  clearUserPassageState,
-} = userPassageSlice.actions;
+  setFilters,
+  updateFilter,
+  clearFilters,
+  setCurrentPage,
+  setSort,
+  setSortBy,
+  setSortDirection,
+  setLoading,
+  setPagination,
+  clearState,
+} = listeningTasksSlice.actions;
 
-export default userPassageSlice.reducer;
+export default listeningTasksSlice.reducer;

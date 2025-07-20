@@ -1,6 +1,6 @@
 'use client';
 
-import { HandleAnswerChangeParams } from '@/app/(root)/(user)/reading/[id]/practice/page';
+import { HandleAnswerChangeParams } from '@/components/features/user/reading/practice/ReadingPractice';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -26,7 +26,7 @@ interface FillInBlankQuestionProps {
   answers: Record<
     string,
     {
-      answer_id: string;
+      answer_id: string | string[];
       questionType: QuestionTypeEnumIndex;
       questionOrder: number;
       content: string;
@@ -39,7 +39,17 @@ const FillInBlankQuestion = ({
   onAnswerChange,
   answers,
 }: FillInBlankQuestionProps) => {
-  const [userAnswers, setUserAnswers] = useState<Record<string, (typeof answers)[string]>>(answers);
+  const [userAnswers, setUserAnswers] = useState<Record<string, (typeof answers)[string]>>(
+    Object.fromEntries(
+      Object.entries(answers).map(([key, value]) => [
+        key,
+        {
+          ...value,
+          answer_id: Array.isArray(value.answer_id) ? value.answer_id.join(', ') : value.answer_id,
+        },
+      ])
+    )
+  );
 
   const handleAnswerChange = (questionId: string, value: string, questionOrder: number) => {
     setUserAnswers((prev) => ({

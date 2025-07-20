@@ -58,9 +58,9 @@ export interface ListeningTaskUpdateRequest {
 export interface ListeningTaskFilterParams {
   page?: number;
   size?: number;
-  ielts_type?: string;
-  part_number?: string;
-  status?: string;
+  ielts_type?: string[];
+  part_number?: string[];
+  status?: string[];
   question_category?: string;
   sort_by?: string;
   sort_direction?: string;

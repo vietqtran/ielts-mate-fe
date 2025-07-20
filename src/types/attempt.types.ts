@@ -100,9 +100,9 @@ export interface ReadingAttemptHistoryResponse {
 export interface GetReadingAttemptHistoryRequest {
   page: number;
   size: number;
-  ieltsTypeList?: number[]; // Optional
-  statusList?: number[];
-  partNumberList?: number[];
+  ieltsType?: number[]; // Optional
+  status?: number[];
+  partNumber?: number[];
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
   title?: string;
@@ -125,9 +125,9 @@ export interface ListeningAttemptHistoryResponse {
 export interface ListeningAttemptHistoryRequest {
   page: number;
   size: number;
-  ieltsTypeList?: number[];
-  statusList?: number[];
-  partNumberList?: number[];
+  ieltsType?: number[]; // Optional
+  status?: number[];
+  partNumber?: number[];
   sortBy?: string;
   sortDirection?: 'asc' | 'desc';
   title?: string;

@@ -36,8 +36,6 @@ export default function ReadingExamDetailsPage() {
   }, [examId]);
 
   const handleStartExam = () => {
-    // In a real implementation, this would navigate to the exam attempt page
-    // router.push(`/reading-exams/${examId}/attempt`);
     toast.info('Starting exam...');
   };
 
