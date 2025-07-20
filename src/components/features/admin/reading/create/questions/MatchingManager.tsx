@@ -13,7 +13,7 @@ interface QuestionGroup {
   section_order: number;
   section_label: string;
   instruction: string;
-  question_type: string;
+  question_type: number; // QuestionTypeEnumIndex
   questions: any[];
 }
 

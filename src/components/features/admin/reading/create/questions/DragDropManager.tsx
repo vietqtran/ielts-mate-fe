@@ -36,7 +36,7 @@ interface QuestionGroup {
   section_order: number;
   section_label: string;
   instruction: string;
-  question_type: string;
+  question_type: number; // QuestionTypeEnumIndex
   questions: Question[];
   drag_items?: DragItem[];
 }
@@ -107,18 +107,27 @@ export function DragDropManager({
     if (!groupId) return;
     try {
       const response = await getAllDragItemsByGroup(groupId, isListening);
-      if (response?.data?.items) {
-        const fetchedItems = response.data.items.map((item) => ({
-          id: item.item_id,
-          drag_item_id: item.item_id,
-          item_id: item.item_id,
-          content: item.item_content,
-          item_content: item.item_content,
+      let items: any[] = [];
+      if (Array.isArray(response?.data)) {
+        items = response.data;
+      } else if (response?.data?.items && Array.isArray(response.data.items)) {
+        items = response.data.items;
+      }
+      if (items.length > 0) {
+        const fetchedItems = items.map((item) => ({
+          id: item.item_id || item.drag_item_id || item.id,
+          drag_item_id: item.drag_item_id || item.item_id || item.id,
+          item_id: item.item_id || item.drag_item_id || item.id,
+          content: item.content || item.item_content || '',
+          item_content: item.content || item.item_content || '',
         }));
         setLocalDragItems(fetchedItems);
+      } else {
+        setLocalDragItems([]);
       }
     } catch (error) {
       console.error('Failed to fetch drag items:', error);
+      setLocalDragItems([]);
     }
   };
 
@@ -441,6 +450,7 @@ export function DragDropManager({
         }
         isEditing={formMode === 'editing_question'}
         questionId={editingQuestion?.id || editingQuestion?.question_id}
+        isListening={isListening}
       />
     );
   }
@@ -476,17 +486,17 @@ export function DragDropManager({
               <CardTitle>Drag Items ({localDragItems?.length || 0})</CardTitle>
             </CardHeader>
             <CardContent>
-              {localDragItems?.length > 0 ? (
+              {localDragItems && localDragItems.length > 0 ? (
                 <div className='space-y-3'>
                   {localDragItems.map((item, index) => (
                     <div
-                      key={item.item_id || index}
+                      key={item.item_id || item.drag_item_id || index}
                       className='flex items-center justify-between p-3 border rounded-lg'
                     >
                       <div className='flex-1'>
                         <p className='font-medium'>{item.content || item.item_content}</p>
                         <p className='text-xs text-muted-foreground'>
-                          ID: {item.item_id || item.id}
+                          ID: {item.item_id || item.drag_item_id || item.id}
                         </p>
                       </div>
                       <div className='flex gap-2'>
@@ -502,7 +512,9 @@ export function DragDropManager({
                           type='button'
                           variant='ghost'
                           size='sm'
-                          onClick={() => handleDeleteDragItem(item.item_id || item.id || '')}
+                          onClick={() =>
+                            handleDeleteDragItem(item.item_id || item.drag_item_id || item.id || '')
+                          }
                           disabled={isLoading.deleteDragItem}
                         >
                           <Trash2 className='h-4 w-4' />

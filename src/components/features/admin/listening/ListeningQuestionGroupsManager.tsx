@@ -9,8 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useListeningQuestion } from '@/hooks';
-import { useListeningTask } from '@/hooks/apis/listening/useListeningTask';
-import { QuestionType } from '@/types/reading.types';
+import { useListeningTask } from '@/hooks/useListeningTask';
+import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import { Edit3, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
@@ -27,7 +27,7 @@ export interface LocalListeningQuestionGroup {
   section_order: number;
   section_label: string;
   instruction: string;
-  question_type: QuestionType;
+  question_type: number;
   questions: any[];
   drag_items?: DragItem[];
 }
@@ -41,9 +41,16 @@ interface ListeningQuestionGroupsManagerProps {
   refetchTaskData: () => void;
 }
 
-const IELTS_QUESTION_TYPES = [
+const IELTS_QUESTION_TYPES: Array<{
+  type: number;
+  label: string;
+  description: string;
+  icon: string;
+  explanation: string;
+  tips: string;
+}> = [
   {
-    type: QuestionType.MULTIPLE_CHOICE,
+    type: QuestionTypeEnumIndex.MULTIPLE_CHOICE,
     label: 'Multiple Choice',
     description: 'Choose the correct answer from multiple options',
     icon: '●',
@@ -52,7 +59,7 @@ const IELTS_QUESTION_TYPES = [
     tips: 'Use for testing specific information, opinions, or main ideas. Provide 3-4 plausible options.',
   },
   {
-    type: QuestionType.FILL_IN_THE_BLANKS,
+    type: QuestionTypeEnumIndex.FILL_IN_THE_BLANKS,
     label: 'Fill in the Blanks',
     description: 'Complete sentences with missing words from the audio',
     icon: '___',
@@ -61,7 +68,7 @@ const IELTS_QUESTION_TYPES = [
     tips: 'Test factual information, dates, names, or key terms. Blanks should follow audio order.',
   },
   {
-    type: QuestionType.MATCHING,
+    type: QuestionTypeEnumIndex.MATCHING,
     label: 'Matching',
     description: 'Match items to categories, headings, or audio sections',
     icon: '⟷',
@@ -70,7 +77,7 @@ const IELTS_QUESTION_TYPES = [
     tips: 'Divide audio into clear sections. Use for testing understanding of main ideas.',
   },
   {
-    type: QuestionType.DRAG_AND_DROP,
+    type: QuestionTypeEnumIndex.DRAG_AND_DROP,
     label: 'Drag & Drop',
     description: 'Drag items to correct positions in diagrams or text',
     icon: '🔄',
@@ -167,7 +174,7 @@ export function ListeningQuestionGroupsManager({
       refetchPassageData: refetchTaskData,
     };
     switch (group.question_type) {
-      case QuestionType.MULTIPLE_CHOICE:
+      case QuestionTypeEnumIndex.MULTIPLE_CHOICE:
         return (
           <MultipleChoiceManager
             {...commonProps}
@@ -175,7 +182,7 @@ export function ListeningQuestionGroupsManager({
             isListening={true}
           />
         );
-      case QuestionType.FILL_IN_THE_BLANKS:
+      case QuestionTypeEnumIndex.FILL_IN_THE_BLANKS:
         return (
           <FillInBlanksManager
             {...commonProps}
@@ -183,7 +190,7 @@ export function ListeningQuestionGroupsManager({
             isListening={true}
           />
         );
-      case QuestionType.MATCHING:
+      case QuestionTypeEnumIndex.MATCHING:
         return (
           <MatchingManager
             {...commonProps}
@@ -191,7 +198,7 @@ export function ListeningQuestionGroupsManager({
             isListening={true}
           />
         );
-      case QuestionType.DRAG_AND_DROP:
+      case QuestionTypeEnumIndex.DRAG_AND_DROP:
         return (
           <DragDropManager
             {...commonProps}
@@ -208,7 +215,7 @@ export function ListeningQuestionGroupsManager({
     }
   };
 
-  const getQuestionTypeInfo = (type: QuestionType) => {
+  const getQuestionTypeInfo = (type: number) => {
     return IELTS_QUESTION_TYPES.find((qt) => qt.type === type);
   };
 
@@ -272,7 +279,7 @@ export function ListeningQuestionGroupsManager({
                 <div>
                   <CardTitle>{group.section_label}</CardTitle>
                   <Badge variant='secondary' className='ml-2'>
-                    {getQuestionTypeInfo(group.question_type)?.label}
+                    {getQuestionTypeInfo(Number(group.question_type))?.label}
                   </Badge>
                 </div>
                 <div className='flex gap-2'>
@@ -288,8 +295,88 @@ export function ListeningQuestionGroupsManager({
                 {activeGroupIndex === index ? (
                   renderQuestionManager(group, index)
                 ) : (
-                  <div className='text-muted-foreground'>
-                    {group.questions.length} question(s) in this group
+                  <div>
+                    <div className='text-muted-foreground mb-2'>
+                      {group.questions.length} question(s) in this group
+                    </div>
+                    {group.questions && group.questions.length > 0 && (
+                      <div className='space-y-4'>
+                        {group.questions.map((q: any) => {
+                          switch (Number(q.question_type)) {
+                            case QuestionTypeEnumIndex.MULTIPLE_CHOICE: // Multiple Choice
+                              return (
+                                <div key={q.question_id} className='p-4 border rounded'>
+                                  <div
+                                    dangerouslySetInnerHTML={{ __html: q.instruction_for_choice }}
+                                  />
+                                  <ul className='list-disc ml-6'>
+                                    {Array.isArray(q.choices) &&
+                                      q.choices.map((c: any) => (
+                                        <li key={c.choice_id}>
+                                          <span className='font-semibold'>{c.label}:</span>{' '}
+                                          {c.content}
+                                          {c.is_correct && (
+                                            <span className='ml-2 text-green-600 font-bold'>
+                                              (Correct)
+                                            </span>
+                                          )}
+                                        </li>
+                                      ))}
+                                  </ul>
+                                  <div className='mt-2 text-sm text-gray-500'>
+                                    Explanation: {q.explanation}
+                                  </div>
+                                </div>
+                              );
+                            case QuestionTypeEnumIndex.FILL_IN_THE_BLANKS: // Fill in the Blanks
+                              return (
+                                <div key={q.question_id} className='p-4 border rounded'>
+                                  <div>
+                                    <span className='font-semibold'>Blank {q.blank_index}:</span>{' '}
+                                    {q.correct_answer}
+                                  </div>
+                                  <div className='mt-2 text-sm text-gray-500'>
+                                    Explanation: {q.explanation}
+                                  </div>
+                                </div>
+                              );
+                            case QuestionTypeEnumIndex.MATCHING: // Matching
+                              return (
+                                <div key={q.question_id} className='p-4 border rounded'>
+                                  <div
+                                    dangerouslySetInnerHTML={{ __html: q.instruction_for_matching }}
+                                  />
+                                  <div>
+                                    <span className='font-semibold'>Answer:</span>{' '}
+                                    {q.correct_answer_for_matching}
+                                  </div>
+                                  <div className='mt-2 text-sm text-gray-500'>
+                                    Explanation: {q.explanation}
+                                  </div>
+                                </div>
+                              );
+                            case QuestionTypeEnumIndex.DRAG_AND_DROP: // Drag & Drop
+                              return (
+                                <div key={q.question_id} className='p-4 border rounded'>
+                                  <div>
+                                    <span className='font-semibold'>Zone {q.zone_index}:</span>{' '}
+                                    {q.drag_item_id}
+                                  </div>
+                                  <div className='mt-2 text-sm text-gray-500'>
+                                    Explanation: {q.explanation}
+                                  </div>
+                                </div>
+                              );
+                            default:
+                              return (
+                                <div key={q.question_id} className='p-4 border rounded'>
+                                  Unknown question type
+                                </div>
+                              );
+                          }
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
               </CardContent>

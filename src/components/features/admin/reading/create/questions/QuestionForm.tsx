@@ -71,6 +71,7 @@ interface QuestionFormProps {
   };
   isEditing?: boolean;
   questionId?: string;
+  isListening?: boolean;
 }
 
 export function QuestionForm({
@@ -82,6 +83,7 @@ export function QuestionForm({
   initialData,
   isEditing = false,
   questionId,
+  isListening = false,
 }: Readonly<QuestionFormProps>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { createQuestions, updateQuestionInfo, isLoading } = useQuestion();
@@ -164,7 +166,7 @@ export function QuestionForm({
           drag_item_id: data.drag_item_id || undefined,
         };
 
-        const result = await createQuestions(groupId, [questionRequest]);
+        const result = await createQuestions(groupId, [questionRequest], isListening);
         if (result?.data && Array.isArray(result.data) && result.data.length > 0) {
           const createdQuestion = result.data[0] as any; // Type assertion for API response
           toast.success('Question created successfully');
