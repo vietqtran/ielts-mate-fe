@@ -5,7 +5,7 @@ import { Edit3, Eye, Plus, Settings, Trash2 } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { usePassage } from '@/hooks/usePassage';
+import { usePassage } from '@/hooks';
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import { useEffect, useState } from 'react';
 import { QuestionGroupForm } from './QuestionGroupForm';

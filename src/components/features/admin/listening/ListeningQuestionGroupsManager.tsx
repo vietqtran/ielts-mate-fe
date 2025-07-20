@@ -8,8 +8,8 @@ import { MultipleChoiceManager } from '@/components/features/admin/reading/creat
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useListeningQuestion } from '@/hooks';
-import { useListeningTask } from '@/hooks/useListeningTask';
+import { useListeningQuestion, useListeningTask } from '@/hooks';
+
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import { Edit3, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';

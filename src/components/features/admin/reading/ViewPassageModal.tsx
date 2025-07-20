@@ -8,7 +8,7 @@ import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { usePassage } from '@/hooks/usePassage';
+import { usePassage } from '@/hooks';
 import { PassageGetResponse, QuestionTypeEnumIndex } from '@/types/reading.types';
 
 interface ViewPassageModalProps {
@@ -102,7 +102,11 @@ export function ViewPassageModal({
           return (
             <div key={index} className='space-y-2'>
               <h5 className='font-medium'>Question {question.question_order}</h5>
-              <div dangerouslySetInnerHTML={{ __html: question.instruction_for_choice }} />
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: question.instruction_for_choice,
+                }}
+              />
               {question.choices && (
                 <div className='space-y-1 ml-4'>
                   {question.choices.map((choice: any, choiceIndex: number) => (
@@ -131,7 +135,11 @@ export function ViewPassageModal({
           return (
             <div key={index} className='space-y-2'>
               <h5 className='font-medium'>Question {question.question_order}</h5>
-              <div dangerouslySetInnerHTML={{ __html: question.instruction_for_matching }} />
+              <div
+                dangerouslySetInnerHTML={{
+                  __html: question.instruction_for_matching,
+                }}
+              />
               <div className='text-sm'>
                 <p className='font-medium'>Correct Answers:</p>
                 <p className='font-mono bg-gray-50 p-2 rounded'>
@@ -273,7 +281,9 @@ export function ViewPassageModal({
                           <div className='mt-2 p-3 bg-blue-50 rounded-md'>
                             <div
                               className='text-sm prose prose-sm max-w-none'
-                              dangerouslySetInnerHTML={{ __html: group.instruction }}
+                              dangerouslySetInnerHTML={{
+                                __html: group.instruction,
+                              }}
                             />
                           </div>
                         )}
