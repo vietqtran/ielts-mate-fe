@@ -6,6 +6,7 @@ import {
   AttemptData,
   DataResponse,
   GetReadingAttemptHistoryRequest,
+  LoadAttemptResponse,
   ReadingAttemptHistoryResponse,
 } from '@/types/attempt.types';
 import { BaseResponse } from '@/types/reading.types';
@@ -180,11 +181,11 @@ const useReadingAttempt = () => {
     setErrorState('loadAttemptById', null);
 
     try {
-      const { data } = await instance.get(`reading/attempts/${params.attempt_id}`, {
+      const { data } = await instance.get(`reading/attempts/load/${params.attempt_id}`, {
         notify: false,
         signal: currentController.signal,
       });
-      return data as BaseResponse<ReadingAttemptHistoryResponse[]>;
+      return data as BaseResponse<LoadAttemptResponse>;
     } catch (error) {
       if (abortControllerRef.current === currentController) {
         if ((error as any).name !== 'AbortError') {

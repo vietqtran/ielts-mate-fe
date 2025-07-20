@@ -10,7 +10,7 @@ import useReadingAttempt from '@/hooks/apis/reading/useReadingAttempt';
 import { formatTime, useIncrementalTimer } from '@/hooks/utils/useTimer';
 import { AttemptData, DataResponse } from '@/types/attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading.types';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export interface HandleAnswerChangeParams {
@@ -21,27 +21,46 @@ export interface HandleAnswerChangeParams {
   content: string;
 }
 
-const ReadingPractice = () => {
-  const { id }: { id: string } = useParams();
-  const [passages, setPassages] = useState<AttemptData | null>(null);
-  const [answers, setAnswers] = useState<
-    Record<
-      string,
-      {
-        answer_id: string | string[];
-        questionType: QuestionTypeEnumIndex;
-        questionOrder: number;
-        content: string;
-      }
-    >
-  >({});
+interface ReadingPracticeProps {
+  passages: AttemptData;
+  initialAnswers: Record<
+    string,
+    {
+      answer_id: string | string[];
+      questionType: QuestionTypeEnumIndex;
+      questionOrder: number;
+      content: string;
+    }
+  >;
+  initialDuration: number;
+}
+
+const ReadingPractice = ({ passages, initialAnswers, initialDuration }: ReadingPracticeProps) => {
+  const [answers, setAnswers] =
+    useState<
+      Record<
+        string,
+        {
+          answer_id: string | string[];
+          questionType: QuestionTypeEnumIndex;
+          questionOrder: number;
+          content: string;
+        }
+      >
+    >(initialAnswers);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<boolean>(false);
   const [submittedData, setSubmittedData] = useState<DataResponse>();
-  const time = useIncrementalTimer(0, startTime); // Initialize timer with 0 seconds
-  const { startNewAttempt, submitAttempt, saveAttemptProgress } = useReadingAttempt();
+  const time = useIncrementalTimer(initialDuration, startTime); // Initialize timer with initialDuration
+  const { submitAttempt, saveAttemptProgress } = useReadingAttempt();
   const router = useRouter();
+
+  // Initialize answers when initialAnswers prop changes
+  useEffect(() => {
+    setAnswers(initialAnswers);
+    setStartTime(true); // Start the timer when component mounts
+  }, [initialAnswers]);
 
   const notAnsweredQuestions = Object?.entries(answers)?.filter(([, { answer_id: answer }]) => {
     if (Array.isArray(answer)) {
@@ -49,36 +68,6 @@ const ReadingPractice = () => {
     }
     return answer.trim() === '';
   });
-
-  // Initialize all question keys in the answers state with null values
-  const initializeAnswerState = (attemptData: AttemptData | null) => {
-    if (!attemptData) return;
-
-    const initialAnswers: Record<
-      string,
-      {
-        answer_id: string | string[];
-        questionType: QuestionTypeEnumIndex;
-        questionOrder: number;
-        content: string;
-      }
-    > = {};
-
-    attemptData.question_groups.forEach((group) => {
-      group.questions.forEach((question) => {
-        // Check if question supports multiple answers
-        const supportsMultiple = question.number_of_correct_answers > 1;
-        initialAnswers[question.question_id] = {
-          answer_id: supportsMultiple ? [] : '', // Initialize with array for multiple choice, string for single
-          questionType: question.question_type,
-          questionOrder: question.question_order,
-          content: '', // Initialize content as empty string
-        };
-      });
-    });
-
-    setAnswers(initialAnswers);
-  };
 
   const handleSave = async () => {
     try {
@@ -131,24 +120,6 @@ const ReadingPractice = () => {
       }
     } catch (error) {
       console.error('Error saving attempt:', error);
-    }
-  };
-
-  const startAttempt = async () => {
-    try {
-      const res = await startNewAttempt({
-        passageId: id,
-      });
-      if (res) {
-        setPassages(res.data || null);
-        // Initialize all question keys in the answers state
-        initializeAnswerState(res.data);
-        setStartTime(true); // Start the timer when the attempt is successfully created
-      } else {
-        setPassages(null);
-      }
-    } catch (error) {
-      console.error('Error starting new attempt:', error);
     }
   };
 
@@ -209,10 +180,6 @@ const ReadingPractice = () => {
     }
   };
 
-  useEffect(() => {
-    startAttempt();
-  }, [id]);
-
   const handleAnswerChange = (params: HandleAnswerChangeParams) => {
     setAnswers((prev) => ({
       ...prev,
@@ -258,7 +225,7 @@ const ReadingPractice = () => {
       <div className='h-screen flex flex-col bg-gray-50'>
         {/* Header with timer and submit button */}
         <div className='flex justify-between items-center p-4 bg-white border-b shadow-sm'>
-          <h1 className='text-xl font-bold'>{passages?.title || 'Loading...'}</h1>
+          <h1 className='text-xl font-bold'>{passages.title}</h1>
           <div className='flex items-center gap-4'>
             <div className={`px-3 py-1 rounded-lg text-sm font-medium bg-blue-100 text-blue-800`}>
               Time: {formatTime(time)}
@@ -282,7 +249,7 @@ const ReadingPractice = () => {
               <h2 className='text-lg font-semibold text-center'>Reading Passage</h2>
             </div>
             <div className='flex-1 overflow-y-auto p-4'>
-              <PassageBox content={passages?.content || 'Loading passage...'} />
+              <PassageBox content={passages.content} />
             </div>
           </div>
 
@@ -292,17 +259,11 @@ const ReadingPractice = () => {
               <h2 className='text-lg font-semibold text-center'>Questions</h2>
             </div>
             <div className='flex-1 overflow-y-auto p-4'>
-              {passages?.question_groups ? (
-                <QuestionRenderer
-                  questionGroups={passages.question_groups}
-                  onAnswerChange={handleAnswerChange}
-                  answers={answers}
-                />
-              ) : (
-                <div className='flex items-center justify-center h-full'>
-                  <p className='text-gray-500'>Loading questions...</p>
-                </div>
-              )}
+              <QuestionRenderer
+                questionGroups={passages.question_groups}
+                onAnswerChange={handleAnswerChange}
+                answers={answers}
+              />
             </div>
           </div>
           <div className='bg-white rounded-lg shadow-sm overflow-hidden max-h-3/12 flex flex-col col-span-2'>
