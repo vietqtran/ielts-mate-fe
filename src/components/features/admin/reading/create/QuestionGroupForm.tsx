@@ -102,20 +102,6 @@ export function QuestionGroupForm({
         {initialData ? 'Edit Question Group' : 'Create New Question Group'}
       </h3>
 
-      {selectedQuestionType && (
-        <div className='p-3 mb-4 bg-blue-50 rounded-md'>
-          <h4 className='font-medium text-blue-900 mb-1'>
-            {QUESTION_TYPE_INFO[selectedQuestionType].label}
-          </h4>
-          <p className='text-sm text-blue-700 mb-2'>
-            {QUESTION_TYPE_INFO[selectedQuestionType].description}
-          </p>
-          <p className='text-xs text-blue-600 italic'>
-            Example: {QUESTION_TYPE_INFO[selectedQuestionType].example}
-          </p>
-        </div>
-      )}
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-4'>
           <div className='grid grid-cols-2 gap-4'>
@@ -159,7 +145,10 @@ export function QuestionGroupForm({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Question Type</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select
+                  onValueChange={(value) => field.onChange(Number(value))}
+                  defaultValue={String(field.value)}
+                >
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder='Select question type' />
@@ -167,7 +156,7 @@ export function QuestionGroupForm({
                   </FormControl>
                   <SelectContent>
                     {Object.entries(QUESTION_TYPE_INFO).map(([type, info]) => (
-                      <SelectItem key={type} value={type}>
+                      <SelectItem key={type} value={String(type)}>
                         <div className='flex flex-col'>
                           <span className='font-medium'>{info.label}</span>
                           <span className='text-xs text-muted-foreground'>{info.description}</span>

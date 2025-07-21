@@ -1,8 +1,8 @@
 export enum QuestionType {
-  MULTIPLE_CHOICE = 'MULTIPLE_CHOICE',
-  FILL_IN_THE_BLANKS = 'FILL_IN_THE_BLANKS',
-  MATCHING = 'MATCHING',
-  DRAG_AND_DROP = 'DRAG_AND_DROP',
+  MULTIPLE_CHOICE = 0,
+  FILL_IN_THE_BLANKS = 1,
+  MATCHING = 2,
+  DRAG_AND_DROP = 3,
 }
 
 export enum QuestionTypeEnumIndex {

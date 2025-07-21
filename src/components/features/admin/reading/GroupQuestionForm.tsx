@@ -204,21 +204,26 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Question Type</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
+                        defaultValue={String(field.value)}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder='Select question type' />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value={QuestionType.MULTIPLE_CHOICE}>
+                          <SelectItem value={String(QuestionType.MULTIPLE_CHOICE)}>
                             Multiple Choice
                           </SelectItem>
-                          <SelectItem value={QuestionType.FILL_IN_THE_BLANKS}>
-                            Fill in Blanks
+                          <SelectItem value={String(QuestionType.FILL_IN_THE_BLANKS)}>
+                            Fill in the Blanks
                           </SelectItem>
-                          <SelectItem value={QuestionType.MATCHING}>Matching</SelectItem>
-                          <SelectItem value={QuestionType.DRAG_AND_DROP}>Drag & Drop</SelectItem>
+                          <SelectItem value={String(QuestionType.MATCHING)}>Matching</SelectItem>
+                          <SelectItem value={String(QuestionType.DRAG_AND_DROP)}>
+                            Drag & Drop
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />

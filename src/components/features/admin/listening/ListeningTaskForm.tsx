@@ -82,7 +82,8 @@ interface ListeningTaskFormProps {
 export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFormProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const { createListeningTask, updateListeningTask, isLoading } = useListeningTask();
+  const { createListeningTask, updateListeningTask, isLoading, deleteGroupQuestion } =
+    useListeningTask();
 
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
   const [serverAudioUrl, setServerAudioUrl] = useState<string | null>(null);
@@ -235,8 +236,27 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
   const handleUpdateGroup = (index: number, group: LocalListeningQuestionGroup) => {
     setQuestionGroups((prev) => prev.map((g, i) => (i === index ? group : g)));
   };
-  const handleDeleteGroup = (index: number) => {
-    setQuestionGroups((prev) => prev.filter((_, i) => i !== index));
+  const handleDeleteGroup = async (index: number) => {
+    const groupToDelete = questionGroups[index];
+    if (!groupToDelete.id || !createdTaskId) {
+      // If the group doesn't have an ID, it hasn't been saved to the backend yet.
+      setQuestionGroups((prev) => prev.filter((_, i) => i !== index));
+      return;
+    }
+    try {
+      await deleteGroupQuestion(createdTaskId, groupToDelete.id);
+      setQuestionGroups((prev) => prev.filter((_, i) => i !== index));
+      toast({
+        title: 'Success',
+        description: 'Question group deleted successfully',
+      });
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to delete question group',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
