@@ -29,7 +29,6 @@ import {
   ListeningTaskStatus,
   ListeningTaskUpdateRequest,
 } from '@/types/listening.types';
-import { QuestionTypeEnumIndex } from '@/types/reading.types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
@@ -488,7 +487,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
                 }
               }}
             />
-            {/* Render question groups and questions in edit mode */}
+            {/*
             {mode === 'edit' && questionGroups.length > 0 && (
               <div className='mt-8'>
                 <Card>
@@ -596,7 +595,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
                   </CardContent>
                 </Card>
               </div>
-            )}
+            )} */}
           </div>
         )}
       </CardContent>
