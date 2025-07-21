@@ -1,17 +1,23 @@
 'use client';
-
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import LoadingSpinner from '@/components/ui/loading-spinner';
 import {
-  ListeningQuestionGroupsManager,
-  LocalListeningQuestionGroup,
-} from '@/components/features/admin/listening/ListeningQuestionGroupsManager';
-import { ListeningTaskBasicInfoForm } from '@/components/features/admin/listening/ListeningTaskBasicInfoForm';
-import { ListeningTaskPreview } from '@/components/features/admin/listening/ListeningTaskPreview';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import { Textarea } from '@/components/ui/textarea';
+import { useListeningExam } from '@/hooks/apis/admin/useListeningExam';
 import { useListeningTask } from '@/hooks/apis/listening/useListeningTask';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { ListeningTaskFilterParams } from '@/types/listening.types';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import * as z from 'zod';
 
 const listeningTaskSchema = z.object({
@@ -27,159 +33,282 @@ const listeningTaskSchema = z.object({
 
 type ListeningTaskFormData = z.infer<typeof listeningTaskSchema>;
 
-export default function CreateListeningTaskPage() {
+type PartKey = 'part1_id' | 'part2_id' | 'part3_id' | 'part4_id';
+const PARTS: PartKey[] = ['part1_id', 'part2_id', 'part3_id', 'part4_id'];
+const PART_LABELS = ['Part 1', 'Part 2', 'Part 3', 'Part 4'];
+
+export default function CreateListeningExamPage() {
   const router = useRouter();
-  const { createListeningTask, isLoading } = useListeningTask();
+  const { getListeningTasksByCreator, isLoading: isLoadingTask } = useListeningTask();
+  const { createExam, isLoading: isLoadingExam } = useListeningExam();
 
-  const [currentStep, setCurrentStep] = useState<'basic' | 'questions' | 'preview'>('basic');
-  const [createdTaskId, setCreatedTaskId] = useState<string | null>(null);
-  const [questionGroups, setQuestionGroups] = useState<LocalListeningQuestionGroup[]>([]);
-  const [activeTab, setActiveTab] = useState('task');
-
-  const form = useForm<ListeningTaskFormData>({
-    resolver: zodResolver(listeningTaskSchema),
-    defaultValues: {
-      title: '',
-      instruction: '',
-      ielts_type: 0,
-      part_number: 0,
-      status: 0,
-      audio_file: undefined,
-      is_automatic_transcription: false,
-      transcription: '',
-    },
+  const [tasks, setTasks] = useState<any[]>([]);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    pageSize: 10,
+    totalItems: 0,
+    hasNextPage: false,
+    hasPreviousPage: false,
+  });
+  const [filters, setFilters] = useState<ListeningTaskFilterParams>({
+    page: 1,
+    size: 10,
+    sort_by: 'updatedAt',
+    sort_direction: 'desc',
   });
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      sessionStorage.setItem('CURRENT_PAGE_SESSION_STORAGE_KEY', 'LISTENING_TASKS_CREATE');
-      if (!createdTaskId) {
-        sessionStorage.removeItem('draft-listening-task');
-      }
-    }
-  }, [createdTaskId]);
+  const [form, setForm] = useState({
+    exam_name: '',
+    exam_description: '',
+    url_slug: '',
+    part1_id: '',
+    part2_id: '',
+    part3_id: '',
+    part4_id: '',
+  });
+  const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      const formData = form.getValues();
-      if (formData.title || formData.instruction) {
-        sessionStorage.setItem(
-          'draft-listening-task',
-          JSON.stringify({
-            ...formData,
-            questionGroups,
-            timestamp: Date.now(),
-          })
-        );
-      }
-    }, 30000);
-    return () => clearInterval(interval);
-  }, [form, questionGroups]);
-
-  useEffect(() => {
-    const savedDraft = sessionStorage.getItem('draft-listening-task');
-    if (savedDraft) {
-      try {
-        const draft = JSON.parse(savedDraft);
-        if (Date.now() - draft.timestamp < 24 * 60 * 60 * 1000) {
-          form.reset(draft);
-          setQuestionGroups(draft.questionGroups ?? []);
-        }
-      } catch (error) {}
-    }
-  }, [form]);
-
-  const handleBasicInfoSubmit = async (data: ListeningTaskFormData) => {
+  const fetchTasks = async () => {
     try {
-      let payload: any = data;
-      // Nếu có file audio, dùng FormData
-      if (data.audio_file instanceof File) {
-        const formData = new FormData();
-        Object.entries(data).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            // boolean phải chuyển thành string
-            if (typeof value === 'boolean') {
-              formData.append(key, value ? 'true' : 'false');
-            } else {
-              formData.append(key, value);
-            }
-          }
-        });
-        payload = formData;
+      const response = await getListeningTasksByCreator(filters);
+      if (response) {
+        setTasks(response.data);
+        if (response.pagination) setPagination(response.pagination);
       }
-      const response = await createListeningTask(payload);
-      if (response.data?.task_id) {
-        setCreatedTaskId(response.data.task_id);
-        setCurrentStep('questions');
-        setActiveTab('questions');
-        sessionStorage.removeItem('draft-listening-task');
-      }
-    } catch (error) {}
+    } catch (error) {
+      toast.error('Failed to fetch listening tasks');
+    }
   };
 
-  const handleAddQuestionGroup = (group: LocalListeningQuestionGroup) => {
-    setQuestionGroups((prev) => [...prev, group]);
+  useEffect(() => {
+    fetchTasks();
+  }, [filters]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleUpdateQuestionGroup = (index: number, group: LocalListeningQuestionGroup) => {
-    setQuestionGroups((prev) => prev.map((g, i) => (i === index ? group : g)));
+  // Radio selection logic: only one task per part, and a task can't be assigned to multiple parts
+  const handleRadioSelect = (part: PartKey, taskId: string) => {
+    // Remove this task from any other part
+    setForm((prev) => {
+      const updated = { ...prev };
+      PARTS.forEach((p) => {
+        if (p !== part && updated[p] === taskId) {
+          updated[p] = '';
+        }
+      });
+      updated[part] = taskId;
+      return updated;
+    });
   };
 
-  const handleDeleteQuestionGroup = (index: number) => {
-    setQuestionGroups((prev) => prev.filter((_, i) => i !== index));
+  // Remove a selected task from a part
+  const handleRemovePart = (part: PartKey) => {
+    setForm((prev) => ({ ...prev, [part]: '' }));
   };
 
-  const handlePreview = () => {
-    setCurrentStep('preview');
-    setActiveTab('preview');
+  // Helper to get task info by id
+  const getTaskById = (taskId: string) => tasks.find((t) => t.task_id === taskId) || null;
+
+  const handlePageChange = (page: number) => {
+    setFilters((prev) => ({ ...prev, page }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.exam_name || !form.exam_description || !form.url_slug) {
+      toast.error('Please fill all exam info');
+      return;
+    }
+    const partIds = [form.part1_id, form.part2_id, form.part3_id, form.part4_id];
+    if (partIds.some((id) => !id)) {
+      toast.error('Please select a task for all 4 parts');
+      return;
+    }
+    if (new Set(partIds).size !== 4) {
+      toast.error('Each part must be a different task');
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await createExam(form);
+      toast.success('Listening exam created successfully');
+      router.push('/creator/listening-exams');
+    } catch (error) {
+      toast.error('Failed to create listening exam');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <div className='container py-8'>
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className='grid w-full grid-cols-3'>
-          <TabsTrigger value='task'>Listening Task Information</TabsTrigger>
-          <TabsTrigger value='questions' disabled={!createdTaskId}>
-            Question Groups
-          </TabsTrigger>
-          <TabsTrigger value='preview' disabled={!createdTaskId}>
-            Preview
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value='task' className='space-y-6'>
-          <ListeningTaskBasicInfoForm
-            isEdit={false}
-            form={form}
-            onSubmit={handleBasicInfoSubmit}
-            isLoading={isLoading.createListeningTask}
-            isCompleted={!!createdTaskId}
-          />
-        </TabsContent>
-
-        <TabsContent value='questions' className='space-y-6'>
-          {createdTaskId && (
-            <ListeningQuestionGroupsManager
-              task_id={createdTaskId}
-              questionGroups={questionGroups}
-              onAddGroup={handleAddQuestionGroup}
-              onUpdateGroup={handleUpdateQuestionGroup}
-              onDeleteGroup={handleDeleteQuestionGroup}
-              refetchTaskData={() => {}}
-            />
+    <div className='container mx-auto p-6'>
+      <Card className='mb-8'>
+        <CardHeader>
+          <CardTitle>Create Listening Exam</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className='space-y-6'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+              <div>
+                <label className='block font-medium mb-1'>Exam Name</label>
+                <Input
+                  name='exam_name'
+                  value={form.exam_name}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+              <div>
+                <label className='block font-medium mb-1'>URL Slug</label>
+                <Input
+                  name='url_slug'
+                  value={form.url_slug}
+                  onChange={(e) => {
+                    const value = e.target.value
+                      .toLowerCase()
+                      .replace(/\s+/g, '-')
+                      .replace(/[^a-z0-9-]/g, '');
+                    setForm((prev) => ({ ...prev, url_slug: value }));
+                  }}
+                  required
+                  placeholder='example-exam-title'
+                />
+              </div>
+            </div>
+            <div>
+              <label className='block font-medium mb-1'>Description</label>
+              <Textarea
+                name='exam_description'
+                value={form.exam_description}
+                onChange={handleInputChange}
+                required
+                rows={3}
+              />
+            </div>
+            <Button type='submit' disabled={submitting || isLoadingExam.createExam}>
+              {submitting || isLoadingExam.createExam ? (
+                <LoadingSpinner color='white' />
+              ) : (
+                'Create Exam'
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+      {/* Selected Parts Table */}
+      <Card className='mb-8'>
+        <CardHeader>
+          <CardTitle>Selected Tasks for Each Part</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Part</TableHead>
+                <TableHead>Task Title</TableHead>
+                <TableHead>Part Number</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {PARTS.map((part, idx) => {
+                const taskId = form[part];
+                const task = getTaskById(taskId);
+                return (
+                  <TableRow key={part}>
+                    <TableCell>{PART_LABELS[idx]}</TableCell>
+                    <TableCell>
+                      {task ? (
+                        task.title
+                      ) : (
+                        <span className='text-muted-foreground'>No task selected</span>
+                      )}
+                    </TableCell>
+                    <TableCell>{task ? task.part_number + 1 : '-'}</TableCell>
+                    <TableCell>
+                      {task ? (task.status === 1 ? 'Published' : 'Draft') : '-'}
+                    </TableCell>
+                    <TableCell>
+                      {task && (
+                        <Button size='sm' variant='outline' onClick={() => handleRemovePart(part)}>
+                          Remove
+                        </Button>
+                      )}
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+      {/* Main Task Table with filter/search and radio selection */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Available Listening Tasks</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoadingTask['getListeningTasksByCreator'] ? (
+            <div className='flex justify-center py-8'>
+              <LoadingSpinner />
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Part</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Created At</TableHead>
+                  {PART_LABELS.map((label, idx) => (
+                    <TableHead key={label}>{label}</TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {tasks.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className='text-center py-6'>
+                      No listening tasks found.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  tasks.map((task) => (
+                    <TableRow key={task.task_id}>
+                      <TableCell>{task.title}</TableCell>
+                      <TableCell>{task.part_number + 1}</TableCell>
+                      <TableCell>{task.status === 1 ? 'Published' : 'Draft'}</TableCell>
+                      <TableCell>
+                        {task.created_at ? new Date(task.created_at).toLocaleString() : ''}
+                      </TableCell>
+                      {PARTS.map((part, idx) => (
+                        <TableCell key={part} className='text-center'>
+                          <input
+                            type='radio'
+                            name={part}
+                            value={task.task_id}
+                            checked={form[part] === task.task_id}
+                            onChange={() => handleRadioSelect(part, task.task_id)}
+                            disabled={
+                              Object.values(form).includes(task.task_id) &&
+                              form[part] !== task.task_id
+                            }
+                          />
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           )}
-        </TabsContent>
-
-        <TabsContent value='preview' className='space-y-6'>
-          {createdTaskId && (
-            <ListeningTaskPreview
-              taskData={form.getValues()}
-              questionGroups={questionGroups}
-              onFinish={() => router.push('/creator/listening-exams')}
-            />
-          )}
-        </TabsContent>
-      </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 }

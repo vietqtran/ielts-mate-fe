@@ -49,8 +49,8 @@ const formSchema = z.object({
   part_number: z
     .number()
     .int()
-    .min(1, 'Part number is required')
-    .max(4, 'Part number must be between 1-4'),
+    .min(0, 'Part number is required')
+    .max(3, 'Part number must be between 1-4'),
   instruction: z.string().min(10, 'Instruction must be at least 10 characters'),
   status: z.number().int(),
   is_automatic_transcription: z.boolean().default(true),
@@ -96,7 +96,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
     defaultValues: {
       title: initialData?.title || '',
       ielts_type: initialData?.ielts_type || 1,
-      part_number: initialData?.part_number || 1,
+      part_number: initialData?.part_number || 0,
       instruction: initialData?.instruction || '',
       status: initialData?.status || 0,
       is_automatic_transcription: true,
@@ -330,10 +330,10 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value='1'>Part 1</SelectItem>
-                        <SelectItem value='2'>Part 2</SelectItem>
-                        <SelectItem value='3'>Part 3</SelectItem>
-                        <SelectItem value='4'>Part 4</SelectItem>
+                        <SelectItem value='0'>Part 1</SelectItem>
+                        <SelectItem value='1'>Part 2</SelectItem>
+                        <SelectItem value='2'>Part 3</SelectItem>
+                        <SelectItem value='3'>Part 4</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
