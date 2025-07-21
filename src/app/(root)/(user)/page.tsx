@@ -1,7 +1,9 @@
 'use client';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAppSelector } from '@/hooks/redux/useStore';
 import {
   ArrowRight,
   Award,
@@ -26,6 +28,7 @@ import { useState } from 'react';
 const GuestPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
+  const user = useAppSelector((state) => state.auth.user);
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50'>
@@ -62,14 +65,26 @@ const GuestPage = () => {
 
             {/* Desktop Auth Buttons */}
             <div className='hidden md:flex items-center space-x-4'>
+              {user ? (
+                <div className='flex items-center space-x-2'>
+                  <Avatar>
+                    <AvatarFallback>{user.firstName?.[0] || user.email?.[0] || 'U'}</AvatarFallback>
+                  </Avatar>
+                  <span className='text-gray-700 font-medium'>{user.email}</span>
+                </div>
+              ) : (
+                <Button
+                  variant='ghost'
+                  className='text-gray-600 hover:text-blue-600'
+                  onClick={() => router.push('/sign-in')}
+                >
+                  Sign In
+                </Button>
+              )}
               <Button
-                variant='ghost'
-                className='text-gray-600 hover:text-blue-600'
-                onClick={() => router.push('/sign-in')}
+                className='bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white'
+                onClick={() => router.push('/exams')}
               >
-                Sign In
-              </Button>
-              <Button className='bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white'>
                 Start Learning Free
               </Button>
             </div>
@@ -110,13 +125,34 @@ const GuestPage = () => {
                   About
                 </Link>
                 <div className='flex flex-col space-y-2 px-4 pt-4 border-t border-gray-200'>
+                  {user ? (
+                    <div className='flex items-center space-x-2'>
+                      <Avatar>
+                        <AvatarFallback>
+                          {user.firstName?.[0] || user.email?.[0] || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className='text-gray-700 font-medium'>{user.email}</span>
+                    </div>
+                  ) : (
+                    <Button
+                      variant='ghost'
+                      className='text-gray-600 hover:text-blue-600 justify-start'
+                      onClick={() => {
+                        setIsMenuOpen(false);
+                        router.push('/sign-in');
+                      }}
+                    >
+                      Sign In
+                    </Button>
+                  )}
                   <Button
-                    variant='ghost'
-                    className='text-gray-600 hover:text-blue-600 justify-start'
+                    className='bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white'
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      router.push('/exams');
+                    }}
                   >
-                    Sign In
-                  </Button>
-                  <Button className='bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white'>
                     Start Learning Free
                   </Button>
                 </div>
@@ -152,6 +188,7 @@ const GuestPage = () => {
                 <Button
                   size='lg'
                   className='bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-6 text-lg'
+                  onClick={() => router.push('/exams')}
                 >
                   Start Learning Free
                   <ArrowRight className='ml-2 h-5 w-5' />
@@ -458,6 +495,7 @@ const GuestPage = () => {
               size='lg'
               className='bg-white text-blue-600 hover:bg-gray-100 px-8 py-6 text-lg'
               variant={'ghost'}
+              onClick={() => router.push('/exams')}
             >
               Start Learning Free
               <ArrowRight className='ml-2 h-5 w-5' />
