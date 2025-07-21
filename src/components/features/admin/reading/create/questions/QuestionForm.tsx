@@ -131,13 +131,18 @@ export function QuestionForm({
 
       if (isEditing && questionId) {
         // Update existing question
-        const result = await updateQuestionInfo(groupId, questionId, {
-          explanation: data.explanation,
-          point: data.point,
-          question_categories: [],
-          zone_index: data.zone_index,
-          drag_item_id: data.drag_item_id || undefined,
-        });
+        const result = await updateQuestionInfo(
+          groupId,
+          questionId,
+          {
+            explanation: data.explanation,
+            point: data.point,
+            question_categories: [],
+            zone_index: data.zone_index,
+            drag_item_id: data.drag_item_id || undefined,
+          },
+          isListening
+        );
 
         if (result?.data) {
           const updatedQuestion = result.data as any; // Type assertion for API response

@@ -346,7 +346,7 @@ export function DragDropManager({
     }
 
     try {
-      await deleteDragItem(group.id, itemId);
+      await deleteDragItem(group.id, itemId, isListening);
       // Only mark as user changes for deletion since we need to update group state
       hasUserChanges.current = true;
       setLocalDragItems((prev) => prev.filter((item) => item.item_id !== itemId));
@@ -364,7 +364,7 @@ export function DragDropManager({
     }
 
     try {
-      await deleteQuestion(group.id, questionId);
+      await deleteQuestion(group.id, questionId, isListening);
       // Only mark as user changes for deletion since we need to update group state
       hasUserChanges.current = true;
       setLocalQuestions((prev) =>
