@@ -8,22 +8,20 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
 
 const ExamHomepage = () => {
-  const { tabs } = useParams();
+  const param = useParams();
   const router = useRouter();
-
-  const extractedTab = Array.isArray(tabs) ? tabs[0] : tabs || 'all';
-  const [activeTab, setActiveTab] = useState<string>(extractedTab);
+  const tab = param.tabs as string;
 
   const handleTabChange = (value: string) => {
-    setActiveTab(value);
-    router.push(`/exams/${value}`);
+    if (value !== tab) {
+      router.push(`/exams/${value}`);
+    }
   };
 
   const renderTabContent = () => {
-    switch (activeTab) {
+    switch (tab) {
       case 'reading':
         return <ReadingExamsTable />;
       case 'listening':
@@ -47,7 +45,7 @@ const ExamHomepage = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} className='w-full' onValueChange={handleTabChange}>
+          <Tabs value={tab} className='w-full' onValueChange={handleTabChange}>
             <TabsList className='mb-4'>
               <TabsTrigger value='all'>All Exams</TabsTrigger>
               <TabsTrigger value='reading'>Reading</TabsTrigger>
