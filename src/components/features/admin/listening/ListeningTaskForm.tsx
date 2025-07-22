@@ -43,7 +43,7 @@ const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
 const ACCEPTED_AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg'];
 
 // We need to conditionally validate the audio file based on mode
-const formSchema = z.object({
+const createSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
   ielts_type: z.number().int().min(1, 'IELTS type is required'),
   part_number: z
@@ -61,7 +61,30 @@ const formSchema = z.object({
     .refine(
       (file) => ACCEPTED_AUDIO_TYPES.includes(file.type),
       'File must be an audio file (MP3, WAV, OGG)'
-    ),
+    )
+    .optional(),
+});
+
+const editSchema = z.object({
+  title: z.string().min(3, 'Title must be at least 3 characters'),
+  ielts_type: z.number().int().min(1, 'IELTS type is required'),
+  part_number: z
+    .number()
+    .int()
+    .min(0, 'Part number is required')
+    .max(3, 'Part number must be between 1-4'),
+  instruction: z.string().min(10, 'Instruction must be at least 10 characters'),
+  status: z.number().int(),
+  is_automatic_transcription: z.boolean().default(true),
+  transcript: z.string().optional(),
+  audio_file: z
+    .instanceof(File)
+    .refine((file) => file.size <= MAX_FILE_SIZE, 'File size must be less than 30MB')
+    .refine(
+      (file) => ACCEPTED_AUDIO_TYPES.includes(file.type),
+      'File must be an audio file (MP3, WAV, OGG)'
+    )
+    .optional(),
 });
 
 interface ListeningTaskFormProps {
@@ -79,6 +102,10 @@ interface ListeningTaskFormProps {
   mode: 'create' | 'edit';
 }
 
+type CreateFormType = z.infer<typeof createSchema>;
+type EditFormType = z.infer<typeof editSchema>;
+type FormType = CreateFormType | EditFormType;
+
 export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFormProps) {
   const router = useRouter();
   const { toast } = useToast();
@@ -91,18 +118,30 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
   const [createdTaskId, setCreatedTaskId] = useState<string | undefined>(taskId);
   const [questionGroups, setQuestionGroups] = useState<LocalListeningQuestionGroup[]>([]);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      title: initialData?.title || '',
-      ielts_type: initialData?.ielts_type || 1,
-      part_number: initialData?.part_number || 0,
-      instruction: initialData?.instruction || '',
-      status: initialData?.status || 0,
-      is_automatic_transcription: true,
-      transcript: initialData?.transcript || '',
-      audio_file: undefined,
-    },
+  const schema = mode === 'create' ? createSchema : editSchema;
+  const form = useForm<FormType>({
+    resolver: zodResolver(schema),
+    defaultValues:
+      mode === 'create'
+        ? {
+            title: initialData?.title || '',
+            ielts_type: initialData?.ielts_type || 1,
+            part_number: initialData?.part_number || 0,
+            instruction: initialData?.instruction || '',
+            status: initialData?.status || 0,
+            is_automatic_transcription: true,
+            transcript: initialData?.transcript || '',
+            audio_file: undefined as unknown as File,
+          }
+        : {
+            title: initialData?.title || '',
+            ielts_type: initialData?.ielts_type || 1,
+            part_number: initialData?.part_number || 0,
+            instruction: initialData?.instruction || '',
+            status: initialData?.status || 0,
+            is_automatic_transcription: true,
+            transcript: initialData?.transcript || '',
+          },
   });
 
   useEffect(() => {
@@ -156,10 +195,18 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
     }
   }, [mode, initialData, taskId]);
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: FormType) => {
     try {
       if (mode === 'create') {
         // In create mode, audio_file is required
+        if (!values.audio_file) {
+          toast({
+            title: 'Error',
+            description: 'Audio file is required',
+            variant: 'destructive',
+          });
+          return;
+        }
         const request: ListeningTaskCreationRequest = {
           title: values.title,
           ielts_type: values.ielts_type,
