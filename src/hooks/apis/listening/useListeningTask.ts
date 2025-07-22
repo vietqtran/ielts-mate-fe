@@ -198,17 +198,9 @@ export function useListeningTask() {
       // Handle status field - using set() to ensure single value
       formData.set('status', task.status.toString());
 
-      // Always include audio_file parameter since backend expects it as @RequestPart
-      // If no new file is provided, send an empty Blob to satisfy the multipart requirement
+      // Only append audio_file if a new one is provided
       if (task.audio_file) {
         formData.append('audio_file', task.audio_file);
-      } else {
-        // Create an empty file to satisfy the @RequestPart requirement
-        const emptyBlob = new Blob([], { type: 'audio/mp3' });
-        const emptyFile = new File([emptyBlob], 'empty.mp3', {
-          type: 'audio/mp3',
-        });
-        formData.append('audio_file', emptyFile);
       }
 
       // Send request with formData body - DO NOT set Content-Type header manually
