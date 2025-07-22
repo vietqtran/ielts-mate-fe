@@ -100,19 +100,13 @@ interface ListeningTaskFormProps {
     audio_file_id?: string;
   };
   mode: 'create' | 'edit';
-  transcript?: string;
 }
 
 type CreateFormType = z.infer<typeof createSchema>;
 type EditFormType = z.infer<typeof editSchema>;
 type FormType = CreateFormType | EditFormType;
 
-export function ListeningTaskForm({
-  taskId,
-  initialData,
-  mode,
-  transcript,
-}: ListeningTaskFormProps) {
+export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const { createListeningTask, updateListeningTask, isLoading, deleteGroupQuestion } =
@@ -136,7 +130,7 @@ export function ListeningTaskForm({
             instruction: initialData?.instruction || '',
             status: initialData?.status || 0,
             is_automatic_transcription: true,
-            transcript: typeof transcript === 'string' ? transcript : initialData?.transcript || '',
+            transcript: initialData?.transcript || '',
             audio_file: undefined as unknown as File,
           }
         : {
@@ -146,7 +140,7 @@ export function ListeningTaskForm({
             instruction: initialData?.instruction || '',
             status: initialData?.status || 0,
             is_automatic_transcription: true,
-            transcript: typeof transcript === 'string' ? transcript : initialData?.transcript || '',
+            transcript: initialData?.transcript || '',
           },
   });
 
@@ -499,22 +493,20 @@ export function ListeningTaskForm({
               )}
             />
 
-            {!useAutomaticTranscription && (
-              <FormField
-                control={form.control}
-                name='transcript'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Transcript</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder='Enter transcript' {...field} rows={10} />
-                    </FormControl>
-                    <FormDescription>Manual transcript of the audio</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
+            <FormField
+              control={form.control}
+              name='transcript'
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Transcript</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder='Enter transcript' {...field} rows={10} />
+                  </FormControl>
+                  <FormDescription>Manual transcript of the audio</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <div className='flex justify-end space-x-2'>
               <Button type='button' variant='outline' onClick={handleCancel}>
