@@ -162,9 +162,9 @@ export function useListeningTask() {
       // Add audio file
       formData.append('audio_file', task.audio_file);
 
-      // Add transcription if provided
-      if (task.transcription) {
-        formData.append('transcription', task.transcription);
+      // Add transcript if provided
+      if (task.transcript) {
+        formData.append('transcript', task.transcript);
       }
 
       // Send request with formData body - DO NOT set Content-Type header manually
@@ -193,7 +193,7 @@ export function useListeningTask() {
       formData.append('part_number', task.part_number.toString());
       formData.append('instruction', task.instruction);
       formData.append('title', task.title);
-      formData.append('transcription', task.transcription);
+      formData.append('transcript', task.transcript);
 
       // Handle status field - using set() to ensure single value
       formData.set('status', task.status.toString());

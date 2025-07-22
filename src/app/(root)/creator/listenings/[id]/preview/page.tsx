@@ -158,12 +158,10 @@ export default function PreviewListeningTaskPage() {
             </div>
           )}
 
-          {task.transcription && (
+          {task.transcript && (
             <div>
-              <h3 className='text-lg font-medium mb-2'>Transcription</h3>
-              <div className='p-4 bg-gray-50 rounded-md whitespace-pre-wrap'>
-                {task.transcription}
-              </div>
+              <h3 className='text-lg font-medium mb-2'>Transcript</h3>
+              <div className='p-4 bg-gray-50 rounded-md whitespace-pre-wrap'>{task.transcript}</div>
             </div>
           )}
         </CardContent>

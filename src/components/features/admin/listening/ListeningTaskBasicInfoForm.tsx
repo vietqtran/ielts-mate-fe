@@ -270,13 +270,13 @@ export function ListeningTaskBasicInfoForm({
             />
             <FormField
               control={form.control}
-              name='transcription'
+              name='transcript'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Transcription (optional)</FormLabel>
+                  <FormLabel>Transcript (optional)</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder='Paste or edit the transcription here if available.'
+                      placeholder='Paste or edit the transcript here if available.'
                       className='min-h-[80px]'
                       {...field}
                     />

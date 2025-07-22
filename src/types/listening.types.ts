@@ -30,7 +30,7 @@ export interface ListeningTaskDetailResponse {
   instruction: string;
   title: string;
   audio_file_id: string;
-  transcription: string;
+  transcript: string;
   status?: number;
 }
 
@@ -39,7 +39,7 @@ export interface ListeningTaskCreationRequest {
   part_number: number;
   instruction: string;
   title: string;
-  transcription?: string;
+  transcript?: string;
   status: number;
   is_automatic_transcription: boolean;
   audio_file: File;
@@ -51,7 +51,7 @@ export interface ListeningTaskUpdateRequest {
   instruction: string;
   status: number;
   title: string;
-  transcription: string;
+  transcript: string;
   audio_file?: File;
 }
 

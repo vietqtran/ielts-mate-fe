@@ -28,7 +28,7 @@ const listeningTaskSchema = z.object({
   status: z.number().min(0),
   audio_file: z.any(),
   is_automatic_transcription: z.boolean(),
-  transcription: z.string().optional(),
+  transcript: z.string().optional(),
 });
 
 type ListeningTaskFormData = z.infer<typeof listeningTaskSchema>;

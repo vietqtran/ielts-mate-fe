@@ -70,7 +70,9 @@ const GuestPage = () => {
                   <Avatar>
                     <AvatarFallback>{user.firstName?.[0] || user.email?.[0] || 'U'}</AvatarFallback>
                   </Avatar>
-                  <span className='text-gray-700 font-medium'>{user.email}</span>
+                  <span className='text-gray-700 font-medium'>
+                    {user.firstName ?? ''} {user.lastName ?? ''}
+                  </span>
                 </div>
               ) : (
                 <Button

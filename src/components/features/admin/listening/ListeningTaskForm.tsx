@@ -54,7 +54,7 @@ const formSchema = z.object({
   instruction: z.string().min(10, 'Instruction must be at least 10 characters'),
   status: z.number().int(),
   is_automatic_transcription: z.boolean().default(true),
-  transcription: z.string().optional(),
+  transcript: z.string().optional(),
   audio_file: z
     .instanceof(File)
     .refine((file) => file.size <= MAX_FILE_SIZE, 'File size must be less than 30MB')
@@ -72,7 +72,7 @@ interface ListeningTaskFormProps {
     part_number: number;
     instruction: string;
     title: string;
-    transcription?: string;
+    transcript?: string;
     status: number;
     audio_file_id?: string;
   };
@@ -100,7 +100,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
       instruction: initialData?.instruction || '',
       status: initialData?.status || 0,
       is_automatic_transcription: true,
-      transcription: initialData?.transcription || '',
+      transcript: initialData?.transcript || '',
       audio_file: undefined,
     },
   });
@@ -169,8 +169,8 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
           is_automatic_transcription: values.is_automatic_transcription,
           // Only include transcription if automatic is disabled and value exists
           ...(!values.is_automatic_transcription &&
-            values.transcription && {
-              transcription: values.transcription,
+            values.transcript && {
+              transcript: values.transcript,
             }),
           audio_file: values.audio_file,
         };
@@ -191,7 +191,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
           part_number: values.part_number,
           instruction: values.instruction,
           status: values.status,
-          transcription: values.transcription || '',
+          transcript: values.transcript || '',
           // Only include audio_file if provided in edit mode
           ...(values.audio_file && { audio_file: values.audio_file }),
         };
@@ -449,14 +449,14 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
             {!useAutomaticTranscription && (
               <FormField
                 control={form.control}
-                name='transcription'
+                name='transcript'
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Transcription</FormLabel>
+                    <FormLabel>Transcript</FormLabel>
                     <FormControl>
-                      <Textarea placeholder='Enter transcription' {...field} rows={10} />
+                      <Textarea placeholder='Enter transcript' {...field} rows={10} />
                     </FormControl>
-                    <FormDescription>Manual transcription of the audio</FormDescription>
+                    <FormDescription>Manual transcript of the audio</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

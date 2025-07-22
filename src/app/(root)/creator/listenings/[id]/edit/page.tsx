@@ -64,6 +64,14 @@ export default function EditListeningTaskPage() {
     <ToastProvider>
       <div className='container mx-auto p-4 space-y-6'>
         <h1 className='text-2xl font-bold mb-6'>Edit Listening Task</h1>
+        {taskData?.transcript && (
+          <div>
+            <h3 className='text-lg font-medium mb-2'>Transcript</h3>
+            <div className='p-4 bg-gray-50 rounded-md whitespace-pre-wrap'>
+              {taskData.transcript}
+            </div>
+          </div>
+        )}
         {taskData && <ListeningTaskForm taskId={taskId} initialData={taskData} mode='edit' />}
       </div>
     </ToastProvider>

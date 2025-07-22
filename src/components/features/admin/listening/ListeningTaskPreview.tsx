@@ -142,12 +142,12 @@ export function ListeningTaskPreview({
             </div>
           )}
 
-          {/* Transcription (if any) */}
-          {taskData.transcription && (
-            <div className='bg-gray-50 p-4 rounded-lg border mt-2'>
-              <h4 className='font-semibold mb-2'>Transcription</h4>
-              <div className='prose prose-sm max-w-none text-gray-700'>
-                {taskData.transcription}
+          {/* Transcript (if any) */}
+          {taskData.transcript && (
+            <div>
+              <h4 className='font-semibold mb-2'>Transcript</h4>
+              <div className='p-4 bg-gray-50 rounded-md whitespace-pre-wrap'>
+                {taskData.transcript}
               </div>
             </div>
           )}
