@@ -183,7 +183,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
         section_order: g.section_order,
         section_label: g.section_label,
         instruction: g.instruction,
-        question_type: g.questions && g.questions[0]?.question_type,
+        question_type: g.question_type,
         questions: g.questions ?? [],
         drag_items: g.drag_items ?? [],
       }));
@@ -545,7 +545,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
                       section_order: g.section_order,
                       section_label: g.section_label,
                       instruction: g.instruction,
-                      question_type: g.questions && g.questions[0]?.question_type,
+                      question_type: g.question_type,
                       questions: g.questions ?? [],
                       drag_items: g.drag_items ?? [],
                     }));
