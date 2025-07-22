@@ -24,16 +24,54 @@ import {
   SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { useAppSelector, useAuth } from '@/hooks';
-import { BookOpen, LayoutDashboard, LogOut, Settings, User2 } from 'lucide-react';
+import {
+  ClipboardCheck,
+  Ear,
+  FileText,
+  Headphones,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+  User2,
+} from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
+
+const sidebarNavItems = [
+  {
+    title: 'Dashboard',
+    href: '/creator',
+    icon: <LayoutDashboard className='h-4 w-4' />,
+  },
+  {
+    title: 'Reading Passages',
+    href: '/creator/passages',
+    icon: <FileText className='h-4 w-4' />,
+  },
+  {
+    title: 'Reading Exams',
+    href: '/creator/reading-exams',
+    icon: <ClipboardCheck className='h-4 w-4' />,
+  },
+  {
+    title: 'Listening Tasks',
+    href: '/creator/listenings',
+    icon: <Headphones className='h-4 w-4' />,
+  },
+  {
+    title: 'Listening Exams',
+    href: '/creator/listening-exams',
+    icon: <Ear className='h-4 w-4' />,
+  },
+];
 
 export function AppSidebar() {
   const { signOut } = useAuth();
   const { replace } = useRouter();
+  const pathname = usePathname();
   const { user } = useAppSelector((state) => state.auth);
 
   const handleLogout = async () => {
@@ -59,46 +97,24 @@ export function AppSidebar() {
           <SidebarGroupLabel>Main</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href='/creator'>
-                    <LayoutDashboard className='h-4 w-4' />
-                    <span>Dashboard</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href='/creator/passages'>
-                    <BookOpen className='h-4 w-4' />
-                    <span>Reading Passages</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href='/creator/reading-exams'>
-                    <BookOpen className='h-4 w-4' />
-                    <span>Reading Exams</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href='/creator/listenings'>
-                    <BookOpen className='h-4 w-4' />
-                    <span>Listening Tasks</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link href='/creator/listening-exams'>
-                    <BookOpen className='h-4 w-4' />
-                    <span>Listening Exams</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {sidebarNavItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    className={
+                      pathname === item.href ||
+                      (item.href !== '/creator' && pathname.startsWith(item.href))
+                        ? 'bg-blue-500 text-white'
+                        : undefined
+                    }
+                  >
+                    <Link href={item.href}>
+                      {item.icon}
+                      <span>{item.title}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
