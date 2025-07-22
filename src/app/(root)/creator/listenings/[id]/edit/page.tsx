@@ -2,10 +2,12 @@
 
 import { ListeningTaskForm } from '@/components/features/admin/listening/ListeningTaskForm';
 import { Card, CardContent } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 import { ToastProvider } from '@/components/ui/toast';
 import { useListeningTask } from '@/hooks';
 import { useParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import React, { useEffect, useState } from 'react';
 
 export default function EditListeningTaskPage() {
   const params = useParams();
@@ -64,16 +66,30 @@ export default function EditListeningTaskPage() {
     <ToastProvider>
       <div className='container mx-auto p-4 space-y-6'>
         <h1 className='text-2xl font-bold mb-6'>Edit Listening Task</h1>
-        {taskData?.transcript && (
-          <div>
-            <h3 className='text-lg font-medium mb-2'>Transcript</h3>
-            <div className='p-4 bg-gray-50 rounded-md whitespace-pre-wrap'>
-              {taskData.transcript}
-            </div>
-          </div>
-        )}
-        {taskData && <ListeningTaskForm taskId={taskId} initialData={taskData} mode='edit' />}
+        {/* Transcript editable textarea, always show in edit mode */}
+        {taskData && <TranscriptTextareaWrapper taskData={taskData} taskId={taskId} />}
       </div>
     </ToastProvider>
+  );
+}
+
+function TranscriptTextareaWrapper({ taskData, taskId }: { taskData: any; taskId: string }) {
+  const [transcript, setTranscript] = useState(taskData.transcript || '');
+  const [localTaskData, setLocalTaskData] = useState(taskData);
+  const router = useRouter();
+
+  // Khi transcript thay đổi, cập nhật vào localTaskData để truyền vào form
+  const handleTranscriptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setTranscript(e.target.value);
+    setLocalTaskData((prev: any) => ({ ...prev, transcript: e.target.value }));
+  };
+
+  return (
+    <div className='mb-4'>
+      <h3 className='text-lg font-medium mb-2'>Transcript</h3>
+      <Textarea value={transcript} onChange={handleTranscriptChange} rows={10} className='mb-2' />
+      {/* Truyền localTaskData vào form để cập nhật transcript */}
+      <ListeningTaskForm taskId={taskId} initialData={localTaskData} mode='edit' />
+    </div>
   );
 }
