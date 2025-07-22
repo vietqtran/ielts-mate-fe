@@ -54,7 +54,7 @@ export default function ReadingExamsPage() {
       <div className='flex justify-between items-center mb-6'>
         <h1 className='text-3xl font-bold'>Reading Exams</h1>
         <Button asChild>
-          <Link href='/reading-exams/create'>
+          <Link href='/creator/reading-exams/create'>
             <PlusCircle className='mr-2 h-4 w-4' />
             Create Exam
           </Link>
