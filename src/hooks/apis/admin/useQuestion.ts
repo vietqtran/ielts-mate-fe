@@ -124,12 +124,15 @@ export function useQuestion() {
   };
 
   // Get choices by question ID
-  const getChoicesByQuestionId = async (question_id: string) => {
+  const getChoicesByQuestionId = async (question_id: string, isListening = false) => {
     setLoadingState('getChoicesByQuestionId', true);
     setErrorState('getChoicesByQuestionId', null);
 
     try {
-      const { data } = await instance.get(`/reading/questions/${question_id}/choices`);
+      const endpoint = isListening
+        ? `/listening/questions/${question_id}/choices`
+        : `/reading/questions/${question_id}/choices`;
+      const { data } = await instance.get(endpoint);
       return data as BaseResponse<QuestionCreationResponse['choices']>;
     } catch (error) {
       setErrorState('getChoicesByQuestionId', error as Error);
@@ -140,12 +143,15 @@ export function useQuestion() {
   };
 
   // Create choice for question
-  const createChoice = async (question_id: string, choice: ChoiceRequest) => {
+  const createChoice = async (question_id: string, choice: ChoiceRequest, isListening = false) => {
     setLoadingState('createChoice', true);
     setErrorState('createChoice', null);
 
     try {
-      const { data } = await instance.post(`/reading/questions/${question_id}/choices`, choice);
+      const endpoint = isListening
+        ? `/listening/questions/${question_id}/choices`
+        : `/reading/questions/${question_id}/choices`;
+      const { data } = await instance.post(endpoint, choice);
       return data as BaseResponse<QuestionCreationResponse['choices']>;
     } catch (error) {
       setErrorState('createChoice', error as Error);
@@ -159,16 +165,17 @@ export function useQuestion() {
   const updateChoice = async (
     question_id: string,
     choice_id: string,
-    choice: Partial<ChoiceRequest>
+    choice: Partial<ChoiceRequest>,
+    isListening = false
   ) => {
     setLoadingState('updateChoice', true);
     setErrorState('updateChoice', null);
 
     try {
-      const { data } = await instance.put(
-        `/reading/questions/${question_id}/choices/${choice_id}`,
-        choice
-      );
+      const endpoint = isListening
+        ? `/listening/questions/${question_id}/choices/${choice_id}`
+        : `/reading/questions/${question_id}/choices/${choice_id}`;
+      const { data } = await instance.put(endpoint, choice);
       return data as BaseResponse<QuestionCreationResponse['choices']>;
     } catch (error) {
       setErrorState('updateChoice', error as Error);
@@ -179,14 +186,15 @@ export function useQuestion() {
   };
 
   // Delete choice
-  const deleteChoice = async (question_id: string, choice_id: string) => {
+  const deleteChoice = async (question_id: string, choice_id: string, isListening = false) => {
     setLoadingState('deleteChoice', true);
     setErrorState('deleteChoice', null);
 
     try {
-      const { data } = await instance.delete(
-        `/reading/questions/${question_id}/choices/${choice_id}`
-      );
+      const endpoint = isListening
+        ? `/listening/questions/${question_id}/choices/${choice_id}`
+        : `/reading/questions/${question_id}/choices/${choice_id}`;
+      const { data } = await instance.delete(endpoint);
       return data as BaseResponse<void>;
     } catch (error) {
       setErrorState('deleteChoice', error as Error);

@@ -83,7 +83,7 @@ export function MultipleChoiceManager({
         );
         if (choicesToDelete.length > 0) {
           const deletePromises = choicesToDelete.map((choice: any) =>
-            deleteChoice(questionId, choice.choice_id)
+            deleteChoice(questionId, choice.choice_id, isListening)
           );
           await Promise.all(deletePromises);
         }
@@ -96,7 +96,7 @@ export function MultipleChoiceManager({
           })
           .map((choice: any) => {
             const { id, ...updateData } = choice; // Clean data for update
-            return updateChoice(questionId, choice.id, updateData);
+            return updateChoice(questionId, choice.id, updateData, isListening);
           });
 
         if (unsetCorrectPromises.length > 0) {
@@ -118,7 +118,7 @@ export function MultipleChoiceManager({
           })
           .map((choice: any) => {
             const { id, ...updateData } = choice; // Clean data for update
-            return updateChoice(questionId, choice.id, updateData);
+            return updateChoice(questionId, choice.id, updateData, isListening);
           });
 
         if (otherUpdatePromises.length > 0) {
@@ -130,13 +130,13 @@ export function MultipleChoiceManager({
         if (choicesToCreate.length > 0) {
           const createPromises = choicesToCreate.map((choice: any) => {
             const { id, ...creationData } = choice; // Ensure no client-side ID is sent
-            return createChoice(questionId, creationData);
+            return createChoice(questionId, creationData, isListening);
           });
           await Promise.all(createPromises);
         }
 
         // 3. Refetch choices to get the final state
-        const updatedChoicesResponse = await getChoicesByQuestionId(questionId);
+        const updatedChoicesResponse = await getChoicesByQuestionId(questionId, isListening);
 
         // 4. Construct the final, authoritative question object
         const finalUpdatedQuestion = {
