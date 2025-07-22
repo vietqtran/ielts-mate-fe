@@ -88,8 +88,13 @@ function TranscriptTextareaWrapper({ taskData, taskId }: { taskData: any; taskId
     <div className='mb-4'>
       <h3 className='text-lg font-medium mb-2'>Transcript</h3>
       <Textarea value={transcript} onChange={handleTranscriptChange} rows={10} className='mb-2' />
-      {/* Truyền localTaskData vào form để cập nhật transcript */}
-      <ListeningTaskForm taskId={taskId} initialData={localTaskData} mode='edit' />
+      {/* Truyền transcript mới nhất vào form qua prop transcript */}
+      <ListeningTaskForm
+        taskId={taskId}
+        initialData={localTaskData}
+        mode='edit'
+        transcript={transcript}
+      />
     </div>
   );
 }

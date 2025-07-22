@@ -100,13 +100,19 @@ interface ListeningTaskFormProps {
     audio_file_id?: string;
   };
   mode: 'create' | 'edit';
+  transcript?: string;
 }
 
 type CreateFormType = z.infer<typeof createSchema>;
 type EditFormType = z.infer<typeof editSchema>;
 type FormType = CreateFormType | EditFormType;
 
-export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFormProps) {
+export function ListeningTaskForm({
+  taskId,
+  initialData,
+  mode,
+  transcript,
+}: ListeningTaskFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const { createListeningTask, updateListeningTask, isLoading, deleteGroupQuestion } =
@@ -130,7 +136,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
             instruction: initialData?.instruction || '',
             status: initialData?.status || 0,
             is_automatic_transcription: true,
-            transcript: initialData?.transcript || '',
+            transcript: typeof transcript === 'string' ? transcript : initialData?.transcript || '',
             audio_file: undefined as unknown as File,
           }
         : {
@@ -140,7 +146,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
             instruction: initialData?.instruction || '',
             status: initialData?.status || 0,
             is_automatic_transcription: true,
-            transcript: initialData?.transcript || '',
+            transcript: typeof transcript === 'string' ? transcript : initialData?.transcript || '',
           },
   });
 
