@@ -17,6 +17,7 @@ import {
   listeningTasksReducer,
   passageReducer,
   readingAttemptReducer,
+  readingExamAttemptReducer,
   userPassageReducer,
 } from './slices';
 
@@ -27,7 +28,15 @@ const persistConfig = {
   key: 'root',
   version: 1,
   storage,
-  whitelist: ['auth', 'authForm', 'common', 'passage', 'userPassage', 'readingAttempt'],
+  whitelist: [
+    'auth',
+    'authForm',
+    'common',
+    'passage',
+    'userPassage',
+    'readingAttempt',
+    'readingExamAttempt',
+  ],
 };
 
 const rootReducer = combineReducers({
@@ -39,7 +48,7 @@ const rootReducer = combineReducers({
   listeningTasks: listeningTasksReducer,
   readingAttempt: readingAttemptReducer,
   listeningAttempt: listeningAttemptReducer,
-  readingExamAttempt: readingAttemptReducer,
+  readingExamAttempt: readingExamAttemptReducer,
 });
 
 const persistedReducer = persistReducer<RootState>(persistConfig, rootReducer);

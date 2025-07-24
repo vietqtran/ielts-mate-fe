@@ -1,5 +1,6 @@
 import instance from '@/lib/axios';
 import {
+  ReadingExamAttemptList,
   ReadingExamData,
   SubmitExamAttemptAnswersRequest,
   SubmitExamResultResponse,
@@ -106,7 +107,7 @@ const useReadingExamAttempt = () => {
 
       // Only return data if this is still the current request
       if (abortControllerRef.current === currentController) {
-        return response.data;
+        return response.data.data as ReadingExamAttemptList;
       }
     } catch (error) {
       // Only handle error if this is still the current request

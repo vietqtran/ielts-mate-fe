@@ -99,3 +99,24 @@ export interface ResultSet {
   is_correct: boolean;
   explanation: string;
 }
+
+/**
+ * Type definitions of response for Get Reading Exam Attempt History
+ */
+export type ReadingExamAttempt = {
+  exam_attempt_id: string;
+  reading_exam: {
+    reading_exam_id: string;
+    reading_exam_name: string;
+    reading_exam_description: string;
+    url_slug: string;
+  };
+  duration: number;
+  total_question: number;
+  created_by: CreatedBy;
+  updated_by: CreatedBy;
+  created_at: string;
+  updated_at: string;
+};
+
+export type ReadingExamAttemptList = ReadingExamAttempt[];
