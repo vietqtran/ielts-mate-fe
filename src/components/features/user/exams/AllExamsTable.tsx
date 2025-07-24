@@ -11,8 +11,8 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useReadingExam } from '@/hooks/apis/admin/useReadingExam';
 import { useListeningExam } from '@/hooks/apis/listening/useListeningExam';
+import useReadingExamAttempt from '@/hooks/apis/reading/useReadingExamAttempt';
 import { ReadingExamResponse } from '@/types/reading-exam.types';
 import { BookOpen, Eye, Headphones } from 'lucide-react';
 import Link from 'next/link';
@@ -39,7 +39,7 @@ interface AllExamsTableProps {
 }
 
 export default function AllExamsTable({ className, onRetry }: AllExamsTableProps) {
-  const { getAllExams: getReadingExams, isLoading: isReadingLoading } = useReadingExam();
+  const { getAllAvailableExams, isLoading: isReadingLoading } = useReadingExamAttempt();
   const {
     fetchExams: fetchListeningExams,
     isLoading: isListeningLoading,
@@ -51,7 +51,7 @@ export default function AllExamsTable({ className, onRetry }: AllExamsTableProps
 
   const fetchReadingExams = async () => {
     try {
-      const response = await getReadingExams();
+      const response = await getAllAvailableExams();
       if (response && response.data) {
         setReadingExams(response.data);
       }

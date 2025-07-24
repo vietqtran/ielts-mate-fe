@@ -15,8 +15,9 @@ export enum AttemptStatusEnumIndex {
 
 // Response types for fetching attempt data
 export interface AttemptData {
-  attempt_id: string;
-  reading_passage_id: string;
+  attempt_id?: string; // for reading attempt only
+  reading_passage_id?: string; // for reading attempt only
+  passage_ids?: string; // for exam reading attempt only
   ielts_type: number;
   title: string;
   part_number: number;

@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 
 const ExamDispatcher = async () => {
-  return redirect('/exams/all');
+  return redirect('/exams/reading');
 };
 
 export default ExamDispatcher;

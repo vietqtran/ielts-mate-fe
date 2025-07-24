@@ -20,9 +20,9 @@
 
 Always use the following color palette as the primary design system colors for all UI design, code generation, and Tailwind/React/HTML/CSS suggestions, unless otherwise instructed.
 
-When generating any color references (including Tailwind classes, inline styles, or CSS custom properties), prefer these variables and their OKLCH values.
+When generating any color references (including Tailwind classes, inline styles, or CSS custom properties), prefer these variables and their OKLCH values in Color Palette section below.
 
-## Color Palette:
+## Color Palette (main themed colors for IELTS Mate)
 
 :root {
 --color-tekhelet-100: oklch(0.19 0.04 286.49);
@@ -79,8 +79,30 @@ When generating any color references (including Tailwind classes, inline styles,
 **Guidelines:**
 
 - Treat these CSS variables as the source of truth for all UI/UX, Tailwind, and CSS color output.
+- These colors are configured in the Tailwind CSS new configuration file (globals.css), so you can use them directly in Tailwind classes, eg: `bg-tekhelet-500`, `text-medium-slate-blue-300`, etc.
+- Use constrast colors for text and backgrounds, ensuring readability and accessibility. You can use color usage like below:
+  App background: --color-tekhelet-900 or --color-medium-slate-blue-900: Both are very light, almost white; ideal for clean backgrounds.
+
+  Card/Section BG: --color-tekhelet-100 or --color-medium-slate-blue-100: Subtle, slightly tinted panels for depth.
+
+  Primary text: --color-tekhelet-700 or --color-medium-slate-blue-700: Deep, highly readable against very light backgrounds.
+
+  Secondary text: --color-tekhelet-500 or --color-medium-slate-blue-500: For muted info, labels, helper text.
+
+  Links/Highlight: --color-medium-slate-blue-500: Pops on light BG, feels lively but readable.
+
+  Primary button: --color-selective-yellow-500: Strong call-to-action yellow.
+
+  Button text: --color-tekhelet-900: Dark text for excellent contrast on yellow button.
+
+  Warning/Alert: --color-persimmon-500 or red color: Noticeable warm for errors or important alerts.
+
+  Border/Divider: --color-tekhelet-200: Subtle, not distracting but enough separation.
+
+  Correct text: use Tailwind's default green colors
+
+- For text colors, do not use too faded colors, always ensure sufficient contrast against the background.
+- Do not use inline CSS styles for colors unless explicitly requested, only use Tailwind classes.
 - When a design needs a color, select from this palette using the closest semantic match.
-- Use OKLCH color references for modernity and accessibility.
-- When generating Tailwind classes, prefer custom utility syntax that references these colors if possible (e.g., `bg-tekhelet`).
 
 **Do not use hardcoded hex or RGB colors unless directly instructed.**

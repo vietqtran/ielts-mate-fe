@@ -11,9 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useReadingExam } from '@/hooks/apis/admin/useReadingExam';
+import useReadingExamAttempt from '@/hooks/apis/reading/useReadingExamAttempt';
 import { ReadingExamResponse } from '@/types/reading-exam.types';
-import { Eye } from 'lucide-react';
+import { Play } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
@@ -23,12 +23,12 @@ interface ReadingExamsTableProps {
 }
 
 export default function ReadingExamsTable({ className }: ReadingExamsTableProps) {
-  const { getAllExams, isLoading } = useReadingExam();
+  const { getAllAvailableExams, isLoading } = useReadingExamAttempt();
   const [exams, setExams] = useState<ReadingExamResponse['data'][]>([]);
 
   const fetchExams = async () => {
     try {
-      const response = await getAllExams();
+      const response = await getAllAvailableExams();
       if (response) {
         setExams(response.data);
       }
@@ -92,9 +92,10 @@ export default function ReadingExamsTable({ className }: ReadingExamsTableProps)
                 </TableCell>
                 <TableCell className='text-right'>
                   <div className='flex justify-end gap-2'>
-                    <Button variant='outline' size='icon' asChild>
-                      <Link href={`/reading-exams/${exam.reading_exam_id}`}>
-                        <Eye className='h-4 w-4' />
+                    <Button size='sm' asChild className='bg-tekhelet-600 hover:bg-tekhelet-700'>
+                      <Link href={`/exams/preview?examUrl=${exam.url_slug}`}>
+                        <Play className='h-4 w-4' />
+                        Take Exam
                       </Link>
                     </Button>
                   </div>

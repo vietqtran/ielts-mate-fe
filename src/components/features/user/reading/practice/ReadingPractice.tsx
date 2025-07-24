@@ -108,7 +108,7 @@ const ReadingPractice = ({ passages, initialAnswers, initialDuration }: ReadingP
         };
 
         await saveAttemptProgress({
-          attempt_id: passages.attempt_id,
+          attempt_id: passages.attempt_id as string,
           payload,
         }).then((res) => {
           if (res) {
@@ -162,7 +162,7 @@ const ReadingPractice = ({ passages, initialAnswers, initialDuration }: ReadingP
         };
 
         await submitAttempt({
-          attempt_id: passages.attempt_id,
+          attempt_id: passages.attempt_id as string,
           payload,
         }).then((res) => {
           if (res) {

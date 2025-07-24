@@ -1,0 +1,101 @@
+import { AttemptData } from '@/types/attempt.types';
+
+/**
+ * Type definitions of response for Create Reading Exam Attempt
+ */
+export interface ReadingExamData {
+  exam_attempt_id: string;
+  reading_exam: ReadingExam;
+  url_slug: string;
+  created_by: CreatedBy;
+  created_at: string;
+}
+
+type UrlSlug = string;
+
+type CreatedBy = {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+};
+
+export interface ReadingExam {
+  reading_exam_id: string;
+  reading_exam_name: string;
+  reading_exam_description: string;
+  url_slug: string;
+  reading_passage_id_part1: AttemptData;
+  reading_passage_id_part2: AttemptData;
+  reading_passage_id_part3: AttemptData;
+}
+
+/**
+ * Type definitions of submit payload for Reading Exam Attempt
+ */
+// Represents the whole exam attempt submission payload
+export interface SubmitExamAttemptAnswersRequest {
+  /**
+   * List of 3 passage IDs (UUIDs) included in exam.
+   */
+  passage_id: string[];
+
+  /**
+   * List of all question group IDs (UUIDs) present in exam.
+   */
+  question_group_ids: string[];
+
+  /**
+   * List of all item IDs (UUIDs) used for drag and drop questions in exam.
+   */
+  item_ids: string[];
+
+  /**
+   * Array of answers for each question the user has answered.
+   * Each item corresponds to one question answered by the user.
+   */
+  answers: SubmitExamAnswerRequest[];
+
+  /**
+   * Time spent on the exam (in seconds).
+   */
+  duration: number;
+}
+
+// Represents a single answer for one question in the exam attempt
+export interface SubmitExamAnswerRequest {
+  /**
+   * UUID of the question being answered.
+   */
+  question_id: string;
+
+  /**
+   * List of selected answers for the question:
+   *  - For multiple choice: array of selected choice ids (as strings).
+   *  - For fill in the blank: array of user filled answers, e.g. ["user answer"].
+   *  - For matching: array of pairs as string, e.g. ["4-A"].
+   *  - For drag and drop: array of item ids selected by the user, e.g. ["item id"].
+   */
+  selected_answers: string[];
+
+  /**
+   * For multiple choice questions: Pass a list of **all choice ids** (not just selected ones) for this question.
+   * For other question types: pass an empty array or omit this field by passing `null`.
+   */
+  choice_ids: string[];
+}
+
+/**
+ * Type definitions of response for Submit Reading Exam Attempt
+ */
+export interface SubmitExamResultResponse {
+  duration: number;
+  result_sets: ResultSet[];
+}
+export interface ResultSet {
+  question_index: number;
+  correct_answer: string[];
+  user_answer: string[];
+  is_correct: boolean;
+  explanation: string;
+}

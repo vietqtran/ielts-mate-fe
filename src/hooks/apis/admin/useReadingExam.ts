@@ -102,7 +102,7 @@ export function useReadingExam() {
   };
 
   /**
-   * Get all reading exams
+   * Get all reading exams (for creator only)
    */
   const getAllExams = async () => {
     if (abortControllerRef.current) {
