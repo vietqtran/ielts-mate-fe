@@ -39,6 +39,7 @@ const rootReducer = combineReducers({
   listeningTasks: listeningTasksReducer,
   readingAttempt: readingAttemptReducer,
   listeningAttempt: listeningAttemptReducer,
+  readingExamAttempt: readingAttemptReducer,
 });
 
 const persistedReducer = persistReducer<RootState>(persistConfig, rootReducer);

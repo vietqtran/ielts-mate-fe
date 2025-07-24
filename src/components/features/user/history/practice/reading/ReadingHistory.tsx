@@ -44,8 +44,6 @@ const ReadingHistory = () => {
   const reduxIsLoading = useSelector((state: RootState) => state.readingAttempt.isLoading);
   const pagination = useSelector((state: RootState) => state.readingAttempt.pagination);
 
-  console.log('reduxIsLoading', reduxIsLoading);
-
   // Load attempts when dependencies change
   useEffect(() => {
     const loadAttempts = async () => {

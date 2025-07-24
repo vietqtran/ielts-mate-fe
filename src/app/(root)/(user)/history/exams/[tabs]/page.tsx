@@ -1,3 +1,5 @@
+import ReadingExamHistory from '@/components/features/user/history/exam/reading/ReadingExamHistory';
+
 interface ExamsTabControllerProps {
   params: Promise<{ tabs: string }>;
 }
@@ -7,7 +9,7 @@ const ExamsTabController = async ({ params }: ExamsTabControllerProps) => {
 
   switch (tabs) {
     case 'reading':
-      return <div>Reading Exams History</div>; // reading exams component
+      return <ReadingExamHistory />;
     case 'listening':
       return <div>Listening Exams History</div>;
     default:

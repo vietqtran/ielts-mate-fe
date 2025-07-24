@@ -14,6 +14,7 @@ export interface RootState {
   listeningTasks: ListeningTasksStates;
   readingAttempt: ReadingAttemptState;
   listeningAttempt: ListeningAttemptState;
+  readingExamAttempt: ReadingAttemptState;
 }
 
 export interface AuthState {
