@@ -171,6 +171,8 @@ const TakeExam = ({ examData, initialAnswers }: TakeExamProps) => {
     return notAnswered;
   };
 
+  console.log(examData.reading_exam.reading_passage_id_part3.passage_id);
+
   const handleSubmit = async () => {
     try {
       // Transform answers data to match the required payload format
@@ -180,14 +182,14 @@ const TakeExam = ({ examData, initialAnswers }: TakeExamProps) => {
       const itemIds: string[] = [];
 
       // Extract passage IDs (with null checks)
-      if (examData.reading_exam.reading_passage_id_part1.reading_passage_id) {
-        passageIds.push(examData.reading_exam.reading_passage_id_part1.reading_passage_id);
+      if (examData.reading_exam.reading_passage_id_part1.passage_id) {
+        passageIds.push(examData.reading_exam.reading_passage_id_part1.passage_id);
       }
-      if (examData.reading_exam.reading_passage_id_part2.reading_passage_id) {
-        passageIds.push(examData.reading_exam.reading_passage_id_part2.reading_passage_id);
+      if (examData.reading_exam.reading_passage_id_part2.passage_id) {
+        passageIds.push(examData.reading_exam.reading_passage_id_part2.passage_id);
       }
-      if (examData.reading_exam.reading_passage_id_part3.reading_passage_id) {
-        passageIds.push(examData.reading_exam.reading_passage_id_part3.reading_passage_id);
+      if (examData.reading_exam.reading_passage_id_part3.passage_id) {
+        passageIds.push(examData.reading_exam.reading_passage_id_part3.passage_id);
       }
 
       // Process each part and collect data

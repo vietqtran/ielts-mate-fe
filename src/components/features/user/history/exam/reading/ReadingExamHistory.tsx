@@ -143,7 +143,7 @@ const ReadingExamHistory = () => {
   };
 
   const handleViewAttempt = (attemptId: string) => {
-    router.push(`/history/exams/reading/${attemptId}`);
+    router.push(`/history/exams/details?mode=reading&examId=${attemptId}`);
   };
 
   // Filter and sort data locally since the API doesn't support these operations

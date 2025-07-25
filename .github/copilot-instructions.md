@@ -93,12 +93,12 @@ Built for usability, accessibility, and effective IELTS skill-building.
 - Color Usage Reference:
 
   - App background: Use bg-white
-  - Card/Section background: --color-medium-slate-blue-900 or white
+  - Card/Section background: Use bg-white
   - Primary text: --color-tekhelet-400 or --color-medium-slate-blue-400
   - Secondary text: --color-tekhelet-500 or --color-medium-slate-blue-500
   - Links/Highlight: --color-medium-slate-blue-300 or --color-tekhelet-300
-  - Primary button: --color-selective-yellow-400 (text: --color-tekhelet-300 or 400)
-  - Warning/Alert: --color-persimmon-300
+  - Primary button: --color-selective-yellow-300 (text: bg-white)
+  - Warning/Alert: --color-persimmon-300 or Tailwind’s default red scale.
   - Border/Divider: --color-tekhelet-900
   - Success/Correct: Use Tailwind’s default green scale.
 
@@ -109,7 +109,7 @@ Built for usability, accessibility, and effective IELTS skill-building.
 - Apply a glassmorphism effect to all main content surfaces (cards, panels, modals, navigation). Use:
   - Semi-transparent backgrounds (bg-white/60, bg-tekhelet-100/60)
   - Backdrop blur (backdrop-blur-md or backdrop-blur-lg)
-  - Subtle borders and soft shadows (border, shadow-xl)
+  - Soft shadows (shadow-xl)
   - Rounded corners (rounded-2xl)
 
 - Text must remain clear and accessible over blurred backgrounds.
@@ -127,6 +127,7 @@ Example:
 - No inline CSS for colors unless absolutely necessary.
 - Always map every color/effect to the palette and glassmorphism instructions above.
 - When unsure of color, use the nearest semantic match from the palette.
+- DO NOT add border lines unless specified. Use shadows for depth.
 
 ### 4. Summary Checklist
 
