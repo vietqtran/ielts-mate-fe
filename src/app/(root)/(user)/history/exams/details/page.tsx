@@ -2,14 +2,14 @@ import ListeningExamDetailsPage from '@/components/features/user/exams/listening
 import ReadingExamDetailsPage from '@/components/features/user/exams/reading/ReadingExamDetailsPage';
 
 interface ExamDetailsProps {
-  searchParams: {
+  searchParams: Promise<{
     mode?: string;
     examId?: string;
-  };
+  }>;
 }
 
-const ExamDetails = ({ searchParams }: ExamDetailsProps) => {
-  const { mode = 'reading', examId } = searchParams;
+const ExamDetails = async ({ searchParams }: ExamDetailsProps) => {
+  const { mode = 'reading', examId } = await searchParams;
 
   // If no examId is provided, redirect or show error
   if (!examId) {
