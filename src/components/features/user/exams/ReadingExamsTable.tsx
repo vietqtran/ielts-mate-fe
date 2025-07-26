@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import useReadingExamAttempt from '@/hooks/apis/reading/useReadingExamAttempt';
-import { ReadingExamResponse } from '@/types/reading-exam.types';
+import { ReadingExamResponse } from '@/types/reading/reading-exam.types';
 import { Play } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';

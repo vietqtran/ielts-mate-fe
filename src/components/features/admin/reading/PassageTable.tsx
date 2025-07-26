@@ -24,7 +24,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Pagination, PassageGetResponse } from '@/types/reading.types';
+import { Pagination, PassageGetResponse } from '@/types/reading/reading.types';
 import {
   ArrowDownIcon,
   ArrowUpIcon,

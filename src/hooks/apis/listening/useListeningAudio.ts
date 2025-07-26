@@ -26,7 +26,7 @@ const useListeningAudio = () => {
     setLoadingState('getAudio', true);
     setErrorState('getAudio', null);
 
-    // cleanup url cũ nếu có
+    // cleanup url if it exists
     setAudioUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return null;

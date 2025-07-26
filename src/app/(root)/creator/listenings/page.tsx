@@ -4,7 +4,7 @@ import { ListeningTaskFilterToolbar } from '@/components/features/admin/listenin
 import { ListeningTaskTable } from '@/components/features/admin/listening/ListeningTaskTable';
 import { Button } from '@/components/ui/button';
 import { useListeningTask } from '@/hooks';
-import { ListeningTaskFilterParams } from '@/types/listening.types';
+import { ListeningTaskFilterParams } from '@/types/listening/listening.types';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 

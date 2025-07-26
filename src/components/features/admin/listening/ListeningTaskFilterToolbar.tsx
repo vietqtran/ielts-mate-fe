@@ -14,7 +14,7 @@ import {
   IeltsListeningType,
   ListeningTaskFilterParams,
   ListeningTaskStatus,
-} from '@/types/listening.types';
+} from '@/types/listening/listening.types';
 import { SearchIcon } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 

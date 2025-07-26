@@ -1,6 +1,6 @@
 'use client';
 
-import { ReadingExamAttemptDetailsResponse } from '@/types/reading-exam-attempt.types';
+import { ReadingExamAttemptDetailsResponse } from '@/types/reading/reading-exam-attempt.types';
 import { ExamStats } from '../utils/examUtils';
 
 export const useExamStatistics = (

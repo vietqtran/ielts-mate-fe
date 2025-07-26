@@ -9,7 +9,7 @@ import {
   QuestionCreationRequest,
   QuestionCreationResponse,
   UpdateDragItemRequest,
-} from '@/types/reading.types';
+} from '@/types/reading/reading.types';
 
 import instance from '@/lib/axios';
 import { useState } from 'react';

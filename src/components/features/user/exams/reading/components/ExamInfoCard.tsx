@@ -2,7 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ReadingExamAttemptDetailsResponse } from '@/types/reading-exam-attempt.types';
+import { ReadingExamAttemptDetailsResponse } from '@/types/reading/reading-exam-attempt.types';
 import { Calendar, Clock, FileText, Trophy, User } from 'lucide-react';
 
 interface ExamInfoCardProps {

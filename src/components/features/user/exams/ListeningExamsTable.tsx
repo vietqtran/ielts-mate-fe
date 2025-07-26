@@ -22,19 +22,19 @@ interface ListeningExamsTableProps {
 }
 
 export default function ListeningExamsTable({ className }: ListeningExamsTableProps) {
-  const { fetchExams, isLoading, error, exams } = useListeningExam();
+  const { fetchListeningExamsList, isLoading, error, exams } = useListeningExam();
 
   useEffect(() => {
     const loadExams = async () => {
       try {
-        await fetchExams();
+        await fetchListeningExamsList();
       } catch (error) {
         toast.error('Failed to fetch listening exams');
       }
     };
 
     loadExams();
-  }, [fetchExams]);
+  }, []);
 
   if (isLoading) {
     return (
@@ -64,8 +64,8 @@ export default function ListeningExamsTable({ className }: ListeningExamsTablePr
             </TableRow>
           ) : (
             exams.map((exam) => (
-              <TableRow key={exam.id}>
-                <TableCell className='font-medium'>{exam.title || 'Listening Exam'}</TableCell>
+              <TableRow key={exam.listening_exam_id}>
+                <TableCell className='font-medium'>{exam.exam_name || 'Listening Exam'}</TableCell>
                 <TableCell>
                   <div className='flex flex-wrap gap-1'>
                     <Badge variant='outline' className='text-xs'>
@@ -88,7 +88,7 @@ export default function ListeningExamsTable({ className }: ListeningExamsTablePr
                 <TableCell className='text-right'>
                   <div className='flex justify-end gap-2'>
                     <Button variant='outline' size='icon' asChild>
-                      <Link href={`/listening-exams/${exam.id}`}>
+                      <Link href={`/exams/preview?examUrl=${exam.url_slug}`}>
                         <Eye className='h-4 w-4' />
                       </Link>
                     </Button>

@@ -14,8 +14,8 @@ import {
   SubmitExamAnswerRequest,
   SubmitExamAttemptAnswersRequest,
   SubmitExamResultResponse,
-} from '@/types/reading-exam-attempt.types';
-import { QuestionTypeEnumIndex } from '@/types/reading.types';
+} from '@/types/reading/reading-exam-attempt.types';
+import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { AlertTriangle, BookOpen, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';

@@ -1,7 +1,7 @@
 'use client';
 
 import useReadingExamAttempt from '@/hooks/apis/reading/useReadingExamAttempt';
-import { ReadingExamAttemptDetailsResponse } from '@/types/reading-exam-attempt.types';
+import { ReadingExamAttemptDetailsResponse } from '@/types/reading/reading-exam-attempt.types';
 import { useEffect, useState } from 'react';
 import {
   ExamErrorState,

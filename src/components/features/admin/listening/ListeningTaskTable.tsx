@@ -29,7 +29,7 @@ import {
   ListeningTaskFilterParams,
   ListeningTaskResponse,
   ListeningTaskStatus,
-} from '@/types/listening.types';
+} from '@/types/listening/listening.types';
 import {
   ArrowDown,
   ArrowUp,

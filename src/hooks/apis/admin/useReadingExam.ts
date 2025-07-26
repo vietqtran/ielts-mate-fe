@@ -8,7 +8,10 @@ import {
   updateReadingExam,
 } from '@/lib/api/reading-exams';
 import instance from '@/lib/axios';
-import { ReadingExamCreateRequest, ReadingExamUpdateRequest } from '@/types/reading-exam.types';
+import {
+  ReadingExamCreateRequest,
+  ReadingExamUpdateRequest,
+} from '@/types/reading/reading-exam.types';
 import { useRef, useState } from 'react';
 
 export function useReadingExam() {

@@ -23,7 +23,7 @@ import {
   setReadingExamAttemptSortBy,
   setReadingExamAttemptSortDirection,
 } from '@/store/slices/reading-exam-attempt-filter-slice';
-import { ReadingExamAttempt } from '@/types/reading-exam-attempt.types';
+import { ReadingExamAttempt } from '@/types/reading/reading-exam-attempt.types';
 import { RootState } from '@/types/store.types';
 import { BookOpen, Calendar, Clock, Eye, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';

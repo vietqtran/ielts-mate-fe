@@ -3,8 +3,8 @@
 import TakeExam from '@/components/features/user/exams/take/TakeExam';
 import { Button } from '@/components/ui/button';
 import useReadingExamAttempt from '@/hooks/apis/reading/useReadingExamAttempt';
-import { ReadingExamData } from '@/types/reading-exam-attempt.types';
-import { QuestionTypeEnumIndex } from '@/types/reading.types';
+import { ReadingExamData } from '@/types/reading/reading-exam-attempt.types';
+import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 

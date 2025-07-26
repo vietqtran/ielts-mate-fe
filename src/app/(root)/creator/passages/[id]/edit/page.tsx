@@ -11,7 +11,7 @@ import {
   PassageStatus,
   QuestionCreationRequest,
   QuestionTypeEnumIndex,
-} from '@/types/reading.types';
+} from '@/types/reading/reading.types';
 import { ArrowLeft, Eye, Save } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';

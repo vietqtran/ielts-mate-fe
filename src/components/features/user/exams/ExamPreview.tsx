@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ReadingExamResponse } from '@/types/reading-exam.types';
+import { ReadingExamResponse } from '@/types/reading/reading-exam.types';
 import { ArrowLeft, ArrowRight, BookOpen, Clock, FileText } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 

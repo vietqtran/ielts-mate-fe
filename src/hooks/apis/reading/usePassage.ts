@@ -7,7 +7,7 @@ import {
   PassageCreationRequest,
   PassageDetailResponse,
   PassageGetResponse,
-} from '@/types/reading.types';
+} from '@/types/reading/reading.types';
 import { useRef, useState } from 'react';
 
 import instance from '@/lib/axios';

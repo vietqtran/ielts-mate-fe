@@ -2,7 +2,7 @@
 
 import { HandleAnswerChangeParams } from '@/components/features/user/reading/practice/ReadingPractice';
 import { QuestionGroup as AttemptQuestionGroup } from '@/types/attempt.types';
-import { QuestionTypeEnumIndex } from '@/types/reading.types';
+import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import DragDropQuestion from './DragDropQuestion';
 import FillInBlankQuestion from './FillInBlankQuestion';
 import MatchingQuestion from './MatchingQuestion';

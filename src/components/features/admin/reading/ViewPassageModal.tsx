@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { usePassage } from '@/hooks';
-import { PassageGetResponse, QuestionTypeEnumIndex } from '@/types/reading.types';
+import { PassageGetResponse, QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 
 interface ViewPassageModalProps {
   passage: PassageGetResponse;

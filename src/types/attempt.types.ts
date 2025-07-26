@@ -1,4 +1,4 @@
-import { QuestionTypeEnumIndex } from '@/types/reading.types';
+import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 
 // Enums for attempt status
 export enum AttemptStatus {

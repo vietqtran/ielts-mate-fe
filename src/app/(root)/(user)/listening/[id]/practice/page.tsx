@@ -1,10 +1,9 @@
 'use client';
-const ReadingPracticePage = ({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) => {
-  const searchParams = new URLSearchParams();
+
+import ListeningPracticeAttempt from '@/components/features/user/listening/practice/ListeningAttempt';
+
+const ListeningPractice = () => {
+  return <ListeningPracticeAttempt />;
 };
 
-export default ReadingPracticePage;
+export default ListeningPractice;

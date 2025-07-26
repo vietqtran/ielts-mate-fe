@@ -3,8 +3,11 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useListeningTask } from '@/hooks';
-import { ListeningTaskDetailResponse, ListeningTaskStatus } from '@/types/listening.types';
-import { QuestionTypeEnumIndex } from '@/types/reading.types';
+import {
+  ListeningTaskDetailResponse,
+  ListeningTaskStatus,
+} from '@/types/listening/listening.types';
+import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 

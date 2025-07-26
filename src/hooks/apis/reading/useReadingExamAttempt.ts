@@ -5,7 +5,7 @@ import {
   ReadingExamData,
   SubmitExamAttemptAnswersRequest,
   SubmitExamResultResponse,
-} from '@/types/reading-exam-attempt.types';
+} from '@/types/reading/reading-exam-attempt.types';
 import { useRef, useState } from 'react';
 
 const useReadingExamAttempt = () => {

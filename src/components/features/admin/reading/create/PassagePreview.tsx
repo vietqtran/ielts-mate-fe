@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { IeltsType, PassageStatus, QuestionTypeEnumIndex } from '@/types/reading.types';
+import { IeltsType, PassageStatus, QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { BookOpen, CheckCircle, Clock, Users } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';

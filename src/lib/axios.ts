@@ -1,4 +1,4 @@
-import { BaseResponse } from '@/types/reading.types';
+import { BaseResponse } from '@/types/reading/reading.types';
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import { toast } from 'sonner';
 

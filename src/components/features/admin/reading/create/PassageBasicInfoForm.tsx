@@ -16,7 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { IeltsType, PassageStatus } from '@/types/reading.types';
+import { IeltsType, PassageStatus } from '@/types/reading/reading.types';
 import { ArrowRight, CheckCircle } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';

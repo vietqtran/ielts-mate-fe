@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { IeltsType, PassageStatus } from '@/types/reading.types';
+import { IeltsType, PassageStatus } from '@/types/reading/reading.types';
 import { useEffect, useState } from 'react';
 
 import { Button } from '@/components/ui/button';

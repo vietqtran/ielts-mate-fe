@@ -24,7 +24,7 @@ import {
   setListeningAttemptSortDirection,
 } from '@/store/slices/listening-attempt-filter-slice';
 import { AttemptStatusEnumIndex, ListeningAttemptHistoryResponse } from '@/types/attempt.types';
-import { IeltsTypeEnumIndex, PartNumberEnumIndex } from '@/types/reading.types';
+import { IeltsTypeEnumIndex, PartNumberEnumIndex } from '@/types/reading/reading.types';
 import { RootState } from '@/types/store.types';
 import { BookOpen, Calendar, CheckCircle, Clock, Eye, PlayCircle, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';

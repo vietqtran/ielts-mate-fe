@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ReadingExamAttemptDetailsResponse } from '@/types/reading-exam-attempt.types';
+import { ReadingExamAttemptDetailsResponse } from '@/types/reading/reading-exam-attempt.types';
 import { BookOpen } from 'lucide-react';
 import { QuestionItem } from './QuestionItem';
 

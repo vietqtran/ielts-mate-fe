@@ -1,0 +1,121 @@
+import {
+  SubmitExamAttemptAnswersRequest,
+  SubmitExamResultResponse,
+} from '@/types/reading/reading-exam-attempt.types';
+
+export interface UserInfo {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+}
+
+/**
+ * Type definitions of response for start new listening exam attempt.
+ */
+export interface StartListeningExamResponse {
+  exam_attempt_id: string;
+  listening_exam: ListeningExamDetail;
+  url_slug: string;
+  total_question: number;
+  created_by: UserInfo;
+  created_at: string;
+}
+
+export interface ListeningExamDetail {
+  listening_exam_id: string;
+  listening_exam_name: string;
+  listening_exam_description: string;
+  url_slug: string;
+  listening_task_id_part1: ListeningTaskShort;
+  listening_task_id_part2: ListeningTaskShort;
+  listening_task_id_part3: ListeningTaskShort;
+}
+
+export interface ListeningTaskShort {
+  task_id: string;
+  ielts_type: number;
+  part_number: number;
+  instruction: string;
+  title: string;
+  audio_file_id: string;
+  transcription: string;
+}
+
+/**
+ * Type definitions of request for submit listening exam attempt answers.
+ */
+export interface SubmitListeningExamAttemptAnswersRequest extends SubmitExamAttemptAnswersRequest {}
+
+/**
+ * Type definitions for response after submit listening exam attempt answers.
+ */
+export interface SubmitListeningExamAttemptAnswersResponse extends SubmitExamResultResponse {}
+
+/**
+ * Type definitions for response of get listening exam attempt details.
+ */
+export interface ListeningExamAttemptDetailsResponse {
+  exam_attempt_id: string;
+  listening_exam: ListeningExamDetail;
+  duration: number;
+  total_point: number;
+  created_by: UserInfo;
+  updated_by: UserInfo;
+  created_at: string;
+  updated_at: string;
+  answers: Record<string, string[]>;
+}
+
+export interface ListeningExamDetail {
+  listening_exam_id: string;
+  listening_exam_name: string;
+  listening_exam_description: string;
+  url_slug: string;
+  listening_task_id_part1: ListeningTaskShort;
+  listening_task_id_part2: ListeningTaskShort;
+  listening_task_id_part3: ListeningTaskShort;
+}
+
+/**
+ * Type definitions for response of get listening exam attempts history.
+ */
+export interface ListeningExamAttemptsHistoryResponse {
+  exam_attempt_id: string;
+  listening_exam: ListeningExamBasic;
+  duration: number;
+  total_question: number;
+  created_by: UserInfo;
+  updated_by: UserInfo;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ListeningExamBasic {
+  listening_exam_id: string;
+  listening_exam_name: string;
+  listening_exam_description: string;
+  url_slug: string;
+}
+
+/**
+ * Type definition for the response of get list active listening exams.
+ */
+export interface ListActiveListeningExamsResponse {
+  listening_exam_id: string;
+  exam_name: string;
+  exam_description: string;
+  url_slug: string;
+  part1: ListeningTaskShort;
+  part2: ListeningTaskShort;
+  part3: ListeningTaskShort;
+  part4: ListeningTaskShort;
+  created_by: string;
+  created_at: string; // ISO 8601 string
+  updated_by: string;
+  updated_at: string; // ISO 8601 string
+  is_current: boolean;
+  display_version: number;
+  is_original: boolean;
+  is_deleted: boolean;
+}

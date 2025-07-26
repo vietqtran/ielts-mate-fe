@@ -5,8 +5,8 @@ import { Separator } from '@/components/ui/separator';
 import { BookOpen, CheckCircle, Clock, Users } from 'lucide-react';
 
 // You may need to adjust these imports/types to match your listening types
-import { IeltsListeningType, ListeningTaskStatus } from '@/types/listening.types';
-import { QuestionType } from '@/types/reading.types';
+import { IeltsListeningType, ListeningTaskStatus } from '@/types/listening/listening.types';
+import { QuestionType } from '@/types/reading/reading.types';
 
 export interface ListeningTaskPreviewProps {
   taskData: any;

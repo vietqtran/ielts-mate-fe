@@ -28,7 +28,7 @@ import {
   ListeningTaskCreationRequest,
   ListeningTaskStatus,
   ListeningTaskUpdateRequest,
-} from '@/types/listening.types';
+} from '@/types/listening/listening.types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';

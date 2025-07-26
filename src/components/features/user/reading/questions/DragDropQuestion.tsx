@@ -3,7 +3,7 @@
 import { HandleAnswerChangeParams } from '@/components/features/user/reading/practice/ReadingPractice';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DragItem } from '@/types/attempt.types';
-import { QuestionTypeEnumIndex } from '@/types/reading.types';
+import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { useState } from 'react';
 import React from 'react';
 

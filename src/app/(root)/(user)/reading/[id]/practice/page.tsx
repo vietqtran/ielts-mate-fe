@@ -3,7 +3,7 @@
 import ReadingPractice from '@/components/features/user/reading/practice/ReadingPractice';
 import useReadingAttempt from '@/hooks/apis/reading/useReadingAttempt';
 import { AttemptData, LoadAttemptResponse } from '@/types/attempt.types';
-import { QuestionTypeEnumIndex } from '@/types/reading.types';
+import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
