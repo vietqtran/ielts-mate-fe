@@ -362,6 +362,15 @@ export default function PersonalizedPage() {
                       <Button variant='outline' className='border-tekhelet-200 text-tekhelet-400'>
                         <Star className='h-4 w-4' />
                       </Button>
+                      <Button
+                        variant='outline'
+                        className='border-tekhelet-200 text-tekhelet-400'
+                        asChild
+                      >
+                        <Link href={`/personalized/update-module?id=${module.module_id}`}>
+                          Edit
+                        </Link>
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>

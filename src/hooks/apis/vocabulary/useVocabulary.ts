@@ -52,7 +52,7 @@ export const useVocabulary = () => {
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Failed to fetch vocabulary';
       setError(errorMessage);
-      toast.error(errorMessage);
+      // toast.error(errorMessage); // Removed toast for GET
       return null;
     } finally {
       setIsLoading((prev) => ({ ...prev, getMyVocabulary: false }));

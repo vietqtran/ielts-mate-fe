@@ -70,3 +70,27 @@ export const getMyModules = async (): Promise<ModuleListResponse> => {
   const response = await axios.get<ModuleListResponse>('/personal/module/my-flash-cards');
   return response.data;
 };
+
+/**
+ * Get a module by id
+ * @param id Module id
+ * @returns Promise with the module
+ */
+export const getModuleById = async (id: string): Promise<ModuleCreateResponse> => {
+  const response = await axios.get<ModuleCreateResponse>(`/personal/module/${id}`);
+  return response.data;
+};
+
+/**
+ * Update a module by id
+ * @param id Module id
+ * @param data Module update data
+ * @returns Promise with the updated module
+ */
+export const updateModule = async (
+  id: string,
+  data: ModuleCreateRequest
+): Promise<ModuleCreateResponse> => {
+  const response = await axios.put<ModuleCreateResponse>(`/personal/module/${id}`, data);
+  return response.data;
+};
