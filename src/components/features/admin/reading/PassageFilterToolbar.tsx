@@ -30,8 +30,6 @@ const ieltsTypeOptions = [
 const statusOptions = [
   { value: '0', label: 'Draft' },
   { value: '1', label: 'Published' },
-  { value: '2', label: 'Deactivated' },
-  { value: '3', label: 'Finished' },
   { value: '4', label: 'Test' },
 ];
 

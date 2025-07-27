@@ -9,6 +9,7 @@ export enum ListeningTaskStatus {
   DRAFT = 0,
   PUBLISHED = 1,
   DEACTIVATED = 2,
+  TEST = 4,
 }
 
 export interface ListeningTaskResponse {

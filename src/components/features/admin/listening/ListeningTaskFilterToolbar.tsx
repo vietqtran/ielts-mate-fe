@@ -174,9 +174,7 @@ export function ListeningTaskFilterToolbar({
               <SelectItem value='all'>All Statuses</SelectItem>
               <SelectItem value={ListeningTaskStatus.DRAFT.toString()}>Draft</SelectItem>
               <SelectItem value={ListeningTaskStatus.PUBLISHED.toString()}>Published</SelectItem>
-              <SelectItem value={ListeningTaskStatus.DEACTIVATED.toString()}>
-                Deactivated
-              </SelectItem>
+              <SelectItem value={ListeningTaskStatus.TEST.toString()}>Test</SelectItem>
             </SelectContent>
           </Select>
         </div>

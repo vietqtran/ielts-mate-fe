@@ -24,11 +24,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
-import { UseFormReturn } from 'react-hook-form';
 
 interface PassageBasicInfoFormProps {
   isEdit: boolean;
-  form: UseFormReturn<any>;
+  form: any;
   onSubmit: (data: any) => void;
   isLoading: boolean;
   isCompleted: boolean;
@@ -135,7 +134,7 @@ export function PassageBasicInfoForm({
               <FormField
                 control={form.control}
                 name='title'
-                render={({ field }) => (
+                render={({ field }: any) => (
                   <FormItem>
                     <FormLabel>Passage Title *</FormLabel>
                     <FormControl>
@@ -149,7 +148,7 @@ export function PassageBasicInfoForm({
               <FormField
                 control={form.control}
                 name='ielts_type'
-                render={({ field }) => (
+                render={({ field }: any) => (
                   <FormItem>
                     <FormLabel>IELTS Type *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value ?? ''}>
@@ -173,7 +172,7 @@ export function PassageBasicInfoForm({
               <FormField
                 control={form.control}
                 name='part_number'
-                render={({ field }) => (
+                render={({ field }: any) => (
                   <FormItem>
                     <FormLabel>Part Number *</FormLabel>
                     <Select
@@ -203,7 +202,7 @@ export function PassageBasicInfoForm({
               <FormField
                 control={form.control}
                 name='passage_status'
-                render={({ field }) => (
+                render={({ field }: any) => (
                   <FormItem>
                     <FormLabel>Status *</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value ?? ''}>
@@ -215,8 +214,6 @@ export function PassageBasicInfoForm({
                       <SelectContent>
                         <SelectItem value={PassageStatus.DRAFT}>Draft</SelectItem>
                         <SelectItem value={PassageStatus.PUBLISHED}>Published</SelectItem>
-                        <SelectItem value={PassageStatus.DEACTIVATED}>Deactivated</SelectItem>
-                        <SelectItem value={PassageStatus.FINISHED}>Finished</SelectItem>
                         <SelectItem value={PassageStatus.TEST}>Test</SelectItem>
                       </SelectContent>
                     </Select>
@@ -229,7 +226,7 @@ export function PassageBasicInfoForm({
             <FormField
               control={form.control}
               name='instruction'
-              render={({ field }) => (
+              render={({ field }: any) => (
                 <FormItem>
                   <FormLabel>Reading Instruction *</FormLabel>
                   <FormControl>
@@ -247,7 +244,7 @@ export function PassageBasicInfoForm({
             <FormField
               control={form.control}
               name='content'
-              render={({ field }) => (
+              render={({ field }: any) => (
                 <FormItem>
                   <FormLabel>Reading Passage Content *</FormLabel>
                   <FormControl>

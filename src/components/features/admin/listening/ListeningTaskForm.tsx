@@ -320,7 +320,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
               <FormField
                 control={form.control}
                 name='title'
-                render={({ field }) => (
+                render={({ field }: any) => (
                   <FormItem>
                     <FormLabel>Title</FormLabel>
                     <FormControl>
@@ -335,7 +335,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
               <FormField
                 control={form.control}
                 name='ielts_type'
-                render={({ field }) => (
+                render={({ field }: any) => (
                   <FormItem>
                     <FormLabel>IELTS Type</FormLabel>
                     <Select
@@ -364,7 +364,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
               <FormField
                 control={form.control}
                 name='part_number'
-                render={({ field }) => (
+                render={({ field }: any) => (
                   <FormItem>
                     <FormLabel>Part Number</FormLabel>
                     <Select
@@ -391,7 +391,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
               <FormField
                 control={form.control}
                 name='status'
-                render={({ field }) => (
+                render={({ field }: any) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
                     <Select
@@ -408,9 +408,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
                         <SelectItem value={ListeningTaskStatus.PUBLISHED.toString()}>
                           Published
                         </SelectItem>
-                        <SelectItem value={ListeningTaskStatus.DEACTIVATED.toString()}>
-                          Deactivated
-                        </SelectItem>
+                        <SelectItem value={ListeningTaskStatus.TEST.toString()}>Test</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -422,7 +420,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
             <FormField
               control={form.control}
               name='instruction'
-              render={({ field }) => (
+              render={({ field }: any) => (
                 <FormItem>
                   <FormLabel>Instruction</FormLabel>
                   <FormControl>
@@ -437,7 +435,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
             <FormField
               control={form.control}
               name='audio_file'
-              render={({ field: { value, onChange, ...fieldProps } }) => (
+              render={({ value, onChange }: any) => (
                 <FormItem>
                   <FormLabel>Audio File</FormLabel>
                   <FormControl>
@@ -446,7 +444,6 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
                         type='file'
                         accept='audio/*'
                         onChange={(e) => handleFileChange(e, onChange)}
-                        {...fieldProps}
                       />
                       {audioPreview ? (
                         <div className='mt-2'>
@@ -472,7 +469,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
             <FormField
               control={form.control}
               name='is_automatic_transcription'
-              render={({ field }) => (
+              render={({ field }: any) => (
                 <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
                   <div className='space-y-0.5'>
                     <FormLabel className='text-base'>Automatic Transcription</FormLabel>
@@ -496,7 +493,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
             <FormField
               control={form.control}
               name='transcript'
-              render={({ field }) => (
+              render={({ field }: any) => (
                 <FormItem>
                   <FormLabel>Transcript</FormLabel>
                   <FormControl>
