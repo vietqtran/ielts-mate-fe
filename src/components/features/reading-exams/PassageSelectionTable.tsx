@@ -14,7 +14,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { usePassage } from '@/hooks/apis/reading/usePassage';
-import { Pagination, PassageGetResponse } from '@/types/reading.types';
+import { Pagination, PassageGetResponse } from '@/types/reading/reading.types';
 import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import LoadingSpinner from '../../ui/loading-spinner';

@@ -1,4 +1,4 @@
-import { AttemptData } from '@/types/attempt.types';
+import { AttemptData, Choice, DragItem } from '@/types/attempt.types';
 
 /**
  * Type definitions of response for Create Reading Exam Attempt
@@ -99,3 +99,90 @@ export interface ResultSet {
   is_correct: boolean;
   explanation: string;
 }
+
+/**
+ * Type definitions of response for Get List Reading Exam Attempt History
+ */
+export type ReadingExamAttempt = {
+  exam_attempt_id: string;
+  reading_exam: {
+    reading_exam_id: string;
+    reading_exam_name: string;
+    reading_exam_description: string;
+    url_slug: string;
+  };
+  duration: number;
+  total_question: number;
+  created_by: CreatedBy;
+  updated_by: CreatedBy;
+  created_at: string;
+  updated_at: string;
+};
+export type ReadingExamAttemptList = ReadingExamAttempt[];
+// End of Reading Exam Attempt History Response
+
+/**
+ * Type definitions of response for Get Reading Exam Attempt Details
+ */
+// Start of Reading Exam Attempt Details Response
+export interface ReadingExamAttemptDetailsResponse {
+  exam_attempt_id: string;
+  reading_exam: ReadingExamAttemptDetailsMainResponse;
+  duration: number;
+  total_point: number;
+  created_by: CreatedBy;
+  updated_by: CreatedBy;
+  created_at: string;
+  updated_at: string;
+  answers: Record<string, string[]>; // key: question_id, value: array of answer(s)
+}
+
+interface ReadingExamAttemptDetailsChoice extends Choice {
+  is_correct: boolean;
+}
+
+type ReadingExamAttemptDetailsQuestion = {
+  question_id: string;
+  question_order: number;
+  question_type: number;
+  number_of_correct_answers: number;
+  instruction_for_choice?: string;
+  choices?: ReadingExamAttemptDetailsChoice[];
+  correct_answer?: string;
+  explanation?: string;
+  point?: number;
+  blank_index?: number;
+};
+
+type QuestionGroup = {
+  question_group_id: string;
+  section_order: number;
+  section_label: string;
+  instruction: string;
+  questions?: ReadingExamAttemptDetailsQuestion[];
+  drag_items?: DragItem[];
+};
+
+// Passage type
+type ReadingExamAttemptDetails = {
+  passage_id: string;
+  instruction: string;
+  title: string;
+  content_with_highlight_keyword: string;
+  content: string;
+  part_number: number;
+  question_groups: QuestionGroup[];
+};
+
+// Main Exam structure
+type ReadingExamAttemptDetailsMainResponse = {
+  reading_exam_id: string;
+  reading_exam_name: string;
+  reading_exam_description: string;
+  url_slug: string;
+  reading_passage_id_part1: ReadingExamAttemptDetails;
+  reading_passage_id_part2: ReadingExamAttemptDetails;
+  reading_passage_id_part3: ReadingExamAttemptDetails;
+};
+
+// End of Reading Exam Attempt Details Response

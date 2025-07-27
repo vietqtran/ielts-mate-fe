@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { Separator } from '@/components/ui/separator';
 import { useReadingExam } from '@/hooks/apis/admin/useReadingExam';
-import { ReadingExamResponse } from '@/types/reading-exam.types';
+import { ReadingExamResponse } from '@/types/reading/reading-exam.types';
 import { ArrowLeft, Pencil, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';

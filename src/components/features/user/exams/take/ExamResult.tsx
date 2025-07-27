@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { SubmitExamResultResponse } from '@/types/reading-exam-attempt.types';
+import { SubmitExamResultResponse } from '@/types/reading/reading-exam-attempt.types';
 import {
   Award,
   BarChart3,

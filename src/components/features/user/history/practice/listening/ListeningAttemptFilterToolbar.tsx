@@ -16,7 +16,7 @@ import {
 } from '@/components/ui/select';
 import { ListeningAttemptFilters } from '@/store/slices/listening-attempt-filter-slice';
 import { AttemptStatusEnumIndex } from '@/types/attempt.types';
-import { IeltsTypeEnumIndex, PartNumberEnumIndex } from '@/types/reading.types';
+import { IeltsTypeEnumIndex, PartNumberEnumIndex } from '@/types/reading/reading.types';
 import { useDebounce } from '@uidotdev/usehooks';
 import React, { useState, useCallback, useMemo, memo, useEffect } from 'react';
 

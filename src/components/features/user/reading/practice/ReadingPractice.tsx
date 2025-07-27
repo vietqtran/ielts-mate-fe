@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import useReadingAttempt from '@/hooks/apis/reading/useReadingAttempt';
 import { formatTime, useIncrementalTimer } from '@/hooks/utils/useTimer';
 import { AttemptData, DataResponse } from '@/types/attempt.types';
-import { QuestionTypeEnumIndex } from '@/types/reading.types';
+import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 

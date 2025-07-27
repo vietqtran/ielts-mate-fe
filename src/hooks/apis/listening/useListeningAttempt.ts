@@ -2,14 +2,18 @@
 
 import instance from '@/lib/axios';
 import {
-  AnswersPayload,
-  AttemptData,
-  DataResponse,
   ListeningAttemptHistoryRequest,
   ListeningAttemptHistoryResponse,
-  ReadingAttemptHistoryResponse,
 } from '@/types/attempt.types';
-import { BaseResponse } from '@/types/reading.types';
+import {
+  LoadListeningAttemptResponse,
+  LoadListeningAttemptResultResponse,
+  SaveListeningAttemptProgressRequest,
+  StartListeningAttemptResponse,
+  SubmitListeningAttemptRequest,
+  SubmitListeningAttemptResponse,
+} from '@/types/listening/listening-attempt.types';
+import { BaseResponse } from '@/types/reading/reading.types';
 import { useRef, useState } from 'react';
 
 const useListeningAttempt = () => {
@@ -26,7 +30,7 @@ const useListeningAttempt = () => {
   };
 
   // Get active passages for public
-  const startNewAttempt = async ({ passageId }: { passageId: string }) => {
+  const startNewAttempt = async ({ taskId }: { taskId: string }) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -38,11 +42,11 @@ const useListeningAttempt = () => {
 
     try {
       const { data } = await instance.post(
-        `listening/attempts/passages/${passageId}`,
+        `listening/attempts/${taskId}`,
         {},
         { signal: currentController.signal, notify: false }
       );
-      return data as BaseResponse<AttemptData>;
+      return data as BaseResponse<StartListeningAttemptResponse>;
     } catch (error) {
       if (abortControllerRef.current === currentController) {
         if ((error as any).name !== 'AbortError') {
@@ -63,7 +67,7 @@ const useListeningAttempt = () => {
     payload,
   }: {
     attempt_id: string;
-    payload: AnswersPayload;
+    payload: SubmitListeningAttemptRequest;
   }) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -75,10 +79,8 @@ const useListeningAttempt = () => {
     setErrorState('submitAttempt', null);
 
     try {
-      const { data } = await instance.put(`listening/attempts/submit/${attempt_id}`, {
-        ...payload,
-      });
-      return data as BaseResponse<AttemptData>;
+      const { data } = await instance.put(`listening/attempts/submit/${attempt_id}`, payload);
+      return data as BaseResponse<SubmitListeningAttemptResponse>;
     } catch (error) {
       if (abortControllerRef.current === currentController) {
         if ((error as any).name !== 'AbortError') {
@@ -99,7 +101,7 @@ const useListeningAttempt = () => {
     payload,
   }: {
     attempt_id: string;
-    payload: AnswersPayload;
+    payload: SaveListeningAttemptProgressRequest;
   }) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -111,10 +113,8 @@ const useListeningAttempt = () => {
     setErrorState('saveAttemptProgress', null);
 
     try {
-      const { data } = await instance.put(`listening/attempts/save/${attempt_id}`, {
-        ...payload,
-      });
-      return data as BaseResponse<DataResponse>;
+      const { data } = await instance.put(`listening/attempts/save/${attempt_id}`, payload);
+      return data as BaseResponse<any>;
     } catch (error) {
       if (abortControllerRef.current === currentController) {
         if ((error as any).name !== 'AbortError') {
@@ -170,6 +170,37 @@ const useListeningAttempt = () => {
     }
   };
 
+  const getAttemptResultById = async (params: { attempt_id: string }) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    const currentController = abortControllerRef.current;
+
+    setLoadingState('getAttemptResultById', true);
+    setErrorState('getAttemptResultById', null);
+
+    try {
+      const { data } = await instance.get(`listening/attempts/result/${params.attempt_id}`, {
+        notify: false,
+        signal: currentController.signal,
+      });
+      return data as BaseResponse<LoadListeningAttemptResultResponse>;
+    } catch (error) {
+      if (abortControllerRef.current === currentController) {
+        if ((error as any).name !== 'AbortError') {
+          setErrorState('getAttemptResultById', error as Error);
+          throw error;
+        }
+      }
+    } finally {
+      if (abortControllerRef.current === currentController) {
+        setLoadingState('getAttemptResultById', false);
+      }
+      abortControllerRef.current = null;
+    }
+  };
+
   const loadAttemptById = async (params: { attempt_id: string }) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
@@ -185,7 +216,7 @@ const useListeningAttempt = () => {
         notify: false,
         signal: currentController.signal,
       });
-      return data as BaseResponse<ReadingAttemptHistoryResponse[]>;
+      return data as BaseResponse<LoadListeningAttemptResponse>;
     } catch (error) {
       if (abortControllerRef.current === currentController) {
         if ((error as any).name !== 'AbortError') {
@@ -206,6 +237,7 @@ const useListeningAttempt = () => {
     submitAttempt,
     saveAttemptProgress,
     getAllListeningAttemptHistory,
+    getAttemptResultById,
     loadAttemptById,
     isLoading,
     error,

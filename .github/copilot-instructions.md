@@ -1,25 +1,40 @@
-# About Project
+# IELTS Mate Web Application
 
-- This project is a web application designed to help users prepare for the IELTS exam. It provides various resources, including practice tests, vocabulary lists, and tips for each section of the exam.
-- This platform will mainly focus on Reading and Listening skills, with a user-friendly interface that allows users to easily navigate through different sections and access the resources they need.
-- The application is built using modern web technologies, including React, TypeScript, ShadcnUI, and Tailwind CSS, ensuring a responsive and accessible user experience.
-- This project uses mainly Tailwind CSS for styling, leveraging its utility-first approach to create a consistent and efficient design system.
+A modern web application to help users prepare for the IELTS exam.  
+Built for usability, accessibility, and effective IELTS skill-building.
 
-## Code Architecture:
+---
 
-- The code is organized into several components, each responsible for a specific part of the user interface.
-- The code should be easy to read and maintain, with clear separation of concerns.
+## 1. Project Overview
 
-## General UI Guidelines
+- **Goal:** Provide comprehensive IELTS preparation, focused on Reading and Listening.
+- **Key Features:** Practice tests, vocabulary lists, skill-specific tips, and a user-friendly interface.
+- **Tech Stack:**
+  - **Frontend:** React, TypeScript, ShadcnUI, Tailwind CSS
+  - **Styling:** Tailwind CSS with a custom OKLCH-based color palette
 
-- **Framework:** Use Shadcn UI components for all interfaces.
-- **Responsiveness:** The UI **must** be fully responsive across all devices.
-- **Accessibility:** Always ensure strong color contrast, accessible navigation, and keyboard support.
-- **User Experience:** Prioritize intuitive navigation, visual clarity, and a frictionless user journey.
+---
 
-## Brand Color Palette
+## 2. Code Architecture
 
-- Prefer using the following palette via CSS variables for all colors, in both code and design handoff.
+- Components are **modular** and separated by concern.
+- **Easy to maintain:** Clear file/folder structure, readable code.
+- **Responsibility separation:** Each component handles a distinct UI feature or logic unit.
+
+---
+
+## 3. UI & UX Guidelines
+
+### 3.1. General Principles
+
+- **Use Shadcn UI** for all components
+- **Fully responsive:** Works on all devices
+- **Accessible:** Keyboard navigation, strong color contrast
+- **User-friendly:** Clear navigation and consistent layout
+
+### 3.2. Brand Color Palette
+
+- **Always use these CSS variables for color:**
 
 ```css
 :root {
@@ -75,33 +90,29 @@
 }
 ```
 
-**Guidelines:**
+- Color Usage Reference:
 
-App background: --color-tekhelet-900 or --color-medium-slate-blue-900
+  - App background: Use bg-white
+  - Card/Section background: Use bg-white
+  - Primary text: --color-tekhelet-400 or --color-medium-slate-blue-400
+  - Secondary text: --color-tekhelet-500 or --color-medium-slate-blue-500
+  - Links/Highlight: --color-medium-slate-blue-300 or --color-tekhelet-300
+  - Primary button: --color-selective-yellow-300 (text: bg-white)
+  - Warning/Alert: --color-persimmon-300 or Tailwind’s default red scale.
+  - Border/Divider: --color-tekhelet-900
+  - Success/Correct: Use Tailwind’s default green scale.
 
-Card/Section BG: --color-tekhelet-100 or --color-medium-slate-blue-100
+> Never use faded text or inaccessible contrast. Always meet accessibility standards.
 
-Primary text: --color-tekhelet-700 or --color-medium-slate-blue-700
+### 3.3. Glassmorphism (Aero Effect)
 
-Secondary text: --color-tekhelet-500 or --color-medium-slate-blue-500
+- Apply a glassmorphism effect to all main content surfaces (cards, panels, modals, navigation). Use:
+  - Semi-transparent backgrounds (bg-white/60, bg-tekhelet-100/60)
+  - Backdrop blur (backdrop-blur-md or backdrop-blur-lg)
+  - Soft shadows (shadow-xl)
+  - Rounded corners (rounded-2xl)
 
-Links/Highlight: --color-medium-slate-blue-500
-
-Primary button: --color-selective-yellow-500 (--color-tekhelet-900 for text)
-
-Warning/Alert: --color-persimmon-500
-
-Border/Divider: --color-tekhelet-200
-
-Success/Correct: Use Tailwind’s default green scale.
-
-Do not use faded text. Always meet accessibility contrast standards.
-
-### Glassmorphism (Aero Effect)
-- Apply a glassmorphism (aero) effect to all major content surfaces (cards, panels, modals, nav).
-- Use semi-transparent backgrounds (bg-white/60, bg-tekhelet-100/60), backdrop blur (backdrop-blur-md or backdrop-blur-lg in Tailwind), and subtle borders.
-- Add depth: Soft box-shadow (shadow-xl) and rounded corners (rounded-2xl).
-- Ensure text remains highly readable against the blurred background.
+- Text must remain clear and accessible over blurred backgrounds.
 Example:
 
 ```jsx
@@ -109,11 +120,18 @@ Example:
   {/* Content */}
 </div>
 ```
-- Keep blur gentle and text highly readable.
-- All content inside glass containers must remain accessible and high-contrast.
 
-### Component & Code Usage
-- Use only Tailwind classes for color and effect styling.
-- Do not use inline CSS for colors unless strictly necessary.
-- Always map every color or effect to the palette and glassmorphism rules above.
-- If unsure of color, pick the closest semantic match from the provided palette.
+### 3.4. Styling & Component Rules
+
+- Tailwind Only: Use Tailwind classes for all color and effect styling.
+- No inline CSS for colors unless absolutely necessary.
+- Always map every color/effect to the palette and glassmorphism instructions above.
+- When unsure of color, use the nearest semantic match from the palette.
+- DO NOT add border lines unless specified. Use shadows for depth.
+
+### 4. Summary Checklist
+
+- Use ONLY the provided OKLCH color palette for all design.
+- All content surfaces should use a gentle glassmorphism effect.
+- All styling should use Tailwind classes.
+- Ensure accessibility and responsive design at every step.

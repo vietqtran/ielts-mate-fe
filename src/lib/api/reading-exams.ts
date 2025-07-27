@@ -2,7 +2,7 @@ import {
   ReadingExamCreateRequest,
   ReadingExamResponse,
   ReadingExamUpdateRequest,
-} from '@/types/reading-exam.types';
+} from '@/types/reading/reading-exam.types';
 import axios from '../axios';
 
 /**

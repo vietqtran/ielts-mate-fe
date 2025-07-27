@@ -3,7 +3,7 @@
 import ExamPreview from '@/components/features/user/exams/ExamPreview';
 import { Button } from '@/components/ui/button';
 import useReadingExamAttempt from '@/hooks/apis/reading/useReadingExamAttempt';
-import { ReadingExamResponse } from '@/types/reading-exam.types';
+import { ReadingExamResponse } from '@/types/reading/reading-exam.types';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 

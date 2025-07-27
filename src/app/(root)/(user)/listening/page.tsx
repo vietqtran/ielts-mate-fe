@@ -23,8 +23,8 @@ import {
   setUserSortBy,
   setUserSortDirection,
 } from '@/store/slices/reading-filter-slices';
-import { ListeningTaskResponse } from '@/types/listening.types';
-import { BaseResponse } from '@/types/reading.types';
+import { ListeningTaskResponse } from '@/types/listening/listening.types';
+import { BaseResponse } from '@/types/reading/reading.types';
 import { RootState } from '@/types/store.types';
 import { BookOpen, Calendar, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';

@@ -10,7 +10,7 @@ import {
   ListeningTaskFilterParams,
   ListeningTaskResponse,
   ListeningTaskUpdateRequest,
-} from '@/types/listening.types';
+} from '@/types/listening/listening.types';
 import { useRef, useState } from 'react';
 
 export function useListeningTask() {

@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { AddGroupQuestionRequest, QuestionType } from '@/types/reading.types';
+import { AddGroupQuestionRequest, QuestionType } from '@/types/reading/reading.types';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

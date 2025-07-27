@@ -15,7 +15,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useListeningExam } from '@/hooks/apis/admin/useListeningExam';
 import { useListeningTask } from '@/hooks/apis/listening/useListeningTask';
-import { ListeningTaskFilterParams } from '@/types/listening.types';
+import { ListeningTaskFilterParams } from '@/types/listening/listening.types';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';

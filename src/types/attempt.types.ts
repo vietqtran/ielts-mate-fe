@@ -1,4 +1,4 @@
-import { QuestionTypeEnumIndex } from '@/types/reading.types';
+import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 
 // Enums for attempt status
 export enum AttemptStatus {
@@ -17,7 +17,7 @@ export enum AttemptStatusEnumIndex {
 export interface AttemptData {
   attempt_id?: string; // for reading attempt only
   reading_passage_id?: string; // for reading attempt only
-  passage_ids?: string; // for exam reading attempt only
+  passage_id?: string; // for exam reading attempt only
   ielts_type: number;
   title: string;
   part_number: number;

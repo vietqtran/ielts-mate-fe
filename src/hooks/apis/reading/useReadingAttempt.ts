@@ -9,7 +9,7 @@ import {
   LoadAttemptResponse,
   ReadingAttemptHistoryResponse,
 } from '@/types/attempt.types';
-import { BaseResponse } from '@/types/reading.types';
+import { BaseResponse } from '@/types/reading/reading.types';
 import { useRef, useState } from 'react';
 
 const useReadingAttempt = () => {

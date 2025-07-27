@@ -1,0 +1,11 @@
+// Component exports for easy imports
+export { ExamResultHeader } from './ExamResultHeader';
+export { ExamInfoCard } from './ExamInfoCard';
+export { OverallScoreCard } from './OverallScoreCard';
+export { IELTSBandScoreCard } from './IELTSBandScoreCard';
+export { StatisticsCard } from './StatisticsCard';
+export { PerformanceByPartsCard } from './PerformanceByPartsCard';
+export { QuestionAnalysis } from './QuestionAnalysis';
+export { QuestionItem } from './QuestionItem';
+export { ExamErrorState } from './ExamErrorState';
+export { ExamLoadingState } from './ExamLoadingState';

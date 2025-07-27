@@ -4,7 +4,7 @@ import { HandleAnswerChangeParams } from '@/components/features/user/reading/pra
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { QuestionTypeEnumIndex } from '@/types/reading.types';
+import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { useState } from 'react';
 import * as z from 'zod';
 

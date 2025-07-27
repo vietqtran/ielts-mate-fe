@@ -19,7 +19,7 @@ import { PassageTable } from '@/components/features/admin/reading/PassageTable';
 import { ViewPassageModal } from '@/components/features/admin/reading/ViewPassageModal';
 import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/apis/reading/usePassage';
-import { PassageGetResponse } from '@/types/reading.types';
+import { PassageGetResponse } from '@/types/reading/reading.types';
 import { RootState } from '@/types/store.types';
 import { PlusCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';

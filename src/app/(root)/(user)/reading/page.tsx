@@ -24,7 +24,7 @@ import {
   setUserSortBy,
   setUserSortDirection,
 } from '@/store/slices/reading-filter-slices';
-import { BaseResponse, PassageGetResponse } from '@/types/reading.types';
+import { BaseResponse, PassageGetResponse } from '@/types/reading/reading.types';
 import { RootState } from '@/types/store.types';
 import { BookOpen, Calendar, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';

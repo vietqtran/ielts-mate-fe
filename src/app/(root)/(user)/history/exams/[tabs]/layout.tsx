@@ -16,12 +16,14 @@ export default function ExamsLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className='p-4'>
-      <Tabs value={tab} onValueChange={handleTabChange}>
-        <TabsList>
-          <TabsTrigger value='reading'>Reading</TabsTrigger>
-          <TabsTrigger value='listening'>Listening</TabsTrigger>
-        </TabsList>
-      </Tabs>
+      <div className='flex items-center justify-center'>
+        <Tabs value={tab} onValueChange={handleTabChange}>
+          <TabsList>
+            <TabsTrigger value='reading'>Reading</TabsTrigger>
+            <TabsTrigger value='listening'>Listening</TabsTrigger>
+          </TabsList>
+        </Tabs>
+      </div>
       <div className='mt-4'>{children}</div>
     </div>
   );

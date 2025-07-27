@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useListeningQuestion, useListeningTask } from '@/hooks';
 
-import { QuestionTypeEnumIndex } from '@/types/reading.types';
+import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { Edit3, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 

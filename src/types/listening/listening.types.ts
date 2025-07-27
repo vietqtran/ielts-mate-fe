@@ -1,4 +1,4 @@
-import { Pagination, UserInformation } from './reading.types';
+import { Pagination, UserInformation } from '../reading/reading.types';
 
 export enum IeltsListeningType {
   ACADEMIC = 1,
