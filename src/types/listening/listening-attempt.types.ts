@@ -1,5 +1,6 @@
 import {
   Answer,
+  AnswersPayload,
   AttemptAnswer,
   DataResponse,
   DragItem,
@@ -20,7 +21,7 @@ export interface SubmitListeningAttemptResponse extends DataResponse {}
 /**
  * Type for saving progress of a listening attempt during practice.
  */
-export interface SaveListeningAttemptProgressRequest extends Answer {}
+export interface SaveListeningAttemptProgressRequest extends AnswersPayload {}
 
 /**
  * Type for the response after starting a listening attempt.
@@ -68,32 +69,30 @@ export interface ListeningTaskData {
   listening_task_id: string;
   ielts_type: number;
   part_number: number;
-  status: number;
+  status?: number;
   instruction: string;
   title: string;
   audio_file_id: string;
-  transcript: string;
+  transcript?: string;
   question_groups: ListeningTaskQuestionGroup[];
 }
 
 export interface ListeningTaskQuestionGroup {
   group_id: string;
-  listening_task_id: string;
   section_order: number;
   section_label: string;
-  question_type: number;
   instruction: string;
-  created_by: string;
-  created_at: string; // ISO date string
-  updated_by: string;
-  updated_at: string; // ISO date string
-  is_current: boolean;
-  is_deleted: boolean;
-  version: number;
-  is_original: boolean;
-  parent_id: string;
-  children: string[];
   drag_items: DragItem[];
+  questions: ListeningTaskQuestion[];
+}
+
+export interface ListeningTaskQuestion {
+  question_id: string;
+  question_order: number;
+  question_type: number;
+  point: number;
+  number_of_correct_answers: number;
+  correct_answer: string;
 }
 
 export interface ListeningAttemptAnswer extends AttemptAnswer {}

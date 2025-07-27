@@ -212,7 +212,7 @@ const useListeningAttempt = () => {
     setErrorState('loadAttemptById', null);
 
     try {
-      const { data } = await instance.get(`listening/attempts/${params.attempt_id}`, {
+      const { data } = await instance.get(`listening/attempts/load/${params.attempt_id}`, {
         notify: false,
         signal: currentController.signal,
       });

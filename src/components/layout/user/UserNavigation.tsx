@@ -20,7 +20,7 @@ import { usePathname, useRouter } from 'next/navigation';
 const navigationItems = [
   {
     name: 'Dashboard',
-    href: '/',
+    href: '/dashboard',
     icon: Home,
   },
   {

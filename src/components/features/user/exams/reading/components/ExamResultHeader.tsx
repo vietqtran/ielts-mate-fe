@@ -7,11 +7,13 @@ import { useRouter } from 'next/navigation';
 interface ExamResultHeaderProps {
   title?: string;
   subtitle?: string;
+  backUrl?: string;
 }
 
 export const ExamResultHeader = ({
   title = 'Exam Results',
   subtitle = 'Detailed analysis of your performance',
+  backUrl = '/history/exams/reading',
 }: ExamResultHeaderProps) => {
   const router = useRouter();
 
@@ -27,11 +29,11 @@ export const ExamResultHeader = ({
       <div className='flex gap-2'>
         <Button
           variant='outline'
-          onClick={() => router.push('/history/exams/reading')}
+          onClick={() => router.push(backUrl)}
           className='bg-medium-slate-blue-400 text-white backdrop-blur-sm hover:bg-medium-slate-blue-300 hover:text-white'
         >
-          <ArrowLeft className='w-4 h-4 mr-2' />
-          Back to History
+          <ArrowLeft className='w-4 h-4' />
+          Back
         </Button>
         <Button
           onClick={() => router.push('/')}

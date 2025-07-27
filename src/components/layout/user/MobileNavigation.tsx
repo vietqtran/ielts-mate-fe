@@ -14,7 +14,7 @@ import { useState } from 'react';
 const navigationItems = [
   {
     name: 'Dashboard',
-    href: '/',
+    href: '/dashboard',
     icon: Home,
   },
   {
