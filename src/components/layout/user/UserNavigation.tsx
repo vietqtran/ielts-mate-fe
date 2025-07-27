@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAppSelector, useAuth } from '@/hooks';
 import { cn } from '@/lib/utils';
-import { BookOpen, History, Home, LogOut, Settings, User2 } from 'lucide-react';
+import { BookOpen, History, Home, LogOut, Settings, User, User2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -42,6 +42,11 @@ const navigationItems = [
     name: 'History',
     href: '/history',
     icon: History,
+  },
+  {
+    name: 'Personalized',
+    href: '/personalized',
+    icon: User,
   },
 ];
 

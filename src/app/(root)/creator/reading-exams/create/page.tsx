@@ -54,6 +54,7 @@ export default function CreateReadingExamPage() {
     part2: '',
     part3: '',
   });
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -92,10 +93,12 @@ export default function CreateReadingExamPage() {
 
   const onSubmit = async (values: FormValues) => {
     try {
+      setIsSubmitted(true);
       await createExam(values);
       toast.success('Reading exam created successfully');
       router.push('/creator/reading-exams');
     } catch (error) {
+      setIsSubmitted(false);
       toast.error('Failed to create reading exam');
     }
   };
@@ -254,26 +257,28 @@ export default function CreateReadingExamPage() {
                   />
                 </div>
 
-                <CardFooter className='flex justify-end px-0 pt-4'>
-                  <Button
-                    type='submit'
-                    disabled={
-                      isLoading['createExam'] ||
-                      !selectedPassages.part1 ||
-                      !selectedPassages.part2 ||
-                      !selectedPassages.part3
-                    }
-                  >
-                    {isLoading['createExam'] ? (
-                      <>
-                        <LoadingSpinner color='white' />
-                        <span className='ml-2'>Creating...</span>
-                      </>
-                    ) : (
-                      'Create Reading Exam'
-                    )}
-                  </Button>
-                </CardFooter>
+                {!isSubmitted && (
+                  <CardFooter className='flex justify-end px-0 pt-4'>
+                    <Button
+                      type='submit'
+                      disabled={
+                        isLoading['createExam'] ||
+                        !selectedPassages.part1 ||
+                        !selectedPassages.part2 ||
+                        !selectedPassages.part3
+                      }
+                    >
+                      {isLoading['createExam'] ? (
+                        <>
+                          <LoadingSpinner color='white' />
+                          <span className='ml-2'>Creating...</span>
+                        </>
+                      ) : (
+                        'Create Reading Exam'
+                      )}
+                    </Button>
+                  </CardFooter>
+                )}
               </form>
             </Form>
           </CardContent>

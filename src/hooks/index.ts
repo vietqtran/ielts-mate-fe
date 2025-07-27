@@ -7,3 +7,5 @@ export * from './apis/reading/usePassage';
 export * from './apis/admin/useQuestion';
 export { useQuestion as useListeningQuestion } from './apis/admin/useQuestion';
 export * from './apis/listening/useListeningTask';
+export * from './apis/vocabulary/useVocabulary';
+export * from './apis/modules/useModules';

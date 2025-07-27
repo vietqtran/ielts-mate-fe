@@ -32,6 +32,11 @@ const navigationItems = [
     href: '/practice-tests',
     icon: BookOpen,
   },
+  {
+    name: 'Personalized',
+    href: '/personalized',
+    icon: BookOpen,
+  },
 ];
 
 export function MobileNavigation() {
