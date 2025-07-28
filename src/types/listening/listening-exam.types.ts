@@ -1,4 +1,5 @@
 import {
+  QuestionGroup,
   SubmitExamAttemptAnswersRequest,
   SubmitExamResultResponse,
 } from '@/types/reading/reading-exam-attempt.types';
@@ -30,6 +31,7 @@ export interface ListeningExamDetail {
   listening_task_id_part1: ListeningTaskShort;
   listening_task_id_part2: ListeningTaskShort;
   listening_task_id_part3: ListeningTaskShort;
+  listening_task_id_part4: ListeningTaskShort;
 }
 
 export interface ListeningTaskShort {
@@ -40,12 +42,16 @@ export interface ListeningTaskShort {
   title: string;
   audio_file_id: string;
   transcription: string;
+  question_groups: QuestionGroup[];
 }
 
 /**
  * Type definitions of request for submit listening exam attempt answers.
  */
-export interface SubmitListeningExamAttemptAnswersRequest extends SubmitExamAttemptAnswersRequest {}
+export interface SubmitListeningExamAttemptAnswersRequest
+  extends Omit<SubmitExamAttemptAnswersRequest, 'passage_id'> {
+  task_id: string[];
+}
 
 /**
  * Type definitions for response after submit listening exam attempt answers.
@@ -65,16 +71,6 @@ export interface ListeningExamAttemptDetailsResponse {
   created_at: string;
   updated_at: string;
   answers: Record<string, string[]>;
-}
-
-export interface ListeningExamDetail {
-  listening_exam_id: string;
-  listening_exam_name: string;
-  listening_exam_description: string;
-  url_slug: string;
-  listening_task_id_part1: ListeningTaskShort;
-  listening_task_id_part2: ListeningTaskShort;
-  listening_task_id_part3: ListeningTaskShort;
 }
 
 /**
