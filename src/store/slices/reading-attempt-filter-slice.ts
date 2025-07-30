@@ -19,6 +19,7 @@ export interface ReadingAttemptState {
     totalItems: number;
     hasNextPage: boolean;
     hasPreviousPage: boolean;
+    currentPage: number;
   };
 }
 
@@ -34,6 +35,7 @@ const initialState: ReadingAttemptState = {
     totalItems: 0,
     hasNextPage: false,
     hasPreviousPage: false,
+    currentPage: 1,
   },
 };
 
@@ -67,6 +69,7 @@ const readingAttemptSlice = createSlice({
         totalItems: number;
         hasNextPage: boolean;
         hasPreviousPage: boolean;
+        currentPage: number;
       }>
     ) => {
       state.pagination = action.payload;

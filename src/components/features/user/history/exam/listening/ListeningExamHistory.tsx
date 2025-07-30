@@ -1,16 +1,10 @@
 'use client';
 
+import { PaginationCommon } from '@/components/features/user/common';
 import ListeningAttemptFilterToolbar from '@/components/features/user/history/practice/listening/ListeningAttemptFilterToolbar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
 import { Separator } from '@/components/ui/separator';
 import { useListeningExam } from '@/hooks/apis/listening/useListeningExam';
 import { ListeningAttemptFilters } from '@/store/slices/listening-attempt-filter-slice';
@@ -41,7 +35,9 @@ const ListeningExamHistory = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const response = await getListeningExamAttemptsHistory({ attempt_id: '' }); // API doesn't seem to use this param based on the hook
+        const response = await getListeningExamAttemptsHistory({
+          attempt_id: '',
+        }); // API doesn't seem to use this param based on the hook
 
         if (response?.data) {
           setAttemptHistoryData(response.data || []);
@@ -179,7 +175,7 @@ const ListeningExamHistory = () => {
   if (error) {
     return (
       <div className='container mx-auto p-6'>
-        <Card className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl'>
+        <Card className='bg-white/60 backdrop-blur-lg border rounded-2xl shadow-xl'>
           <CardContent className='pt-6'>
             <div className='text-center py-12'>
               <Headphones className='h-12 w-12 mx-auto text-persimmon-300 mb-4' />
@@ -236,10 +232,7 @@ const ListeningExamHistory = () => {
         {isLoading ? (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             {Array.from({ length: 6 }).map((_, i) => (
-              <Card
-                key={i}
-                className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl'
-              >
+              <Card key={i} className='bg-white/60 backdrop-blur-lg border rounded-2xl shadow-xl'>
                 <CardHeader>
                   <div className='flex items-start justify-between'>
                     <div className='flex-1'>
@@ -262,7 +255,7 @@ const ListeningExamHistory = () => {
             ))}
           </div>
         ) : filteredAndSortedData.length === 0 ? (
-          <Card className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl'>
+          <Card className='bg-white/60 backdrop-blur-lg border rounded-2xl shadow-xl'>
             <CardContent className='pt-6'>
               <div className='text-center py-12'>
                 <Headphones className='h-12 w-12 mx-auto text-tekhelet-400 mb-4' />
@@ -298,7 +291,7 @@ const ListeningExamHistory = () => {
             {filteredAndSortedData.map((attempt) => (
               <Card
                 key={attempt.exam_attempt_id}
-                className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow'
+                className='bg-white/60 backdrop-blur-lg border rounded-2xl shadow-xl hover:shadow-2xl transition-shadow'
               >
                 <CardHeader>
                   <div className='flex items-start justify-between'>
@@ -371,52 +364,18 @@ const ListeningExamHistory = () => {
         )}
 
         {/* Pagination */}
-        {!isLoading && filteredAndSortedData.length > 0 && totalPages > 1 && (
-          <div className='flex items-center justify-between mt-8'>
-            <div className='text-sm text-tekhelet-500'>
-              Showing {(currentPage - 1) * pageSize + 1} to{' '}
-              {Math.min(currentPage * pageSize, attemptHistoryData.length)} of{' '}
-              {attemptHistoryData.length} entries
-            </div>
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href='#'
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (hasPreviousPage) {
-                        handlePageChange(currentPage - 1);
-                      }
-                    }}
-                    className={
-                      !hasPreviousPage
-                        ? 'pointer-events-none opacity-50'
-                        : 'text-tekhelet-700 hover:bg-tekhelet-200'
-                    }
-                  />
-                </PaginationItem>
-
-                <PaginationItem>
-                  <PaginationNext
-                    href='#'
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (hasNextPage) {
-                        handlePageChange(currentPage + 1);
-                      }
-                    }}
-                    className={
-                      !hasNextPage
-                        ? 'pointer-events-none opacity-50'
-                        : 'text-tekhelet-700 hover:bg-tekhelet-200'
-                    }
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
-        )}
+        <PaginationCommon
+          pagination={{
+            currentPage,
+            totalPages,
+            pageSize,
+            totalItems: attemptHistoryData.length,
+            hasNextPage,
+            hasPreviousPage,
+          }}
+          onPageChange={handlePageChange}
+          onPageSizeChange={() => {}}
+        />
       </div>
     </div>
   );

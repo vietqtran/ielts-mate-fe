@@ -1,16 +1,10 @@
 'use client';
 
+import { PaginationCommon } from '@/components/features/user/common';
 import ReadingAttemptFilterToolbar from '@/components/features/user/history/practice/reading/ReadingAttemptFilterToolbar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
 import { Separator } from '@/components/ui/separator';
 import useReadingExamAttempt from '@/hooks/apis/reading/useReadingExamAttempt';
 import { ReadingAttemptFilters } from '@/store/slices/reading-attempt-filter-slice';
@@ -25,6 +19,7 @@ import {
 } from '@/store/slices/reading-exam-attempt-filter-slice';
 import { ReadingExamAttempt } from '@/types/reading/reading-exam-attempt.types';
 import { RootState } from '@/types/store.types';
+import { formatDate, formatDuration } from '@/utils/time';
 import { BookOpen, Calendar, Clock, Eye, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -38,31 +33,38 @@ const ReadingExamHistory = () => {
 
   // Get state from Redux
   const filters = useSelector((state: RootState) => state.readingExamAttempt.filters);
-  const currentPage = useSelector((state: RootState) => state.readingExamAttempt.currentPage);
   const sortBy = useSelector((state: RootState) => state.readingExamAttempt.sortBy);
   const sortDirection = useSelector((state: RootState) => state.readingExamAttempt.sortDirection);
   const reduxIsLoading = useSelector((state: RootState) => state.readingExamAttempt.isLoading);
   const pagination = useSelector((state: RootState) => state.readingExamAttempt.pagination);
+
+  console.log(pagination);
 
   // Load attempts when dependencies change
   useEffect(() => {
     const loadAttempts = async () => {
       try {
         dispatch(setReadingExamAttemptLoading(true));
-        const response = await getExamAttemptHistory();
+        const response = await getExamAttemptHistory({
+          size: pagination?.pageSize || 12,
+          readingExamName: filters.title || '',
+          page: pagination?.currentPage || 1,
+          sortBy,
+          sortDirection,
+        });
 
         if (response) {
-          setAttemptHistoryData(response || []);
+          setAttemptHistoryData(response?.data || []);
 
           // Update pagination state from response length (since API doesn't provide pagination)
           dispatch(
             setReadingExamAttemptPagination({
-              totalPages: Math.ceil((response?.length || 0) / (pagination?.pageSize || 12)),
-              pageSize: pagination?.pageSize || 12,
-              totalItems: response?.length || 0,
-              hasNextPage:
-                currentPage < Math.ceil((response?.length || 0) / (pagination?.pageSize || 12)),
-              hasPreviousPage: currentPage > 1,
+              totalPages: response?.pagination?.totalPages || 1,
+              pageSize: response?.pagination?.pageSize || 12,
+              totalItems: response?.pagination?.totalItems || 0,
+              hasNextPage: response?.pagination?.hasNextPage || false,
+              hasPreviousPage: response?.pagination?.hasPreviousPage || false,
+              currentPage: response?.pagination?.currentPage || 1,
             })
           );
         }
@@ -81,35 +83,9 @@ const ReadingExamHistory = () => {
     filters.title,
     sortBy,
     sortDirection,
-    currentPage,
     pagination?.pageSize,
+    pagination?.currentPage,
   ]);
-
-  const formatDuration = (duration: number | null): string => {
-    if (!duration) return 'N/A';
-    const hours = Math.floor(duration / 3600);
-    const minutes = Math.floor((duration % 3600) / 60);
-    const seconds = duration % 60;
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m ${seconds}s`;
-    } else if (minutes > 0) {
-      return `${minutes}m ${seconds}s`;
-    } else {
-      return `${seconds}s`;
-    }
-  };
-
-  const formatDate = (dateString: string | null): string => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
 
   const handleFiltersChange = (newFilters: ReadingAttemptFilters) => {
     dispatch(setReadingExamAttemptFilters(newFilters));
@@ -129,7 +105,11 @@ const ReadingExamHistory = () => {
   };
 
   const handlePageChange = (page: number) => {
-    dispatch(setReadingExamAttemptCurrentPage(page));
+    dispatch(setReadingExamAttemptPagination({ ...pagination, currentPage: page }));
+  };
+
+  const handlePageSizeChange = (size: string) => {
+    dispatch(setReadingExamAttemptPagination({ ...pagination, pageSize: Number(size) }));
   };
 
   // Check if there are active filters
@@ -145,58 +125,6 @@ const ReadingExamHistory = () => {
   const handleViewAttempt = (attemptId: string) => {
     router.push(`/history/exams/details?mode=reading&examId=${attemptId}`);
   };
-
-  // Filter and sort data locally since the API doesn't support these operations
-  const getFilteredAndSortedData = () => {
-    let filteredData = [...attemptHistoryData];
-
-    // Apply title filter
-    if (filters.title) {
-      filteredData = filteredData.filter((attempt) =>
-        attempt.reading_exam.reading_exam_name.toLowerCase().includes(filters.title!.toLowerCase())
-      );
-    }
-
-    // Apply sorting
-    filteredData.sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
-
-      switch (sortBy) {
-        case 'finishedAt':
-        case 'createdAt':
-          aValue = new Date(a.created_at || 0);
-          bValue = new Date(b.created_at || 0);
-          break;
-        case 'duration':
-          aValue = a.duration || 0;
-          bValue = b.duration || 0;
-          break;
-        case 'totalPoints':
-          // Exam attempts don't have total points, so we'll sort by total questions
-          aValue = a.total_question || 0;
-          bValue = b.total_question || 0;
-          break;
-        default:
-          aValue = new Date(a.created_at || 0);
-          bValue = new Date(b.created_at || 0);
-      }
-
-      if (sortDirection === 'asc') {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
-    });
-
-    // Apply pagination
-    const startIndex = (currentPage - 1) * (pagination?.pageSize || 12);
-    const endIndex = startIndex + (pagination?.pageSize || 12);
-
-    return filteredData.slice(startIndex, endIndex);
-  };
-
-  const filteredAndSortedData = getFilteredAndSortedData();
 
   return (
     <div className='container mx-auto p-6'>
@@ -254,7 +182,7 @@ const ReadingExamHistory = () => {
               </Card>
             ))}
           </div>
-        ) : filteredAndSortedData.length === 0 ? (
+        ) : attemptHistoryData.length === 0 ? (
           <Card className='backdrop-blur-lg rounded-2xl shadow-xl'>
             <CardContent className='pt-6'>
               <div className='text-center py-12'>
@@ -288,7 +216,7 @@ const ReadingExamHistory = () => {
           </Card>
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {filteredAndSortedData.map((attempt) => (
+            {attemptHistoryData.map((attempt) => (
               <Card
                 key={attempt.exam_attempt_id}
                 className='bg-white backdrop-blur-lg rounded-2xl shadow-xl hover:shadow-2xl transition-shadow'
@@ -362,56 +290,11 @@ const ReadingExamHistory = () => {
             ))}
           </div>
         )}
-
-        {/* Pagination */}
-        {!reduxIsLoading &&
-          filteredAndSortedData.length > 0 &&
-          (pagination?.totalPages || 0) > 1 && (
-            <div className='flex items-center justify-between mt-8'>
-              <div className='text-sm text-[var(--color-tekhelet-500)]'>
-                Showing {(currentPage - 1) * (pagination?.pageSize || 12) + 1} to{' '}
-                {Math.min(currentPage * (pagination?.pageSize || 12), attemptHistoryData.length)} of{' '}
-                {attemptHistoryData.length} entries
-              </div>
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href='#'
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (pagination?.hasPreviousPage) {
-                          handlePageChange(currentPage - 1);
-                        }
-                      }}
-                      className={
-                        !pagination?.hasPreviousPage
-                          ? 'pointer-events-none opacity-50'
-                          : 'text-tekhelet-700 hover:bg-tekhelet-200'
-                      }
-                    />
-                  </PaginationItem>
-
-                  <PaginationItem>
-                    <PaginationNext
-                      href='#'
-                      onClick={(e) => {
-                        e.preventDefault();
-                        if (pagination?.hasNextPage) {
-                          handlePageChange(currentPage + 1);
-                        }
-                      }}
-                      className={
-                        !pagination?.hasNextPage
-                          ? 'pointer-events-none opacity-50'
-                          : 'text-tekhelet-700 hover:bg-tekhelet-200'
-                      }
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
+        <PaginationCommon
+          pagination={pagination}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
       </div>
     </div>
   );

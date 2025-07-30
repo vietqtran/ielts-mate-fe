@@ -124,7 +124,7 @@ export function UserNavigation() {
                     const hasActiveChild = group.items.some((item) => isActiveRoute(item.href));
 
                     return (
-                      <NavigationMenuItem key={group.name}>
+                      <NavigationMenuItem key={group.name} className='z-20'>
                         <NavigationMenuTrigger
                           className={cn(
                             'flex items-center gap-2 text-sm font-medium',

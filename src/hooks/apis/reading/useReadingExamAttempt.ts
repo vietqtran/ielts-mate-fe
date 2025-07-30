@@ -1,4 +1,5 @@
 import instance from '@/lib/axios';
+import { ReadingExamAttemptFiltersParams } from '@/types/pagination.types';
 import {
   ReadingExamAttemptDetailsResponse,
   ReadingExamAttemptList,
@@ -6,6 +7,7 @@ import {
   SubmitExamAttemptAnswersRequest,
   SubmitExamResultResponse,
 } from '@/types/reading/reading-exam-attempt.types';
+import { BaseResponse } from '@/types/reading/reading.types';
 import { useRef, useState } from 'react';
 
 const useReadingExamAttempt = () => {
@@ -92,7 +94,7 @@ const useReadingExamAttempt = () => {
     }
   };
 
-  const getExamAttemptHistory = async () => {
+  const getExamAttemptHistory = async (params: ReadingExamAttemptFiltersParams) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -104,11 +106,16 @@ const useReadingExamAttempt = () => {
     setErrorState('getExamAttemptHistory', null);
 
     try {
-      const response = await instance.get(`reading/exam/attempts/history`);
+      const response = await instance.get(`reading/exam/attempts/history`, {
+        params: {
+          ...params,
+        },
+        signal: currentController.signal,
+      });
 
       // Only return data if this is still the current request
       if (abortControllerRef.current === currentController) {
-        return response.data.data as ReadingExamAttemptList;
+        return response.data as BaseResponse<ReadingExamAttemptList>;
       }
     } catch (error) {
       // Only handle error if this is still the current request

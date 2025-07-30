@@ -1,3 +1,4 @@
+import { DragItem } from '@/types/attempt.types';
 import {
   QuestionGroup,
   SubmitExamAttemptAnswersRequest,
@@ -114,4 +115,71 @@ export interface ListActiveListeningExamsResponse {
   display_version: number;
   is_original: boolean;
   is_deleted: boolean;
+}
+
+/**
+ * Type definition for the response of get listening exam details.
+ */
+export interface ListeningExamAttemptResponse {
+  exam_attempt_id: string;
+  listening_exam: ListeningExam;
+  duration: number;
+  total_point: number;
+  created_by: UserInfo;
+  updated_by: UserInfo;
+  created_at: string;
+  updated_at: string;
+  answers: Record<string, string[]>;
+}
+
+export interface ListeningExam {
+  listening_exam_id: string;
+  listening_exam_name: string;
+  listening_exam_description: string;
+  url_slug: string;
+  listening_task_id_part1: ListeningTask;
+  listening_task_id_part2: ListeningTask;
+  listening_task_id_part3: ListeningTask;
+  listening_task_id_part4: ListeningTask;
+}
+
+export interface ListeningTask {
+  task_id: string;
+  ielts_type: number;
+  part_number: number;
+  instruction: string;
+  title: string;
+  audio_file_id: string;
+  question_groups: ListeningQuestionGroup[];
+}
+
+export interface ListeningQuestionGroup {
+  question_group_id: string;
+  section_order: number;
+  section_label: string;
+  instruction: string;
+  questions: ListeningQuestion[];
+  drag_items: DragItem[];
+}
+
+export interface ListeningQuestion {
+  question_id: string;
+  question_order: number;
+  question_type: number;
+  number_of_correct_answers: number;
+  instruction_for_choice?: string;
+  choices?: ListeningChoice[];
+  explanation?: string;
+  point?: number;
+  blank_index?: number;
+  zone_index?: number;
+  correct_answer?: string;
+}
+
+export interface ListeningChoice {
+  choice_id: string;
+  label: string;
+  content: string;
+  choice_order: number;
+  is_correct?: boolean;
 }
