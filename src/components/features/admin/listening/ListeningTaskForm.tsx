@@ -435,7 +435,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
             <FormField
               control={form.control}
               name='audio_file'
-              render={({ value, onChange }: any) => (
+              render={({ field }: any) => (
                 <FormItem>
                   <FormLabel>Audio File</FormLabel>
                   <FormControl>
@@ -443,7 +443,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
                       <Input
                         type='file'
                         accept='audio/*'
-                        onChange={(e) => handleFileChange(e, onChange)}
+                        onChange={(e) => handleFileChange(e, field.onChange)}
                       />
                       {audioPreview ? (
                         <div className='mt-2'>
