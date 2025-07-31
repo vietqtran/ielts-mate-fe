@@ -5,37 +5,47 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useAppSelector, useAuth } from '@/hooks';
 import { cn } from '@/lib/utils';
-import { BookOpen, Home, LogOut, Menu, Settings, User2 } from 'lucide-react';
+import { BookOpen, History, Home, LogOut, Menu, Settings, User, User2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState } from 'react';
 
-const navigationItems = [
+const navigationGroups = [
   {
     name: 'Dashboard',
-    href: '/',
+    href: '/dashboard',
     icon: Home,
   },
   {
-    name: 'Reading',
-    href: '/reading',
+    name: 'Practice',
+    items: [
+      {
+        name: 'Reading',
+        href: '/reading',
+        icon: BookOpen,
+      },
+      {
+        name: 'Listening',
+        href: '/listening',
+        icon: BookOpen,
+      },
+    ],
+  },
+  {
+    name: 'Exams',
+    href: '/exams',
     icon: BookOpen,
   },
   {
-    name: 'Listening',
-    href: '/listening',
-    icon: BookOpen,
-  },
-  {
-    name: 'Practice Tests',
-    href: '/practice-tests',
-    icon: BookOpen,
+    name: 'History',
+    href: '/history',
+    icon: History,
   },
   {
     name: 'Personalized',
     href: '/personalized',
-    icon: BookOpen,
+    icon: User,
   },
 ];
 
@@ -50,13 +60,16 @@ export function MobileNavigation() {
     try {
       await signOut();
       setTimeout(() => {
-        replace('/sign-in');
+        replace('/');
       }, 500);
     } catch (error) {}
   };
 
   const handleLinkClick = () => {
     setIsOpen(false);
+  };
+  const isActiveRoute = (href: string) => {
+    return pathname === href || pathname.startsWith(href + '/');
   };
 
   return (
@@ -98,26 +111,59 @@ export function MobileNavigation() {
 
             {/* Navigation Links */}
             <nav className='flex flex-col space-y-2'>
-              {navigationItems.map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.href;
+              {navigationGroups.map((group) => {
+                if (group.items) {
+                  // Group with sub-items (Practice)
+                  return (
+                    <div key={group.name} className='space-y-1'>
+                      <div className='px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider'>
+                        {group.name}
+                      </div>
+                      {group.items.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = isActiveRoute(item.href);
 
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    onClick={handleLinkClick}
-                    className={cn(
-                      'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
-                      isActive
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
-                    )}
-                  >
-                    <Icon className='h-4 w-4' />
-                    <span>{item.name}</span>
-                  </Link>
-                );
+                        return (
+                          <Link
+                            key={item.name}
+                            href={item.href}
+                            onClick={handleLinkClick}
+                            className={cn(
+                              'flex items-center gap-3 px-3 py-2 ml-4 rounded-lg text-sm font-medium transition-colors',
+                              isActive
+                                ? 'bg-primary text-primary-foreground'
+                                : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                            )}
+                          >
+                            <Icon className='h-4 w-4' />
+                            <span>{item.name}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  );
+                } else {
+                  // Single navigation item
+                  const Icon = group.icon!;
+                  const isActive = isActiveRoute(group.href!);
+
+                  return (
+                    <Link
+                      key={group.name}
+                      href={group.href!}
+                      onClick={handleLinkClick}
+                      className={cn(
+                        'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                        isActive
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
+                      )}
+                    >
+                      <Icon className='h-4 w-4' />
+                      <span>{group.name}</span>
+                    </Link>
+                  );
+                }
               })}
             </nav>
 

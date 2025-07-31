@@ -93,7 +93,7 @@ export default function ReadingExamsTable({ className }: ReadingExamsTableProps)
                 <TableCell className='text-right'>
                   <div className='flex justify-end gap-2'>
                     <Button size='sm' asChild className='bg-tekhelet-600 hover:bg-tekhelet-700'>
-                      <Link href={`/exams/preview?examUrl=${exam.url_slug}`}>
+                      <Link href={`/exams/preview?examUrl=${exam.url_slug}&examType=reading`}>
                         <Play className='h-4 w-4' />
                         Take Exam
                       </Link>

@@ -11,6 +11,7 @@ import { BaseResponse } from '@/types/reading/reading.types';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 
+// This hook is used to manage listening exam operations on the user side.
 export function useListeningExam() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -98,7 +99,7 @@ export function useListeningExam() {
       setIsLoading(true);
       setError(null);
 
-      const res = await instance.get(`listening/exam/history`);
+      const res = await instance.get(`listening/exam/attempts/history`);
 
       return res.data as BaseResponse<ListeningExamAttemptsHistoryResponse[]>;
     } catch (err) {

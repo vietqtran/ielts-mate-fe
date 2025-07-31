@@ -14,7 +14,7 @@ interface ExamPreviewProps {
   onBack: () => void;
 }
 
-const ExamPreview = ({ examData, onStartExam, onBack }: ExamPreviewProps) => {
+const ReadingExamPreview = ({ examData, onStartExam, onBack }: ExamPreviewProps) => {
   const router = useRouter();
 
   const passages = [
@@ -199,4 +199,4 @@ const ExamPreview = ({ examData, onStartExam, onBack }: ExamPreviewProps) => {
   );
 };
 
-export default ExamPreview;
+export default ReadingExamPreview;
