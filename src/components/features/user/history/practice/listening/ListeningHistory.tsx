@@ -263,7 +263,7 @@ const ListeningHistory = () => {
   };
 
   const handleViewAttempt = (attemptId: string) => {
-    router.push(`/history/practices/listening/${attemptId}`);
+    router.push(`/history/practices/details?mode=listening&attemptId=${attemptId}`);
   };
 
   const handleContinueAttempt = (attemptId: string, passageId: string) => {

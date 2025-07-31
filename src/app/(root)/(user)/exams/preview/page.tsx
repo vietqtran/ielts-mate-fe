@@ -1,8 +1,11 @@
 'use client';
 
-import ExamPreview from '@/components/features/user/exams/ExamPreview';
+import ListeningExamPreview from '@/components/features/user/exams/listening/take/ListeningExamPreview';
+import ReadingExamPreview from '@/components/features/user/exams/reading/ReadingExamPreview';
 import { Button } from '@/components/ui/button';
+import { useListeningExam } from '@/hooks/apis/listening/useListeningExam';
 import useReadingExamAttempt from '@/hooks/apis/reading/useReadingExamAttempt';
+import { ListActiveListeningExamsResponse } from '@/types/listening/listening-exam.types';
 import { ReadingExamResponse } from '@/types/reading/reading-exam.types';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -10,29 +13,48 @@ import { useEffect, useState } from 'react';
 const ExamPreviewPage = () => {
   const searchParams = useSearchParams();
   const examUrl = searchParams.get('examUrl');
+  const examType = searchParams.get('examType'); // 'reading' or 'listening'
   const router = useRouter();
 
-  const [examData, setExamData] = useState<ReadingExamResponse['data'] | null>(null);
+  const [readingExamData, setReadingExamData] = useState<ReadingExamResponse['data'] | null>(null);
+  const [listeningExamData, setListeningExamData] =
+    useState<ListActiveListeningExamsResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const { getAllAvailableExams } = useReadingExamAttempt();
+  const { fetchListeningExamsList, exams: listeningExams } = useListeningExam();
 
   const fetchExamData = async () => {
-    if (!examUrl) return;
+    if (!examUrl || !examType) return;
 
     try {
       setIsLoading(true);
-      const response = await getAllAvailableExams();
-      if (response && response.data) {
-        // Find the exam with matching url_slug
-        const exam = response.data.find(
-          (exam: ReadingExamResponse['data']) => exam.url_slug === examUrl
+
+      if (examType === 'reading') {
+        const response = await getAllAvailableExams();
+        if (response && response.data) {
+          // Find the exam with matching url_slug
+          const exam = response.data.find(
+            (exam: ReadingExamResponse['data']) => exam.url_slug === examUrl
+          );
+
+          if (exam) {
+            setReadingExamData(exam);
+          } else {
+            console.error('Reading exam not found');
+          }
+        }
+      } else if (examType === 'listening') {
+        await fetchListeningExamsList();
+        // Find the listening exam with matching url_slug from the exams state
+        const exam = listeningExams.find(
+          (exam: ListActiveListeningExamsResponse) => exam.url_slug === examUrl
         );
 
         if (exam) {
-          setExamData(exam);
+          setListeningExamData(exam);
         } else {
-          console.error('Exam not found');
+          console.error('Listening exam not found');
         }
       }
     } catch (error) {
@@ -43,22 +65,48 @@ const ExamPreviewPage = () => {
   };
 
   const handleStartExam = () => {
-    if (examUrl) {
-      router.push(`/exams/take?examUrl=${examUrl}&examType=reading`);
+    if (examUrl && examType) {
+      router.push(`/exams/take?examUrl=${examUrl}&examType=${examType}`);
     }
   };
 
   const handleBack = () => {
-    router.push('/exams/reading');
+    if (examType === 'reading') {
+      router.push('/exams/reading');
+    } else if (examType === 'listening') {
+      router.push('/exams/listening');
+    } else {
+      router.push('/exams');
+    }
   };
 
   useEffect(() => {
-    if (examUrl) {
+    if (examUrl && examType) {
       fetchExamData();
     } else {
-      router.push('/exams/reading');
+      // Redirect based on examType or to general exams page
+      if (examType === 'reading') {
+        router.push('/exams/reading');
+      } else if (examType === 'listening') {
+        router.push('/exams/listening');
+      } else {
+        router.push('/exams');
+      }
     }
-  }, [examUrl]);
+  }, [examUrl, examType]);
+
+  // Additional useEffect to handle listening exams data when it's available
+  useEffect(() => {
+    if (examType === 'listening' && listeningExams.length > 0 && examUrl) {
+      const exam = listeningExams.find(
+        (exam: ListActiveListeningExamsResponse) => exam.url_slug === examUrl
+      );
+      if (exam) {
+        setListeningExamData(exam);
+        setIsLoading(false);
+      }
+    }
+  }, [listeningExams, examUrl, examType]);
 
   if (isLoading) {
     return (
@@ -71,10 +119,10 @@ const ExamPreviewPage = () => {
     );
   }
 
-  if (!examData) {
+  if (!readingExamData && !listeningExamData && !isLoading) {
     return (
       <div className='h-screen flex items-center justify-center bg-medium-slate-blue-900'>
-        <div className='text-center p-6 bg-white rounded-lg shadow-lg border border-persimmon-300 max-w-md'>
+        <div className='text-center p-6 bg-white/80 backdrop-blur-lg border rounded-2xl shadow-xl max-w-md'>
           <p className='text-persimmon-600 text-lg font-medium mb-4'>
             Exam not found or failed to load.
           </p>
@@ -82,7 +130,7 @@ const ExamPreviewPage = () => {
             <Button
               onClick={handleBack}
               variant='outline'
-              className='border-tekhelet-300 text-tekhelet-600 hover:bg-tekhelet-50'
+              className='border-tekhelet-300 text-tekhelet-600 hover:bg-tekhelet-50 bg-white/60 backdrop-blur-md'
             >
               Back to Exams
             </Button>
@@ -98,7 +146,48 @@ const ExamPreviewPage = () => {
     );
   }
 
-  return <ExamPreview examData={examData} onStartExam={handleStartExam} onBack={handleBack} />;
+  // Render the appropriate preview component based on examType
+  if (examType === 'reading' && readingExamData) {
+    return (
+      <ReadingExamPreview
+        examData={readingExamData}
+        onStartExam={handleStartExam}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  if (examType === 'listening' && listeningExamData) {
+    return (
+      <ListeningExamPreview
+        examData={listeningExamData}
+        onStartExam={handleStartExam}
+        onBack={handleBack}
+      />
+    );
+  }
+
+  // If examType is invalid, show error
+  if (!isLoading && (!examType || (examType !== 'reading' && examType !== 'listening'))) {
+    return (
+      <div className='h-screen flex items-center justify-center bg-medium-slate-blue-900'>
+        <div className='text-center p-6 bg-white/80 backdrop-blur-lg border border-persimmon-300 rounded-2xl shadow-xl max-w-md'>
+          <p className='text-red-600 text-lg font-medium mb-4'>
+            Invalid exam type. Please specify either 'reading' or 'listening'.
+          </p>
+          <Button
+            onClick={() => router.push('/exams')}
+            className='bg-tekhelet-600 hover:bg-tekhelet-700'
+          >
+            Go to Exams
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state or waiting for data
+  return null;
 };
 
 export default ExamPreviewPage;

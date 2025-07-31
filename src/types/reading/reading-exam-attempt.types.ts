@@ -154,14 +154,14 @@ type ReadingExamAttemptDetailsQuestion = {
   blank_index?: number;
 };
 
-type QuestionGroup = {
+export interface QuestionGroup {
   question_group_id: string;
   section_order: number;
   section_label: string;
   instruction: string;
   questions?: ReadingExamAttemptDetailsQuestion[];
   drag_items?: DragItem[];
-};
+}
 
 // Passage type
 type ReadingExamAttemptDetails = {

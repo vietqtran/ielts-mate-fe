@@ -12,7 +12,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useListeningExam } from '@/hooks/apis/listening/useListeningExam';
-import { Eye } from 'lucide-react';
+import { Play } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
@@ -87,9 +87,10 @@ export default function ListeningExamsTable({ className }: ListeningExamsTablePr
                 </TableCell>
                 <TableCell className='text-right'>
                   <div className='flex justify-end gap-2'>
-                    <Button variant='outline' size='icon' asChild>
-                      <Link href={`/exams/preview?examUrl=${exam.url_slug}`}>
-                        <Eye className='h-4 w-4' />
+                    <Button size='sm' asChild className='bg-tekhelet-600 hover:bg-tekhelet-700'>
+                      <Link href={`/exams/preview?examUrl=${exam.url_slug}&examType=listening`}>
+                        <Play className='h-4 w-4' />
+                        Take Exam
                       </Link>
                     </Button>
                   </div>

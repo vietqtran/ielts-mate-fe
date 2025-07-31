@@ -1,10 +1,6 @@
 'use client';
 
-import {
-  // AllExamsTable,
-  ListeningExamsTable,
-  ReadingExamsTable,
-} from '@/components/features/user/exams';
+import { ListeningExamsTable, ReadingExamsTable } from '@/components/features/user/exams';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useParams, useRouter } from 'next/navigation';
@@ -26,20 +22,18 @@ const ExamHomepage = () => {
         return <ReadingExamsTable />;
       case 'listening':
         return <ListeningExamsTable />;
-      // default:
-      //   return <AllExamsTable />;
     }
   };
 
   return (
     <div className='container mx-auto p-6'>
       <div className='flex justify-between items-center mb-6'>
-        <h1 className='text-3xl font-bold text-tekhelet-700'>IELTS Exams</h1>
+        <h1 className='text-3xl font-bold text-tekhelet-300'>IELTS Exams</h1>
       </div>
 
-      <Card className='border-tekhelet-200'>
+      <Card className='border'>
         <CardHeader className='bg-tekhelet-50'>
-          <CardTitle className='text-tekhelet-700'>Available Exams</CardTitle>
+          <CardTitle className='text-tekhelet-400'>Available Exams</CardTitle>
           <CardDescription className='text-medium-slate-blue-400'>
             Practice with a variety of IELTS exams to improve your skills
           </CardDescription>
@@ -48,16 +42,10 @@ const ExamHomepage = () => {
           <Tabs value={tab} className='w-full' onValueChange={handleTabChange}>
             <TabsList className='mb-4'>
               {/* <TabsTrigger value='all'>All Exams</TabsTrigger> */}
-              <TabsTrigger
-                value='reading'
-                className='data-[state=active]:bg-tekhelet-100 data-[state=active]:text-tekhelet-700'
-              >
+              <TabsTrigger value='reading' className='data-[state=active]:text-tekhelet-400'>
                 Reading
               </TabsTrigger>
-              <TabsTrigger
-                value='listening'
-                className='data-[state=active]:bg-medium-slate-blue-100 data-[state=active]:text-medium-slate-blue-700'
-              >
+              <TabsTrigger value='listening' className='data-[state=active]:text-tekhelet-400'>
                 Listening
               </TabsTrigger>
             </TabsList>

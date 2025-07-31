@@ -197,13 +197,13 @@ const Listening = () => {
         {/* Header */}
         <div className='flex items-center justify-between'>
           <div>
-            <h1 className='text-2xl font-bold tracking-tight'>Listening Tasks</h1>
+            <h1 className='text-2xl font-bold tracking-tight text-tekhelet-400'>Listening Tasks</h1>
             <p className='text-muted-foreground'>
               Practice with IELTS listening tasks and improve your skills
             </p>
           </div>
           <div className='flex items-center gap-2'>
-            <Badge variant='secondary'>
+            <Badge variant='outline' className='text-tekhelet-600 backdrop-blur-md'>
               {pagination?.totalItems || 0} task
               {(pagination?.totalItems || 0) !== 1 ? 's' : ''}
             </Badge>
@@ -228,19 +228,19 @@ const Listening = () => {
                 <CardHeader>
                   <div className='flex items-start justify-between'>
                     <div className='flex-1'>
-                      <CardTitle className='h-6 w-3/4 bg-gray-200 rounded animate-pulse mb-2' />
+                      <CardTitle className='h-6 w-3/4 bg-tekhelet-800 rounded animate-pulse mb-2' />
                       <div className='flex items-center gap-2 mb-2'>
-                        <div className='h-4 w-20 bg-gray-200 rounded animate-pulse' />
-                        <div className='h-4 w-16 bg-gray-200 rounded animate-pulse' />
+                        <div className='h-4 w-20 bg-tekhelet-800 rounded animate-pulse' />
+                        <div className='h-4 w-16 bg-tekhelet-800 rounded animate-pulse' />
                       </div>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className='space-y-3'>
-                    <div className='h-4 w-full bg-gray-200 rounded animate-pulse' />
-                    <div className='h-4 w-full bg-gray-200 rounded animate-pulse' />
-                    <div className='h-4 w-2/3 bg-gray-200 rounded animate-pulse' />
+                    <div className='h-4 w-full bg-tekhelet-800 rounded animate-pulse' />
+                    <div className='h-4 w-full bg-tekhelet-800 rounded animate-pulse' />
+                    <div className='h-4 w-2/3 bg-tekhelet-800 rounded animate-pulse' />
                   </div>
                 </CardContent>
               </Card>
@@ -274,11 +274,14 @@ const Listening = () => {
                 <CardHeader>
                   <div className='flex items-start justify-between'>
                     <div className='flex-1'>
-                      <CardTitle className='text-lg leading-tight mb-2'>
+                      <CardTitle className='text-lg leading-tight mb-2 text-tekhelet-500'>
                         {listening.title}
                       </CardTitle>
                       <div className='flex items-center gap-2 mb-2'>
-                        <Badge className={getIeltsTypeBadgeColor(listening.ielts_type)}>
+                        <Badge
+                          className={getIeltsTypeBadgeColor(listening.ielts_type)}
+                          variant='outline'
+                        >
                           {getIeltsTypeLabel(listening.ielts_type)}
                         </Badge>
                         <Badge variant='outline'>{getPartNumberLabel(listening.part_number)}</Badge>
@@ -303,7 +306,7 @@ const Listening = () => {
 
                     {/* Action Button */}
                     <Button
-                      className='w-full'
+                      className='w-full bg-selective-yellow-300 hover:bg-selective-yellow-400'
                       size='sm'
                       onClick={() => router.push(`/listening/${listening.task_id}/practice`)}
                     >
