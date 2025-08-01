@@ -1,7 +1,7 @@
 import instance from '@/lib/axios';
-import { ReadingExamAttemptFiltersRequestParams } from '@/types/filter.types';
 import {
   ReadingExamAttemptDetailsResponse,
+  ReadingExamAttemptFiltersRequestParams,
   ReadingExamAttemptList,
   ReadingExamData,
   SubmitExamAttemptAnswersRequest,
