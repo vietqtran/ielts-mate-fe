@@ -1,17 +1,16 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 export interface ReadingAttemptFilters {
-  title?: string;
+  searchText?: string;
   ieltsType?: number[];
   partNumber?: number[];
   status?: number[];
+  sortBy?: string;
+  sortDirection?: 'asc' | 'desc';
 }
 
 export interface ReadingAttemptState {
   filters: ReadingAttemptFilters;
-  currentPage: number;
-  sortBy: string;
-  sortDirection: 'asc' | 'desc';
   isLoading: boolean;
   pagination: {
     totalPages: number;
@@ -24,14 +23,18 @@ export interface ReadingAttemptState {
 }
 
 const initialState: ReadingAttemptState = {
-  filters: {},
-  currentPage: 1,
-  sortBy: 'createdAt',
-  sortDirection: 'desc',
+  filters: {
+    searchText: '',
+    ieltsType: [],
+    partNumber: [],
+    status: [],
+    sortBy: 'updatedAt',
+    sortDirection: 'desc',
+  },
   isLoading: false,
   pagination: {
     totalPages: 1,
-    pageSize: 12,
+    pageSize: 10,
     totalItems: 0,
     hasNextPage: false,
     hasPreviousPage: false,
@@ -47,17 +50,14 @@ const readingAttemptSlice = createSlice({
       state.filters = action.payload;
     },
     clearReadingAttemptFilters: (state) => {
-      state.filters = {};
+      state.filters = initialState.filters;
     },
-    setReadingAttemptCurrentPage: (state, action: PayloadAction<number>) => {
-      state.currentPage = action.payload;
+
+    clearReadingAttemptState: (state) => {
+      state.filters = initialState.filters;
+      state.pagination = initialState.pagination;
     },
-    setReadingAttemptSortBy: (state, action: PayloadAction<string>) => {
-      state.sortBy = action.payload;
-    },
-    setReadingAttemptSortDirection: (state, action: PayloadAction<'asc' | 'desc'>) => {
-      state.sortDirection = action.payload;
-    },
+
     setReadingAttemptLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
@@ -80,9 +80,6 @@ const readingAttemptSlice = createSlice({
 export const {
   setReadingAttemptFilters,
   clearReadingAttemptFilters,
-  setReadingAttemptCurrentPage,
-  setReadingAttemptSortBy,
-  setReadingAttemptSortDirection,
   setReadingAttemptLoading,
   setReadingAttemptPagination,
 } = readingAttemptSlice.actions;

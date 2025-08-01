@@ -110,7 +110,7 @@ const PaginationCommon = ({
   };
 
   // Don't render pagination if there's only one page or no items
-  if (totalPages <= 1) {
+  if (totalPages < 1) {
     return null;
   }
 

@@ -2,6 +2,7 @@ import { ListeningAttemptState } from '@/store/slices/listening-attempt-filter-s
 import { ListeningTasksStates } from '@/store/slices/listening-filter-slice';
 import { PassageState } from '@/store/slices/passage-slice';
 import { ReadingAttemptState } from '@/store/slices/reading-attempt-filter-slice';
+import { ReadingExamAttemptFilters } from '@/store/slices/reading-exam-attempt-filter-slice';
 import { UserPassageState } from '@/store/slices/reading-filter-slices';
 import { User } from '.';
 
@@ -14,7 +15,7 @@ export interface RootState {
   listeningTasks: ListeningTasksStates;
   readingAttempt: ReadingAttemptState;
   listeningAttempt: ListeningAttemptState;
-  readingExamAttempt: ReadingAttemptState;
+  readingExamAttempt: ReadingExamAttemptFilters;
 }
 
 export interface AuthState {

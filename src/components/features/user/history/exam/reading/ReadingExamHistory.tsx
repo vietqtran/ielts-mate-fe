@@ -1,21 +1,18 @@
 'use client';
 
 import { PaginationCommon } from '@/components/features/user/common';
-import ReadingAttemptFilterToolbar from '@/components/features/user/history/practice/reading/ReadingAttemptFilterToolbar';
+import ReadingExamAttemptHistoryFilter from '@/components/features/user/history/exam/reading/components/ReadingExamAttemptFilter';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import useReadingExamAttempt from '@/hooks/apis/reading/useReadingExamAttempt';
-import { ReadingAttemptFilters } from '@/store/slices/reading-attempt-filter-slice';
 import {
-  clearReadingExamAttemptFilters,
-  setReadingExamAttemptCurrentPage,
-  setReadingExamAttemptFilters,
-  setReadingExamAttemptLoading,
-  setReadingExamAttemptPagination,
-  setReadingExamAttemptSortBy,
-  setReadingExamAttemptSortDirection,
+  ReadingExamAttemptFilters,
+  clearFilters,
+  setFilters,
+  setLoading,
+  setPagination,
 } from '@/store/slices/reading-exam-attempt-filter-slice';
 import { ReadingExamAttempt } from '@/types/reading/reading-exam-attempt.types';
 import { RootState } from '@/types/store.types';
@@ -33,24 +30,20 @@ const ReadingExamHistory = () => {
 
   // Get state from Redux
   const filters = useSelector((state: RootState) => state.readingExamAttempt.filters);
-  const sortBy = useSelector((state: RootState) => state.readingExamAttempt.sortBy);
-  const sortDirection = useSelector((state: RootState) => state.readingExamAttempt.sortDirection);
   const reduxIsLoading = useSelector((state: RootState) => state.readingExamAttempt.isLoading);
   const pagination = useSelector((state: RootState) => state.readingExamAttempt.pagination);
-
-  console.log(pagination);
 
   // Load attempts when dependencies change
   useEffect(() => {
     const loadAttempts = async () => {
       try {
-        dispatch(setReadingExamAttemptLoading(true));
+        dispatch(setLoading(true));
         const response = await getExamAttemptHistory({
           size: pagination?.pageSize || 12,
-          readingExamName: filters.title || '',
+          readingExamName: filters.searchText || '',
           page: pagination?.currentPage || 1,
-          sortBy,
-          sortDirection,
+          sortBy: filters.sortBy || '',
+          sortDirection: filters.sortDirection || 'desc',
         });
 
         if (response) {
@@ -58,7 +51,7 @@ const ReadingExamHistory = () => {
 
           // Update pagination state from response length (since API doesn't provide pagination)
           dispatch(
-            setReadingExamAttemptPagination({
+            setPagination({
               totalPages: response?.pagination?.totalPages || 1,
               pageSize: response?.pagination?.pageSize || 12,
               totalItems: response?.pagination?.totalItems || 0,
@@ -71,45 +64,34 @@ const ReadingExamHistory = () => {
       } catch (err) {
         console.error('Failed to load reading exam attempt history:', err);
       } finally {
-        dispatch(setReadingExamAttemptLoading(false));
+        dispatch(setLoading(false));
       }
     };
 
     loadAttempts();
   }, [
-    filters.ieltsType,
-    filters.partNumber,
-    filters.status,
-    filters.title,
-    sortBy,
-    sortDirection,
+    filters.searchText,
+    filters.sortBy,
+    filters.sortDirection,
     pagination?.pageSize,
     pagination?.currentPage,
   ]);
 
-  const handleFiltersChange = (newFilters: ReadingAttemptFilters) => {
-    dispatch(setReadingExamAttemptFilters(newFilters));
-    dispatch(setReadingExamAttemptCurrentPage(1));
+  const handleFiltersChange = (newFilters: ReadingExamAttemptFilters['filters']) => {
+    dispatch(setFilters(newFilters));
+    dispatch(setPagination({ ...pagination, currentPage: 1 }));
   };
 
   const handleClearFilters = () => {
-    dispatch(clearReadingExamAttemptFilters());
-  };
-
-  const handleSortByChange = (field: string) => {
-    dispatch(setReadingExamAttemptSortBy(field));
-  };
-
-  const handleSortDirectionChange = (direction: 'asc' | 'desc') => {
-    dispatch(setReadingExamAttemptSortDirection(direction));
+    dispatch(clearFilters());
   };
 
   const handlePageChange = (page: number) => {
-    dispatch(setReadingExamAttemptPagination({ ...pagination, currentPage: page }));
+    dispatch(setPagination({ ...pagination, currentPage: page }));
   };
 
   const handlePageSizeChange = (size: string) => {
-    dispatch(setReadingExamAttemptPagination({ ...pagination, pageSize: Number(size) }));
+    dispatch(setPagination({ ...pagination, pageSize: Number(size), currentPage: 1 }));
   };
 
   // Check if there are active filters
@@ -145,14 +127,10 @@ const ReadingExamHistory = () => {
           </div>
         </div>
 
-        <ReadingAttemptFilterToolbar
+        <ReadingExamAttemptHistoryFilter
           filters={filters}
           onFiltersChange={handleFiltersChange}
           onClearFilters={handleClearFilters}
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          onSortByChange={handleSortByChange}
-          onSortDirectionChange={handleSortDirectionChange}
           isLoading={reduxIsLoading}
         />
 

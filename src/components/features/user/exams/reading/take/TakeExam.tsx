@@ -361,7 +361,7 @@ const TakeExam = ({ examData, initialAnswers }: TakeExamProps) => {
                   <h1 className='text-xl font-bold text-tekhelet-600'>
                     {examData.reading_exam.reading_exam_name}
                   </h1>
-                  <p className='text-sm text-medium-slate-blue-400 mt-1'>
+                  <p className='text-sm text-medium-slate-blue-400 mt-1 truncate'>
                     {examData.reading_exam.reading_exam_description}
                   </p>
                 </div>

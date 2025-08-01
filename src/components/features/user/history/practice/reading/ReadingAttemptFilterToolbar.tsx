@@ -1,7 +1,7 @@
 'use client';
 
 import { Card, CardContent } from '@/components/ui/card';
-import { Filter, Loader2, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Filter, Loader2, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -24,10 +24,6 @@ interface ReadingAttemptFilterToolbarProps {
   filters: ReadingAttemptFilters;
   onFiltersChange: (filters: ReadingAttemptFilters) => void;
   onClearFilters: () => void;
-  sortBy: string;
-  sortDirection: 'asc' | 'desc';
-  onSortByChange: (field: string) => void;
-  onSortDirectionChange: (direction: 'asc' | 'desc') => void;
   isLoading?: boolean;
 }
 
@@ -52,7 +48,7 @@ const statusOptions = [
 ];
 
 const sortOptions = [
-  { value: 'finishedAt', label: 'Finish Date' },
+  { value: 'updatedAt', label: 'Finished At' },
   { value: 'totalPoints', label: 'Score' },
   { value: 'duration', label: 'Duration' },
   { value: 'createdAt', label: 'Created At' },
@@ -62,14 +58,10 @@ export const ReadingAttemptFilterToolbar = memo(function ReadingAttemptFilterToo
   filters,
   onFiltersChange,
   onClearFilters,
-  sortBy,
-  sortDirection,
-  onSortByChange,
-  onSortDirectionChange,
   isLoading = false,
 }: Readonly<ReadingAttemptFilterToolbarProps>) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [searchTerm, setSearchTerm] = useState(filters.title || '');
+  const [searchTerm, setSearchTerm] = useState(filters.searchText || '');
   const debouncedSearchTerm = useDebounce(searchTerm, 800);
 
   const updateFilter = useCallback(
@@ -87,8 +79,11 @@ export const ReadingAttemptFilterToolbar = memo(function ReadingAttemptFilterToo
   }, []);
 
   const handleSortDirectionToggle = useCallback(() => {
-    onSortDirectionChange(sortDirection === 'asc' ? 'desc' : 'asc');
-  }, [sortDirection, onSortDirectionChange]);
+    onFiltersChange({
+      ...filters,
+      sortDirection: filters.sortDirection === 'asc' ? 'desc' : 'asc',
+    });
+  }, [filters, onFiltersChange]);
 
   const hasActiveFilters = useMemo(() => {
     return Object.values(filters).some((value) => {
@@ -101,10 +96,13 @@ export const ReadingAttemptFilterToolbar = memo(function ReadingAttemptFilterToo
 
   const activeFilterCount = useMemo(() => {
     return Object.values(filters).filter((value) => {
+      // Count active filters
       if (Array.isArray(value)) {
+        // Check if it's an array
+        // For arrays, count if there are any selected options
         return value.length > 0;
       }
-      return value !== undefined && value !== '';
+      return value !== undefined && value !== ''; // For other types, check if they are defined and not empty
     }).length;
   }, [filters]);
 
@@ -138,10 +136,10 @@ export const ReadingAttemptFilterToolbar = memo(function ReadingAttemptFilterToo
   );
 
   useEffect(() => {
-    if (debouncedSearchTerm !== filters.title) {
-      updateFilter('title', debouncedSearchTerm);
+    if (debouncedSearchTerm !== filters.searchText) {
+      updateFilter('searchText', debouncedSearchTerm);
     }
-  }, [debouncedSearchTerm, filters.title]);
+  }, [debouncedSearchTerm, filters.searchText]);
 
   return (
     <Card>
@@ -161,7 +159,16 @@ export const ReadingAttemptFilterToolbar = memo(function ReadingAttemptFilterToo
 
             {/* Sort controls */}
             <div className='flex gap-2 shrink-0'>
-              <Select value={sortBy} onValueChange={onSortByChange} disabled={isLoading}>
+              <Select
+                value={filters.sortBy}
+                onValueChange={(value) => {
+                  onFiltersChange({
+                    ...filters,
+                    sortBy: value,
+                  });
+                }}
+                disabled={isLoading}
+              >
                 <SelectTrigger className='w-[140px]'>
                   <SelectValue placeholder='Sort by' />
                 </SelectTrigger>
@@ -176,19 +183,17 @@ export const ReadingAttemptFilterToolbar = memo(function ReadingAttemptFilterToo
 
               <Button
                 variant='outline'
-                size='sm'
                 onClick={handleSortDirectionToggle}
                 disabled={isLoading}
                 className='px-3'
               >
-                {sortDirection === 'asc' ? '↑' : '↓'}
+                {filters.sortDirection === 'asc' ? <ArrowDown /> : <ArrowUp />}
               </Button>
             </div>
 
             {/* Filter toggle button */}
             <Button
               variant='outline'
-              size='sm'
               onClick={handleToggleExpanded}
               disabled={isLoading}
               className='flex items-center gap-2'
@@ -206,7 +211,6 @@ export const ReadingAttemptFilterToolbar = memo(function ReadingAttemptFilterToo
             {hasActiveFilters && (
               <Button
                 variant='ghost'
-                size='sm'
                 onClick={onClearFilters}
                 disabled={isLoading}
                 className='flex items-center gap-2 text-muted-foreground hover:text-foreground'

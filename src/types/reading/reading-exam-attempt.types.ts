@@ -1,4 +1,5 @@
 import { AttemptData, Choice, DragItem } from '@/types/attempt.types';
+import { CommonPaginationParams } from '@/types/filter.types';
 
 /**
  * Type definitions of response for Create Reading Exam Attempt
@@ -186,3 +187,10 @@ type ReadingExamAttemptDetailsMainResponse = {
 };
 
 // End of Reading Exam Attempt Details Response
+
+/**
+ * Interface for Get Reading Exam Attempt History request parameters.
+ */
+export interface ReadingExamAttemptFiltersRequestParams extends CommonPaginationParams {
+  readingExamName?: string; // Filter by reading exam name
+}
