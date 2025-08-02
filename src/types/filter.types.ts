@@ -27,3 +27,18 @@ export interface CommonPaginationParams {
   sortBy: string; // Default: createdAt
   sortDirection: string; // Default: desc
 }
+
+/**
+ * Interface for common pagination response properties.
+ * This interface defines the structure for pagination details in API responses.
+ * It includes properties such as total pages, page size, total items, and flags for next and previous pages.
+ * This structure is useful for managing pagination in API responses across different endpoints.
+ */
+export interface CommonPaginationResponseProperties {
+  totalPages: number;
+  pageSize: number;
+  totalItems: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+  currentPage: number;
+}
