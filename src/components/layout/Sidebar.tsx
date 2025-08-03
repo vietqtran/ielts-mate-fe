@@ -82,7 +82,6 @@ export function AppSidebar() {
       }, 500);
     } catch (error) {}
   };
-
   return (
     <Sidebar>
       <SidebarHeader className='px-4 h-14'>
@@ -171,6 +170,17 @@ export function AppSidebar() {
                 <span>Profile</span>
               </Link>
             </DropdownMenuItem>
+            {user?.roles.includes('USER') && user?.roles.includes('CREATOR') && (
+              <DropdownMenuItem>
+                <Link
+                  href='/creator/passages'
+                  className='flex items-center w-full justify-start cursor-pointer'
+                >
+                  <LayoutDashboard className='mr-2 h-4 w-4' />
+                  <span>Creator view</span>
+                </Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuItem>
               <Settings className='mr-2 h-4 w-4' />
               <span>Settings</span>

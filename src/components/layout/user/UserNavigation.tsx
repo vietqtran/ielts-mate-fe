@@ -12,7 +12,16 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useAppSelector, useAuth } from '@/hooks';
 import { cn } from '@/lib/utils';
-import { BookOpen, History, Home, LogOut, Settings, User, User2 } from 'lucide-react';
+import {
+  BookOpen,
+  History,
+  Home,
+  LayoutDashboard,
+  LogOut,
+  Settings,
+  User,
+  User2,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -129,6 +138,17 @@ export function UserNavigation() {
                     <span>Profile</span>
                   </Link>
                 </DropdownMenuItem>
+                {user?.roles.includes('USER') && user?.roles.includes('CREATOR') && (
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href='/creator/passages'
+                      className='flex items-center w-full cursor-pointer'
+                    >
+                      <LayoutDashboard className='mr-2 h-4 w-4' />
+                      <span>Creator view</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem>
                   <Settings className='mr-2 h-4 w-4' />
                   <span>Settings</span>
