@@ -72,6 +72,7 @@ const ReadingHistory = () => {
                 totalItems: response.pagination.totalItems,
                 hasNextPage: response.pagination.hasNextPage,
                 hasPreviousPage: response.pagination.hasPreviousPage,
+                currentPage: response.pagination.currentPage || 1,
               })
             );
           }
@@ -122,6 +123,7 @@ const ReadingHistory = () => {
                 totalItems: response.pagination.totalItems,
                 hasNextPage: response.pagination.hasNextPage,
                 hasPreviousPage: response.pagination.hasPreviousPage,
+                currentPage: response.pagination.currentPage || 1,
               })
             );
           }

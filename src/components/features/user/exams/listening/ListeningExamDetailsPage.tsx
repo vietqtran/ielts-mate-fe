@@ -1,64 +1,143 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Clock, Headphones } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import {
+  ExamErrorState,
+  ExamLoadingState,
+  ExamResultHeader,
+  IELTSBandScoreCard,
+  OverallScoreCard,
+  PerformanceByPartsCard,
+  StatisticsCard,
+} from '@/components/features/user/exams/reading/components';
+import {
+  formatDate,
+  formatDuration,
+  getIELTSBandScore,
+  getPerformanceLevel,
+} from '@/components/features/user/exams/reading/utils/examUtils';
+import { useListeningExam } from '@/hooks/apis/listening/useListeningExam';
+import { ListeningExamAttemptDetailsResponse } from '@/types/listening/listening-exam.types';
+import { useEffect, useState } from 'react';
+import { ListeningExamInfoCard, ListeningQuestionAnalysis } from './components';
+import { useListeningExamStatistics } from './hooks/useListeningExamStatistics';
 
 interface ListeningExamDetailsPageProps {
   examId: string;
 }
 
 const ListeningExamDetailsPage = ({ examId }: ListeningExamDetailsPageProps) => {
-  const router = useRouter();
+  const { getListeningExamAttemptResult } = useListeningExam();
+
+  const [examDetails, setExamDetails] = useState<ListeningExamAttemptDetailsResponse | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [openQuestions, setOpenQuestions] = useState<Set<string>>(new Set());
+
+  // Load exam details
+  useEffect(() => {
+    const loadExamDetails = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await getListeningExamAttemptResult({
+          attempt_id: examId,
+        });
+
+        if (response?.data) {
+          setExamDetails(response.data);
+        } else {
+          setError('Failed to load listening exam details');
+        }
+      } catch (err) {
+        console.error('Error loading listening exam details:', err);
+        setError('An error occurred while loading listening exam details');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (examId) {
+      loadExamDetails();
+    }
+  }, [examId, getListeningExamAttemptResult]);
+
+  // Calculate statistics using custom hook
+  const stats = useListeningExamStatistics(examDetails);
+
+  // Toggle question details
+  const toggleQuestion = (questionId: string) => {
+    const newOpen = new Set(openQuestions);
+    if (newOpen.has(questionId)) {
+      newOpen.delete(questionId);
+    } else {
+      newOpen.add(questionId);
+    }
+    setOpenQuestions(newOpen);
+  };
+
+  // Loading state
+  if (isLoading) {
+    return <ExamLoadingState />;
+  }
+
+  // Error state
+  if (error || !examDetails) {
+    return <ExamErrorState error={error || 'Listening exam details not found'} />;
+  }
+
+  const bandScore = stats ? getIELTSBandScore(stats.scorePercentage) : 0;
+  const performance = stats
+    ? getPerformanceLevel(stats.scorePercentage)
+    : { level: 'Unknown', color: 'bg-gray-500 text-white' };
 
   return (
     <div className='min-h-screen bg-medium-slate-blue-900 p-4'>
-      <div className='max-w-4xl mx-auto'>
+      <div className='max-w-6xl mx-auto space-y-6'>
         {/* Header */}
-        <div className='flex items-center justify-between mb-6'>
-          <div className='flex gap-3 items-center'>
-            <Headphones className='w-8 h-8 text-selective-yellow-400' />
-            <div>
-              <h1 className='text-3xl font-bold text-white'>Listening Exam Details</h1>
-              <p className='text-medium-slate-blue-300'>Coming soon...</p>
-            </div>
-          </div>
-          <Button
-            variant='outline'
-            onClick={() => router.push('/history/exams/listening')}
-            className='bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-sm'
-          >
-            <ArrowLeft className='w-4 h-4 mr-2' />
-            Back to History
-          </Button>
+        <ExamResultHeader
+          title='Listening Exam Results'
+          subtitle='Detailed analysis of your listening performance'
+          backUrl='/history/exams/listening'
+        />
+
+        {/* Exam Info Card */}
+        <ListeningExamInfoCard
+          examDetails={examDetails}
+          formatDate={formatDate}
+          formatDuration={formatDuration}
+        />
+
+        {/* Main Results Section */}
+        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+          {/* Overall Score */}
+          <OverallScoreCard
+            scorePercentage={stats?.scorePercentage || 0}
+            correctAnswers={stats?.correctAnswers || 0}
+            totalQuestions={stats?.totalQuestions || 0}
+            performance={performance}
+          />
+
+          {/* IELTS Band Score */}
+          <IELTSBandScoreCard bandScore={bandScore} />
+
+          {/* Statistics */}
+          <StatisticsCard
+            totalPoints={stats?.totalPoints || 0}
+            examTotalPoints={examDetails.total_point}
+            correctAnswers={stats?.correctAnswers || 0}
+            incorrectAnswers={stats?.incorrectAnswers || 0}
+          />
         </div>
 
-        {/* Coming Soon Card */}
-        <Card className='bg-white/70 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl'>
-          <CardHeader className='text-center'>
-            <CardTitle className='flex items-center justify-center gap-2 text-tekhelet-400'>
-              <Clock className='w-5 h-5' />
-              Feature Under Development
-            </CardTitle>
-          </CardHeader>
-          <CardContent className='text-center py-8'>
-            <div className='max-w-md mx-auto space-y-4'>
-              <div className='w-24 h-24 mx-auto bg-gradient-to-br from-selective-yellow-400 to-tangerine-400 rounded-full flex items-center justify-center'>
-                <Headphones className='w-12 h-12 text-white' />
-              </div>
-              <h2 className='text-xl font-semibold text-tekhelet-400'>Listening Exam Details</h2>
-              <p className='text-tekhelet-500'>
-                We're working hard to bring you detailed listening exam analytics. This feature will
-                include audio playback analysis, question breakdown, and performance insights.
-              </p>
-              <div className='bg-tekhelet-100/50 rounded-lg p-3 text-sm text-tekhelet-600'>
-                <strong>Exam ID:</strong> {examId}
-              </div>
-              <p className='text-sm text-tekhelet-400 font-medium'>Stay tuned for updates!</p>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Parts Performance */}
+        {stats && <PerformanceByPartsCard partStats={stats.partStats} />}
+
+        {/* Detailed Question Analysis with Audio */}
+        <ListeningQuestionAnalysis
+          examDetails={examDetails}
+          openQuestions={openQuestions}
+          onToggleQuestion={toggleQuestion}
+        />
       </div>
     </div>
   );

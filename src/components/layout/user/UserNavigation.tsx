@@ -10,10 +10,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  NavigationMenu,
+  NavigationMenuContent,
+  NavigationMenuItem,
+  NavigationMenuLink,
+  NavigationMenuList,
+  NavigationMenuTrigger,
+} from '@/components/ui/navigation-menu';
 import { useAppSelector, useAuth } from '@/hooks';
 import { cn } from '@/lib/utils';
 import {
+  Album,
   BookOpen,
+  Headphones,
   History,
   Home,
   LayoutDashboard,
@@ -26,31 +36,48 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
-const navigationItems = [
+const navigationGroups = [
   {
     name: 'Dashboard',
-    href: '/',
+    href: '/dashboard',
     icon: Home,
   },
   {
-    name: 'Reading',
-    href: '/reading',
-    icon: BookOpen,
+    name: 'Practice',
+    icon: Album,
+    items: [
+      {
+        name: 'Reading',
+        href: '/reading',
+        icon: BookOpen,
+      },
+      {
+        name: 'Listening',
+        href: '/listening',
+        icon: Headphones,
+      },
+    ],
   },
   {
-    name: 'Listening',
-    href: '/listening',
-    icon: BookOpen,
-  },
-  {
-    name: 'Practice Tests',
-    href: '/practice-tests',
+    name: 'Exams',
+    href: '/exams',
     icon: BookOpen,
   },
   {
     name: 'History',
-    href: '/history',
     icon: History,
+    items: [
+      {
+        name: 'Practice',
+        href: '/history/practices/reading',
+        icon: BookOpen,
+      },
+      {
+        name: 'Exams',
+        href: '/history/exams/reading',
+        icon: Headphones,
+      },
+    ],
   },
   {
     name: 'Personalized',
@@ -69,9 +96,13 @@ export function UserNavigation() {
     try {
       await signOut();
       setTimeout(() => {
-        replace('/sign-in');
+        replace('/');
       }, 500);
     } catch (error) {}
+  };
+
+  const isActiveRoute = (href: string) => {
+    return pathname === href || pathname.startsWith(href + '/');
   };
 
   return (
@@ -86,26 +117,78 @@ export function UserNavigation() {
 
           {/* Navigation Links */}
           <div className='hidden md:flex items-center space-x-8'>
-            {navigationItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
+            <NavigationMenu viewport={false}>
+              <NavigationMenuList>
+                {navigationGroups.map((group) => {
+                  if (group.items) {
+                    // Group with sub-items
+                    const hasActiveChild = group.items.some((item) => isActiveRoute(item.href));
 
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={cn(
-                    'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                    isActive
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-100'
-                  )}
-                >
-                  <Icon className='h-4 w-4' />
-                  <span>{item.name}</span>
-                </Link>
-              );
-            })}
+                    return (
+                      <NavigationMenuItem key={group.name} className='z-20'>
+                        <NavigationMenuTrigger
+                          className={cn(
+                            'flex items-center gap-2 text-sm font-medium',
+                            hasActiveChild
+                              ? 'text-[var(--color-medium-slate-blue-300)]'
+                              : 'text-[var(--color-tekhelet-400)] hover:text-[var(--color-medium-slate-blue-300)]'
+                          )}
+                        >
+                          {group.icon && <group.icon className='h-4 w-4' />}
+                          {group.name}
+                        </NavigationMenuTrigger>
+                        <NavigationMenuContent>
+                          <div className='grid w-[200px] gap-2 p-2'>
+                            {group.items.map((item) => {
+                              const Icon = item.icon;
+                              const isActive = isActiveRoute(item.href);
+
+                              return (
+                                <NavigationMenuLink key={item.name} asChild>
+                                  <Link
+                                    href={item.href}
+                                    className={cn(
+                                      'flex flex-row items-center gap-2 rounded-md p-2 text-sm font-medium hover:bg-accent',
+                                      isActive
+                                        ? 'text-selective-yellow-300'
+                                        : 'text-[var(--color-tekhelet-400)] hover:text-[var(--color-medium-slate-blue-300)]'
+                                    )}
+                                  >
+                                    <Icon className='h-4 w-4' />
+                                    <p>{item.name}</p>
+                                  </Link>
+                                </NavigationMenuLink>
+                              );
+                            })}
+                          </div>
+                        </NavigationMenuContent>
+                      </NavigationMenuItem>
+                    );
+                  } else {
+                    // Single navigation item
+                    const Icon = group.icon!;
+                    const isActive = isActiveRoute(group.href!);
+
+                    return (
+                      <NavigationMenuItem key={group.name}>
+                        <Link
+                          href={group.href!}
+                          className={cn(
+                            'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-gray-100',
+                            isActive
+                              ? 'text-selective-yellow-300'
+                              : 'text-[var(--color-tekhelet-400)] hover:text-[var(--color-medium-slate-blue-300)]'
+                          )}
+                        >
+                          <Icon className='h-4 w-4' />
+                          <span>{group.name}</span>
+                        </Link>
+                      </NavigationMenuItem>
+                    );
+                  }
+                })}
+              </NavigationMenuList>
+            </NavigationMenu>
           </div>
 
           {/* User Menu */}
