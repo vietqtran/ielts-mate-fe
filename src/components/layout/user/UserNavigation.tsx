@@ -26,6 +26,7 @@ import {
   Headphones,
   History,
   Home,
+  LayoutDashboard,
   LogOut,
   Settings,
   User,
@@ -220,6 +221,17 @@ export function UserNavigation() {
                     <span>Profile</span>
                   </Link>
                 </DropdownMenuItem>
+                {user?.roles.includes('USER') && user?.roles.includes('CREATOR') && (
+                  <DropdownMenuItem asChild>
+                    <Link
+                      href='/creator/passages'
+                      className='flex items-center w-full justify-start cursor-pointer'
+                    >
+                      <LayoutDashboard className='mr-2 h-4 w-4' />
+                      <span>Creator view</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem>
                   <Settings className='mr-2 h-4 w-4' />
                   <span>Settings</span>
