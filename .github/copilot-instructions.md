@@ -61,9 +61,7 @@ Built for usability, accessibility, and effective IELTS skill-building.
   Example:
 
 ```jsx
-<div className="bg-tekhelet-100/70 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl p-6">
-  {/* Content */}
-</div>
+<div className="backdrop-blur-lg border rounded-2xl p-6">{/* Content */}</div>
 ```
 
 ### 3.4. Styling & Component Rules
