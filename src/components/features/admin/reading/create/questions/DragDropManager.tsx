@@ -322,6 +322,8 @@ export function DragDropManager({
           question_type: group.question_type,
           questions: localQuestions,
           drag_items: localDragItems,
+          // @ts-ignore - Mark as state sync only to prevent redundant API calls
+          _isStateSyncOnly: true,
         };
         updateParentGroup(updatedGroup);
       }

@@ -35,6 +35,7 @@ interface FillInBlanksFormProps {
   onSubmit: (data: FillInBlanksFormData) => void;
   onCancel: () => void;
   isSubmitting: boolean;
+  isEditing?: boolean;
 }
 
 export function FillInBlanksForm({
@@ -42,6 +43,7 @@ export function FillInBlanksForm({
   onSubmit,
   onCancel,
   isSubmitting,
+  isEditing = false,
 }: Readonly<FillInBlanksFormProps>) {
   const form = useForm<FillInBlanksFormData>({
     resolver: zodResolver(questionSchema),
@@ -53,8 +55,6 @@ export function FillInBlanksForm({
       correct_answer: '',
     },
   });
-
-  const isEditing = !!initialData?.id;
 
   return (
     <Card>

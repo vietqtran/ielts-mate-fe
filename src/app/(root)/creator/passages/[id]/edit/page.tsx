@@ -210,14 +210,20 @@ export default function EditPassagePage() {
     setQuestionGroups((prev) => [...prev, group]);
   };
 
-  const handleUpdateQuestionGroup = async (index: number, group: LocalQuestionGroup) => {
+  const handleUpdateQuestionGroup = async (
+    index: number,
+    group: LocalQuestionGroup,
+    skipApiCall: boolean = false
+  ) => {
     // Check if this contains newly created questions that shouldn't be updated again
     // @ts-ignore - These properties aren't in the type definition but were added to prevent redundant updates
     const hasJustCreatedQuestions = group._justCreatedQuestions === true;
     // @ts-ignore
     const createdQuestionIds = group._createdQuestionIds || [];
+    // @ts-ignore - Check if this is just a state sync after individual question update
+    const isStateSyncOnly = group._isStateSyncOnly === true;
 
-    if (hasJustCreatedQuestions) {
+    if (hasJustCreatedQuestions || skipApiCall || isStateSyncOnly) {
       // Just update the local state without making an API call
       setQuestionGroups((prev) => prev.map((g, i) => (i === index ? group : g)));
       return;

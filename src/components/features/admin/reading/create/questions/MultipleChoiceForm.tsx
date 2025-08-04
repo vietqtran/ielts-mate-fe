@@ -47,6 +47,7 @@ interface MultipleChoiceFormProps {
   onSubmit: (data: QuestionFormData) => void;
   onCancel: () => void;
   isSubmitting: boolean;
+  isEditing?: boolean;
 }
 
 export function MultipleChoiceForm({
@@ -54,6 +55,7 @@ export function MultipleChoiceForm({
   onSubmit,
   onCancel,
   isSubmitting,
+  isEditing = false,
 }: Readonly<MultipleChoiceFormProps>) {
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
@@ -137,8 +139,6 @@ export function MultipleChoiceForm({
       form.setValue(`choices.${choiceIndex}.is_correct`, isChecked);
     }
   };
-
-  const isEditing = !!initialData?.id;
 
   return (
     <Card>

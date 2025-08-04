@@ -144,7 +144,7 @@ export function QuestionGroupsManager({
     const commonProps = {
       group: group, // Pass group directly since types now match
       groupIndex,
-      onUpdateGroup: (updatedGroup: any) => {
+      onUpdateGroup: (updatedGroup: any, isStateSyncOnly: boolean = true) => {
         // Check if this contains newly created questions that shouldn't be updated again
         const hasJustCreatedQuestions = updatedGroup._justCreatedQuestions === true;
         const createdQuestionIds = updatedGroup._createdQuestionIds || [];
@@ -175,6 +175,12 @@ export function QuestionGroupsManager({
           localGroup._justCreatedQuestions = true;
           // @ts-ignore
           localGroup._createdQuestionIds = createdQuestionIds;
+        }
+
+        // Mark as state sync only if this comes from individual question updates
+        if (isStateSyncOnly) {
+          // @ts-ignore - Flag to prevent API call when just syncing state after individual question update
+          localGroup._isStateSyncOnly = true;
         }
 
         onUpdateGroup(groupIndex, localGroup);

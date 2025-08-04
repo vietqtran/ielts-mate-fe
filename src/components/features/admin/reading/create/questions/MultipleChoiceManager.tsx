@@ -271,6 +271,7 @@ export function MultipleChoiceManager({
             isLoading.updateChoice ||
             isLoading.deleteChoice
           }
+          isEditing={!!editingQuestion}
         />
       )}
 

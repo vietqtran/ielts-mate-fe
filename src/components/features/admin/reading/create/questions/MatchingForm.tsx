@@ -36,6 +36,7 @@ interface MatchingFormProps {
   onSubmit: (data: MatchingFormData) => void;
   onCancel: () => void;
   isSubmitting: boolean;
+  isEditing?: boolean;
 }
 
 export function MatchingForm({
@@ -43,6 +44,7 @@ export function MatchingForm({
   onSubmit,
   onCancel,
   isSubmitting,
+  isEditing = false,
 }: Readonly<MatchingFormProps>) {
   const form = useForm<MatchingFormData>({
     resolver: zodResolver(questionSchema),
@@ -54,8 +56,6 @@ export function MatchingForm({
       correct_answer_for_matching: '',
     },
   });
-
-  const isEditing = !!initialData?.id;
 
   return (
     <Card>

@@ -166,6 +166,7 @@ export function MatchingManager({
           onSubmit={handleFormSubmit}
           onCancel={handleCancel}
           isSubmitting={isLoading.createQuestions || isLoading.updateQuestionInfo}
+          isEditing={!!editingQuestion}
         />
       )}
 
