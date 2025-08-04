@@ -94,7 +94,9 @@ export default function CreatePassagePage() {
           form.reset(draft);
           setQuestionGroups(draft.questionGroups ?? []);
         }
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
     }
   }, [form]);
 
@@ -152,7 +154,9 @@ export default function CreatePassagePage() {
         // Clear draft after successful creation
         sessionStorage.removeItem('draft-passage');
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleAddQuestionGroup = (group: LocalQuestionGroup) => {
@@ -162,7 +166,7 @@ export default function CreatePassagePage() {
   const handleUpdateQuestionGroup = (index: number, group: LocalQuestionGroup) => {
     // Check if this contains newly created questions that shouldn't be updated again
     // @ts-ignore - These properties aren't in the type definition but were added to prevent redundant updates
-    const hasJustCreatedQuestions = group._justCreatedQuestions === true;
+    const _hasJustCreatedQuestions = group._justCreatedQuestions === true;
 
     // In create page, we're just updating local state without API calls,
     // but we still need to preserve the special flags

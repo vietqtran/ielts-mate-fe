@@ -114,13 +114,16 @@ const ReadingExamHistory = () => {
         {/* Header */}
         <div className='flex items-center justify-between'>
           <div>
-            <h1 className='text-2xl font-bold tracking-tight text-tekhelet-500'>
+            <h1 className='text-2xl font-bold tracking-tight text-[#003b73]'>
               Reading Exam History
             </h1>
-            <p className='text-tekhelet-600'>View and manage your reading exam attempts</p>
+            <p className='text-[#0074b7]'>View and manage your reading exam attempts</p>
           </div>
           <div className='flex items-center gap-2'>
-            <Badge variant='secondary' className='backdrop-blur-lg text-tekhelet-500'>
+            <Badge
+              variant='secondary'
+              className='backdrop-blur-lg text-[#003b73] bg-[#bfd7ed]/50 border-[#60a3d9]/30'
+            >
               {attemptHistoryData.length} attempt
               {attemptHistoryData.length !== 1 ? 's' : ''}
             </Badge>
@@ -138,23 +141,26 @@ const ReadingExamHistory = () => {
         {reduxIsLoading ? (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             {Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i} className='bg-white backdrop-blur-lg border rounded-2xl shadow-xl'>
+              <Card
+                key={i}
+                className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20'
+              >
                 <CardHeader>
                   <div className='flex items-start justify-between'>
                     <div className='flex-1'>
-                      <div className='h-6 w-3/4 bg-tekhelet-700 rounded animate-pulse mb-2' />
+                      <div className='h-6 w-3/4 bg-[#bfd7ed]/60 rounded-xl animate-pulse mb-2' />
                       <div className='flex items-center gap-2 mb-2'>
-                        <div className='h-4 w-20 bg-tekhelet-700 rounded animate-pulse' />
-                        <div className='h-4 w-16 bg-tekhelet-700 rounded animate-pulse' />
+                        <div className='h-4 w-20 bg-[#bfd7ed]/60 rounded-xl animate-pulse' />
+                        <div className='h-4 w-16 bg-[#bfd7ed]/60 rounded-xl animate-pulse' />
                       </div>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className='space-y-3'>
-                    <div className='h-4 w-full bg-tekhelet-700 rounded animate-pulse' />
-                    <div className='h-4 w-full bg-tekhelet-700 rounded animate-pulse' />
-                    <div className='h-4 w-2/3 bg-tekhelet-700 rounded animate-pulse' />
+                    <div className='h-4 w-full bg-[#bfd7ed]/60 rounded-xl animate-pulse' />
+                    <div className='h-4 w-full bg-[#bfd7ed]/60 rounded-xl animate-pulse' />
+                    <div className='h-4 w-2/3 bg-[#bfd7ed]/60 rounded-xl animate-pulse' />
                   </div>
                 </CardContent>
               </Card>

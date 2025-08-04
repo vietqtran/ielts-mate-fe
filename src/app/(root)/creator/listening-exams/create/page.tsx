@@ -18,20 +18,6 @@ import { ListeningTaskFilterParams } from '@/types/listening/listening.types';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react';
 import { toast } from 'sonner';
-import * as z from 'zod';
-
-const listeningTaskSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  instruction: z.string().min(1, 'Instruction is required'),
-  ielts_type: z.number().min(0),
-  part_number: z.number().min(0),
-  status: z.number().min(0),
-  audio_file: z.any(),
-  is_automatic_transcription: z.boolean(),
-  transcript: z.string().optional(),
-});
-
-type ListeningTaskFormData = z.infer<typeof listeningTaskSchema>;
 
 type PartKey = 'part1_id' | 'part2_id' | 'part3_id' | 'part4_id';
 const PARTS: PartKey[] = ['part1_id', 'part2_id', 'part3_id', 'part4_id'];
@@ -43,7 +29,7 @@ export default function CreateListeningExamPage() {
   const { createExam, isLoading: isLoadingExam } = useListeningExam();
 
   const [tasks, setTasks] = useState<any[]>([]);
-  const [pagination, setPagination] = useState({
+  const [_, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
     pageSize: 10,
@@ -77,7 +63,7 @@ export default function CreateListeningExamPage() {
         if (response.pagination) setPagination(response.pagination);
       }
     } catch (error) {
-      toast.error('Failed to fetch listening tasks');
+      console.log(error);
     }
   };
 
@@ -113,10 +99,6 @@ export default function CreateListeningExamPage() {
   // Helper to get task info by id
   const getTaskById = (taskId: string) => tasks.find((t) => t.task_id === taskId) || null;
 
-  const handlePageChange = (page: number) => {
-    setFilters((prev) => ({ ...prev, page }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.exam_name || !form.exam_description || !form.url_slug) {
@@ -138,7 +120,7 @@ export default function CreateListeningExamPage() {
       toast.success('Listening exam created successfully');
       router.push('/creator/listening-exams');
     } catch (error) {
-      toast.error('Failed to create listening exam');
+      console.log(error);
     } finally {
       setSubmitting(false);
     }
@@ -265,7 +247,7 @@ export default function CreateListeningExamPage() {
                   <TableHead>Part</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created At</TableHead>
-                  {PART_LABELS.map((label, idx) => (
+                  {PART_LABELS.map((label) => (
                     <TableHead key={label}>{label}</TableHead>
                   ))}
                 </TableRow>
@@ -286,7 +268,7 @@ export default function CreateListeningExamPage() {
                       <TableCell>
                         {task.created_at ? new Date(task.created_at).toLocaleString() : ''}
                       </TableCell>
-                      {PARTS.map((part, idx) => (
+                      {PARTS.map((part) => (
                         <TableCell key={part} className='text-center'>
                           <input
                             type='radio'

@@ -27,6 +27,7 @@ export default function ListeningExamsPage() {
       const response = await getAllExams();
       setExams(response || []);
     } catch (error) {
+      console.log(error);
       toast.error('Failed to fetch listening exams');
     }
   };

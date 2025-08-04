@@ -65,10 +65,10 @@ export default function ModuleProgressModal({
   };
 
   const getProgressColor = (percentage: number) => {
-    if (percentage >= 80) return 'bg-green-500';
-    if (percentage >= 60) return 'bg-yellow-500';
-    if (percentage >= 40) return 'bg-orange-500';
-    return 'bg-red-500';
+    if (percentage >= 80) return 'bg-gradient-to-r from-[#0074b7] to-[#60a3d9]';
+    if (percentage >= 60) return 'bg-gradient-to-r from-[#60a3d9] to-[#bfd7ed]';
+    if (percentage >= 40) return 'bg-gradient-to-r from-[#bfd7ed] to-[#60a3d9]';
+    return 'bg-gradient-to-r from-[#003b73] to-[#0074b7]';
   };
 
   const getProgressLevel = (percentage: number) => {
@@ -90,32 +90,34 @@ export default function ModuleProgressModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='sm:max-w-[600px] bg-white/95 backdrop-blur-lg border border-tekhelet-200 max-h-[80vh] overflow-y-auto'>
+      <DialogContent className='sm:max-w-[700px] bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl max-h-[85vh] overflow-y-auto ring-1 ring-[#60a3d9]/20'>
         <DialogHeader>
-          <DialogTitle className='flex items-center space-x-2 text-tekhelet-400'>
-            <TrendingUp className='h-5 w-5' />
+          <DialogTitle className='flex items-center space-x-3 text-[#003b73] text-xl font-bold'>
+            <TrendingUp className='h-6 w-6 text-[#0074b7]' />
             <span>Progress Details</span>
           </DialogTitle>
-          <DialogDescription className='text-medium-slate-blue-500'>
+          <DialogDescription className='text-[#0074b7] text-base font-medium'>
             Track your learning progress for "{module.module_name}"
           </DialogDescription>
         </DialogHeader>
 
         {isLoading.getModuleProgress ? (
-          <div className='flex justify-center py-8'>
+          <div className='flex justify-center py-12'>
             <div className='text-center'>
-              <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-tekhelet-400 mx-auto mb-4'></div>
-              <p className='text-medium-slate-blue-500'>Loading progress...</p>
+              <div className='animate-spin rounded-full h-12 w-12 border-4 border-[#bfd7ed] border-t-[#0074b7] mx-auto mb-4'></div>
+              <p className='text-[#0074b7] font-medium'>Loading progress...</p>
             </div>
           </div>
         ) : (
           <div className='space-y-6 py-4'>
             {/* Overall Progress */}
-            <Card className='bg-gradient-to-r from-tekhelet-50 to-medium-slate-blue-50 border-tekhelet-200'>
+            <Card className='bg-gradient-to-br from-[#bfd7ed]/40 to-[#60a3d9]/20 border border-[#60a3d9]/30 rounded-2xl shadow-lg backdrop-blur-sm'>
               <CardHeader>
                 <CardTitle className='flex items-center justify-between'>
-                  <span className='text-tekhelet-400'>Overall Progress</span>
-                  <Badge className={`text-white ${getProgressColor(progressPercentage)}`}>
+                  <span className='text-[#003b73] font-bold text-lg'>Overall Progress</span>
+                  <Badge
+                    className={`text-white font-semibold px-3 py-1 rounded-xl ${getProgressColor(progressPercentage)}`}
+                  >
                     {progressPercentage.toFixed(1)}%
                   </Badge>
                 </CardTitle>
@@ -123,10 +125,10 @@ export default function ModuleProgressModal({
               <CardContent className='space-y-4'>
                 <Progress
                   value={progressPercentage}
-                  className='h-4'
-                  indicatorClassName={getProgressColor(progressPercentage)}
+                  className='h-5 rounded-full'
+                  indicatorClassName={`${getProgressColor(progressPercentage)} rounded-full`}
                 />
-                <div className='flex justify-between text-sm text-medium-slate-blue-600'>
+                <div className='flex justify-between text-sm text-[#0074b7] font-medium'>
                   <span>{cardsCompleted} cards completed</span>
                   <span>{totalCards - cardsCompleted} cards remaining</span>
                 </div>
@@ -134,9 +136,9 @@ export default function ModuleProgressModal({
             </Card>
 
             {/* Level & Achievement */}
-            <Card className='border-tekhelet-200'>
+            <Card className='border-[#60a3d9]/30 rounded-2xl shadow-lg bg-white/90 backdrop-blur-sm'>
               <CardHeader>
-                <CardTitle className='flex items-center space-x-2 text-tekhelet-400'>
+                <CardTitle className='flex items-center space-x-2 text-[#003b73] font-semibold'>
                   <LevelIcon className='h-5 w-5' />
                   <span>Current Level</span>
                 </CardTitle>
@@ -145,7 +147,7 @@ export default function ModuleProgressModal({
                 <div className='flex items-center justify-between'>
                   <div>
                     <p className={`text-2xl font-bold ${levelInfo.color}`}>{levelInfo.level}</p>
-                    <p className='text-sm text-medium-slate-blue-500'>
+                    <p className='text-sm text-[#0074b7] font-medium'>
                       Based on your completion rate
                     </p>
                   </div>
@@ -155,7 +157,7 @@ export default function ModuleProgressModal({
                         <Zap className='h-6 w-6 text-yellow-500' />
                       </div>
                       <p className='text-xl font-bold text-yellow-600'>{streakCount}</p>
-                      <p className='text-xs text-medium-slate-blue-500'>Study Streak</p>
+                      <p className='text-xs text-[#0074b7] font-medium'>Study Streak</p>
                     </div>
                   )}
                 </div>
@@ -164,47 +166,49 @@ export default function ModuleProgressModal({
 
             {/* Statistics Grid */}
             <div className='grid grid-cols-2 gap-4'>
-              <Card className='border-tekhelet-200'>
+              <Card className='border-[#60a3d9]/30 rounded-2xl shadow-lg bg-white/90 backdrop-blur-sm'>
                 <CardContent className='p-4 text-center'>
                   <div className='flex items-center justify-center mb-2'>
-                    <Target className='h-8 w-8 text-tekhelet-400' />
+                    <Target className='h-8 w-8 text-[#003b73] font-semibold' />
                   </div>
-                  <p className='text-2xl font-bold text-tekhelet-400'>{cardsCompleted}</p>
-                  <p className='text-sm text-medium-slate-blue-500'>Cards Mastered</p>
-                  <p className='text-xs text-medium-slate-blue-400 mt-1'>
+                  <p className='text-2xl font-bold text-[#003b73] font-semibold'>
+                    {cardsCompleted}
+                  </p>
+                  <p className='text-sm text-[#0074b7] font-medium'>Cards Mastered</p>
+                  <p className='text-xs text-[#60a3d9] font-medium mt-1'>
                     out of {totalCards} total
                   </p>
                 </CardContent>
               </Card>
 
-              <Card className='border-tekhelet-200'>
+              <Card className='border-[#60a3d9]/30 rounded-2xl shadow-lg bg-white/90 backdrop-blur-sm'>
                 <CardContent className='p-4 text-center'>
                   <div className='flex items-center justify-center mb-2'>
-                    <Clock className='h-8 w-8 text-selective-yellow-500' />
+                    <Clock className='h-8 w-8 text-[#0074b7] font-bold' />
                   </div>
-                  <p className='text-2xl font-bold text-selective-yellow-500'>
+                  <p className='text-2xl font-bold text-[#0074b7] font-bold'>
                     {formatTime(timeSpent)}
                   </p>
-                  <p className='text-sm text-medium-slate-blue-500'>Total Study Time</p>
-                  <p className='text-xs text-medium-slate-blue-400 mt-1'>across all sessions</p>
+                  <p className='text-sm text-[#0074b7] font-medium'>Total Study Time</p>
+                  <p className='text-xs text-[#60a3d9] font-medium mt-1'>across all sessions</p>
                 </CardContent>
               </Card>
             </div>
 
             {/* Last Study Session */}
             {progress?.last_studied && (
-              <Card className='border-tekhelet-200'>
+              <Card className='border-[#60a3d9]/30 rounded-2xl shadow-lg bg-white/90 backdrop-blur-sm'>
                 <CardHeader>
-                  <CardTitle className='flex items-center space-x-2 text-tekhelet-400'>
+                  <CardTitle className='flex items-center space-x-2 text-[#003b73] font-semibold'>
                     <Calendar className='h-5 w-5' />
                     <span>Last Study Session</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className='text-medium-slate-blue-600'>
+                  <p className='text-[#0074b7] font-medium'>
                     {new Date(progress.last_studied).toLocaleString()}
                   </p>
-                  <p className='text-sm text-medium-slate-blue-500 mt-1'>
+                  <p className='text-sm text-[#0074b7] font-medium mt-1'>
                     Keep up the momentum! Regular practice leads to better retention.
                   </p>
                 </CardContent>
@@ -212,9 +216,9 @@ export default function ModuleProgressModal({
             )}
 
             {/* Next Steps */}
-            <Card className='border-tekhelet-200 bg-blue-50'>
+            <Card className='border-[#60a3d9]/30 rounded-2xl shadow-lg bg-white/90 backdrop-blur-sm bg-gradient-to-br from-[#bfd7ed]/30 to-[#60a3d9]/10'>
               <CardHeader>
-                <CardTitle className='text-tekhelet-400'>Next Steps</CardTitle>
+                <CardTitle className='text-[#003b73] font-semibold'>Next Steps</CardTitle>
                 <CardDescription>
                   {progressPercentage < 100
                     ? `Continue studying to complete this module. You're ${(100 - progressPercentage).toFixed(1)}% away from completion!`
@@ -225,11 +229,11 @@ export default function ModuleProgressModal({
           </div>
         )}
 
-        <DialogFooter>
+        <DialogFooter className='gap-3'>
           <Button
             variant='outline'
             onClick={onClose}
-            className='border-medium-slate-blue-200 text-medium-slate-blue-600'
+            className='border-[#60a3d9]/40 text-[#0074b7] hover:bg-[#60a3d9]/10 hover:border-[#0074b7] rounded-xl px-6 py-3 font-medium transition-all duration-200'
           >
             Close
           </Button>
@@ -239,9 +243,9 @@ export default function ModuleProgressModal({
                 onStartStudy?.();
                 onClose();
               }}
-              className='bg-tekhelet-400 hover:bg-tekhelet-500 text-white'
+              className='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] text-white rounded-xl px-6 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-200'
             >
-              <Play className='h-4 w-4 mr-2' />
+              <Play className='h-5 w-5 mr-2' />
               Continue Studying
             </Button>
           )}

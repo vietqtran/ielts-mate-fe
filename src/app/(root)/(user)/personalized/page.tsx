@@ -28,14 +28,12 @@ import { VocabularyResponse } from '@/lib/api/vocabulary';
 import {
   Award,
   BarChart3,
-  BookMarked,
   BookOpen,
   Calendar,
   ChevronDown,
   Clock,
   Filter,
   Globe,
-  GraduationCap,
   Lightbulb,
   Lock,
   Play,
@@ -46,7 +44,6 @@ import {
   SortDesc,
   Star,
   Target,
-  TrendingUp,
   Users,
   X,
 } from 'lucide-react';
@@ -65,55 +62,6 @@ interface Module {
   estimatedTime: string;
   lastAccessed?: string;
 }
-
-interface Vocabulary {
-  id: string;
-  word: string;
-  definition: string;
-  example: string;
-  difficulty: 'Easy' | 'Medium' | 'Hard';
-  category: string;
-  mastered: boolean;
-  reviewDate?: string;
-}
-
-const mockModules: Module[] = [
-  {
-    id: '1',
-    title: 'Academic Reading Fundamentals',
-    description: 'Master essential reading strategies for academic texts',
-    progress: 75,
-    totalLessons: 12,
-    completedLessons: 9,
-    difficulty: 'Intermediate',
-    category: 'Reading',
-    estimatedTime: '2-3 hours',
-    lastAccessed: '2 hours ago',
-  },
-  {
-    id: '2',
-    title: 'Listening Comprehension',
-    description: 'Improve your listening skills with various accents',
-    progress: 45,
-    totalLessons: 8,
-    completedLessons: 4,
-    difficulty: 'Beginner',
-    category: 'Listening',
-    estimatedTime: '1.5-2 hours',
-    lastAccessed: '1 day ago',
-  },
-  {
-    id: '3',
-    title: 'Advanced Writing Techniques',
-    description: 'Learn advanced writing structures and vocabulary',
-    progress: 20,
-    totalLessons: 15,
-    completedLessons: 3,
-    difficulty: 'Advanced',
-    category: 'Writing',
-    estimatedTime: '3-4 hours',
-  },
-];
 
 interface FilterOptions {
   visibility: 'all' | 'public' | 'private';
@@ -145,7 +93,7 @@ export default function PersonalizedPage() {
   const [sharedModules, setSharedModules] = useState<ModuleUserResponse[]>([]);
   const [shareRequests, setShareRequests] = useState<ModuleUserResponse[]>([]);
   const [mySharedModules, setMySharedModules] = useState<ModuleUserResponse[]>([]);
-  const [pagination, setPagination] = useState({
+  const [_, setPagination] = useState({
     currentPage: 1,
     totalPages: 0,
     pageSize: 10,
@@ -154,7 +102,7 @@ export default function PersonalizedPage() {
     hasPreviousPage: false,
   });
 
-  const { getMyVocabulary, isLoading: vocabLoading } = useVocabulary();
+  const { getMyVocabulary } = useVocabulary();
   const {
     getMyModules,
     getMySharedModules,
@@ -275,37 +223,6 @@ export default function PersonalizedPage() {
     }
   };
 
-  const getDifficultyColor = (difficulty: string) => {
-    switch (difficulty) {
-      case 'Beginner':
-      case 'Easy':
-        return 'bg-green-100 text-green-800';
-      case 'Intermediate':
-      case 'Medium':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'Advanced':
-      case 'Hard':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'Reading':
-        return <BookOpen className='h-4 w-4' />;
-      case 'Listening':
-        return <GraduationCap className='h-4 w-4' />;
-      case 'Writing':
-        return <Target className='h-4 w-4' />;
-      case 'Speaking':
-        return <TrendingUp className='h-4 w-4' />;
-      default:
-        return <BookMarked className='h-4 w-4' />;
-    }
-  };
-
   // Filter and sort modules
   const filteredModules = modules
     .filter((module) => {
@@ -382,16 +299,16 @@ export default function PersonalizedPage() {
   );
 
   return (
-    <div className='container mx-auto p-6 space-y-6'>
+    <div className='container mx-auto p-6 space-y-6 bg-gradient-to-br from-[#bfd7ed]/30 to-[#60a3d9]/10 min-h-screen'>
       {/* Header */}
       <div className='flex flex-col space-y-4'>
         <div className='flex items-center space-x-3'>
-          <div className='p-3 bg-gradient-to-r from-tekhelet-400 to-medium-slate-blue-500 rounded-xl'>
+          <div className='p-3 bg-gradient-to-r from-[#0074b7] to-[#60a3d9] rounded-xl shadow-lg'>
             <Lightbulb className='h-6 w-6 text-white' />
           </div>
           <div>
-            <h1 className='text-3xl font-bold text-tekhelet-400'>Personalized Learning</h1>
-            <p className='text-medium-slate-blue-500'>
+            <h1 className='text-3xl font-bold text-[#003b73]'>Personalized Learning</h1>
+            <p className='text-[#0074b7] font-medium'>
               Track your progress and manage your learning journey
             </p>
           </div>
@@ -400,57 +317,57 @@ export default function PersonalizedPage() {
 
       {/* Stats Overview */}
       <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
-        <Card className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl'>
+        <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20 hover:shadow-3xl transition-all duration-200'>
           <CardContent className='p-6'>
             <div className='flex items-center space-x-3'>
-              <div className='p-2 bg-tekhelet-100 rounded-lg'>
-                <BookOpen className='h-5 w-5 text-tekhelet-600' />
+              <div className='p-3 bg-gradient-to-br from-[#bfd7ed]/50 to-[#60a3d9]/20 rounded-xl'>
+                <BookOpen className='h-5 w-5 text-[#0074b7]' />
               </div>
               <div>
-                <p className='text-sm text-medium-slate-blue-500'>Active Modules</p>
-                <p className='text-2xl font-bold text-tekhelet-400'>{modules.length}</p>
+                <p className='text-sm text-[#0074b7] font-medium'>Active Modules</p>
+                <p className='text-2xl font-bold text-[#003b73]'>{modules.length}</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl'>
+        <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20 hover:shadow-3xl transition-all duration-200'>
           <CardContent className='p-6'>
             <div className='flex items-center space-x-3'>
-              <div className='p-2 bg-selective-yellow-100 rounded-lg'>
-                <Target className='h-5 w-5 text-selective-yellow-600' />
+              <div className='p-3 bg-gradient-to-br from-[#60a3d9]/50 to-[#0074b7]/20 rounded-xl'>
+                <Target className='h-5 w-5 text-[#0074b7]' />
               </div>
               <div>
-                <p className='text-sm text-medium-slate-blue-500'>Avg. Progress</p>
-                <p className='text-2xl font-bold text-selective-yellow-500'>47%</p>
+                <p className='text-sm text-[#0074b7] font-medium'>Avg. Progress</p>
+                <p className='text-2xl font-bold text-[#003b73]'>47%</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl'>
+        <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20 hover:shadow-3xl transition-all duration-200'>
           <CardContent className='p-6'>
             <div className='flex items-center space-x-3'>
-              <div className='p-2 bg-persimmon-100 rounded-lg'>
-                <Award className='h-5 w-5 text-persimmon-600' />
+              <div className='p-3 bg-gradient-to-br from-[#0074b7]/50 to-[#60a3d9]/20 rounded-xl'>
+                <Award className='h-5 w-5 text-[#0074b7]' />
               </div>
               <div>
-                <p className='text-sm text-medium-slate-blue-500'>Mastered Words</p>
-                <p className='text-2xl font-bold text-persimmon-500'>156</p>
+                <p className='text-sm text-[#0074b7] font-medium'>Mastered Words</p>
+                <p className='text-2xl font-bold text-[#003b73]'>156</p>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl'>
+        <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20 hover:shadow-3xl transition-all duration-200'>
           <CardContent className='p-6'>
             <div className='flex items-center space-x-3'>
-              <div className='p-2 bg-tangerine-100 rounded-lg'>
-                <Clock className='h-5 w-5 text-tangerine-600' />
+              <div className='p-3 bg-gradient-to-br from-[#bfd7ed]/50 to-[#0074b7]/20 rounded-xl'>
+                <Clock className='h-5 w-5 text-[#0074b7]' />
               </div>
               <div>
-                <p className='text-sm text-medium-slate-blue-500'>Study Time</p>
-                <p className='text-2xl font-bold text-tangerine-500'>12h</p>
+                <p className='text-sm text-[#0074b7] font-medium'>Study Time</p>
+                <p className='text-2xl font-bold text-[#003b73]'>12h</p>
               </div>
             </div>
           </CardContent>
@@ -459,7 +376,7 @@ export default function PersonalizedPage() {
 
       {/* Main Content */}
       <Tabs defaultValue='modules' className='space-y-6'>
-        <TabsList className='grid w-full grid-cols-5 bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl'>
+        <TabsList className='grid w-full grid-cols-5 bg-white/60 backdrop-blur-lg border border-[#bfd7ed]/40 rounded-2xl'>
           <TabsTrigger value='modules' className='rounded-xl'>
             My Modules
           </TabsTrigger>
@@ -486,7 +403,7 @@ export default function PersonalizedPage() {
 
         <TabsContent value='modules' className='space-y-6'>
           {/* Search and Filter */}
-          <Card className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl'>
+          <Card className='bg-white/60 backdrop-blur-lg border border-[#bfd7ed]/40 rounded-2xl shadow-xl'>
             <CardContent className='p-6'>
               <div className='flex flex-col md:flex-row gap-4'>
                 <div className='flex-1 relative'>
@@ -495,7 +412,7 @@ export default function PersonalizedPage() {
                     placeholder='Search modules...'
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className='pl-10 bg-white/80 border-tekhelet-200'
+                    className='pl-10 bg-white/80 border-[#bfd7ed]/40'
                   />
                 </div>
                 <div className='flex gap-2'>
@@ -503,7 +420,7 @@ export default function PersonalizedPage() {
                     <PopoverTrigger asChild>
                       <Button
                         variant='outline'
-                        className='border-tekhelet-200 text-tekhelet-400 relative'
+                        className='border-[#bfd7ed]/40 text-tekhelet-400 relative'
                       >
                         <Filter className='h-4 w-4 mr-2' />
                         Filter
@@ -514,7 +431,7 @@ export default function PersonalizedPage() {
                         )}
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className='w-80 p-4 bg-white/95 backdrop-blur-lg border border-tekhelet-200'>
+                    <PopoverContent className='w-80 p-4 bg-white/95 backdrop-blur-lg border border-[#bfd7ed]/40'>
                       <div className='space-y-4'>
                         <div className='flex items-center justify-between'>
                           <h4 className='font-medium text-tekhelet-400'>Filter Options</h4>
@@ -523,7 +440,7 @@ export default function PersonalizedPage() {
                               variant='ghost'
                               size='sm'
                               onClick={clearFilters}
-                              className='text-medium-slate-blue-500 hover:text-tekhelet-400'
+                              className='text-[#0074b7] hover:text-tekhelet-400'
                             >
                               <X className='h-3 w-3 mr-1' />
                               Clear
@@ -540,7 +457,7 @@ export default function PersonalizedPage() {
                             <DropdownMenuTrigger asChild>
                               <Button
                                 variant='outline'
-                                className='w-full justify-between border-tekhelet-200'
+                                className='w-full justify-between border-[#bfd7ed]/40'
                               >
                                 <div className='flex items-center'>
                                   {filterOptions.visibility === 'all' && (
@@ -597,7 +514,7 @@ export default function PersonalizedPage() {
                             <DropdownMenuTrigger asChild>
                               <Button
                                 variant='outline'
-                                className='w-full justify-between border-tekhelet-200'
+                                className='w-full justify-between border-[#bfd7ed]/40'
                               >
                                 <div className='flex items-center'>
                                   {(filterOptions.sortBy === 'newest' ||
@@ -674,8 +591,8 @@ export default function PersonalizedPage() {
                         </div>
 
                         {/* Results Summary */}
-                        <div className='pt-2 border-t border-tekhelet-200'>
-                          <p className='text-xs text-medium-slate-blue-500'>
+                        <div className='pt-2 border-t border-[#bfd7ed]/40'>
+                          <p className='text-xs text-[#0074b7]'>
                             Showing {filteredModules.length} of {modules.length} modules
                           </p>
                         </div>
@@ -696,11 +613,11 @@ export default function PersonalizedPage() {
           {/* Active Filters */}
           {getActiveFilterCount() > 0 && (
             <div className='flex flex-wrap items-center gap-2 py-2'>
-              <span className='text-sm text-medium-slate-blue-500'>Active filters:</span>
+              <span className='text-sm text-[#0074b7]'>Active filters:</span>
               {filterOptions.visibility !== 'all' && (
                 <Badge
                   variant='secondary'
-                  className='bg-tekhelet-100 text-tekhelet-700 border border-tekhelet-200'
+                  className='bg-tekhelet-100 text-tekhelet-700 border border-[#bfd7ed]/40'
                 >
                   <Globe className='h-3 w-3 mr-1' />
                   {filterOptions.visibility === 'public' ? 'Public' : 'Private'}
@@ -715,7 +632,7 @@ export default function PersonalizedPage() {
               {filterOptions.sortBy !== 'newest' && (
                 <Badge
                   variant='secondary'
-                  className='bg-tekhelet-100 text-tekhelet-700 border border-tekhelet-200'
+                  className='bg-tekhelet-100 text-tekhelet-700 border border-[#bfd7ed]/40'
                 >
                   <Calendar className='h-3 w-3 mr-1' />
                   {getSortLabel(filterOptions.sortBy)}
@@ -731,7 +648,7 @@ export default function PersonalizedPage() {
                 variant='ghost'
                 size='sm'
                 onClick={clearFilters}
-                className='h-6 px-2 text-xs text-medium-slate-blue-500 hover:text-tekhelet-400'
+                className='h-6 px-2 text-xs text-[#0074b7] hover:text-tekhelet-400'
               >
                 Clear all
               </Button>
@@ -742,8 +659,8 @@ export default function PersonalizedPage() {
           {moduleLoading.getMyModules ? (
             <div className='flex justify-center py-8'>
               <div className='text-center'>
-                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-tekhelet-400 mx-auto mb-4'></div>
-                <p className='text-medium-slate-blue-500'>Loading modules...</p>
+                <div className='animate-spin rounded-full h-8 w-8 border-4 border-[#bfd7ed] border-t-[#0074b7] mx-auto mb-4'></div>
+                <p className='text-[#0074b7]'>Loading modules...</p>
               </div>
             </div>
           ) : filteredModules.length === 0 ? (
@@ -751,7 +668,7 @@ export default function PersonalizedPage() {
               <BookOpen className='h-12 w-12 text-medium-slate-blue-300 mx-auto mb-4' />
               {modules.length === 0 ? (
                 <>
-                  <p className='text-medium-slate-blue-500 mb-2'>No modules found</p>
+                  <p className='text-[#0074b7] mb-2'>No modules found</p>
                   <Button asChild className='bg-tekhelet-400 hover:bg-tekhelet-500 text-white'>
                     <Link href='/personalized/create-module'>
                       <Plus className='h-4 w-4 mr-2' />
@@ -761,14 +678,14 @@ export default function PersonalizedPage() {
                 </>
               ) : (
                 <>
-                  <p className='text-medium-slate-blue-500 mb-2'>No modules match your filters</p>
+                  <p className='text-[#0074b7] mb-2'>No modules match your filters</p>
                   <p className='text-sm text-medium-slate-blue-400 mb-4'>
                     Try adjusting your search or filter criteria
                   </p>
                   <Button
                     variant='outline'
                     onClick={clearFilters}
-                    className='border-tekhelet-200 text-tekhelet-400'
+                    className='border-[#bfd7ed]/40 text-tekhelet-400'
                   >
                     <X className='h-4 w-4 mr-2' />
                     Clear Filters
@@ -781,7 +698,7 @@ export default function PersonalizedPage() {
               {filteredModules.map((module) => (
                 <Card
                   key={module.module_id}
-                  className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300'
+                  className='bg-white/60 backdrop-blur-lg border border-[#bfd7ed]/40 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300'
                 >
                   <CardHeader className='pb-4'>
                     <div className='flex items-start justify-between'>
@@ -797,7 +714,7 @@ export default function PersonalizedPage() {
                           {module.is_public ? 'Public' : 'Private'}
                         </Badge>
                       </div>
-                      <span className='text-xs text-medium-slate-blue-500 flex items-center'>
+                      <span className='text-xs text-[#0074b7] flex items-center'>
                         <Clock className='h-3 w-3 mr-1' />
                         {new Date(module.created_at).toLocaleDateString()}
                       </span>
@@ -805,19 +722,19 @@ export default function PersonalizedPage() {
                     <CardTitle className='text-lg text-tekhelet-400'>
                       {module.module_name}
                     </CardTitle>
-                    <CardDescription className='text-medium-slate-blue-500'>
+                    <CardDescription className='text-[#0074b7]'>
                       {module.description}
                     </CardDescription>
                   </CardHeader>
                   <CardContent className='space-y-4'>
                     <div className='space-y-2'>
                       <div className='flex justify-between text-sm'>
-                        <span className='text-medium-slate-blue-500'>Vocabulary Count</span>
+                        <span className='text-[#0074b7]'>Vocabulary Count</span>
                         <span className='text-tekhelet-400 font-medium'>
                           {module.flash_card_ids.length}
                         </span>
                       </div>
-                      <div className='text-xs text-medium-slate-blue-500'>
+                      <div className='text-xs text-[#0074b7]'>
                         <span>Created: {new Date(module.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
@@ -835,14 +752,14 @@ export default function PersonalizedPage() {
                       </Button>
                       <Button
                         variant='outline'
-                        className='border-tekhelet-200 text-tekhelet-400'
+                        className='border-[#bfd7ed]/40 text-tekhelet-400'
                         onClick={() => handleShowProgress(module)}
                       >
                         <BarChart3 className='h-4 w-4' />
                       </Button>
                       <Button
                         variant='outline'
-                        className='border-tekhelet-200 text-tekhelet-400'
+                        className='border-[#bfd7ed]/40 text-tekhelet-400'
                         asChild
                       >
                         <Link href={`/personalized/update-module?id=${module.module_id}`}>
@@ -851,7 +768,7 @@ export default function PersonalizedPage() {
                       </Button>
                       <Button
                         variant='outline'
-                        className='border-tekhelet-200 text-tekhelet-400'
+                        className='border-[#bfd7ed]/40 text-tekhelet-400'
                         onClick={() => handleShareModule(module.module_id, module.module_name)}
                       >
                         <Share2 className='h-4 w-4' />
@@ -866,7 +783,7 @@ export default function PersonalizedPage() {
 
         <TabsContent value='vocabulary' className='space-y-6'>
           {/* Search and Filter */}
-          <Card className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl'>
+          <Card className='bg-white/60 backdrop-blur-lg border border-[#bfd7ed]/40 rounded-2xl shadow-xl'>
             <CardContent className='p-6'>
               <div className='flex flex-col md:flex-row gap-4'>
                 <div className='flex-1 relative'>
@@ -875,11 +792,11 @@ export default function PersonalizedPage() {
                     placeholder='Search vocabulary...'
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className='pl-10 bg-white/80 border-tekhelet-200'
+                    className='pl-10 bg-white/80 border-[#bfd7ed]/40'
                   />
                 </div>
                 <div className='flex gap-2'>
-                  <Button variant='outline' className='border-tekhelet-200 text-tekhelet-400'>
+                  <Button variant='outline' className='border-[#bfd7ed]/40 text-tekhelet-400'>
                     <Filter className='h-4 w-4 mr-2' />
                     Filter
                   </Button>
@@ -900,7 +817,7 @@ export default function PersonalizedPage() {
             {filteredVocabularies.map((vocab) => (
               <Card
                 key={vocab.vocabulary_id}
-                className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300'
+                className='bg-white/60 backdrop-blur-lg border border-[#bfd7ed]/40 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300'
               >
                 <CardContent className='p-6'>
                   <div className='flex items-start justify-between'>
@@ -916,18 +833,12 @@ export default function PersonalizedPage() {
                       </div>
                       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
                         <div>
-                          <p className='text-sm font-medium text-medium-slate-blue-500 mb-1'>
-                            Meaning
-                          </p>
+                          <p className='text-sm font-medium text-[#0074b7] mb-1'>Meaning</p>
                           <p className='text-medium-slate-blue-600'>{vocab.meaning}</p>
                         </div>
                         <div>
-                          <p className='text-sm font-medium text-medium-slate-blue-500 mb-1'>
-                            Context
-                          </p>
-                          <p className='text-sm text-medium-slate-blue-500 italic'>
-                            "{vocab.context}"
-                          </p>
+                          <p className='text-sm font-medium text-[#0074b7] mb-1'>Context</p>
+                          <p className='text-sm text-[#0074b7] italic'>"{vocab.context}"</p>
                         </div>
                       </div>
                       <p className='text-xs text-medium-slate-blue-400 mt-3'>
@@ -938,7 +849,7 @@ export default function PersonalizedPage() {
                       <Button
                         variant='outline'
                         size='sm'
-                        className='border-tekhelet-200 text-tekhelet-400'
+                        className='border-[#bfd7ed]/40 text-tekhelet-400'
                       >
                         Edit
                       </Button>
@@ -951,13 +862,13 @@ export default function PersonalizedPage() {
         </TabsContent>
 
         <TabsContent value='shared' className='space-y-6'>
-          <Card className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl'>
+          <Card className='bg-white/60 backdrop-blur-lg border border-[#bfd7ed]/40 rounded-2xl shadow-xl'>
             <CardHeader>
               <CardTitle className='text-tekhelet-400 flex items-center'>
                 <Users className='h-5 w-5 mr-2' />
                 Modules Shared with Me
               </CardTitle>
-              <CardDescription className='text-medium-slate-blue-500'>
+              <CardDescription className='text-[#0074b7]'>
                 Modules that other users have shared with you and you've accepted
               </CardDescription>
             </CardHeader>
@@ -966,14 +877,14 @@ export default function PersonalizedPage() {
           {moduleLoading.getMySharedModules ? (
             <div className='flex justify-center py-8'>
               <div className='text-center'>
-                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-tekhelet-400 mx-auto mb-4'></div>
-                <p className='text-medium-slate-blue-500'>Loading shared modules...</p>
+                <div className='animate-spin rounded-full h-8 w-8 border-4 border-[#bfd7ed] border-t-[#0074b7] mx-auto mb-4'></div>
+                <p className='text-[#0074b7]'>Loading shared modules...</p>
               </div>
             </div>
           ) : sharedModules.length === 0 ? (
             <div className='text-center py-8'>
               <Users className='h-12 w-12 text-medium-slate-blue-300 mx-auto mb-4' />
-              <p className='text-medium-slate-blue-500 mb-2'>No shared modules yet</p>
+              <p className='text-[#0074b7] mb-2'>No shared modules yet</p>
               <p className='text-sm text-medium-slate-blue-400'>
                 When other users share modules with you, they'll appear here
               </p>
@@ -994,7 +905,7 @@ export default function PersonalizedPage() {
         </TabsContent>
 
         <TabsContent value='requests' className='space-y-6'>
-          <Card className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl'>
+          <Card className='bg-white/60 backdrop-blur-lg border border-[#bfd7ed]/40 rounded-2xl shadow-xl'>
             <CardHeader>
               <CardTitle className='text-tekhelet-400 flex items-center'>
                 <Share2 className='h-5 w-5 mr-2' />
@@ -1003,7 +914,7 @@ export default function PersonalizedPage() {
                   <Badge className='ml-2 bg-red-500 text-white'>{shareRequests.length}</Badge>
                 )}
               </CardTitle>
-              <CardDescription className='text-medium-slate-blue-500'>
+              <CardDescription className='text-[#0074b7]'>
                 Module sharing requests that are waiting for your response
               </CardDescription>
             </CardHeader>
@@ -1012,14 +923,14 @@ export default function PersonalizedPage() {
           {moduleLoading.getSharedModuleRequests ? (
             <div className='flex justify-center py-8'>
               <div className='text-center'>
-                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-tekhelet-400 mx-auto mb-4'></div>
-                <p className='text-medium-slate-blue-500'>Loading requests...</p>
+                <div className='animate-spin rounded-full h-8 w-8 border-4 border-[#bfd7ed] border-t-[#0074b7] mx-auto mb-4'></div>
+                <p className='text-[#0074b7]'>Loading requests...</p>
               </div>
             </div>
           ) : shareRequests.length === 0 ? (
             <div className='text-center py-8'>
               <Share2 className='h-12 w-12 text-medium-slate-blue-300 mx-auto mb-4' />
-              <p className='text-medium-slate-blue-500 mb-2'>No pending requests</p>
+              <p className='text-[#0074b7] mb-2'>No pending requests</p>
               <p className='text-sm text-medium-slate-blue-400'>
                 Module sharing requests will appear here
               </p>
@@ -1039,13 +950,13 @@ export default function PersonalizedPage() {
         </TabsContent>
 
         <TabsContent value='myshared' className='space-y-6'>
-          <Card className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl'>
+          <Card className='bg-white/60 backdrop-blur-lg border border-[#bfd7ed]/40 rounded-2xl shadow-xl'>
             <CardHeader>
               <CardTitle className='text-tekhelet-400 flex items-center'>
                 <Share2 className='h-5 w-5 mr-2' />
                 My Shared Modules
               </CardTitle>
-              <CardDescription className='text-medium-slate-blue-500'>
+              <CardDescription className='text-[#0074b7]'>
                 Modules you've shared with other users and their response status
               </CardDescription>
             </CardHeader>
@@ -1054,14 +965,14 @@ export default function PersonalizedPage() {
           {moduleLoading.getMyRequestedModules ? (
             <div className='flex justify-center py-8'>
               <div className='text-center'>
-                <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-tekhelet-400 mx-auto mb-4'></div>
-                <p className='text-medium-slate-blue-500'>Loading shared modules...</p>
+                <div className='animate-spin rounded-full h-8 w-8 border-4 border-[#bfd7ed] border-t-[#0074b7] mx-auto mb-4'></div>
+                <p className='text-[#0074b7]'>Loading shared modules...</p>
               </div>
             </div>
           ) : mySharedModules.length === 0 ? (
             <div className='text-center py-8'>
               <Share2 className='h-12 w-12 text-medium-slate-blue-300 mx-auto mb-4' />
-              <p className='text-medium-slate-blue-500 mb-2'>No shared modules yet</p>
+              <p className='text-[#0074b7] mb-2'>No shared modules yet</p>
               <p className='text-sm text-medium-slate-blue-400'>
                 Start sharing your modules with other users to help them learn
               </p>

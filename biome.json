@@ -81,7 +81,7 @@
         "noUnsafeOptionalChaining": "error",
         "noUnusedLabels": "error",
         "noUnusedPrivateClassMembers": "error",
-        "noUnusedVariables": "warn",
+        "noUnusedVariables": "off",
         "useArrayLiterals": "off",
         "useHookAtTopLevel": "off",
         "useIsNan": "error",
@@ -123,12 +123,7 @@
         "noUnsafeNegation": "error",
         "useGetterReturn": "error",
         "useValidTypeof": "error",
-        "noConsole": {
-          "level": "warn",
-          "options": {
-            "allow": ["warn", "error", "info", "debug", "trace"]
-          }
-        }
+        "noConsole": "off"
       }
     },
     "ignore": [

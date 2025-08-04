@@ -29,7 +29,6 @@ export default function ReadingExamDetailsPage() {
           setExam(response.data);
         }
       } catch (error) {
-        toast.error('Failed to fetch reading exam details');
       } finally {
         setIsPageLoading(false);
       }
@@ -45,6 +44,7 @@ export default function ReadingExamDetailsPage() {
         toast.success('Reading exam deleted successfully');
         router.push('/creator/reading-exams');
       } catch (error) {
+        console.log(error);
         toast.error('Failed to delete reading exam');
       }
     }
