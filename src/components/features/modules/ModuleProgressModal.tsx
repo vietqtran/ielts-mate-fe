@@ -65,10 +65,10 @@ export default function ModuleProgressModal({
   };
 
   const getProgressColor = (percentage: number) => {
-    if (percentage >= 80) return 'bg-gradient-to-r from-[#0074b7] to-[#60a3d9]';
-    if (percentage >= 60) return 'bg-gradient-to-r from-[#60a3d9] to-[#bfd7ed]';
-    if (percentage >= 40) return 'bg-gradient-to-r from-[#bfd7ed] to-[#60a3d9]';
-    return 'bg-gradient-to-r from-[#003b73] to-[#0074b7]';
+    if (percentage >= 80) return 'bg-gradient-to-r from-tekhelet-400 to-tekhelet-600';
+    if (percentage >= 60) return 'bg-gradient-to-r from-tekhelet-600 to-tekhelet-700';
+    if (percentage >= 40) return 'bg-gradient-to-r from-tekhelet-700 to-tekhelet-800';
+    return 'bg-gradient-to-r from-tekhelet-300 to-tekhelet-500';
   };
 
   const getProgressLevel = (percentage: number) => {

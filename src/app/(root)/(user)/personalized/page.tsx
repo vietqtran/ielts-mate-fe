@@ -44,6 +44,8 @@ import {
   SortDesc,
   Star,
   Target,
+  Timer,
+  TrendingUp,
   Users,
   X,
 } from 'lucide-react';
@@ -69,6 +71,33 @@ interface FilterOptions {
 }
 
 export default function PersonalizedPage() {
+  // Helper function to format time spent
+  const formatTimeSpent = (timeInSeconds: number) => {
+    const hours = Math.floor(timeInSeconds / 3600);
+    const minutes = Math.floor((timeInSeconds % 3600) / 60);
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
+  };
+
+  // Calculate statistics from modules
+  const calculateStats = () => {
+    const totalModules = modules.length;
+    const totalProgress = modules.reduce((sum, module) => sum + (module.progress || 0), 0);
+    const avgProgress = totalModules > 0 ? Math.round(totalProgress / totalModules) : 0;
+    const totalTimeSpent = modules.reduce((sum, module) => sum + (module.time_spent || 0), 0);
+    const totalVocabulary = modules.reduce((sum, module) => sum + module.flash_card_ids.length, 0);
+
+    return {
+      totalModules,
+      avgProgress,
+      totalTimeSpent,
+      totalVocabulary,
+    };
+  };
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
@@ -205,6 +234,8 @@ export default function PersonalizedPage() {
         created_at: module.created_at,
         updated_by: module.updated_by || null,
         updated_at: module.updated_at || null,
+        time_spent: module.time_spent,
+        progress: module.progress,
       };
       setSelectedModuleForStudy(moduleForStudy);
     } else {
@@ -325,7 +356,7 @@ export default function PersonalizedPage() {
               </div>
               <div>
                 <p className='text-sm text-[#0074b7] font-medium'>Active Modules</p>
-                <p className='text-2xl font-bold text-[#003b73]'>{modules.length}</p>
+                <p className='text-2xl font-bold text-[#003b73]'>{calculateStats().totalModules}</p>
               </div>
             </div>
           </CardContent>
@@ -339,7 +370,7 @@ export default function PersonalizedPage() {
               </div>
               <div>
                 <p className='text-sm text-[#0074b7] font-medium'>Avg. Progress</p>
-                <p className='text-2xl font-bold text-[#003b73]'>47%</p>
+                <p className='text-2xl font-bold text-[#003b73]'>{calculateStats().avgProgress}%</p>
               </div>
             </div>
           </CardContent>
@@ -352,8 +383,10 @@ export default function PersonalizedPage() {
                 <Award className='h-5 w-5 text-[#0074b7]' />
               </div>
               <div>
-                <p className='text-sm text-[#0074b7] font-medium'>Mastered Words</p>
-                <p className='text-2xl font-bold text-[#003b73]'>156</p>
+                <p className='text-sm text-[#0074b7] font-medium'>Total Vocabulary</p>
+                <p className='text-2xl font-bold text-[#003b73]'>
+                  {calculateStats().totalVocabulary}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -363,11 +396,15 @@ export default function PersonalizedPage() {
           <CardContent className='p-6'>
             <div className='flex items-center space-x-3'>
               <div className='p-3 bg-gradient-to-br from-[#bfd7ed]/50 to-[#0074b7]/20 rounded-xl'>
-                <Clock className='h-5 w-5 text-[#0074b7]' />
+                <Timer className='h-5 w-5 text-[#0074b7]' />
               </div>
               <div>
                 <p className='text-sm text-[#0074b7] font-medium'>Study Time</p>
-                <p className='text-2xl font-bold text-[#003b73]'>12h</p>
+                <p className='text-2xl font-bold text-[#003b73]'>
+                  {calculateStats().totalTimeSpent > 0
+                    ? formatTimeSpent(calculateStats().totalTimeSpent)
+                    : '0m'}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -734,13 +771,54 @@ export default function PersonalizedPage() {
                           {module.flash_card_ids.length}
                         </span>
                       </div>
+                      {module.progress !== undefined && (
+                        <div className='flex justify-between text-sm'>
+                          <span className='text-[#0074b7] flex items-center'>
+                            <TrendingUp className='h-3 w-3 mr-1' />
+                            Progress
+                          </span>
+                          <span className='text-tekhelet-400 font-medium'>{module.progress}%</span>
+                        </div>
+                      )}
+                      {module.time_spent !== undefined && (
+                        <div className='flex justify-between text-sm'>
+                          <span className='text-[#0074b7] flex items-center'>
+                            <Timer className='h-3 w-3 mr-1' />
+                            Time Spent
+                          </span>
+                          <span className='text-tekhelet-400 font-medium'>
+                            {formatTimeSpent(module.time_spent)}
+                          </span>
+                        </div>
+                      )}
                       <div className='text-xs text-[#0074b7]'>
                         <span>Created: {new Date(module.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
 
                     {/* Progress Bar */}
-                    <ModuleProgressBar totalCards={module.flash_card_ids.length} compact={true} />
+                    <ModuleProgressBar
+                      totalCards={module.flash_card_ids.length}
+                      progress={
+                        module.progress !== undefined
+                          ? {
+                              module_id: module.module_id,
+                              user_id: module.created_by,
+                              progress_percentage: module.progress,
+                              cards_completed: Math.round(
+                                ((module.progress || 0) / 100) * module.flash_card_ids.length
+                              ),
+                              total_cards: module.flash_card_ids.length,
+                              time_spent: module.time_spent || 0,
+                              last_studied: module.updated_at || module.created_at,
+                              streak_count: 0,
+                              created_at: module.created_at,
+                              updated_at: module.updated_at || module.created_at,
+                            }
+                          : undefined
+                      }
+                      compact={true}
+                    />
 
                     <div className='flex gap-2'>
                       <Button
