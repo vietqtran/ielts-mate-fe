@@ -68,6 +68,7 @@ export function MultipleChoiceForm({
       choices: [
         { label: 'A', content: '', choice_order: 1, is_correct: false },
         { label: 'B', content: '', choice_order: 2, is_correct: false },
+        { label: 'C', content: '', choice_order: 3, is_correct: false },
       ],
     },
   });
