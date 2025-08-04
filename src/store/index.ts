@@ -15,13 +15,14 @@ import {
   commonReducer,
   listeningAttemptReducer,
   listeningTasksReducer,
+  markupSliceReducer,
   passageReducer,
   readingAttemptReducer,
   readingExamAttemptReducer,
   userPassageReducer,
 } from './slices';
 
-import { RootState } from '@/types';
+import { RootState } from '@/types/store.types';
 import storage from 'redux-persist/lib/storage';
 
 const persistConfig = {
@@ -34,8 +35,11 @@ const persistConfig = {
     'common',
     'passage',
     'userPassage',
+    'listeningTasks',
     'readingAttempt',
     'readingExamAttempt',
+    'listeningAttempt',
+    'markupTasks',
   ],
 };
 
@@ -49,6 +53,7 @@ const rootReducer = combineReducers({
   readingAttempt: readingAttemptReducer,
   listeningAttempt: listeningAttemptReducer,
   readingExamAttempt: readingExamAttemptReducer,
+  markupTasks: markupSliceReducer,
 });
 
 const persistedReducer = persistReducer<RootState>(persistConfig, rootReducer);
