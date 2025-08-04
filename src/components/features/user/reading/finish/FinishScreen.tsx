@@ -41,14 +41,14 @@ const FinishScreen = ({
   });
 
   return (
-    <div className='flex flex-col items-center justify-center min-h-[60vh] px-4'>
-      <Card className='w-full max-w-2xl shadow-lg'>
+    <div className='flex flex-col items-center justify-center min-h-[60vh] px-4 bg-gradient-to-br from-[#bfd7ed] to-[#60a3d9]/50'>
+      <Card className='w-full max-w-2xl shadow-2xl bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl ring-1 ring-[#60a3d9]/20'>
         <CardHeader className='flex flex-col items-center gap-2'>
           <CheckCircle2 className='text-green-500 mb-2' size={48} />
-          <CardTitle className='text-center text-2xl font-bold'>
+          <CardTitle className='text-center text-2xl font-bold text-[#003b73]'>
             You've completed your attempt!
           </CardTitle>
-          <CardDescription className='text-center text-base text-muted-foreground'>
+          <CardDescription className='text-center text-base text-[#0074b7]'>
             Thank you for submitting your answers.
           </CardDescription>
         </CardHeader>
@@ -57,21 +57,21 @@ const FinishScreen = ({
           <div className='flex flex-col items-center gap-2 w-full'>
             {typeof score === 'number' && typeof total === 'number' && (
               <div className='text-center'>
-                <div className='text-4xl font-semibold text-primary'>
+                <div className='text-4xl font-semibold text-[#0074b7]'>
                   {score} / {total}
                 </div>
-                <div className='text-muted-foreground mt-1'>Your score</div>
+                <div className='text-[#0074b7] mt-1'>Your score</div>
               </div>
             )}
             {typeof duration === 'number' && (
-              <div className='text-sm text-muted-foreground'>
-                Time taken: {formatTime(duration)}
-              </div>
+              <div className='text-sm text-[#0074b7]'>Time taken: {formatTime(duration)}</div>
             )}
           </div>
           {resultSets && resultSets.length > 0 && (
             <div className='w-full mt-4'>
-              <div className='font-semibold mb-2'>Your Answers vs Correct Answers:</div>
+              <div className='font-semibold mb-2 text-[#003b73]'>
+                Your Answers vs Correct Answers:
+              </div>
               <div className='overflow-x-auto'>
                 <table className='min-w-full border text-sm rounded-lg overflow-hidden'>
                   <thead className='bg-muted'>
@@ -116,12 +116,19 @@ const FinishScreen = ({
         <Separator />
         <CardFooter className='flex flex-col gap-2 sm:flex-row sm:justify-center'>
           {onReview && (
-            <Button variant='outline' onClick={onReview} className='w-full sm:w-auto'>
+            <Button
+              variant='outline'
+              onClick={onReview}
+              className='w-full sm:w-auto border-[#60a3d9]/40 text-[#0074b7] hover:bg-[#60a3d9]/10 hover:border-[#0074b7] rounded-xl px-6 py-2.5 font-medium transition-all duration-200'
+            >
               Review Answers
             </Button>
           )}
           {onHome && (
-            <Button onClick={onHome} className='w-full sm:w-auto'>
+            <Button
+              onClick={onHome}
+              className='w-full sm:w-auto bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] text-white rounded-xl px-6 py-2.5 font-medium shadow-lg hover:shadow-xl transition-all duration-200'
+            >
               Back to Home
             </Button>
           )}

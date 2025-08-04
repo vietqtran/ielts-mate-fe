@@ -32,7 +32,7 @@ export default function EditListeningExamPage() {
   const { getExamById, updateExam, isLoading: isLoadingExam } = useListeningExam();
 
   const [tasks, setTasks] = useState<any[]>([]);
-  const [pagination, setPagination] = useState({
+  const [_, setPagination] = useState({
     currentPage: 1,
     totalPages: 1,
     pageSize: 10,
@@ -76,7 +76,7 @@ export default function EditListeningExamPage() {
           });
         }
       } catch (error) {
-        toast.error('Failed to fetch listening exam');
+        console.log(error);
       } finally {
         setIsPageLoading(false);
       }
@@ -93,7 +93,7 @@ export default function EditListeningExamPage() {
         if (response.pagination) setPagination(response.pagination);
       }
     } catch (error) {
-      toast.error('Failed to fetch listening tasks');
+      console.log(error);
     }
   };
 
@@ -148,6 +148,7 @@ export default function EditListeningExamPage() {
       toast.success('Listening exam updated successfully');
       router.push(`/creator/listening-exams/${examId}`);
     } catch (error) {
+      console.log(error);
       toast.error('Failed to update listening exam');
     } finally {
       setSubmitting(false);
@@ -283,7 +284,7 @@ export default function EditListeningExamPage() {
                   <TableHead>Part</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Created At</TableHead>
-                  {PART_LABELS.map((label, idx) => (
+                  {PART_LABELS.map((label) => (
                     <TableHead key={label}>{label}</TableHead>
                   ))}
                 </TableRow>
@@ -304,7 +305,7 @@ export default function EditListeningExamPage() {
                       <TableCell>
                         {task.created_at ? new Date(task.created_at).toLocaleString() : ''}
                       </TableCell>
-                      {PARTS.map((part, idx) => (
+                      {PARTS.map((part) => (
                         <TableCell key={part} className='text-center'>
                           <input
                             type='radio'

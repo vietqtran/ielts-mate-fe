@@ -15,8 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ListeningAttemptFilters } from '@/store/slices/listening-attempt-filter-slice';
-import { AttemptStatusEnumIndex } from '@/types/attempt.types';
-import { IeltsTypeEnumIndex, PartNumberEnumIndex } from '@/types/reading/reading.types';
+import { ieltsTypeOptions, partNumberOptions, statusOptions } from '@/utils/filter';
 import { useDebounce } from '@uidotdev/usehooks';
 import React, { useState, useCallback, useMemo, memo, useEffect } from 'react';
 
@@ -30,26 +29,6 @@ interface ListeningAttemptFilterToolbarProps {
   onSortDirectionChange: (direction: 'asc' | 'desc') => void;
   isLoading?: boolean;
 }
-
-const ieltsTypeOptions = [
-  { value: String(IeltsTypeEnumIndex.ACADEMIC), label: 'Academic' },
-  {
-    value: String(IeltsTypeEnumIndex.GENERAL_TRAINING),
-    label: 'General Training',
-  },
-];
-
-const partNumberOptions = [
-  { value: String(PartNumberEnumIndex.PART_1), label: 'Part 1' },
-  { value: String(PartNumberEnumIndex.PART_2), label: 'Part 2' },
-  { value: String(PartNumberEnumIndex.PART_3), label: 'Part 3' },
-];
-
-const statusOptions = [
-  { value: String(AttemptStatusEnumIndex.IN_PROGRESS), label: 'In Progress' },
-  { value: String(AttemptStatusEnumIndex.COMPLETED), label: 'Completed' },
-  { value: String(AttemptStatusEnumIndex.ABANDONED), label: 'Abandoned' },
-];
 
 const sortOptions = [
   { value: 'finishedAt', label: 'Finish Date' },

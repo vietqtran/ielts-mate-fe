@@ -30,6 +30,8 @@ export interface ModuleResponse {
   created_at: string;
   updated_by: string | null;
   updated_at: string | null;
+  time_spent?: number; // Time spent in milliseconds
+  progress?: number; // Progress as percentage (0 to 100)
 }
 
 export interface ModuleCreateResponse {
@@ -69,6 +71,8 @@ export interface ModuleUserResponse {
   created_at: string;
   updated_by?: string;
   updated_at?: string;
+  time_spent?: number; // Time spent in milliseconds
+  progress?: number; // Progress as percentage (0 to 100)
 }
 
 export interface ModuleUserListResponse {

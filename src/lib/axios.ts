@@ -30,12 +30,6 @@ const instance: AxiosInstance = axios.create({
 
 instance.interceptors.response.use(
   (res: AxiosResponse<BaseResponse<any>>) => {
-    const notify = (res.config as CustomAxiosRequestConfig)?.notify ?? true;
-    const notifySuccess = (res.config as CustomAxiosRequestConfig)?.notifySuccess ?? true;
-
-    if (notify && res.data.status == 'success' && notifySuccess) {
-      toast.success(res.data.message || 'Request successful');
-    }
     return res;
   },
   (err) => {

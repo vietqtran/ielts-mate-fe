@@ -52,13 +52,15 @@ export function ProfileForm({ user }: Readonly<ProfileFormProps>) {
   };
 
   return (
-    <Card>
+    <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20'>
       <CardHeader>
-        <CardTitle className='flex items-center gap-2'>
-          <User className='h-5 w-5' />
+        <CardTitle className='flex items-center gap-2 text-[#003b73] font-semibold'>
+          <User className='h-5 w-5 text-[#0074b7]' />
           Profile Information
         </CardTitle>
-        <CardDescription>Update your personal information here.</CardDescription>
+        <CardDescription className='text-[#0074b7]'>
+          Update your personal information here.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <FormProvider {...form}>
@@ -70,7 +72,10 @@ export function ProfileForm({ user }: Readonly<ProfileFormProps>) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      <Label htmlFor='first_name' className='block text-sm font-medium'>
+                      <Label
+                        htmlFor='first_name'
+                        className='block text-sm font-semibold text-[#003b73]'
+                      >
                         First name
                       </Label>
                     </FormLabel>
@@ -80,7 +85,7 @@ export function ProfileForm({ user }: Readonly<ProfileFormProps>) {
                         autoFocus
                         type='text'
                         placeholder='John'
-                        className={`w-full rounded-md border px-3 py-2`}
+                        className={`w-full rounded-xl border border-[#60a3d9]/40 px-4 py-3 bg-white/90 focus:border-[#0074b7] focus:ring-2 focus:ring-[#60a3d9]/20 text-[#003b73] placeholder:text-[#60a3d9] transition-all duration-200`}
                         isError={!!form.formState.errors.first_name}
                         {...field}
                       />
@@ -95,7 +100,10 @@ export function ProfileForm({ user }: Readonly<ProfileFormProps>) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>
-                      <Label htmlFor='last_name' className='block text-sm font-medium'>
+                      <Label
+                        htmlFor='last_name'
+                        className='block text-sm font-semibold text-[#003b73]'
+                      >
                         Last name
                       </Label>
                     </FormLabel>
@@ -104,7 +112,7 @@ export function ProfileForm({ user }: Readonly<ProfileFormProps>) {
                         id='last_name'
                         type='text'
                         placeholder='Doe'
-                        className={`w-full rounded-md border px-3 py-2`}
+                        className={`w-full rounded-xl border border-[#60a3d9]/40 px-4 py-3 bg-white/90 focus:border-[#0074b7] focus:ring-2 focus:ring-[#60a3d9]/20 text-[#003b73] placeholder:text-[#60a3d9] transition-all duration-200`}
                         isError={!!form.formState.errors.last_name}
                         {...field}
                       />
@@ -116,14 +124,23 @@ export function ProfileForm({ user }: Readonly<ProfileFormProps>) {
             </div>
 
             <div className='space-y-2'>
-              <Label htmlFor='email'>Email</Label>
-              <Input id='email' value={user?.email} disabled className='bg-muted' />
-              <p className='text-sm text-muted-foreground'>
-                Email cannot be changed from this page.
-              </p>
+              <Label htmlFor='email' className='text-sm font-semibold text-[#003b73]'>
+                Email
+              </Label>
+              <Input
+                id='email'
+                value={user?.email}
+                disabled
+                className='bg-[#bfd7ed]/30 rounded-xl border-[#60a3d9]/40 text-[#0074b7]'
+              />
+              <p className='text-sm text-[#0074b7]'>Email cannot be changed from this page.</p>
             </div>
 
-            <Button type='submit' disabled={isPending}>
+            <Button
+              type='submit'
+              disabled={isPending}
+              className='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] text-white rounded-xl px-6 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50'
+            >
               {isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
               Update Profile
             </Button>

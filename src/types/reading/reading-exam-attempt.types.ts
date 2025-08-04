@@ -1,4 +1,5 @@
 import { AttemptData, Choice, DragItem } from '@/types/attempt.types';
+import { CommonPaginationParams } from '@/types/filter.types';
 
 /**
  * Type definitions of response for Create Reading Exam Attempt
@@ -10,8 +11,6 @@ export interface ReadingExamData {
   created_by: CreatedBy;
   created_at: string;
 }
-
-type UrlSlug = string;
 
 type CreatedBy = {
   user_id: string;
@@ -186,3 +185,10 @@ type ReadingExamAttemptDetailsMainResponse = {
 };
 
 // End of Reading Exam Attempt Details Response
+
+/**
+ * Interface for Get Reading Exam Attempt History request parameters.
+ */
+export interface ReadingExamAttemptFiltersRequestParams extends CommonPaginationParams {
+  readingExamName?: string; // Filter by reading exam name
+}

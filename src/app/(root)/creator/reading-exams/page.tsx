@@ -19,7 +19,7 @@ import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 export default function ReadingExamsPage() {
-  const { getAllExams, deleteExam, isLoading, error } = useReadingExam();
+  const { getAllExams, deleteExam, isLoading } = useReadingExam();
   const [exams, setExams] = useState<ReadingExamResponse['data'][]>([]);
 
   const fetchExams = async () => {
@@ -29,6 +29,7 @@ export default function ReadingExamsPage() {
         setExams(response.data);
       }
     } catch (error) {
+      console.log(error);
       toast.error('Failed to fetch reading exams');
     }
   };

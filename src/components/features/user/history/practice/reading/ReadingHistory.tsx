@@ -1,29 +1,22 @@
 'use client';
 
+import { PaginationCommon } from '@/components/features/user/common';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
 import { Separator } from '@/components/ui/separator';
 import useReadingAttempt from '@/hooks/apis/reading/useReadingAttempt';
 import {
   ReadingAttemptFilters,
   clearReadingAttemptFilters,
-  setReadingAttemptCurrentPage,
   setReadingAttemptFilters,
   setReadingAttemptLoading,
   setReadingAttemptPagination,
-  setReadingAttemptSortBy,
-  setReadingAttemptSortDirection,
 } from '@/store/slices/reading-attempt-filter-slice';
+import { setPagination } from '@/store/slices/reading-exam-attempt-filter-slice';
 import { AttemptStatusEnumIndex, ReadingAttemptHistoryResponse } from '@/types/attempt.types';
 import { RootState } from '@/types/store.types';
+import { formatDate, formatDuration } from '@/utils/time';
 import { BookOpen, Calendar, CheckCircle, Clock, Eye, PlayCircle, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -38,9 +31,6 @@ const ReadingHistory = () => {
 
   // Get state from Redux
   const filters = useSelector((state: RootState) => state.readingAttempt.filters);
-  const currentPage = useSelector((state: RootState) => state.readingAttempt.currentPage);
-  const sortBy = useSelector((state: RootState) => state.readingAttempt.sortBy);
-  const sortDirection = useSelector((state: RootState) => state.readingAttempt.sortDirection);
   const reduxIsLoading = useSelector((state: RootState) => state.readingAttempt.isLoading);
   const pagination = useSelector((state: RootState) => state.readingAttempt.pagination);
 
@@ -50,14 +40,12 @@ const ReadingHistory = () => {
       try {
         dispatch(setReadingAttemptLoading(true));
         const response = await getAllReadingAttemptHistory({
-          page: currentPage,
+          page: pagination?.currentPage || 1,
           size: pagination?.pageSize || 12,
           ieltsType: filters.ieltsType,
           partNumber: filters.partNumber,
           status: filters.status,
-          title: filters.title,
-          sortBy,
-          sortDirection,
+          title: filters.searchText,
         });
 
         if (response) {
@@ -89,9 +77,7 @@ const ReadingHistory = () => {
     filters.ieltsType,
     filters.partNumber,
     filters.status,
-    filters.title,
-    sortBy,
-    sortDirection,
+    filters.searchText,
     pagination?.pageSize,
   ]);
 
@@ -101,14 +87,12 @@ const ReadingHistory = () => {
       try {
         dispatch(setReadingAttemptLoading(true));
         const response = await getAllReadingAttemptHistory({
-          page: currentPage,
+          page: pagination?.currentPage || 1,
           size: pagination?.pageSize || 12,
           ieltsType: filters.ieltsType,
           partNumber: filters.partNumber,
           status: filters.status,
-          title: filters.title,
-          sortBy,
-          sortDirection,
+          title: filters.searchText,
         });
 
         if (response) {
@@ -136,7 +120,7 @@ const ReadingHistory = () => {
     };
 
     loadAttempts();
-  }, [currentPage]);
+  }, [pagination?.currentPage]);
 
   const getStatusLabel = (status: number | null): string => {
     if (status === null) return 'Unknown';
@@ -180,51 +164,21 @@ const ReadingHistory = () => {
     }
   };
 
-  const formatDuration = (duration: number | null): string => {
-    if (!duration) return 'N/A';
-    const hours = Math.floor(duration / 3600);
-    const minutes = Math.floor((duration % 3600) / 60);
-    const seconds = duration % 60;
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m ${seconds}s`;
-    } else if (minutes > 0) {
-      return `${minutes}m ${seconds}s`;
-    } else {
-      return `${seconds}s`;
-    }
-  };
-
-  const formatDate = (dateString: string | null): string => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   const handleFiltersChange = (newFilters: ReadingAttemptFilters) => {
     dispatch(setReadingAttemptFilters(newFilters));
-    dispatch(setReadingAttemptCurrentPage(1));
+    dispatch(setReadingAttemptPagination({ ...pagination, currentPage: 1 }));
   };
 
   const handleClearFilters = () => {
     dispatch(clearReadingAttemptFilters());
   };
 
-  const handleSortByChange = (field: string) => {
-    dispatch(setReadingAttemptSortBy(field));
-  };
-
-  const handleSortDirectionChange = (direction: 'asc' | 'desc') => {
-    dispatch(setReadingAttemptSortDirection(direction));
-  };
-
   const handlePageChange = (page: number) => {
-    dispatch(setReadingAttemptCurrentPage(page));
+    dispatch(setReadingAttemptPagination({ ...pagination, currentPage: page }));
+  };
+
+  const handlePageSizeChange = (size: string) => {
+    dispatch(setPagination({ ...pagination, pageSize: Number(size), currentPage: 1 }));
   };
 
   // Check if there are active filters
@@ -266,10 +220,6 @@ const ReadingHistory = () => {
           filters={filters}
           onFiltersChange={handleFiltersChange}
           onClearFilters={handleClearFilters}
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          onSortByChange={handleSortByChange}
-          onSortDirectionChange={handleSortDirectionChange}
           isLoading={reduxIsLoading}
         />
 
@@ -411,45 +361,11 @@ const ReadingHistory = () => {
           </div>
         )}
 
-        {/* Pagination */}
-        {!reduxIsLoading && attemptHistoryData.length > 0 && (pagination?.totalPages || 0) > 1 && (
-          <div className='flex items-center justify-between mt-8'>
-            <div className='text-sm text-muted-foreground'>
-              Showing {(currentPage - 1) * (pagination?.pageSize || 12) + 1} to{' '}
-              {Math.min(currentPage * (pagination?.pageSize || 12), pagination?.totalItems || 0)} of{' '}
-              {pagination?.totalItems || 0} entries
-            </div>
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href='#'
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (pagination?.hasPreviousPage) {
-                        handlePageChange(currentPage - 1);
-                      }
-                    }}
-                    className={!pagination?.hasPreviousPage ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-
-                <PaginationItem>
-                  <PaginationNext
-                    href='#'
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (pagination?.hasNextPage) {
-                        handlePageChange(currentPage + 1);
-                      }
-                    }}
-                    className={!pagination?.hasNextPage ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
-        )}
+        <PaginationCommon
+          pagination={pagination}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
       </div>
     </div>
   );

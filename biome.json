@@ -122,7 +122,8 @@
         "noUnsafeDeclarationMerging": "error",
         "noUnsafeNegation": "error",
         "useGetterReturn": "error",
-        "useValidTypeof": "error"
+        "useValidTypeof": "error",
+        "noConsole": "off"
       }
     },
     "ignore": [

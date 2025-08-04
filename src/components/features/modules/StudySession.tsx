@@ -180,57 +180,57 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
     const isGood = accuracy >= 60;
 
     return (
-      <div className='max-w-2xl mx-auto space-y-6'>
-        <Card className='bg-gradient-to-r from-green-50 to-blue-50 border-green-200'>
+      <div className='max-w-3xl mx-auto space-y-6 p-6 bg-gradient-to-br from-[#bfd7ed]/30 to-[#60a3d9]/10 min-h-screen'>
+        <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20'>
           <CardHeader className='text-center'>
             <div className='flex justify-center mb-4'>
-              <Trophy className='h-16 w-16 text-yellow-500' />
+              <Trophy className='h-16 w-16 text-[#0074b7]' />
             </div>
-            <CardTitle className='text-2xl text-green-600'>Session Complete!</CardTitle>
-            <CardDescription>
+            <CardTitle className='text-3xl font-bold text-[#003b73]'>Session Complete!</CardTitle>
+            <CardDescription className='text-[#0074b7] text-lg font-medium'>
               Great job! You've completed the study session for "{module.module_name}"
             </CardDescription>
           </CardHeader>
           <CardContent className='space-y-6'>
             {/* Session Summary */}
-            <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
-              <div className='text-center p-4 bg-white rounded-lg border'>
-                <Target className='h-6 w-6 text-tekhelet-400 mx-auto mb-2' />
-                <p className='text-2xl font-bold text-tekhelet-400'>{sessionStats.totalCards}</p>
-                <p className='text-sm text-medium-slate-blue-500'>Cards Studied</p>
+            <div className='grid grid-cols-2 md:grid-cols-4 gap-6'>
+              <div className='text-center p-6 bg-gradient-to-br from-[#bfd7ed]/30 to-[#60a3d9]/10 rounded-2xl border border-[#60a3d9]/20 backdrop-blur-sm shadow-lg'>
+                <Target className='h-8 w-8 text-[#0074b7] mx-auto mb-3' />
+                <p className='text-3xl font-bold text-[#003b73]'>{sessionStats.totalCards}</p>
+                <p className='text-sm text-[#0074b7] font-medium'>Cards Studied</p>
               </div>
-              <div className='text-center p-4 bg-white rounded-lg border'>
-                <Check className='h-6 w-6 text-green-500 mx-auto mb-2' />
-                <p className='text-2xl font-bold text-green-600'>{sessionStats.correctAnswers}</p>
-                <p className='text-sm text-medium-slate-blue-500'>Correct</p>
+              <div className='text-center p-6 bg-gradient-to-br from-green-50 to-green-100 rounded-2xl border border-green-200 backdrop-blur-sm shadow-lg'>
+                <Check className='h-8 w-8 text-green-600 mx-auto mb-3' />
+                <p className='text-3xl font-bold text-green-700'>{sessionStats.correctAnswers}</p>
+                <p className='text-sm text-green-600 font-medium'>Correct</p>
               </div>
-              <div className='text-center p-4 bg-white rounded-lg border'>
-                <Clock className='h-6 w-6 text-blue-500 mx-auto mb-2' />
-                <p className='text-2xl font-bold text-blue-600'>
+              <div className='text-center p-6 bg-gradient-to-br from-[#60a3d9]/20 to-[#0074b7]/10 rounded-2xl border border-[#60a3d9]/20 backdrop-blur-sm shadow-lg'>
+                <Clock className='h-8 w-8 text-[#0074b7] mx-auto mb-3' />
+                <p className='text-3xl font-bold text-[#003b73]'>
                   {formatTime(sessionStats.sessionTimeSpent)}
                 </p>
-                <p className='text-sm text-medium-slate-blue-500'>Time Spent</p>
+                <p className='text-sm text-[#0074b7] font-medium'>Time Spent</p>
               </div>
-              <div className='text-center p-4 bg-white rounded-lg border'>
-                <Zap className='h-6 w-6 text-yellow-500 mx-auto mb-2' />
-                <p className='text-2xl font-bold text-yellow-600'>{accuracy}%</p>
-                <p className='text-sm text-medium-slate-blue-500'>Accuracy</p>
+              <div className='text-center p-6 bg-gradient-to-br from-[#bfd7ed]/40 to-[#60a3d9]/20 rounded-2xl border border-[#60a3d9]/30 backdrop-blur-sm shadow-lg'>
+                <Zap className='h-8 w-8 text-[#0074b7] mx-auto mb-3' />
+                <p className='text-3xl font-bold text-[#003b73]'>{accuracy}%</p>
+                <p className='text-sm text-[#0074b7] font-medium'>Accuracy</p>
               </div>
             </div>
 
             {/* Performance Message */}
             <div
-              className={`p-4 rounded-lg border ${
+              className={`p-6 rounded-2xl border backdrop-blur-md shadow-lg ${
                 isExcellent
-                  ? 'bg-green-50 border-green-200'
+                  ? 'bg-gradient-to-r from-green-50 to-green-100 border-green-300'
                   : isGood
-                    ? 'bg-yellow-50 border-yellow-200'
-                    : 'bg-red-50 border-red-200'
+                    ? 'bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-300'
+                    : 'bg-gradient-to-r from-red-50 to-red-100 border-red-300'
               }`}
             >
               <p
-                className={`font-medium ${
-                  isExcellent ? 'text-green-600' : isGood ? 'text-yellow-600' : 'text-red-600'
+                className={`font-bold text-lg ${
+                  isExcellent ? 'text-green-700' : isGood ? 'text-yellow-700' : 'text-red-700'
                 }`}
               >
                 {isExcellent
@@ -239,7 +239,7 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
                     ? '👍 Good job!'
                     : '📚 Keep practicing!'}
               </p>
-              <p className='text-sm text-medium-slate-blue-600 mt-1'>
+              <p className='text-sm text-[#0074b7] mt-2 font-medium'>
                 {isExcellent
                   ? 'You have great mastery of this vocabulary! Consider helping others by sharing this module.'
                   : isGood
@@ -249,13 +249,14 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
             </div>
 
             {/* Action Buttons */}
-            <div className='flex gap-3 justify-center'>
+            <div className='flex gap-4 justify-center'>
               <Button
                 variant='outline'
                 onClick={handleRestart}
-                className='border-tekhelet-200 text-tekhelet-400'
+                className='border-[#60a3d9]/40 text-[#0074b7] hover:bg-[#60a3d9]/10 hover:border-[#0074b7] rounded-xl px-8 py-3 font-medium transition-all duration-200'
+                size='lg'
               >
-                <RotateCcw className='h-4 w-4 mr-2' />
+                <RotateCcw className='h-5 w-5 mr-2' />
                 Study Again
               </Button>
               <Button
@@ -263,9 +264,10 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
                   onComplete?.();
                   toast.success('Progress saved successfully!');
                 }}
-                className='bg-tekhelet-400 hover:bg-tekhelet-500 text-white'
+                className='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] text-white rounded-xl px-8 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-200'
+                size='lg'
               >
-                <Check className='h-4 w-4 mr-2' />
+                <Check className='h-5 w-5 mr-2' />
                 Complete Session
               </Button>
             </div>
@@ -276,24 +278,24 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
   }
 
   return (
-    <div className='max-w-2xl mx-auto space-y-6'>
+    <div className='max-w-4xl mx-auto space-y-6 p-6 bg-gradient-to-br from-[#bfd7ed]/30 to-[#60a3d9]/10 min-h-screen'>
       {/* Session Header */}
-      <Card className='bg-white/60 backdrop-blur-lg border border-tekhelet-200'>
+      <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20'>
         <CardHeader>
           <div className='flex items-center justify-between'>
             <div>
-              <CardTitle className='text-tekhelet-400 flex items-center'>
-                <BookOpen className='h-5 w-5 mr-2' />
+              <CardTitle className='text-[#003b73] flex items-center font-bold text-xl'>
+                <BookOpen className='h-6 w-6 mr-3 text-[#0074b7]' />
                 {module.module_name}
               </CardTitle>
-              <CardDescription>
+              <CardDescription className='text-[#0074b7] font-medium text-base mt-1'>
                 Card {sessionStats.currentCard} of {sessionStats.totalCards}
               </CardDescription>
             </div>
             <div className='text-right'>
-              <div className='flex items-center space-x-2 mb-1'>
-                <Clock className='h-4 w-4 text-medium-slate-blue-500' />
-                <span className='text-sm text-medium-slate-blue-500'>
+              <div className='flex items-center space-x-2 mb-2'>
+                <Clock className='h-5 w-5 text-[#0074b7]' />
+                <span className='text-sm text-[#003b73] font-semibold'>
                   {formatTime(sessionStats.sessionTimeSpent)}
                 </span>
               </div>
@@ -301,7 +303,7 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
                 variant='outline'
                 size='sm'
                 onClick={handleExit}
-                className='border-medium-slate-blue-200 text-medium-slate-blue-600'
+                className='border-[#60a3d9]/40 text-[#0074b7] hover:bg-[#60a3d9]/10 hover:border-[#0074b7] rounded-xl transition-all duration-200'
               >
                 Exit
               </Button>
@@ -312,9 +314,10 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
           <div className='space-y-4'>
             <Progress
               value={(sessionStats.currentCard / sessionStats.totalCards) * 100}
-              className='h-2'
+              className='h-3 rounded-full'
+              indicatorClassName='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] rounded-full'
             />
-            <div className='flex justify-between text-sm text-medium-slate-blue-500'>
+            <div className='flex justify-between text-sm text-[#0074b7] font-medium'>
               <span>✓ {sessionStats.correctAnswers} correct</span>
               <span>✗ {sessionStats.incorrectAnswers} incorrect</span>
             </div>
@@ -323,62 +326,63 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
       </Card>
 
       {/* Flashcard */}
-      <Card className='bg-white/80 backdrop-blur-lg border border-tekhelet-200 min-h-[400px]'>
-        <CardContent className='p-8'>
-          <div className='text-center space-y-6'>
+      <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20 min-h-[500px]'>
+        <CardContent className='p-10'>
+          <div className='text-center space-y-8'>
             {/* Word */}
             <div>
-              <h2 className='text-4xl font-bold text-tekhelet-400 mb-2'>
-                {currentCard.vocab.word}
-              </h2>
-              <Badge variant='secondary' className='text-sm'>
+              <h2 className='text-5xl font-bold text-[#003b73] mb-4'>{currentCard.vocab.word}</h2>
+              <Badge
+                variant='secondary'
+                className='text-base px-4 py-2 bg-gradient-to-r from-[#bfd7ed]/50 to-[#60a3d9]/20 text-[#003b73] border-[#60a3d9]/30 rounded-xl font-medium'
+              >
                 Vocabulary #{currentCardIndex + 1}
               </Badge>
             </div>
 
             {/* Context */}
-            <div className='max-w-md mx-auto'>
-              <p className='text-lg text-medium-slate-blue-600 italic'>
+            <div className='max-w-2xl mx-auto'>
+              <p className='text-xl text-[#0074b7] italic font-medium leading-relaxed'>
                 "{currentCard.vocab.context}"
               </p>
             </div>
 
             {/* Answer Section */}
-            <div className='space-y-4'>
+            <div className='space-y-6'>
               {!showAnswer ? (
                 <Button
                   onClick={() => setShowAnswer(true)}
-                  className='bg-tekhelet-400 hover:bg-tekhelet-500 text-white'
+                  className='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] text-white rounded-2xl px-12 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-200'
                   size='lg'
                 >
                   Show Meaning
                 </Button>
               ) : (
-                <div className='space-y-6'>
-                  <div className='p-6 bg-tekhelet-50 border border-tekhelet-200 rounded-lg'>
-                    <p className='text-xl text-tekhelet-600 font-medium'>
+                <div className='space-y-8'>
+                  <div className='p-8 bg-gradient-to-br from-[#bfd7ed]/40 to-[#60a3d9]/20 border border-[#60a3d9]/30 rounded-2xl backdrop-blur-md shadow-lg'>
+                    <p className='text-2xl text-[#003b73] font-semibold leading-relaxed'>
                       {currentCard.vocab.meaning}
                     </p>
                   </div>
 
-                  <div className='flex justify-center space-x-4'>
+                  <div className='flex justify-center space-x-6'>
                     <Button
                       onClick={() => handleAnswer(false)}
                       disabled={isLoading.updateModuleProgress}
                       variant='destructive'
                       size='lg'
-                      className='min-w-[120px]'
+                      className='min-w-[150px] rounded-2xl px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200'
                     >
-                      <X className='h-5 w-5 mr-2' />
+                      <X className='h-6 w-6 mr-3' />
                       Don't Know
                     </Button>
                     <Button
                       onClick={() => handleAnswer(true)}
                       disabled={isLoading.updateModuleProgress}
-                      className='bg-green-500 hover:bg-green-600 text-white min-w-[120px]'
+                      className='bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white min-w-[150px] rounded-2xl px-8 py-4 text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200'
                       size='lg'
                     >
-                      <Check className='h-5 w-5 mr-2' />I Know This
+                      <Check className='h-6 w-6 mr-3' />I Know This
                     </Button>
                   </div>
                 </div>
@@ -394,19 +398,21 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
           variant='outline'
           onClick={previousCard}
           disabled={currentCardIndex === 0}
-          className='border-tekhelet-200 text-tekhelet-400'
+          className='border-[#60a3d9]/40 text-[#0074b7] hover:bg-[#60a3d9]/10 hover:border-[#0074b7] rounded-xl px-8 py-3 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
+          size='lg'
         >
-          <ArrowLeft className='h-4 w-4 mr-2' />
+          <ArrowLeft className='h-5 w-5 mr-2' />
           Previous
         </Button>
         <Button
           variant='outline'
           onClick={nextCard}
           disabled={isLastCard || !showAnswer}
-          className='border-tekhelet-200 text-tekhelet-400'
+          className='border-[#60a3d9]/40 text-[#0074b7] hover:bg-[#60a3d9]/10 hover:border-[#0074b7] rounded-xl px-8 py-3 font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
+          size='lg'
         >
           Next
-          <ArrowRight className='h-4 w-4 ml-2' />
+          <ArrowRight className='h-5 w-5 ml-2' />
         </Button>
       </div>
     </div>

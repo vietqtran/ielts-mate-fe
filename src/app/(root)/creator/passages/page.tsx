@@ -92,7 +92,9 @@ export default function PassagesPage() {
           setPagination(response.pagination);
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -135,7 +137,9 @@ export default function PassagesPage() {
     try {
       await deletePassage(passage_id);
       await loadPassages(pagination.currentPage, pagination.pageSize);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handlePassageCreated = () => {

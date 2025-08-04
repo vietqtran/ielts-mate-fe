@@ -81,39 +81,39 @@ export default function VocabularyCreateModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl max-w-md'>
+      <DialogContent className='bg-[#bfd7ed]/80 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl max-w-md ring-1 ring-[#60a3d9]/20'>
         <DialogHeader>
           <div className='flex items-center justify-between'>
-            <DialogTitle className='text-xl font-semibold text-tekhelet-400'>
+            <DialogTitle className='text-xl font-semibold text-[#003b73]'>
               Add New Vocabulary
             </DialogTitle>
             <Button
               variant='ghost'
               size='icon'
               onClick={onClose}
-              className='h-6 w-6 text-medium-slate-blue-500 hover:text-tekhelet-400'
+              className='h-8 w-8 text-[#0074b7] hover:text-[#003b73] hover:bg-[#60a3d9]/20 rounded-full transition-all duration-200'
             >
               <X className='h-4 w-4' />
             </Button>
           </div>
-          <DialogDescription className='text-medium-slate-blue-500'>
+          <DialogDescription className='text-[#0074b7] text-sm font-medium'>
             Add a new word to your personal vocabulary collection
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-4'>
+          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
             <FormField
               control={form.control}
               name='word'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className='text-tekhelet-400 font-medium'>Word</FormLabel>
+                  <FormLabel className='text-[#003b73] font-semibold text-sm'>Word</FormLabel>
                   <FormControl>
                     <Input
                       placeholder='Enter the word'
                       {...field}
-                      className='bg-white/80 border-tekhelet-200 focus:border-tekhelet-400'
+                      className='bg-white/90 border-[#60a3d9]/40 focus:border-[#0074b7] focus:ring-2 focus:ring-[#60a3d9]/20 rounded-xl h-11 text-[#003b73] placeholder:text-[#60a3d9] transition-all duration-200'
                     />
                   </FormControl>
                   <FormMessage />
@@ -126,12 +126,12 @@ export default function VocabularyCreateModal({
               name='meaning'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className='text-tekhelet-400 font-medium'>Meaning</FormLabel>
+                  <FormLabel className='text-[#003b73] font-semibold text-sm'>Meaning</FormLabel>
                   <FormControl>
                     <Input
                       placeholder='Enter the meaning'
                       {...field}
-                      className='bg-white/80 border-tekhelet-200 focus:border-tekhelet-400'
+                      className='bg-white/90 border-[#60a3d9]/40 focus:border-[#0074b7] focus:ring-2 focus:ring-[#60a3d9]/20 rounded-xl h-11 text-[#003b73] placeholder:text-[#60a3d9] transition-all duration-200'
                     />
                   </FormControl>
                   <FormMessage />
@@ -144,13 +144,13 @@ export default function VocabularyCreateModal({
               name='context'
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className='text-tekhelet-400 font-medium'>Context</FormLabel>
+                  <FormLabel className='text-[#003b73] font-semibold text-sm'>Context</FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder='Enter the context or example sentence'
                       {...field}
                       rows={3}
-                      className='bg-white/80 border-tekhelet-200 focus:border-tekhelet-400 resize-none'
+                      className='bg-white/90 border-[#60a3d9]/40 focus:border-[#0074b7] focus:ring-2 focus:ring-[#60a3d9]/20 rounded-xl resize-none text-[#003b73] placeholder:text-[#60a3d9] transition-all duration-200'
                     />
                   </FormControl>
                   <FormMessage />
@@ -158,19 +158,19 @@ export default function VocabularyCreateModal({
               )}
             />
 
-            <DialogFooter className='pt-4'>
+            <DialogFooter className='pt-6 gap-3'>
               <Button
                 type='button'
                 variant='outline'
                 onClick={onClose}
-                className='border-tekhelet-200 text-tekhelet-400 hover:bg-tekhelet-50'
+                className='border-[#60a3d9]/40 text-[#0074b7] hover:bg-[#60a3d9]/10 hover:border-[#0074b7] rounded-xl px-6 py-2.5 font-medium transition-all duration-200'
               >
                 Cancel
               </Button>
               <Button
                 type='submit'
                 disabled={isLoading.createVocabulary}
-                className='bg-tekhelet-400 hover:bg-tekhelet-500 text-white'
+                className='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] text-white rounded-xl px-6 py-2.5 font-medium shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed'
               >
                 {isLoading.createVocabulary ? (
                   <>

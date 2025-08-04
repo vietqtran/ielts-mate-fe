@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useModules } from '@/hooks/apis/modules/useModules';
 import { ModuleUserResponse } from '@/lib/api/modules';
-import { BookOpen, Calendar, Check, Clock, Share2, TrendingUp, User, X } from 'lucide-react';
+import { BookOpen, Calendar, Check, Clock, Share2, Timer, TrendingUp, User, X } from 'lucide-react';
 
 interface ModuleShareCardProps {
   moduleShare: ModuleUserResponse;
@@ -46,6 +46,17 @@ export default function ModuleShareCard({
       default:
         return 'Unknown';
     }
+  };
+
+  const formatTimeSpent = (timeInMs: number) => {
+    const timeInSeconds = Math.floor(timeInMs / 1000);
+    const hours = Math.floor(timeInSeconds / 3600);
+    const minutes = Math.floor((timeInSeconds % 3600) / 60);
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes}m`;
   };
 
   const handleAccept = async () => {
@@ -104,6 +115,26 @@ export default function ModuleShareCard({
               {moduleShare.flash_card_ids.length}
             </span>
           </div>
+          {moduleShare.progress !== undefined && (
+            <div className='flex items-center justify-between text-sm'>
+              <span className='text-medium-slate-blue-500 flex items-center'>
+                <TrendingUp className='h-3 w-3 mr-1' />
+                Progress:
+              </span>
+              <span className='text-tekhelet-400 font-medium'>{moduleShare.progress}%</span>
+            </div>
+          )}
+          {moduleShare.time_spent !== undefined && (
+            <div className='flex items-center justify-between text-sm'>
+              <span className='text-medium-slate-blue-500 flex items-center'>
+                <Timer className='h-3 w-3 mr-1' />
+                Time Spent:
+              </span>
+              <span className='text-tekhelet-400 font-medium'>
+                {formatTimeSpent(moduleShare.time_spent)}
+              </span>
+            </div>
+          )}
           {moduleShare.updated_at && (
             <div className='flex items-center justify-between text-sm'>
               <span className='text-medium-slate-blue-500 flex items-center'>

@@ -3,9 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { Separator } from '@/components/ui/separator';
 import { useListeningExam } from '@/hooks/apis/admin/useListeningExam';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { toast } from 'sonner';
 
 // Helper to fetch audio file
 async function getAudio(audio_file_id: string): Promise<string | null> {
@@ -26,9 +25,8 @@ async function getAudio(audio_file_id: string): Promise<string | null> {
 
 export default function ListeningExamPreviewPage() {
   const params = useParams();
-  const router = useRouter();
   const examId = params.id as string;
-  const { getExamById, isLoading } = useListeningExam();
+  const { getExamById } = useListeningExam();
   const [exam, setExam] = useState<any | null>(null);
   const [audioUrls, setAudioUrls] = useState<{ [part: string]: string | null }>({});
   const [isPageLoading, setIsPageLoading] = useState(true);
@@ -52,7 +50,7 @@ export default function ListeningExamPreviewPage() {
           setAudioUrls(Object.fromEntries(results));
         }
       } catch (error) {
-        toast.error('Failed to fetch listening exam');
+        console.log(error);
       } finally {
         setIsPageLoading(false);
       }
