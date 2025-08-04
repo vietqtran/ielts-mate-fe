@@ -151,7 +151,11 @@ const ExamResult = ({ result, examName, examDescription }: ExamResultProps) => {
             <h1 className='text-3xl font-bold text-tekhelet-400'>Exam Results</h1>
           </div>
           <div className='space-y-1'>
-            <Badge className='text-xl font-semibold text-tekhelet-600' variant='outline'>
+            <Badge
+              variant={'outline'}
+              className='text-xl font-semibold text-tekhelet-600'
+              variant='outline'
+            >
               Exam: {examName}
             </Badge>
             {/* {examDescription && (
@@ -202,7 +206,10 @@ const ExamResult = ({ result, examName, examDescription }: ExamResultProps) => {
 
             {/* Performance Badge */}
             <div className='flex justify-center'>
-              <Badge className={`px-4 py-2 text-lg font-semibold ${performance.color}`}>
+              <Badge
+                variant={'outline'}
+                className={`px-4 py-2 text-lg font-semibold ${performance.color}`}
+              >
                 {performance.level}
               </Badge>
             </div>

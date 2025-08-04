@@ -200,7 +200,7 @@ export function ViewPassageModal({
                 </div>
                 <div>
                   <p className='text-sm font-medium text-muted-foreground'>Status</p>
-                  <Badge className={getStatusColor(passage.passage_status)}>
+                  <Badge variant={'outline'} className={getStatusColor(passage.passage_status)}>
                     {getStatusLabel(passage.passage_status)}
                   </Badge>
                 </div>

@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAppSelector } from '@/hooks';
 import { useModules } from '@/hooks/apis/modules/useModules';
 import { useVocabulary } from '@/hooks/apis/vocabulary/useVocabulary';
 import { ModuleResponse, ModuleUserResponse } from '@/lib/api/modules';
@@ -46,6 +47,8 @@ import {
   Target,
   Timer,
   TrendingUp,
+  User2,
+  UserPlus,
   Users,
   X,
 } from 'lucide-react';
@@ -81,6 +84,11 @@ export default function PersonalizedPage() {
       return `${hours}h ${minutes}m`;
     }
     return `${minutes}m`;
+  };
+
+  // Helper function to check if module is created by current user
+  const isMyModule = (moduleCreatedBy: string) => {
+    return user?.id === moduleCreatedBy;
   };
 
   // Calculate statistics from modules
@@ -132,6 +140,7 @@ export default function PersonalizedPage() {
     hasPreviousPage: false,
   });
 
+  const { user } = useAppSelector((state) => state.auth);
   const { getMyVocabulary } = useVocabulary();
   const {
     getMyModules,
@@ -429,7 +438,7 @@ export default function PersonalizedPage() {
             <Share2 className='h-4 w-4 mr-1' />
             Requests
             {shareRequests.length > 0 && (
-              <Badge className='ml-1 bg-red-500 text-white text-xs px-1 py-0'>
+              <Badge variant={'outline'} className='ml-1 bg-red-500 text-white text-xs px-1 py-0'>
                 {shareRequests.length}
               </Badge>
             )}
@@ -440,6 +449,19 @@ export default function PersonalizedPage() {
         </TabsList>
 
         <TabsContent value='modules' className='space-y-6'>
+          {/* Header Description */}
+          <Card className='bg-white/60 backdrop-blur-lg border border-[#bfd7ed]/40 rounded-2xl shadow-xl'>
+            <CardHeader className='pb-2'>
+              <CardTitle className='text-tekhelet-400 flex items-center'>
+                <BookOpen className='h-5 w-5 mr-2' />
+                My Modules
+              </CardTitle>
+              <CardDescription className='text-[#0074b7]'>
+                Modules you've created and modules shared with you that you've accepted
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
           {/* Search and Filter */}
           <Card className='bg-white/60 backdrop-blur-lg border border-[#bfd7ed]/40 rounded-2xl shadow-xl'>
             <CardContent className='p-6'>
@@ -463,7 +485,10 @@ export default function PersonalizedPage() {
                         <Filter className='h-4 w-4 mr-2' />
                         Filter
                         {getActiveFilterCount() > 0 && (
-                          <Badge className='ml-2 bg-tekhelet-500 text-white text-xs px-1 py-0'>
+                          <Badge
+                            variant={'outline'}
+                            className='ml-2 bg-tekhelet-500 text-white text-xs px-1 py-0'
+                          >
                             {getActiveFilterCount()}
                           </Badge>
                         )}
@@ -740,9 +765,10 @@ export default function PersonalizedPage() {
                 >
                   <CardHeader className='pb-4'>
                     <div className='flex items-start justify-between'>
-                      <div className='flex items-center space-x-2'>
+                      <div className='flex items-center gap-2 flex-wrap'>
                         <BookOpen className='h-4 w-4 text-tekhelet-400' />
                         <Badge
+                          variant={'outline'}
                           className={
                             module.is_public
                               ? 'bg-green-100 text-green-800'
@@ -751,6 +777,17 @@ export default function PersonalizedPage() {
                         >
                           {module.is_public ? 'Public' : 'Private'}
                         </Badge>
+                        {isMyModule(module.created_by) ? (
+                          <Badge variant={'outline'} className='bg-blue-100 text-blue-800'>
+                            <User2 className='h-3 w-3 mr-1' />
+                            Created by me
+                          </Badge>
+                        ) : (
+                          <Badge variant={'outline'} className='bg-orange-100 text-orange-800'>
+                            <UserPlus className='h-3 w-3 mr-1' />
+                            Shared with me
+                          </Badge>
+                        )}
                       </div>
                       <span className='text-xs text-[#0074b7] flex items-center'>
                         <Clock className='h-3 w-3 mr-1' />
@@ -904,7 +941,10 @@ export default function PersonalizedPage() {
                       <div className='flex items-center justify-between mb-3'>
                         <h3 className='text-xl font-semibold text-tekhelet-400'>{vocab.word}</h3>
                         {vocab.mastered && (
-                          <Badge className='bg-selective-yellow-100 text-selective-yellow-800'>
+                          <Badge
+                            variant={'outline'}
+                            className='bg-selective-yellow-100 text-selective-yellow-800'
+                          >
                             <Star className='h-3 w-3 mr-1' />
                             Mastered
                           </Badge>
@@ -990,7 +1030,9 @@ export default function PersonalizedPage() {
                 <Share2 className='h-5 w-5 mr-2' />
                 Sharing Requests
                 {shareRequests.length > 0 && (
-                  <Badge className='ml-2 bg-red-500 text-white'>{shareRequests.length}</Badge>
+                  <Badge variant={'outline'} className='ml-2 bg-red-500 text-white'>
+                    {shareRequests.length}
+                  </Badge>
                 )}
               </CardTitle>
               <CardDescription className='text-[#0074b7]'>

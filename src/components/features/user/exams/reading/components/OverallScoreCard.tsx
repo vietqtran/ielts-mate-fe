@@ -29,7 +29,9 @@ export const OverallScoreCard = ({
       </CardHeader>
       <CardContent className='text-center'>
         <div className='text-4xl font-bold text-tekhelet-400 mb-2'>{scorePercentage}%</div>
-        <Badge className={`mb-4 ${performance.color}`}>{performance.level}</Badge>
+        <Badge variant={'outline'} className={`mb-4 ${performance.color}`}>
+          {performance.level}
+        </Badge>
         <div className='space-y-2'>
           <Progress value={scorePercentage} className='h-3' />
           <p className='text-sm text-tekhelet-500'>

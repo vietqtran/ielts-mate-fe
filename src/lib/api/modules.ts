@@ -56,13 +56,14 @@ export interface ModuleListResponse {
 
 // Sharing related interfaces
 export interface ShareModuleRequest {
-  user_ids: string[];
+  users: string[];
 }
 
 export interface ModuleUserResponse {
   module_id: string;
   module_name: string;
   description: string;
+  share_to: string;
   is_public: boolean;
   status: number; // 0: pending, 1: accepted, 2: denied
   is_deleted?: boolean;

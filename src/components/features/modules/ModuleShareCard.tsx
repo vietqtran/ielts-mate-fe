@@ -81,10 +81,14 @@ export default function ModuleShareCard({
         <div className='flex items-start justify-between'>
           <div className='flex items-center space-x-2'>
             <BookOpen className='h-4 w-4 text-tekhelet-400' />
-            <Badge className={getStatusColor(moduleShare.status)}>
+            <Badge variant={'outline'} className={getStatusColor(moduleShare.status)}>
               {getStatusText(moduleShare.status)}
             </Badge>
-            {moduleShare.is_public && <Badge className='bg-blue-100 text-blue-800'>Public</Badge>}
+            {moduleShare.is_public && (
+              <Badge variant={'outline'} className='bg-blue-100 text-blue-800'>
+                Public
+              </Badge>
+            )}
           </div>
           <span className='text-xs text-medium-slate-blue-500 flex items-center'>
             <Calendar className='h-3 w-3 mr-1' />
@@ -105,6 +109,13 @@ export default function ModuleShareCard({
               Created by:
             </span>
             <span className='text-tekhelet-400 font-medium'>{moduleShare.created_by}</span>
+          </div>
+          <div className='flex items-center justify-between text-sm'>
+            <span className='text-medium-slate-blue-500 flex items-center'>
+              <Share2 className='h-3 w-3 mr-1' />
+              Shared to:
+            </span>
+            <span className='text-tekhelet-400 font-medium'>{moduleShare.share_to}</span>
           </div>
           <div className='flex items-center justify-between text-sm'>
             <span className='text-medium-slate-blue-500 flex items-center'>

@@ -170,7 +170,10 @@ const GuestPage = () => {
         <div className='relative container mx-auto px-4'>
           <div className='grid lg:grid-cols-2 gap-12 items-center'>
             <div className='text-center lg:text-left'>
-              <Badge className='mb-4 bg-blue-100 text-blue-700 hover:bg-blue-200'>
+              <Badge
+                variant={'outline'}
+                className='mb-4 bg-blue-100 text-blue-700 hover:bg-blue-200'
+              >
                 🚀 Master IELTS with Confidence
               </Badge>
               <h1 className='text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight'>
@@ -269,7 +272,9 @@ const GuestPage = () => {
       <section id='features' className='py-20 bg-white'>
         <div className='container mx-auto px-4'>
           <div className='text-center mb-16'>
-            <Badge className='mb-4 bg-indigo-100 text-indigo-700'>Why Choose IeltsMate?</Badge>
+            <Badge variant={'outline'} className='mb-4 bg-indigo-100 text-indigo-700'>
+              Why Choose IeltsMate?
+            </Badge>
             <h2 className='text-3xl md:text-4xl font-bold text-gray-900 mb-4'>
               Everything You Need to Succeed
             </h2>
@@ -400,7 +405,9 @@ const GuestPage = () => {
       <section id='testimonials' className='py-20 bg-gray-50'>
         <div className='container mx-auto px-4'>
           <div className='text-center mb-16'>
-            <Badge className='mb-4 bg-green-100 text-green-700'>Success Stories</Badge>
+            <Badge variant={'outline'} className='mb-4 bg-green-100 text-green-700'>
+              Success Stories
+            </Badge>
             <h2 className='text-3xl md:text-4xl font-bold text-gray-900 mb-4'>
               What Our Students Say
             </h2>

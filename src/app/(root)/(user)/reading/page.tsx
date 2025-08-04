@@ -205,7 +205,7 @@ const Reading = () => {
             </p>
           </div>
           <div className='flex items-center gap-2'>
-            <Badge variant='outline' className='text-tekhelet-600 backdrop-blur-md'>
+            <Badge variant={'outline'} className='text-tekhelet-600 backdrop-blur-md'>
               {pagination?.totalItems || 0} passage
               {(pagination?.totalItems || 0) !== 1 ? 's' : ''}
             </Badge>

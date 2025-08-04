@@ -55,7 +55,7 @@ export default function ShareModuleModal({
     }
 
     const shareData: ShareModuleRequest = {
-      user_ids: userIds,
+      users: userIds,
     };
 
     const result = await shareModule(moduleId, shareData);
