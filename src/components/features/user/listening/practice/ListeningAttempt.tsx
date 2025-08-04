@@ -289,11 +289,11 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
 
   if (!propAttemptData) {
     return (
-      <div className='h-screen w-full flex items-center justify-center bg-medium-slate-blue-900'>
-        <Card className='bg-white/80 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl p-6'>
+      <div className='h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#bfd7ed] to-[#60a3d9]/50'>
+        <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl p-8 ring-1 ring-[#60a3d9]/20'>
           <CardContent className='text-center'>
-            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-tekhelet-600 mx-auto mb-4'></div>
-            <p className='text-tekhelet-600'>Loading listening practice...</p>
+            <div className='animate-spin rounded-full h-12 w-12 border-4 border-[#bfd7ed] border-t-[#0074b7] mx-auto mb-4'></div>
+            <p className='text-[#003b73] font-medium'>Loading listening practice...</p>
           </CardContent>
         </Card>
       </div>
@@ -330,13 +330,13 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
         cancelText={isLoading.submitAttempt ? 'Please wait...' : 'Cancel'}
       />
 
-      <div className='h-screen w-full grid grid-rows-[auto_1fr] bg-medium-slate-blue-900'>
+      <div className='h-screen w-full grid grid-rows-[auto_1fr] bg-gradient-to-br from-[#bfd7ed] to-[#60a3d9]/50'>
         {/* Header with timer and task info */}
-        <div className='bg-white/80 backdrop-blur-lg border-b border-tekhelet-200 shadow-sm'>
+        <div className='bg-white/90 backdrop-blur-xl border-b border-[#60a3d9]/30 shadow-lg'>
           <div className='grid grid-cols-1 md:grid-cols-3 items-center p-4 gap-4'>
             <div className='col-span-1'>
-              <h1 className='text-xl font-bold text-tekhelet-600'>{propAttemptData.title}</h1>
-              <p className='text-sm text-medium-slate-blue-400 mt-1'>
+              <h1 className='text-xl font-bold text-[#003b73]'>{propAttemptData.title}</h1>
+              <p className='text-sm text-[#0074b7] mt-1 font-medium'>
                 Part {propAttemptData.part_number + 1} - IELTS Listening Practice
               </p>
             </div>
@@ -344,15 +344,15 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
             <div className='col-span-1 flex items-center gap-4 justify-center'>
               {/* Progress indicator */}
               <div className='flex items-center gap-2'>
-                <Headphones className='w-4 h-4 text-medium-slate-blue-400' />
-                <span className='text-sm font-medium text-tekhelet-600'>
+                <Headphones className='w-4 h-4 text-[#0074b7]' />
+                <span className='text-sm font-medium text-[#003b73]'>
                   {answeredQuestions}/{totalQuestions} questions
                 </span>
               </div>
 
               {/* Timer */}
               <div
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-tekhelet-400 backdrop-blur-md`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl border border-[#60a3d9]/40 text-[#003b73] backdrop-blur-md bg-white/60 shadow-lg`}
               >
                 <Clock className={`w-5 h-5`} />
                 <span className={`text-lg font-bold`}>{formatTime(time)}</span>
@@ -362,7 +362,7 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
             <div className='col-span-1 flex justify-end gap-2'>
               <Button
                 onClick={() => handleSubmit({ type: 'save' })}
-                className='bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white'
+                className='bg-gradient-to-r from-[#60a3d9] to-[#0074b7] hover:from-[#0074b7] hover:to-[#003b73] text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200'
                 size='lg'
                 disabled={isLoading.saveAttemptProgress}
               >
@@ -371,7 +371,7 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
 
               <Button
                 onClick={() => setIsModalOpen(true)}
-                className='bg-tekhelet-600 hover:bg-tekhelet-700 text-white'
+                className='bg-gradient-to-r from-[#003b73] to-[#0074b7] hover:from-[#0074b7] hover:to-[#60a3d9] text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200'
                 size='lg'
                 disabled={isLoading.submitAttempt}
               >
@@ -390,9 +390,9 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
         <div className='flex-1 overflow-hidden p-6'>
           <div className='grid grid-cols-12 gap-6 h-full'>
             {/* Audio Player Column */}
-            <Card className='bg-white/80 backdrop-blur-lg border rounded-2xl shadow-xl overflow-hidden flex flex-col col-span-4 h-full'>
-              <CardHeader className='flex-shrink-0 backdrop-blur-md'>
-                <CardTitle className='text-center text-lg text-tekhelet-400 flex items-center justify-center gap-2'>
+            <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl overflow-hidden flex flex-col col-span-4 h-full ring-1 ring-[#60a3d9]/20'>
+              <CardHeader className='flex-shrink-0 backdrop-blur-md bg-gradient-to-r from-[#bfd7ed]/50 to-[#60a3d9]/20'>
+                <CardTitle className='text-center text-lg text-[#003b73] flex items-center justify-center gap-2 font-semibold'>
                   <Volume2 className='w-5 h-5' />
                   Audio Player
                 </CardTitle>
@@ -400,8 +400,8 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
               <CardContent className='flex-1 p-6 space-y-4'>
                 {/* Instructions */}
                 <div className='space-y-4'>
-                  <h3 className='font-medium text-tekhelet-600'>Instructions:</h3>
-                  <p className='text-sm text-medium-slate-blue-500 leading-relaxed'>
+                  <h3 className='font-semibold text-[#003b73]'>Instructions:</h3>
+                  <p className='text-sm text-[#0074b7] leading-relaxed'>
                     {propAttemptData.instruction}
                   </p>
                 </div>
@@ -416,7 +416,7 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
                       <Button
                         onClick={togglePlayPause}
                         size='lg'
-                        className='bg-tekhelet-600 hover:bg-tekhelet-700 text-white rounded-full w-16 h-16'
+                        className='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] text-white rounded-full w-16 h-16 shadow-lg hover:shadow-xl transition-all duration-200'
                         disabled={audioLoading.getAudio}
                       >
                         {isPlaying ? (
@@ -435,9 +435,9 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
                         max='100'
                         value={duration > 0 ? (currentTime / duration) * 100 : 0}
                         onChange={handleSeek}
-                        className='w-full h-2 bg-tekhelet-200 rounded-lg appearance-none cursor-pointer slider'
+                        className='w-full h-2 bg-[#bfd7ed]/60 rounded-lg appearance-none cursor-pointer slider'
                       />
-                      <div className='flex justify-between text-xs text-medium-slate-blue-500'>
+                      <div className='flex justify-between text-xs text-[#0074b7] font-medium'>
                         <span>{formatTime(Math.floor(currentTime))}</span>
                         <span>{formatTime(Math.floor(duration))}</span>
                       </div>
@@ -445,14 +445,14 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
 
                     {/* Volume Control */}
                     <div className='space-y-2'>
-                      <label className='text-xs font-medium text-tekhelet-600'>Volume</label>
+                      <label className='text-xs font-semibold text-[#003b73]'>Volume</label>
                       <input
                         type='range'
                         min='0'
                         max='100'
                         value={volume * 100}
                         onChange={handleVolumeChange}
-                        className='w-full h-2 bg-tekhelet-200 rounded-lg appearance-none cursor-pointer slider'
+                        className='w-full h-2 bg-[#bfd7ed]/60 rounded-lg appearance-none cursor-pointer slider'
                       />
                     </div>
                   </div>
@@ -460,13 +460,13 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
                   <div className='text-center py-8'>
                     {audioLoading.getAudio ? (
                       <div className='space-y-2'>
-                        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-tekhelet-600 mx-auto'></div>
-                        <p className='text-sm text-medium-slate-blue-500'>Loading audio...</p>
+                        <div className='animate-spin rounded-full h-8 w-8 border-4 border-[#bfd7ed] border-t-[#0074b7] mx-auto'></div>
+                        <p className='text-sm text-[#0074b7] font-medium'>Loading audio...</p>
                       </div>
                     ) : (
                       <div className='space-y-2'>
-                        <AlertTriangle className='w-8 h-8 text-tangerine-500 mx-auto' />
-                        <p className='text-sm text-medium-slate-blue-500'>Audio not available</p>
+                        <AlertTriangle className='w-8 h-8 text-orange-500 mx-auto' />
+                        <p className='text-sm text-[#0074b7] font-medium'>Audio not available</p>
                       </div>
                     )}
                   </div>
@@ -475,9 +475,9 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
             </Card>
 
             {/* Questions Column */}
-            <Card className='bg-white/80 backdrop-blur-lg border rounded-2xl shadow-xl overflow-hidden flex flex-col col-span-6 h-full'>
-              <CardHeader className='flex-shrink-0 backdrop-blur-md'>
-                <CardTitle className='text-center text-lg text-medium-slate-blue-400'>
+            <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl overflow-hidden flex flex-col col-span-6 h-full ring-1 ring-[#60a3d9]/20'>
+              <CardHeader className='flex-shrink-0 backdrop-blur-md bg-gradient-to-r from-[#bfd7ed]/50 to-[#60a3d9]/20'>
+                <CardTitle className='text-center text-lg text-[#003b73] font-semibold'>
                   Questions
                 </CardTitle>
               </CardHeader>
@@ -491,37 +491,37 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
             </Card>
 
             {/* Status Column */}
-            <Card className='col-span-2 flex flex-col border-selective-yellow-300 bg-selective-yellow-50/60 backdrop-blur-lg rounded-2xl shadow-xl h-fit'>
-              <CardHeader className='flex-shrink-0 backdrop-blur-md rounded-t-2xl'>
-                <CardTitle className='text-center text-xl text-selective-yellow-400'>
+            <Card className='col-span-2 flex flex-col border border-[#60a3d9]/40 bg-gradient-to-br from-[#bfd7ed]/60 to-[#60a3d9]/30 backdrop-blur-xl rounded-3xl shadow-2xl h-fit ring-1 ring-[#60a3d9]/20'>
+              <CardHeader className='flex-shrink-0 backdrop-blur-md rounded-t-3xl bg-gradient-to-r from-[#60a3d9]/20 to-[#0074b7]/10'>
+                <CardTitle className='text-center text-xl text-[#003b73] font-bold'>
                   Progress
                 </CardTitle>
               </CardHeader>
               <CardContent className='flex-1 space-y-4 overflow-y-auto p-4 min-h-0'>
                 {/* Progress Summary */}
                 <div className='space-y-2'>
-                  <h4 className='font-medium text-sm text-tekhelet-600'>Progress</h4>
+                  <h4 className='font-semibold text-sm text-[#003b73]'>Progress</h4>
                   <div className='space-y-1 text-xs'>
                     <div className='flex justify-between'>
-                      <span className='text-medium-slate-blue-500'>Answered:</span>
-                      <span className='font-medium text-tekhelet-600'>{answeredQuestions}</span>
+                      <span className='text-[#0074b7]'>Answered:</span>
+                      <span className='font-medium text-[#003b73]'>{answeredQuestions}</span>
                     </div>
                     <div className='flex justify-between'>
-                      <span className='text-medium-slate-blue-500'>Remaining:</span>
-                      <span className='font-medium text-tekhelet-600'>
+                      <span className='text-[#0074b7]'>Remaining:</span>
+                      <span className='font-medium text-[#003b73]'>
                         {totalQuestions - answeredQuestions}
                       </span>
                     </div>
                     <div className='flex justify-between'>
-                      <span className='text-medium-slate-blue-500'>Total:</span>
-                      <span className='font-medium text-tekhelet-600'>{totalQuestions}</span>
+                      <span className='text-[#0074b7]'>Total:</span>
+                      <span className='font-medium text-[#003b73]'>{totalQuestions}</span>
                     </div>
                   </div>
                 </div>
                 {/* Tips */}
                 <div className='space-y-2'>
-                  <h4 className='font-medium text-sm text-tekhelet-600'>Tips</h4>
-                  <div className='text-xs text-medium-slate-blue-500 space-y-1'>
+                  <h4 className='font-semibold text-sm text-[#003b73]'>Tips</h4>
+                  <div className='text-xs text-[#0074b7] space-y-1'>
                     <p>• Listen carefully to the audio</p>
                     <p>• You can replay the audio anytime</p>
                     <p>• Review your answers before submitting</p>
@@ -540,7 +540,7 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
           width: 16px;
           height: 16px;
           border-radius: 50%;
-          background: var(--color-tekhelet-600);
+          background: #0074b7;
           cursor: pointer;
           border: 2px solid white;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -550,7 +550,7 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
           width: 16px;
           height: 16px;
           border-radius: 50%;
-          background: var(--color-tekhelet-600);
+          background: #0074b7;
           cursor: pointer;
           border: 2px solid white;
           box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);

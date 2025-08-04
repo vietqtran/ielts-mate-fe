@@ -92,7 +92,9 @@ export default function PassagesPage() {
           setPagination(response.pagination);
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {
@@ -135,7 +137,9 @@ export default function PassagesPage() {
     try {
       await deletePassage(passage_id);
       await loadPassages(pagination.currentPage, pagination.pageSize);
-    } catch (error) {}
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handlePassageCreated = () => {
@@ -170,7 +174,7 @@ export default function PassagesPage() {
       <div className='container mx-auto p-6'>
         <div className='flex items-center justify-between mb-6'>
           <div>
-            <h1 className='text-3xl font-bold'>Reading Passages</h1>
+            <h1 className='text-3xl font-bold'>Reading Tasks</h1>
             <p className='text-muted-foreground'>
               Manage your IELTS reading passages and questions
             </p>
@@ -178,7 +182,7 @@ export default function PassagesPage() {
           <div className='flex gap-2'>
             <Button onClick={handleCreatePassage} className='gap-2'>
               <PlusCircle className='h-4 w-4' />
-              Create New Passage
+              Create New Task
             </Button>
           </div>
         </div>

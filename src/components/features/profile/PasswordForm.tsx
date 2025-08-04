@@ -49,13 +49,15 @@ export function PasswordForm() {
   };
 
   return (
-    <Card>
+    <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20'>
       <CardHeader>
-        <CardTitle className='flex items-center gap-2'>
-          <Lock className='h-5 w-5' />
+        <CardTitle className='flex items-center gap-2 text-[#003b73] font-semibold'>
+          <Lock className='h-5 w-5 text-[#0074b7]' />
           Change Password
         </CardTitle>
-        <CardDescription>Update your password to keep your account secure.</CardDescription>
+        <CardDescription className='text-[#0074b7]'>
+          Update your password to keep your account secure.
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <FormProvider {...form}>
@@ -66,7 +68,10 @@ export function PasswordForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    <Label htmlFor='oldPassword' className='block text-sm font-medium'>
+                    <Label
+                      htmlFor='oldPassword'
+                      className='block text-sm font-semibold text-[#003b73]'
+                    >
                       Old password
                     </Label>
                   </FormLabel>
@@ -75,7 +80,7 @@ export function PasswordForm() {
                       id='oldPassword'
                       type='password'
                       placeholder='••••••••'
-                      className={`w-full rounded-md border px-3 py-2`}
+                      className={`w-full`}
                       isError={!!form.formState.errors.oldPassword}
                       {...field}
                     />
@@ -91,7 +96,10 @@ export function PasswordForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    <Label htmlFor='newPassword' className='block text-sm font-medium'>
+                    <Label
+                      htmlFor='newPassword'
+                      className='block text-sm font-semibold text-[#003b73]'
+                    >
                       New password
                     </Label>
                   </FormLabel>
@@ -100,7 +108,7 @@ export function PasswordForm() {
                       id='newPassword'
                       type='password'
                       placeholder='••••••••'
-                      className={`w-full rounded-md border px-3 py-2`}
+                      className={`w-full`}
                       isError={!!form.formState.errors.newPassword}
                       {...field}
                     />
@@ -115,7 +123,10 @@ export function PasswordForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    <Label htmlFor='confirmNewPassword' className='block text-sm font-medium'>
+                    <Label
+                      htmlFor='confirmNewPassword'
+                      className='block text-sm font-semibold text-[#003b73]'
+                    >
                       Confirm new password
                     </Label>
                   </FormLabel>
@@ -124,7 +135,7 @@ export function PasswordForm() {
                       id='confirmNewPassword'
                       type='password'
                       placeholder='••••••••'
-                      className={`w-full rounded-md border px-3 py-2`}
+                      className={`w-full`}
                       isError={!!form.formState.errors.confirmNewPassword}
                       {...field}
                     />
@@ -134,7 +145,11 @@ export function PasswordForm() {
               )}
             />
 
-            <Button type='submit' disabled={isPending}>
+            <Button
+              type='submit'
+              disabled={isPending}
+              className='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] text-white rounded-xl px-6 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50'
+            >
               {isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
               Change Password
             </Button>

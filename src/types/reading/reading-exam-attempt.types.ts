@@ -12,8 +12,6 @@ export interface ReadingExamData {
   created_at: string;
 }
 
-type UrlSlug = string;
-
 type CreatedBy = {
   user_id: string;
   first_name: string;

@@ -111,7 +111,9 @@ export default function PassagePreviewPage() {
           };
           setPassageData(mappedData);
         }
-      } catch (error) {}
+      } catch (error) {
+        console.log(error);
+      }
     };
 
     if (passage_id) {
@@ -125,21 +127,6 @@ export default function PassagePreviewPage() {
 
   const getPartLabel = (part: number) => {
     return `Part ${part + 1}`;
-  };
-
-  const getQuestionTypeLabel = (type: number) => {
-    switch (type) {
-      case 0:
-        return 'Multiple Choice';
-      case 1:
-        return 'Fill in the Blanks';
-      case 2:
-        return 'Matching';
-      case 3:
-        return 'Drag and Drop';
-      default:
-        return 'Unknown';
-    }
   };
 
   const renderQuestion = (question: Question, groupIndex: number, questionIndex: number) => {

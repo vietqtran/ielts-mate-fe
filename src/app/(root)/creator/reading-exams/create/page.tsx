@@ -75,7 +75,7 @@ export default function CreateReadingExamPage() {
     form.setValue('reading_passage_id_part3', selectedPassages.part3);
   }, [selectedPassages, form]);
 
-  const handlePassageSelect = (passageId: string, passageTitle: string, partNumber: number) => {
+  const handlePassageSelect = (passageId: string, _passageTitle: string, partNumber: number) => {
     switch (partNumber) {
       case 1:
         setSelectedPassages((prev) => ({ ...prev, part1: passageId }));
@@ -99,7 +99,7 @@ export default function CreateReadingExamPage() {
       router.push('/creator/reading-exams');
     } catch (error) {
       setIsSubmitted(false);
-      toast.error('Failed to create reading exam');
+      console.log(error);
     }
   };
 

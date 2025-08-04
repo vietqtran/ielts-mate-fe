@@ -76,17 +76,12 @@ export default function CreateModulePage() {
   }, []);
 
   const onSubmit = async (values: FormValues) => {
-    console.log('Form values:', values);
-    console.log('Form errors:', form.formState.errors);
-
     if (values.vocabulary_ids.length === 0) {
-      console.log('No vocabulary selected');
       return;
     }
 
     try {
       const result = await createModule(values);
-      console.log('Create module result:', result);
       if (result) {
         router.push('/personalized');
       }
@@ -220,10 +215,8 @@ export default function CreateModulePage() {
                     variant='outline'
                     className='w-full border-tekhelet-200 text-tekhelet-400'
                     onClick={() => {
-                      console.log('Test button clicked');
                       console.log('Form values:', form.getValues());
                       console.log('Form errors:', form.formState.errors);
-                      console.log('Form vocabulary_ids:', form.watch('vocabulary_ids'));
                     }}
                   >
                     Test Form
