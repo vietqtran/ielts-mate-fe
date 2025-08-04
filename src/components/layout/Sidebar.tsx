@@ -47,7 +47,7 @@ const sidebarNavItems = [
     icon: <LayoutDashboard className='h-4 w-4' />,
   },
   {
-    title: 'Reading Passages',
+    title: 'Reading Tasks',
     href: '/creator/passages',
     icon: <FileText className='h-4 w-4' />,
   },
