@@ -1,18 +1,23 @@
-import {
-  ReadingAttemptFilters,
-  ReadingAttemptState,
-} from '@/store/slices/reading-attempt-filter-slice';
+import { CommonReduxFilterStates } from '@/types/filter.types';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-const initialState: ReadingAttemptState = {
-  filters: {},
-  currentPage: 1,
-  sortBy: 'createdAt',
-  sortDirection: 'desc',
+export interface ReadingExamAttemptFilters
+  extends CommonReduxFilterStates<{
+    searchText?: string;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc';
+  }> {}
+
+const initialState: ReadingExamAttemptFilters = {
+  filters: {
+    searchText: '',
+    sortBy: 'createdAt',
+    sortDirection: 'desc',
+  },
   isLoading: false,
   pagination: {
     totalPages: 1,
-    pageSize: 12,
+    pageSize: 10,
     totalItems: 0,
     hasNextPage: false,
     hasPreviousPage: false,
@@ -24,25 +29,13 @@ const readingExamAttemptSlice = createSlice({
   name: 'readingExamAttempt',
   initialState,
   reducers: {
-    setReadingExamAttemptFilters: (state, action: PayloadAction<ReadingAttemptFilters>) => {
+    setFilters: (state, action: PayloadAction<ReadingExamAttemptFilters['filters']>) => {
       state.filters = action.payload;
     },
-    clearReadingExamAttemptFilters: (state) => {
-      state.filters = {};
-    },
-    setReadingExamAttemptCurrentPage: (state, action: PayloadAction<number>) => {
-      state.currentPage = action.payload;
-    },
-    setReadingExamAttemptSortBy: (state, action: PayloadAction<string>) => {
-      state.sortBy = action.payload;
-    },
-    setReadingExamAttemptSortDirection: (state, action: PayloadAction<'asc' | 'desc'>) => {
-      state.sortDirection = action.payload;
-    },
-    setReadingExamAttemptLoading: (state, action: PayloadAction<boolean>) => {
+    setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-    setReadingExamAttemptPagination: (
+    setPagination: (
       state,
       action: PayloadAction<{
         totalPages: number;
@@ -55,17 +48,20 @@ const readingExamAttemptSlice = createSlice({
     ) => {
       state.pagination = action.payload;
     },
+    clearAllStates: (state) => {
+      state.filters = initialState.filters;
+      state.isLoading = initialState.isLoading;
+      state.pagination = initialState.pagination;
+    },
+    clearFilters: (state) => {
+      state.filters.searchText = '';
+      state.filters.sortBy = 'createdAt';
+      state.filters.sortDirection = 'desc';
+    },
   },
 });
 
-export const {
-  setReadingExamAttemptFilters,
-  clearReadingExamAttemptFilters,
-  setReadingExamAttemptCurrentPage,
-  setReadingExamAttemptSortBy,
-  setReadingExamAttemptSortDirection,
-  setReadingExamAttemptLoading,
-  setReadingExamAttemptPagination,
-} = readingExamAttemptSlice.actions;
+export const { setFilters, setLoading, setPagination, clearAllStates, clearFilters } =
+  readingExamAttemptSlice.actions;
 
 export default readingExamAttemptSlice.reducer;

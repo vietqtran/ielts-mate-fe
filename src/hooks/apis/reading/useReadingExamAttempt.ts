@@ -1,7 +1,7 @@
 import instance from '@/lib/axios';
-import { ReadingExamAttemptFiltersParams } from '@/types/pagination.types';
 import {
   ReadingExamAttemptDetailsResponse,
+  ReadingExamAttemptFiltersRequestParams,
   ReadingExamAttemptList,
   ReadingExamData,
   SubmitExamAttemptAnswersRequest,
@@ -94,7 +94,7 @@ const useReadingExamAttempt = () => {
     }
   };
 
-  const getExamAttemptHistory = async (params: ReadingExamAttemptFiltersParams) => {
+  const getExamAttemptHistory = async (params: ReadingExamAttemptFiltersRequestParams) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
