@@ -72,7 +72,8 @@ interface FilterOptions {
 
 export default function PersonalizedPage() {
   // Helper function to format time spent
-  const formatTimeSpent = (timeInSeconds: number) => {
+  const formatTimeSpent = (timeInMs: number) => {
+    const timeInSeconds = Math.floor(timeInMs / 1000);
     const hours = Math.floor(timeInSeconds / 3600);
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
 

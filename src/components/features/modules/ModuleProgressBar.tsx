@@ -21,7 +21,8 @@ export default function ModuleProgressBar({
   const timeSpent = progress?.time_spent || 0;
   const streakCount = progress?.streak_count || 0;
 
-  const formatTime = (seconds: number) => {
+  const formatTime = (milliseconds: number) => {
+    const seconds = Math.floor(milliseconds / 1000);
     if (seconds < 60) return `${seconds}s`;
     if (seconds < 3600) return `${Math.floor(seconds / 60)}m`;
     return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;

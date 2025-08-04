@@ -56,7 +56,8 @@ export default function ModuleProgressModal({
     }
   };
 
-  const formatTime = (seconds: number) => {
+  const formatTime = (milliseconds: number) => {
+    const seconds = Math.floor(milliseconds / 1000);
     if (seconds < 60) return `${seconds} seconds`;
     if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes`;
     const hours = Math.floor(seconds / 3600);
