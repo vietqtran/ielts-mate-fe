@@ -1,14 +1,14 @@
 import { CommonReduxFilterStates } from '@/types/filter.types';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
-export interface ReadingExamAttemptFilters
+export interface ReadingExamFilters
   extends CommonReduxFilterStates<{
     searchText?: string;
     sortBy?: string;
     sortDirection?: 'asc' | 'desc' | '';
   }> {}
 
-const initialState: ReadingExamAttemptFilters = {
+const initialState: ReadingExamFilters = {
   filters: {
     searchText: '',
     sortBy: '',
@@ -25,11 +25,11 @@ const initialState: ReadingExamAttemptFilters = {
   },
 };
 
-const readingExamAttemptSlice = createSlice({
-  name: 'readingExamAttempt',
+const ReadingExamSlice = createSlice({
+  name: 'readingExam',
   initialState,
   reducers: {
-    setFilters: (state, action: PayloadAction<ReadingExamAttemptFilters['filters']>) => {
+    setFilters: (state, action: PayloadAction<ReadingExamFilters['filters']>) => {
       state.filters = action.payload;
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
@@ -60,6 +60,6 @@ const readingExamAttemptSlice = createSlice({
 });
 
 export const { setFilters, setLoading, setPagination, clearAllStates, clearFilters } =
-  readingExamAttemptSlice.actions;
+  ReadingExamSlice.actions;
 
-export default readingExamAttemptSlice.reducer;
+export default ReadingExamSlice.reducer;

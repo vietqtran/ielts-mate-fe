@@ -1,31 +1,23 @@
 'use client';
 
-import ListeningAttemptFilterToolbar from '@/components/features/user/history/practice/listening/ListeningAttemptFilterToolbar';
+import { PaginationCommon } from '@/components/features/user/common';
+import { ListeningAttemptFilterToolbar } from '@/components/features/user/history/practice/listening/ListeningAttemptFilterToolbar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
 import { Separator } from '@/components/ui/separator';
 import useListeningAttempt from '@/hooks/apis/listening/useListeningAttempt';
 import {
   ListeningAttemptFilters,
-  clearListeningAttemptFilters,
-  setListeningAttemptCurrentPage,
-  setListeningAttemptFilters,
-  setListeningAttemptLoading,
-  setListeningAttemptPagination,
-  setListeningAttemptSortBy,
-  setListeningAttemptSortDirection,
+  clearFilters,
+  setFilters,
+  setLoading,
+  setPagination,
 } from '@/store/slices/listening-attempt-filter-slice';
 import { AttemptStatusEnumIndex, ListeningAttemptHistoryResponse } from '@/types/attempt.types';
 import { IeltsTypeEnumIndex, PartNumberEnumIndex } from '@/types/reading/reading.types';
 import { RootState } from '@/types/store.types';
+import { formatDate, formatDuration } from '@/utils/time';
 import { BookOpen, Calendar, CheckCircle, Clock, Eye, PlayCircle, XCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -41,9 +33,6 @@ const ListeningHistory = () => {
 
   // Get state from Redux
   const filters = useSelector((state: RootState) => state.listeningAttempt.filters);
-  const currentPage = useSelector((state: RootState) => state.listeningAttempt.currentPage);
-  const sortBy = useSelector((state: RootState) => state.listeningAttempt.sortBy);
-  const sortDirection = useSelector((state: RootState) => state.listeningAttempt.sortDirection);
   const reduxIsLoading = useSelector((state: RootState) => state.listeningAttempt.isLoading);
   const pagination = useSelector((state: RootState) => state.listeningAttempt.pagination);
 
@@ -51,16 +40,18 @@ const ListeningHistory = () => {
   useEffect(() => {
     const loadAttempts = async () => {
       try {
-        dispatch(setListeningAttemptLoading(true));
+        dispatch(setLoading(true));
         const response = await getAllListeningAttemptHistory({
-          page: currentPage,
-          size: pagination?.pageSize || 12,
+          page: pagination?.currentPage,
+          size: pagination?.pageSize,
           ieltsType: filters.ieltsType,
           partNumber: filters.partNumber,
           status: filters.status,
           title: filters.title,
-          sortBy,
-          sortDirection,
+          listeningTaskId: filters.listeningTaskId,
+          sortBy: filters.sortBy,
+          sortDirection: filters.sortDirection,
+          questionCategory: filters.questionCategory,
         });
 
         if (response) {
@@ -69,12 +60,13 @@ const ListeningHistory = () => {
           // Update pagination state from response
           if (response.pagination) {
             dispatch(
-              setListeningAttemptPagination({
+              setPagination({
                 totalPages: response.pagination.totalPages,
                 pageSize: response.pagination.pageSize,
                 totalItems: response.pagination.totalItems,
                 hasNextPage: response.pagination.hasNextPage,
                 hasPreviousPage: response.pagination.hasPreviousPage,
+                currentPage: response.pagination.currentPage,
               })
             );
           }
@@ -82,7 +74,7 @@ const ListeningHistory = () => {
       } catch (err) {
         console.error('Failed to load listening attempt history:', err);
       } finally {
-        dispatch(setListeningAttemptLoading(false));
+        dispatch(setLoading(false));
       }
     };
 
@@ -92,52 +84,14 @@ const ListeningHistory = () => {
     filters.partNumber,
     filters.status,
     filters.title,
-    sortBy,
-    sortDirection,
     pagination?.pageSize,
+    filters.questionCategory,
+    pagination?.currentPage,
+    filters.listeningTaskId,
+    filters.questionCategory,
+    filters.sortBy,
+    filters.sortDirection,
   ]);
-
-  // Load attempts when page changes (pagination)
-  useEffect(() => {
-    const loadAttempts = async () => {
-      try {
-        dispatch(setListeningAttemptLoading(true));
-        const response = await getAllListeningAttemptHistory({
-          page: currentPage,
-          size: pagination?.pageSize || 12,
-          ieltsType: filters.ieltsType,
-          partNumber: filters.partNumber,
-          status: filters.status,
-          title: filters.title,
-          sortBy,
-          sortDirection,
-        });
-
-        if (response) {
-          setAttemptHistoryData(response.data || []);
-
-          // Update pagination state from response
-          if (response.pagination) {
-            dispatch(
-              setListeningAttemptPagination({
-                totalPages: response.pagination.totalPages,
-                pageSize: response.pagination.pageSize,
-                totalItems: response.pagination.totalItems,
-                hasNextPage: response.pagination.hasNextPage,
-                hasPreviousPage: response.pagination.hasPreviousPage,
-              })
-            );
-          }
-        }
-      } catch (err) {
-        console.error('Failed to load listening attempt history:', err);
-      } finally {
-        dispatch(setListeningAttemptLoading(false));
-      }
-    };
-
-    loadAttempts();
-  }, [currentPage]);
 
   const getIeltsTypeLabel = (type: number): string => {
     switch (type) {
@@ -205,51 +159,21 @@ const ListeningHistory = () => {
     }
   };
 
-  const formatDuration = (duration: number | null): string => {
-    if (!duration) return 'N/A';
-    const hours = Math.floor(duration / 3600);
-    const minutes = Math.floor((duration % 3600) / 60);
-    const seconds = duration % 60;
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m ${seconds}s`;
-    } else if (minutes > 0) {
-      return `${minutes}m ${seconds}s`;
-    } else {
-      return `${seconds}s`;
-    }
-  };
-
-  const formatDate = (dateString: string | null): string => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   const handleFiltersChange = (newFilters: ListeningAttemptFilters) => {
-    dispatch(setListeningAttemptFilters(newFilters));
-    dispatch(setListeningAttemptCurrentPage(1));
+    dispatch(setFilters(newFilters));
+    dispatch(setPagination({ ...pagination, currentPage: 1 }));
   };
 
   const handleClearFilters = () => {
-    dispatch(clearListeningAttemptFilters());
-  };
-
-  const handleSortByChange = (field: string) => {
-    dispatch(setListeningAttemptSortBy(field));
-  };
-
-  const handleSortDirectionChange = (direction: 'asc' | 'desc') => {
-    dispatch(setListeningAttemptSortDirection(direction));
+    dispatch(clearFilters());
   };
 
   const handlePageChange = (page: number) => {
-    dispatch(setListeningAttemptCurrentPage(page));
+    dispatch(setPagination({ ...pagination, currentPage: page }));
+  };
+
+  const handlePageSizeChange = (size: string) => {
+    dispatch(setPagination({ ...pagination, pageSize: Number(size), currentPage: 1 }));
   };
 
   // Check if there are active filters
@@ -293,10 +217,6 @@ const ListeningHistory = () => {
           filters={filters}
           onFiltersChange={handleFiltersChange}
           onClearFilters={handleClearFilters}
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          onSortByChange={handleSortByChange}
-          onSortDirectionChange={handleSortDirectionChange}
           isLoading={reduxIsLoading}
         />
 
@@ -437,46 +357,11 @@ const ListeningHistory = () => {
             ))}
           </div>
         )}
-
-        {/* Pagination */}
-        {!reduxIsLoading && attemptHistoryData.length > 0 && (pagination?.totalPages || 0) > 1 && (
-          <div className='flex items-center justify-between mt-8'>
-            <div className='text-sm text-muted-foreground'>
-              Showing {(currentPage - 1) * (pagination?.pageSize || 12) + 1} to{' '}
-              {Math.min(currentPage * (pagination?.pageSize || 12), pagination?.totalItems || 0)} of{' '}
-              {pagination?.totalItems || 0} entries
-            </div>
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href='#'
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (pagination?.hasPreviousPage) {
-                        handlePageChange(currentPage - 1);
-                      }
-                    }}
-                    className={!pagination?.hasPreviousPage ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-
-                <PaginationItem>
-                  <PaginationNext
-                    href='#'
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (pagination?.hasNextPage) {
-                        handlePageChange(currentPage + 1);
-                      }
-                    }}
-                    className={!pagination?.hasNextPage ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
-        )}
+        <PaginationCommon
+          pagination={pagination}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
       </div>
     </div>
   );

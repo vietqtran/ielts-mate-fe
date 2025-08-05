@@ -3,13 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { MultiSelect } from '@/components/ui/multi-select';
 import { MarkupFilters } from '@/store/slices/markup-slice';
 import { MarkupType, PracticeType, TaskType } from '@/types/markup/markup.enum';
 import { Loader2, X } from 'lucide-react';
@@ -44,17 +38,18 @@ export const MarkupFilterToolbar = memo(function MarkupFilterToolbar({
   isLoading = false,
 }: Readonly<MarkupFilterToolbarProps>) {
   const updateFilter = useCallback(
-    (key: keyof MarkupFilters, value: any) => {
+    (key: keyof MarkupFilters, value: string[]) => {
+      const numericValues = value.length > 0 ? value.map(Number) : [];
       onFiltersChange({
         ...filters,
-        [key]: value === '' || value === 'all' ? undefined : Number(value),
+        [key]: numericValues.length > 0 ? numericValues : undefined,
       });
     },
     [filters, onFiltersChange]
   );
 
   const hasActiveFilters = Object.values(filters).some(
-    (value) => value !== undefined && value !== ''
+    (value) => value !== undefined && Array.isArray(value) && value.length > 0
   );
 
   return (
@@ -65,66 +60,48 @@ export const MarkupFilterToolbar = memo(function MarkupFilterToolbar({
             <Label htmlFor='markUpType' className='text-tekhelet-600'>
               Markup Type
             </Label>
-            <Select
-              value={filters.markUpType?.toString() || ''}
-              onValueChange={(value) => updateFilter('markUpType', value)}
-            >
-              <SelectTrigger className='w-full'>
-                <SelectValue placeholder='Select markup type' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='all'>All Types</SelectItem>
-                {markupTypeOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <MultiSelect
+              selected={
+                Array.isArray(filters.markUpType)
+                  ? filters.markUpType.map((type) => type.toString())
+                  : []
+              }
+              onChange={(value) => updateFilter('markUpType', value)}
+              options={markupTypeOptions}
+              placeholder='Select markup type'
+            />
           </div>
 
           <div className='space-y-2'>
             <Label htmlFor='taskType' className='text-tekhelet-600'>
               Task Type
             </Label>
-            <Select
-              value={filters.taskType?.toString() || ''}
-              onValueChange={(value) => updateFilter('taskType', value)}
-            >
-              <SelectTrigger className='w-full'>
-                <SelectValue placeholder='Select task type' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='all'>All Types</SelectItem>
-                {taskTypeOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <MultiSelect
+              selected={
+                Array.isArray(filters.taskType)
+                  ? filters.taskType.map((type) => type.toString())
+                  : []
+              }
+              onChange={(value) => updateFilter('taskType', value)}
+              options={taskTypeOptions}
+              placeholder='Select task type'
+            />
           </div>
 
           <div className='space-y-2'>
             <Label htmlFor='practiceType' className='text-tekhelet-600'>
               Practice Type
             </Label>
-            <Select
-              value={filters.practiceType?.toString() || ''}
-              onValueChange={(value) => updateFilter('practiceType', value)}
-            >
-              <SelectTrigger className='w-full'>
-                <SelectValue placeholder='Select practice type' />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value='all'>All Types</SelectItem>
-                {practiceTypeOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <MultiSelect
+              selected={
+                Array.isArray(filters.practiceType)
+                  ? filters.practiceType.map((type) => type.toString())
+                  : []
+              }
+              onChange={(value) => updateFilter('practiceType', value)}
+              options={practiceTypeOptions}
+              placeholder='Select practice type'
+            />
           </div>
           <div className='md:col-span-3 flex justify-center items-center gap-4'>
             {hasActiveFilters && (

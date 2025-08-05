@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Filter, Loader2, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
+import { Combobox } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect } from '@/components/ui/multi-select';
@@ -15,41 +16,45 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ListeningAttemptFilters } from '@/store/slices/listening-attempt-filter-slice';
-import { ieltsTypeOptions, partNumberOptions, statusOptions } from '@/utils/filter';
+import {
+  ieltsTypeOptions,
+  isUUID,
+  partNumberOptions,
+  questionCategoryOptions,
+} from '@/utils/filter';
 import { useDebounce } from '@uidotdev/usehooks';
-import React, { useState, useCallback, useMemo, memo, useEffect } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 interface ListeningAttemptFilterToolbarProps {
   filters: ListeningAttemptFilters;
   onFiltersChange: (filters: ListeningAttemptFilters) => void;
   onClearFilters: () => void;
-  sortBy: string;
-  sortDirection: 'asc' | 'desc';
-  onSortByChange: (field: string) => void;
-  onSortDirectionChange: (direction: 'asc' | 'desc') => void;
-  isLoading?: boolean;
+  isLoading: boolean;
 }
 
 const sortOptions = [
-  { value: 'finishedAt', label: 'Finish Date' },
-  { value: 'totalPoints', label: 'Score' },
-  { value: 'duration', label: 'Duration' },
-  { value: 'createdAt', label: 'Created At' },
+  { value: 'createdAt', label: 'Created Date' },
+  { value: 'title', label: 'Title' },
+  { value: 'ieltsType', label: 'IELTS Type' },
+  { value: 'partNumber', label: 'Part Number' },
 ];
 
 export const ListeningAttemptFilterToolbar = memo(function ListeningAttemptFilterToolbar({
   filters,
   onFiltersChange,
   onClearFilters,
-  sortBy,
-  sortDirection,
-  onSortByChange,
-  onSortDirectionChange,
   isLoading = false,
 }: Readonly<ListeningAttemptFilterToolbarProps>) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [searchTerm, setSearchTerm] = useState(filters.title || '');
+  const [listeningTaskId, setListeningTaskId] = useState(filters.listeningTaskId || '');
+  const [error, setError] = useState<Record<string, string | null>>({});
   const debouncedSearchTerm = useDebounce(searchTerm, 800);
+  const debouncedListeningTaskId = useDebounce(listeningTaskId, 800);
+
+  const isValidUUID = useCallback((str: string): boolean => {
+    return isUUID(str);
+  }, []);
 
   const updateFilter = useCallback(
     (key: keyof ListeningAttemptFilters, value: any) => {
@@ -64,10 +69,6 @@ export const ListeningAttemptFilterToolbar = memo(function ListeningAttemptFilte
   const handleToggleExpanded = useCallback(() => {
     setIsExpanded((prev) => !prev);
   }, []);
-
-  const handleSortDirectionToggle = useCallback(() => {
-    onSortDirectionChange(sortDirection === 'asc' ? 'desc' : 'asc');
-  }, [sortDirection, onSortDirectionChange]);
 
   const hasActiveFilters = useMemo(() => {
     return Object.values(filters).some((value) => {
@@ -87,14 +88,6 @@ export const ListeningAttemptFilterToolbar = memo(function ListeningAttemptFilte
     }).length;
   }, [filters]);
 
-  // Memoized input handlers
-  const handleTitleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setSearchTerm(e.target.value);
-    },
-    [updateFilter]
-  );
-
   const handleIeltsTypeChange = useCallback(
     (values: string[]) => {
       updateFilter('ieltsType', values.map(Number));
@@ -104,102 +97,151 @@ export const ListeningAttemptFilterToolbar = memo(function ListeningAttemptFilte
 
   const handlePartNumberChange = useCallback(
     (values: string[]) => {
-      updateFilter('partNumber', values.map(Number));
+      updateFilter('partNumber', values.length > 0 ? values.map(Number) : undefined);
     },
     [updateFilter]
   );
 
-  const handleStatusChange = useCallback(
-    (values: string[]) => {
-      updateFilter('status', values.map(Number));
+  const handleSortByChange = useCallback(
+    (value: string) => {
+      updateFilter('sortBy', value);
     },
     [updateFilter]
   );
+
+  const handleSortDirectionChange = useCallback(() => {
+    updateFilter('sortDirection', filters.sortDirection === 'asc' ? 'desc' : 'asc');
+  }, [filters, updateFilter]);
+
+  const handleQuestionCategoryChange = useCallback(
+    (value: string) => {
+      updateFilter('questionCategory', value);
+    },
+    [updateFilter]
+  );
+
+  const handleClearListeningTaskId = useCallback(() => {
+    setListeningTaskId('');
+    updateFilter('listeningTaskId', '');
+    setError((prev) => ({ ...prev, listeningTaskId: null }));
+  }, [updateFilter]);
 
   useEffect(() => {
-    if (debouncedSearchTerm !== filters.title) {
-      updateFilter('title', debouncedSearchTerm);
+    setSearchTerm(filters.title || '');
+  }, [filters.title]);
+
+  useEffect(() => {
+    if (debouncedSearchTerm === filters.title) return;
+    updateFilter('title', debouncedSearchTerm);
+  }, [debouncedSearchTerm]);
+
+  useEffect(() => {
+    setListeningTaskId(filters.listeningTaskId || '');
+  }, [filters.listeningTaskId]);
+
+  useEffect(() => {
+    if (debouncedListeningTaskId === filters.listeningTaskId) return;
+    if (!isValidUUID(debouncedListeningTaskId) && debouncedListeningTaskId) {
+      setError((prev) => ({
+        ...prev,
+        listeningTaskId: 'Must be a valid listening task UUID.',
+      }));
+      return;
     }
-  }, [debouncedSearchTerm, filters.title]);
+    updateFilter('listeningTaskId', debouncedListeningTaskId);
+    setError((prev) => ({ ...prev, listeningTaskId: null }));
+  }, [debouncedListeningTaskId]);
 
   return (
-    <Card>
-      <CardContent className='p-4'>
-        <div className='space-y-4'>
-          {/* Main toolbar row */}
-          <div className='flex flex-col sm:flex-row gap-4'>
-            {/* Title search - always visible */}
-            <div className='flex-1 min-w-0'>
-              <Input
-                placeholder='Search by passage title...'
-                value={searchTerm}
-                onChange={handleTitleChange}
-                className='w-full'
-              />
-            </div>
-
-            {/* Sort controls */}
-            <div className='flex gap-2 shrink-0'>
-              <Select value={sortBy} onValueChange={onSortByChange} disabled={isLoading}>
-                <SelectTrigger className='w-[140px]'>
-                  <SelectValue placeholder='Sort by' />
-                </SelectTrigger>
-                <SelectContent>
-                  {sortOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={handleSortDirectionToggle}
-                disabled={isLoading}
-                className='px-3'
-              >
-                {sortDirection === 'asc' ? '↑' : '↓'}
-              </Button>
-            </div>
-
-            {/* Filter toggle button */}
-            <Button
-              variant='outline'
-              size='sm'
-              onClick={handleToggleExpanded}
-              disabled={isLoading}
-              className='flex items-center gap-2'
-            >
-              <Filter className='h-4 w-4' />
-              Filters
-              {activeFilterCount > 0 && (
-                <span className='bg-primary text-primary-foreground text-xs rounded-full px-1.5 py-0.5 min-w-[1.25rem] h-5 flex items-center justify-center'>
-                  {activeFilterCount}
-                </span>
-              )}
-            </Button>
-
-            {/* Clear filters button */}
+    <Card className='mb-6 py-4'>
+      <CardContent>
+        <div className='flex items-center justify-between'>
+          <div className='flex items-center gap-2'>
+            <Filter className='h-4 w-4' />
+            <Label className='text-sm font-medium'>Filters</Label>
+            {isLoading && <Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />}
             {hasActiveFilters && (
-              <Button
-                variant='ghost'
-                size='sm'
-                onClick={onClearFilters}
-                disabled={isLoading}
-                className='flex items-center gap-2 text-muted-foreground hover:text-foreground'
-              >
-                <X className='h-4 w-4' />
-                Clear
-              </Button>
+              <span className='bg-blue-600 text-primary-foreground text-xs px-2 py-1 rounded-full'>
+                {activeFilterCount}
+              </span>
             )}
           </div>
+          <div className='flex items-center gap-2'>
+            {hasActiveFilters && (
+              <Button variant='outline' size='sm' onClick={onClearFilters}>
+                <X className='h-4 w-4' />
+                Clear All
+              </Button>
+            )}
+            <Button variant='outline' size='sm' onClick={handleToggleExpanded}>
+              {isExpanded ? 'Hide' : 'Show'} Filters
+            </Button>
+          </div>
+        </div>
 
-          {/* Expanded filters */}
-          {isExpanded && (
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t'>
-              <div className='space-y-2'>
+        {isExpanded && (
+          <div className='grid mt-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+            <div className='grid grid-cols-2 gap-4 col-span-full'>
+              <div className='flex gap-2 justify-between items-end'>
+                <div className='space-y-2 flex-1'>
+                  <Label htmlFor='title'>Search</Label>
+                  <Input
+                    id='title'
+                    placeholder='Search by title'
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                  />
+                </div>
+                {searchTerm && (
+                  <div>
+                    <Button
+                      variant='ghost'
+                      className='mt-2'
+                      size='icon'
+                      onClick={() => updateFilter('title', '')}
+                    >
+                      <X className='h-4 w-4' />
+                    </Button>
+                  </div>
+                )}
+              </div>
+              <div className='flex gap-2 justify-between items-end'>
+                <div className='space-y-2 flex-1'>
+                  <Input
+                    id='listeningTaskId'
+                    placeholder='Search by listening task ID'
+                    value={listeningTaskId}
+                    onChange={(e) => setListeningTaskId(e.target.value)}
+                    aria-invalid={!!error.listeningTaskId}
+                    aria-describedby={error.listeningTaskId ? 'listeningTaskId-error' : undefined}
+                  />
+                  {error.listeningTaskId && (
+                    <span
+                      id='listeningTaskId-error'
+                      className='text-red-500 text-xs mt-1 block'
+                      role='alert'
+                    >
+                      {error.listeningTaskId}
+                    </span>
+                  )}
+                </div>
+                {listeningTaskId && (
+                  <div>
+                    <Button
+                      variant='ghost'
+                      className='mt-2'
+                      size='icon'
+                      onClick={handleClearListeningTaskId}
+                    >
+                      <X className='h-4 w-4' />
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className='flex gap-2 items-end justify-between'>
+              <div className='space-y-2 flex-1'>
                 <Label htmlFor='ieltsType'>IELTS Type</Label>
                 <MultiSelect
                   options={ieltsTypeOptions}
@@ -208,40 +250,100 @@ export const ListeningAttemptFilterToolbar = memo(function ListeningAttemptFilte
                   placeholder='Select IELTS types'
                 />
               </div>
+              {filters.ieltsType && filters.ieltsType.length > 0 && (
+                <Button variant='ghost' size='icon' onClick={() => updateFilter('ieltsType', [])}>
+                  <X className='h-4 w-4' />
+                </Button>
+              )}
+            </div>
 
-              <div className='space-y-2'>
+            <div className='flex gap-2 items-end justify-between'>
+              <div className='space-y-2 flex-1'>
                 <Label htmlFor='partNumber'>Part Number</Label>
                 <MultiSelect
                   options={partNumberOptions}
-                  selected={filters.partNumber?.map(String) || []}
+                  selected={Array.isArray(filters.partNumber) ? filters.partNumber.map(String) : []}
                   onChange={handlePartNumberChange}
                   placeholder='Select parts'
                 />
               </div>
+              {Array.isArray(filters.partNumber) && filters.partNumber.length > 0 && (
+                <Button variant='ghost' size='icon' onClick={() => updateFilter('partNumber', [])}>
+                  <X className='h-4 w-4' />
+                </Button>
+              )}
+            </div>
 
-              <div className='space-y-2'>
-                <Label htmlFor='status'>Status</Label>
-                <MultiSelect
-                  options={statusOptions}
-                  selected={filters.status?.map(String) || []}
-                  onChange={handleStatusChange}
-                  placeholder='Select status'
+            <div className='flex gap-2 items-end justify-between'>
+              <div className='space-y-2 flex-1'>
+                <Label htmlFor='sortBy'>Sort By</Label>
+                <Select value={filters.sortBy} onValueChange={handleSortByChange}>
+                  <SelectTrigger className='w-full' id='sortBy'>
+                    <SelectValue placeholder='Sort by' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sortOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {filters.sortBy && (
+                <Button variant='ghost' size='icon' onClick={() => updateFilter('sortBy', '')}>
+                  <X className='h-4 w-4' />
+                </Button>
+              )}
+            </div>
+
+            <div className='flex gap-2 items-end justify-between'>
+              <div className='space-y-2 flex-1'>
+                <Label htmlFor='sortDirection'>Sort Direction</Label>
+                <Select value={filters.sortDirection} onValueChange={handleSortDirectionChange}>
+                  <SelectTrigger className='w-full' id='sortDirection'>
+                    <SelectValue placeholder='Sort direction' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value='asc'>Ascending</SelectItem>
+                    <SelectItem value='desc'>Descending</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {filters.sortDirection && (
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  onClick={() => updateFilter('sortDirection', '')}
+                >
+                  <X className='h-4 w-4' />
+                </Button>
+              )}
+            </div>
+            <div className='flex gap-2 items-end justify-between'>
+              <div className='space-y-2 flex-1'>
+                <Label htmlFor='questionCategory'>Question Category</Label>
+                <Combobox
+                  options={questionCategoryOptions}
+                  value={filters.questionCategory}
+                  onValueChange={handleQuestionCategoryChange}
+                  placeholder='Select question category'
+                  className='w-full'
                 />
               </div>
+              {filters.questionCategory && (
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  onClick={() => updateFilter('questionCategory', '')}
+                >
+                  <X className='h-4 w-4' />
+                </Button>
+              )}
             </div>
-          )}
-
-          {/* Loading indicator */}
-          {isLoading && (
-            <div className='flex items-center justify-center py-2'>
-              <Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />
-              <span className='text-sm text-muted-foreground ml-2'>Loading...</span>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
 });
-
-export default ListeningAttemptFilterToolbar;

@@ -39,11 +39,11 @@ const ReadingExamHistory = () => {
       try {
         dispatch(setLoading(true));
         const response = await getExamAttemptHistory({
-          size: pagination?.pageSize || 12,
-          readingExamName: filters.searchText || '',
-          page: pagination?.currentPage || 1,
-          sortBy: filters.sortBy || '',
-          sortDirection: filters.sortDirection || 'desc',
+          size: pagination?.pageSize,
+          readingExamName: filters.searchText,
+          page: pagination?.currentPage,
+          sortBy: filters.sortBy,
+          sortDirection: filters.sortDirection,
         });
 
         if (response) {

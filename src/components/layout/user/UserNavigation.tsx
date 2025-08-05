@@ -260,7 +260,7 @@ export function UserNavigation() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link href='/markup-tasks' className='flex items-center w-full cursor-pointer'>
+                  <Link href='/markup' className='flex items-center w-full cursor-pointer'>
                     <SquareCheck className='mr-2 h-4 w-4' />
                     <span>Markup Tasks</span>
                   </Link>

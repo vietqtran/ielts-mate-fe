@@ -12,19 +12,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ReadingExamAttemptFilters } from '@/store/slices/reading-exam-attempt-filter-slice';
+import { ListeningExamAttemptFilters } from '@/store/slices/listening-exam-attempt-filter-slice';
 import { useDebounce } from '@uidotdev/usehooks';
 import React, { useState, useCallback, useMemo, memo, useEffect } from 'react';
 
-interface ReadingExamSearchFilterProps {
+interface ListeningExamSearchFilterProps {
   searchText?: string;
   sortDirection?: 'asc' | 'desc' | '';
   sortBy?: string;
 }
 
-interface ReadingAttemptFilterToolbarProps {
-  filters: ReadingExamSearchFilterProps;
-  onFiltersChange: (filters: ReadingExamSearchFilterProps) => void;
+interface ListeningAttemptFilterToolbarProps {
+  filters: ListeningExamSearchFilterProps;
+  onFiltersChange: (filters: ListeningExamSearchFilterProps) => void;
   onClearFilters: () => void;
   isLoading?: boolean;
 }
@@ -36,17 +36,17 @@ const sortOptions = [
   { value: 'createdAt', label: 'Created At' },
 ];
 
-export const ReadingExamAttemptHistoryFilter = memo(function ReadingAttemptFilterToolbar({
+export const ListeningExamAttemptHistoryFilter = memo(function ListeningAttemptFilterToolbar({
   filters,
   onFiltersChange,
   onClearFilters,
   isLoading = false,
-}: Readonly<ReadingAttemptFilterToolbarProps>) {
+}: Readonly<ListeningAttemptFilterToolbarProps>) {
   const [searchTerm, setSearchTerm] = useState(filters.searchText || '');
   const debouncedSearchTerm = useDebounce(searchTerm, 800);
 
   const updateFilter = useCallback(
-    (key: keyof ReadingExamAttemptFilters['filters'], value: any) => {
+    (key: keyof ListeningExamAttemptFilters['filters'], value: any) => {
       onFiltersChange({
         ...filters,
         [key]: value === '' || (Array.isArray(value) && value.length === 0) ? undefined : value,
@@ -159,4 +159,4 @@ export const ReadingExamAttemptHistoryFilter = memo(function ReadingAttemptFilte
   );
 });
 
-export default ReadingExamAttemptHistoryFilter;
+export default ListeningExamAttemptHistoryFilter;

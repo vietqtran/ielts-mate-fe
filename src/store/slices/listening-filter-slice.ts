@@ -2,15 +2,17 @@ import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 export interface ListeningTasksFilters {
   title?: string;
-  ieltsType?: number[];
-  partNumber?: number[];
+  ieltsType?: string[];
+  partNumber?: string[];
+  sortDirection?: 'asc' | 'desc' | '';
+  sortBy?: string;
+  createdBy?: string;
+  questionCategory?: string;
+  status?: string[];
 }
 
 export interface ListeningTasksStates {
   filters: ListeningTasksFilters;
-  currentPage: number;
-  sortBy: string;
-  sortDirection: 'asc' | 'desc';
   isLoading: boolean;
   pagination: {
     totalPages: number;
@@ -18,21 +20,27 @@ export interface ListeningTasksStates {
     totalItems: number;
     hasNextPage: boolean;
     hasPreviousPage: boolean;
+    currentPage: number;
   };
 }
 
 const initialState: ListeningTasksStates = {
-  filters: {},
-  currentPage: 1,
-  sortBy: 'createdAt',
-  sortDirection: 'desc',
+  filters: {
+    title: '',
+    ieltsType: [],
+    partNumber: [],
+    sortDirection: '',
+    sortBy: '',
+    status: [],
+  },
   isLoading: false,
   pagination: {
     totalPages: 1,
-    pageSize: 12,
+    pageSize: 10,
     totalItems: 0,
     hasNextPage: false,
     hasPreviousPage: false,
+    currentPage: 1,
   },
 };
 
@@ -41,44 +49,17 @@ const listeningTasksSlice = createSlice({
   initialState,
   reducers: {
     setFilters: (state, action: PayloadAction<ListeningTasksFilters>) => {
-      // Migrate old single values to arrays
-      const migratedFilters = { ...action.payload };
-      if (migratedFilters.ieltsType !== undefined && !Array.isArray(migratedFilters.ieltsType)) {
-        migratedFilters.ieltsType = [migratedFilters.ieltsType as any];
-      }
-      if (migratedFilters.partNumber !== undefined && !Array.isArray(migratedFilters.partNumber)) {
-        migratedFilters.partNumber = [migratedFilters.partNumber as any];
-      }
-      state.filters = migratedFilters;
-    },
-    updateFilter: (
-      state,
-      action: PayloadAction<{ key: keyof ListeningTasksFilters; value: any }>
-    ) => {
-      const { key, value } = action.payload;
-      if (value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
-        delete state.filters[key];
-      } else {
-        state.filters[key] = value;
-      }
+      state.filters = action.payload;
     },
     clearFilters: (state) => {
-      state.filters = {};
-      state.currentPage = 1;
+      state.filters = initialState.filters;
     },
-    setCurrentPage: (state, action: PayloadAction<number>) => {
-      state.currentPage = action.payload;
+
+    clearState: (state) => {
+      state.filters = initialState.filters;
+      state.pagination = initialState.pagination;
     },
-    setSort: (state, action: PayloadAction<{ sortBy: string; sortDirection: 'asc' | 'desc' }>) => {
-      state.sortBy = action.payload.sortBy;
-      state.sortDirection = action.payload.sortDirection;
-    },
-    setSortBy: (state, action: PayloadAction<string>) => {
-      state.sortBy = action.payload;
-    },
-    setSortDirection: (state, action: PayloadAction<'asc' | 'desc'>) => {
-      state.sortDirection = action.payload;
-    },
+
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
@@ -90,38 +71,15 @@ const listeningTasksSlice = createSlice({
         totalItems: number;
         hasNextPage: boolean;
         hasPreviousPage: boolean;
+        currentPage: number;
       }>
     ) => {
       state.pagination = action.payload;
     },
-    clearState: (state) => {
-      state.filters = {};
-      state.currentPage = 1;
-      state.sortBy = 'createdAt';
-      state.sortDirection = 'desc';
-      state.isLoading = false;
-      state.pagination = {
-        totalPages: 1,
-        pageSize: 12,
-        totalItems: 0,
-        hasNextPage: false,
-        hasPreviousPage: false,
-      };
-    },
   },
 });
 
-export const {
-  setFilters,
-  updateFilter,
-  clearFilters,
-  setCurrentPage,
-  setSort,
-  setSortBy,
-  setSortDirection,
-  setLoading,
-  setPagination,
-  clearState,
-} = listeningTasksSlice.actions;
+export const { setFilters, clearFilters, clearState, setLoading, setPagination } =
+  listeningTasksSlice.actions;
 
 export default listeningTasksSlice.reducer;
