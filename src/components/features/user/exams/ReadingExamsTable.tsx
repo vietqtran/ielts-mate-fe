@@ -4,7 +4,6 @@ import { PaginationCommon } from '@/components/features/user/common';
 import ExamsListFilter from '@/components/features/user/exams/common/ExamsListFilter';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import LoadingSpinner from '@/components/ui/loading-spinner';
 import {
   Table,
   TableBody,
@@ -23,7 +22,7 @@ import {
 } from '@/store/slices/reading-exam-filter-slice';
 import { RootState } from '@/types';
 import { ReadingExamResponse } from '@/types/reading/reading-exam.types';
-import { Play } from 'lucide-react';
+import { Loader2, Play } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -89,14 +88,6 @@ export default function ReadingExamsTable({ className }: ReadingExamsTableProps)
     pagination.pageSize,
   ]);
 
-  if (reduxIsLoading) {
-    return (
-      <div className='flex justify-center py-8'>
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
   return (
     <div className={className}>
       <ExamsListFilter
@@ -115,13 +106,13 @@ export default function ReadingExamsTable({ className }: ReadingExamsTableProps)
           </TableRow>
         </TableHeader>
         <TableBody>
-          {exams.length === 0 ? (
+          {exams.length === 0 && !reduxIsLoading ? (
             <TableRow>
               <TableCell colSpan={4} className='text-center py-6'>
                 No reading exams found at the moment.
               </TableCell>
             </TableRow>
-          ) : (
+          ) : !reduxIsLoading ? (
             exams.map((exam) => (
               <TableRow key={exam.reading_exam_id}>
                 <TableCell className='font-medium'>{exam.reading_exam_name}</TableCell>
@@ -156,6 +147,15 @@ export default function ReadingExamsTable({ className }: ReadingExamsTableProps)
                 </TableCell>
               </TableRow>
             ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={4} className='py-6'>
+                <div className='flex items-center justify-center gap-2'>
+                  <Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />
+                  <span className='text-sm text-muted-foreground'>Loading...</span>
+                </div>
+              </TableCell>
+            </TableRow>
           )}
         </TableBody>
       </Table>

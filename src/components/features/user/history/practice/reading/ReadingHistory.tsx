@@ -1,6 +1,7 @@
 'use client';
 
 import { PaginationCommon } from '@/components/features/user/common';
+import { ReadingAttemptFilterToolbar } from '@/components/features/user/history/practice/reading/ReadingAttemptFilterToolbar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -20,7 +21,6 @@ import { BookOpen, Calendar, CheckCircle, Clock, Eye, PlayCircle, XCircle } from
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import ReadingAttemptFilterToolbar from './ReadingAttemptFilterToolbar';
 
 const ReadingHistory = () => {
   const dispatch = useDispatch();
