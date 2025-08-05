@@ -1,5 +1,6 @@
 'use client';
 
+import DeleteMarkupModal from '@/components/features/markup/components/DeleteMarkupModal';
 import PaginationCommon from '@/components/features/user/common/PaginationCommon';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,14 +19,15 @@ import { Bookmark, Heart } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
-import MarkupFilterToolbar from './MarkupFilterToolbar';
 import MarkupItem from './MarkupItem';
+import MarkupFilterToolbar from './components/MarkupFilterToolbar';
 
 export default function MarkupList() {
   const dispatch = useDispatch();
   const { filters, isLoading, pagination } = useSelector((state: RootState) => state.markupTasks);
   const { deleteMarkupTask } = useDeleteMarkup();
-  const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<number | null>(null);
 
   // Build API params from filters and pagination
   const apiParams: GetTaskMarkupParams = useMemo(() => {
@@ -33,13 +35,21 @@ export default function MarkupList() {
       page: pagination.currentPage.toString(),
       size: pagination.pageSize.toString(),
     };
-    if (filters.markUpType !== undefined) params.markUpType = filters.markUpType;
-    if (filters.taskType !== undefined) params.taskType = filters.taskType;
-    if (filters.practiceType !== undefined) params.practiceType = filters.practiceType;
+
+    // Only add parameters if arrays have values, and join them with commas
+    if (filters.markUpType && filters.markUpType.length > 0) {
+      params.markupType = filters.markUpType.join(',');
+    }
+    if (filters.taskType && filters.taskType.length > 0) {
+      params.taskType = filters.taskType.join(',');
+    }
+    if (filters.practiceType && filters.practiceType.length > 0) {
+      params.practiceType = filters.practiceType.join(',');
+    }
+
     return params;
   }, [filters, pagination]);
 
-  // Fetch data using SWR
   const { data, error, isLoading: isFetching, mutate } = useGetMarkupTask(apiParams);
 
   // Update loading state
@@ -107,26 +117,14 @@ export default function MarkupList() {
   };
 
   // Handle item deletion
-  const handleDelete = async (markupId: number) => {
-    if (!confirm('Are you sure you want to remove this markup?')) {
-      return;
-    }
-
+  const handleDelete = async () => {
     try {
-      setDeletingIds((prev) => new Set(prev).add(markupId));
-      await deleteMarkupTask(markupId.toString());
+      await deleteMarkupTask(deletingId!);
       toast.success('Markup removed successfully');
-      // Refresh the data
       mutate();
     } catch (error) {
       toast.error('Failed to remove markup');
       console.error('Error deleting markup:', error);
-    } finally {
-      setDeletingIds((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(markupId);
-        return newSet;
-      });
     }
   };
 
@@ -161,66 +159,78 @@ export default function MarkupList() {
   }
 
   return (
-    <div className='container mx-auto px-4 py-8 space-y-6'>
-      {/* Header */}
-      <div className='text-center mb-8'>
-        <h1 className='text-3xl font-bold text-tekhelet-400 mb-2'>My Markup</h1>
-        <p className='text-medium-slate-blue-500'>Manage your bookmarked and favorite tasks</p>
-      </div>
-
-      {/* Filter Toolbar */}
-      <MarkupFilterToolbar
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-        onClearFilters={handleClearFilters}
-        isLoading={isLoading}
+    <>
+      <DeleteMarkupModal
+        onConfirm={handleDelete}
+        onCancel={() => setIsDeleteModalOpen(false)}
+        isOpen={isDeleteModalOpen}
+        setIsOpen={setIsDeleteModalOpen}
+        title='Delete Markup'
+        description='Are you sure you want to remove this markup? This action cannot be undone.'
       />
+      <div className='container mx-auto px-4 py-8 space-y-6'>
+        {/* Header */}
+        <div className='mb-8'>
+          <h1 className='text-3xl font-bold text-tekhelet-400 mb-2'>My Markup</h1>
+          <p className='text-medium-slate-blue-500'>Manage your bookmarked and favorite tasks</p>
+        </div>
 
-      {/* Content */}
-      {isLoading ? (
-        <Card className='backdrop-blur-lg border rounded-2xl'>
-          <CardContent className='p-12 text-center'>
-            <LoadingSpinner />
-            <p className='text-tekhelet-500 mt-4'>Loading your markup...</p>
-          </CardContent>
-        </Card>
-      ) : data?.data && data.data.length > 0 ? (
-        <>
-          {/* Markup Grid */}
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {data.data.map((item) => (
-              <MarkupItem
-                key={item.markup_id}
-                item={item}
-                onDelete={handleDelete}
-                isDeleting={deletingIds.has(item.markup_id)}
-              />
-            ))}
-          </div>
+        {/* Filter Toolbar */}
+        <MarkupFilterToolbar
+          filters={filters}
+          onFiltersChange={handleFiltersChange}
+          onClearFilters={handleClearFilters}
+          isLoading={isLoading}
+        />
 
-          {/* Pagination */}
-          <PaginationCommon
-            pagination={pagination}
-            onPageChange={handlePageChange}
-            onPageSizeChange={handlePageSizeChange}
-            className='mt-8'
-          />
-        </>
-      ) : (
-        // Empty state
-        <Card className='backdrop-blur-lg border rounded-2xl'>
-          <CardContent className='p-12 text-center'>
-            <div className='text-tekhelet-400 mb-4'>
-              <Bookmark className='h-16 w-16 mx-auto mb-4' />
-              <h3 className='text-xl font-semibold mb-2'>No Markup Found</h3>
-              <p className='text-medium-slate-blue-500 max-w-md mx-auto'>
-                You haven't bookmarked or favorited any tasks yet. Start exploring tasks and save
-                the ones you want to practice later.
-              </p>
+        {/* Content */}
+        {isLoading ? (
+          <Card className='backdrop-blur-lg border rounded-2xl'>
+            <CardContent className='p-12 text-center'>
+              <LoadingSpinner />
+              <p className='text-tekhelet-500 mt-4'>Loading your markup...</p>
+            </CardContent>
+          </Card>
+        ) : data?.data && data.data.length > 0 ? (
+          <>
+            {/* Markup Grid */}
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+              {data.data.map((item) => (
+                <MarkupItem
+                  key={item.markup_id}
+                  item={item}
+                  onDelete={(markupId) => {
+                    setDeletingId(markupId);
+                    setIsDeleteModalOpen(true);
+                  }}
+                />
+              ))}
             </div>
-          </CardContent>
-        </Card>
-      )}
-    </div>
+
+            {/* Pagination */}
+            <PaginationCommon
+              pagination={pagination}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
+              className='mt-8'
+            />
+          </>
+        ) : (
+          // Empty state
+          <Card className='backdrop-blur-lg border rounded-2xl'>
+            <CardContent className='p-12 text-center'>
+              <div className='text-tekhelet-400 mb-4'>
+                <Bookmark className='h-16 w-16 mx-auto mb-4' />
+                <h3 className='text-xl font-semibold mb-2'>No Markup Found</h3>
+                <p className='text-medium-slate-blue-500 max-w-md mx-auto'>
+                  You haven't bookmarked or favorited any tasks yet. Start exploring tasks and save
+                  the ones you want to practice later.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
+    </>
   );
 }

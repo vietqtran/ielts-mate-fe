@@ -14,11 +14,14 @@ import {
   authReducer,
   commonReducer,
   listeningAttemptReducer,
+  listeningExamAttemptReducer,
+  listeningExamReducer,
   listeningTasksReducer,
   markupSliceReducer,
   passageReducer,
   readingAttemptReducer,
   readingExamAttemptReducer,
+  readingExamReducer,
   userPassageReducer,
 } from './slices';
 
@@ -40,6 +43,10 @@ const persistConfig = {
     'readingExamAttempt',
     'listeningAttempt',
     'markupTasks',
+    'listeningExamAttempt',
+    'listeningExam',
+    'readingExam',
+    'readingExamAttempt',
   ],
 };
 
@@ -49,10 +56,13 @@ const rootReducer = combineReducers({
   authForm: authFormReducer,
   passage: passageReducer,
   userPassage: userPassageReducer,
-  listeningTasks: listeningTasksReducer,
   readingAttempt: readingAttemptReducer,
-  listeningAttempt: listeningAttemptReducer,
+  readingExam: readingExamReducer,
   readingExamAttempt: readingExamAttemptReducer,
+  listeningTasks: listeningTasksReducer,
+  listeningAttempt: listeningAttemptReducer,
+  listeningExam: listeningExamReducer,
+  listeningExamAttempt: listeningExamAttemptReducer,
   markupTasks: markupSliceReducer,
 });
 

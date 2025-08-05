@@ -1,104 +1,96 @@
 'use client';
 
 import { PaginationCommon } from '@/components/features/user/common';
-import ListeningAttemptFilterToolbar from '@/components/features/user/history/practice/listening/ListeningAttemptFilterToolbar';
+import ListeningExamAttemptHistoryFilter from '@/components/features/user/history/exam/listening/components/ListeningExamAttemptFilter';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useListeningExam } from '@/hooks/apis/listening/useListeningExam';
-import { ListeningAttemptFilters } from '@/store/slices/listening-attempt-filter-slice';
+import {
+  ListeningExamAttemptFilters,
+  clearFilters,
+  setFilters,
+  setLoading,
+  setPagination,
+} from '@/store/slices/listening-exam-attempt-filter-slice';
+import { RootState } from '@/types';
 import { ListeningExamAttemptsHistoryResponse } from '@/types/listening/listening-exam.types';
+import { formatDate, formatDuration } from '@/utils/time';
 import { Calendar, Clock, Eye, Headphones, Users } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 const ListeningExamHistory = () => {
+  const dispatch = useDispatch();
   const router = useRouter();
   const { getListeningExamAttemptsHistory } = useListeningExam();
   const [attemptHistoryData, setAttemptHistoryData] = useState<
     ListeningExamAttemptsHistoryResponse[]
   >([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
 
-  // Local filter state (not using Redux slices as requested)
-  const [filters, setFilters] = useState<ListeningAttemptFilters>({});
-  const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState('createdAt');
-  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc');
-  const pageSize = 12;
+  const filters = useSelector((state: RootState) => state.listeningExamAttempt.filters);
+  const reduxIsLoading = useSelector((state: RootState) => state.listeningExamAttempt.isLoading);
+  const pagination = useSelector((state: RootState) => state.listeningExamAttempt.pagination);
 
   // Load attempts when dependencies change
   useEffect(() => {
     const loadAttempts = async () => {
       try {
-        setIsLoading(true);
-        setError(null);
+        dispatch(setLoading(true));
         const response = await getListeningExamAttemptsHistory({
-          attempt_id: '',
-        }); // API doesn't seem to use this param based on the hook
+          size: pagination?.pageSize,
+          listeningExamName: filters.searchText,
+          page: pagination?.currentPage,
+          sortBy: filters.sortBy,
+          sortDirection: filters.sortDirection,
+        });
 
         if (response?.data) {
           setAttemptHistoryData(response.data || []);
+          dispatch(
+            setPagination({
+              totalPages: response?.pagination?.totalPages || 1,
+              pageSize: response?.pagination?.pageSize || 12,
+              totalItems: response?.pagination?.totalItems || 0,
+              hasNextPage: response?.pagination?.hasNextPage || false,
+              hasPreviousPage: response?.pagination?.hasPreviousPage || false,
+              currentPage: response?.pagination?.currentPage || 1,
+            })
+          );
         }
       } catch (err) {
         console.error('Failed to load listening exam attempt history:', err);
-        setError(err as Error);
       } finally {
-        setIsLoading(false);
+        dispatch(setLoading(false));
       }
     };
 
     loadAttempts();
-  }, []);
+  }, [
+    filters.searchText,
+    filters.sortBy,
+    filters.sortDirection,
+    pagination?.pageSize,
+    pagination?.currentPage,
+  ]);
 
-  const formatDuration = (duration: number | null): string => {
-    if (!duration) return 'N/A';
-    const hours = Math.floor(duration / 3600);
-    const minutes = Math.floor((duration % 3600) / 60);
-    const seconds = duration % 60;
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m ${seconds}s`;
-    } else if (minutes > 0) {
-      return `${minutes}m ${seconds}s`;
-    } else {
-      return `${seconds}s`;
-    }
-  };
-
-  const formatDate = (dateString: string | null): string => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
-  const handleFiltersChange = (newFilters: ListeningAttemptFilters) => {
-    setFilters(newFilters);
-    setCurrentPage(1);
+  const handleFiltersChange = (newFilters: ListeningExamAttemptFilters['filters']) => {
+    dispatch(setFilters(newFilters));
+    dispatch(setPagination({ ...pagination, currentPage: 1 }));
   };
 
   const handleClearFilters = () => {
-    setFilters({});
-    setCurrentPage(1);
-  };
-
-  const handleSortByChange = (field: string) => {
-    setSortBy(field);
-  };
-
-  const handleSortDirectionChange = (direction: 'asc' | 'desc') => {
-    setSortDirection(direction);
+    dispatch(clearFilters());
   };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    dispatch(setPagination({ ...pagination, currentPage: page }));
+  };
+
+  const handlePageSizeChange = (size: string) => {
+    dispatch(setPagination({ ...pagination, pageSize: Number(size), currentPage: 1 }));
   };
 
   // Check if there are active filters
@@ -116,87 +108,6 @@ const ListeningExamHistory = () => {
   };
 
   // Filter and sort data locally since the API doesn't support these operations
-  const getFilteredAndSortedData = () => {
-    let filteredData = [...attemptHistoryData];
-
-    // Apply title filter
-    if (filters.title) {
-      filteredData = filteredData.filter((attempt) =>
-        attempt.listening_exam.listening_exam_name
-          .toLowerCase()
-          .includes(filters.title!.toLowerCase())
-      );
-    }
-
-    // Apply sorting
-    filteredData.sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
-
-      switch (sortBy) {
-        case 'finishedAt':
-        case 'createdAt':
-          aValue = new Date(a.created_at || 0);
-          bValue = new Date(b.created_at || 0);
-          break;
-        case 'duration':
-          aValue = a.duration || 0;
-          bValue = b.duration || 0;
-          break;
-        case 'totalPoints':
-          // Exam attempts don't have total points, so we'll sort by total questions
-          aValue = a.total_question || 0;
-          bValue = b.total_question || 0;
-          break;
-        default:
-          aValue = new Date(a.created_at || 0);
-          bValue = new Date(b.created_at || 0);
-      }
-
-      if (sortDirection === 'asc') {
-        return aValue > bValue ? 1 : -1;
-      } else {
-        return aValue < bValue ? 1 : -1;
-      }
-    });
-
-    // Apply pagination
-    const startIndex = (currentPage - 1) * pageSize;
-    const endIndex = startIndex + pageSize;
-
-    return filteredData.slice(startIndex, endIndex);
-  };
-
-  const filteredAndSortedData = getFilteredAndSortedData();
-  const totalPages = Math.ceil(attemptHistoryData.length / pageSize);
-  const hasNextPage = currentPage < totalPages;
-  const hasPreviousPage = currentPage > 1;
-
-  if (error) {
-    return (
-      <div className='container mx-auto p-6'>
-        <Card className='bg-white/60 backdrop-blur-lg border rounded-2xl shadow-xl'>
-          <CardContent className='pt-6'>
-            <div className='text-center py-12'>
-              <Headphones className='h-12 w-12 mx-auto text-persimmon-300 mb-4' />
-              <h3 className='text-lg font-semibold text-tekhelet-700 mb-2'>
-                Failed to load exam history
-              </h3>
-              <p className='text-tekhelet-500 mb-4'>
-                There was an error loading your listening exam attempts. Please try again.
-              </p>
-              <Button
-                onClick={() => window.location.reload()}
-                className='bg-selective-yellow-300 text-tekhelet-900 hover:bg-selective-yellow-400'
-              >
-                Retry
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className='container mx-auto p-6'>
@@ -217,19 +128,15 @@ const ListeningExamHistory = () => {
           </div>
         </div>
 
-        <ListeningAttemptFilterToolbar
+        <ListeningExamAttemptHistoryFilter
           filters={filters}
           onFiltersChange={handleFiltersChange}
           onClearFilters={handleClearFilters}
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          onSortByChange={handleSortByChange}
-          onSortDirectionChange={handleSortDirectionChange}
-          isLoading={isLoading}
+          isLoading={reduxIsLoading}
         />
 
         {/* Attempts Grid */}
-        {isLoading ? (
+        {reduxIsLoading ? (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             {Array.from({ length: 6 }).map((_, i) => (
               <Card key={i} className='bg-white/60 backdrop-blur-lg border rounded-2xl shadow-xl'>
@@ -254,7 +161,7 @@ const ListeningExamHistory = () => {
               </Card>
             ))}
           </div>
-        ) : filteredAndSortedData.length === 0 ? (
+        ) : attemptHistoryData.length === 0 ? (
           <Card className='bg-white/60 backdrop-blur-lg border rounded-2xl shadow-xl'>
             <CardContent className='pt-6'>
               <div className='text-center py-12'>
@@ -288,7 +195,7 @@ const ListeningExamHistory = () => {
           </Card>
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-            {filteredAndSortedData.map((attempt) => (
+            {attemptHistoryData.map((attempt) => (
               <Card
                 key={attempt.exam_attempt_id}
                 className='bg-white/60 backdrop-blur-lg border rounded-2xl shadow-xl hover:shadow-2xl transition-shadow'
@@ -365,16 +272,9 @@ const ListeningExamHistory = () => {
 
         {/* Pagination */}
         <PaginationCommon
-          pagination={{
-            currentPage,
-            totalPages,
-            pageSize,
-            totalItems: attemptHistoryData.length,
-            hasNextPage,
-            hasPreviousPage,
-          }}
+          pagination={pagination}
           onPageChange={handlePageChange}
-          onPageSizeChange={() => {}}
+          onPageSizeChange={handlePageSizeChange}
         />
       </div>
     </div>

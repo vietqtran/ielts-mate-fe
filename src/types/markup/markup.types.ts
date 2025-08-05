@@ -4,19 +4,19 @@ export interface CreateTaskMarkupPayload {
   markUpType: MarkupType;
   taskType: TaskType;
   practiceType: PracticeType;
+
   // TaskID will be corresponding to the task type and practice type
   // e.g., for taskType = reading, practiceType = exam, it will be the reading exam ID
   // and for taskType = listening, practiceType = task, it will be the listening task ID
-
   taskId: string;
 }
 
 export interface GetTaskMarkupParams {
   page: string;
   size: string;
-  markUpType?: MarkupType;
-  taskType?: TaskType;
-  practiceType?: PracticeType;
+  markupType?: string;
+  taskType?: string;
+  practiceType?: string;
 }
 
 export interface GetTaskMarkupResponse {

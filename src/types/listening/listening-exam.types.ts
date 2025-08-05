@@ -183,3 +183,11 @@ export interface ListeningChoice {
   choice_order: number;
   is_correct?: boolean;
 }
+
+export interface GetListeningExamParams {
+  page: number;
+  size: number;
+  sort_by?: string;
+  sort_direction?: string;
+  keywords?: string;
+}

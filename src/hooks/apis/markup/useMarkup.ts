@@ -22,13 +22,13 @@ export const useGetMarkupTask = (params: GetTaskMarkupParams) => {
   return { data, error, isLoading, mutate };
 };
 
-export const useUpdateMarkupTask = () => {
+export const useCreateMarkupTask = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const updateMarkupTask = async (params: CreateTaskMarkupPayload) => {
+  const createMarkupTask = async (params: CreateTaskMarkupPayload) => {
     setIsLoading(true);
     try {
-      const { data } = await instance.put(`personal/markup`, params, {
+      const { data } = await instance.post(`personal/markup`, params, {
         notify: false,
       });
       return data as BaseResponse<any>;
@@ -41,16 +41,16 @@ export const useUpdateMarkupTask = () => {
     }
   };
 
-  return { updateMarkupTask, isLoading };
+  return { createMarkupTask, isLoading };
 };
 
 export const useDeleteMarkup = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const deleteMarkupTask = async (taskId: string) => {
+  const deleteMarkupTask = async (taskId: number) => {
     setIsLoading(true);
     try {
-      const { data } = await instance.post(`personal/markup/${taskId}`, {
+      const { data } = await instance.delete(`personal/markup/${taskId}`, {
         notify: false,
       });
       return data as BaseResponse<any>;

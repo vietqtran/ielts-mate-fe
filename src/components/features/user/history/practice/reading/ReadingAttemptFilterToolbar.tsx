@@ -75,13 +75,10 @@ export const ReadingAttemptFilterToolbar = memo(function ReadingAttemptFilterToo
 
   const activeFilterCount = useMemo(() => {
     return Object.values(filters).filter((value) => {
-      // Count active filters
       if (Array.isArray(value)) {
-        // Check if it's an array
-        // For arrays, count if there are any selected options
         return value.length > 0;
       }
-      return value !== undefined && value !== ''; // For other types, check if they are defined and not empty
+      return value !== undefined && value !== '';
     }).length;
   }, [filters]);
 

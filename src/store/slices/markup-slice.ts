@@ -2,9 +2,9 @@ import { MarkupType, PracticeType, TaskType } from '@/types/markup/markup.enum';
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 export interface MarkupFilters {
-  markUpType?: MarkupType; // Corresponds to MarkupType enum
-  taskType?: TaskType; // Corresponds to TaskType enum
-  practiceType?: PracticeType; // Corresponds to PracticeType enum
+  markUpType?: MarkupType[]; // Corresponds to MarkupType enum
+  taskType?: TaskType[]; // Corresponds to TaskType enum
+  practiceType?: PracticeType[]; // Corresponds to PracticeType enum
 }
 
 export interface MarkupStates {
@@ -22,9 +22,9 @@ export interface MarkupStates {
 
 const initialState: MarkupStates = {
   filters: {
-    markUpType: undefined,
-    taskType: undefined,
-    practiceType: undefined,
+    markUpType: [],
+    taskType: [],
+    practiceType: [],
   },
   isLoading: false,
   pagination: {

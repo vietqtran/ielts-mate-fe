@@ -1,16 +1,17 @@
 import { PayloadAction, createSlice } from '@reduxjs/toolkit';
 
 export interface UserPassageFilters {
-  title?: string;
   ieltsType?: string[];
   partNumber?: string[];
+  title?: string;
+  sortDirection?: 'asc' | 'desc' | '';
+  sortBy?: string;
+  questionCategory?: string;
+  createdBy?: string;
 }
 
 export interface UserPassageState {
   filters: UserPassageFilters;
-  currentPage: number;
-  sortBy: string;
-  sortDirection: 'asc' | 'desc';
   isLoading: boolean;
   pagination: {
     totalPages: number;
@@ -18,21 +19,28 @@ export interface UserPassageState {
     totalItems: number;
     hasNextPage: boolean;
     hasPreviousPage: boolean;
+    currentPage: number;
   };
 }
 
 const initialState: UserPassageState = {
-  filters: {},
-  currentPage: 1,
-  sortBy: 'createdAt',
-  sortDirection: 'desc',
+  filters: {
+    ieltsType: [],
+    partNumber: [],
+    title: '',
+    sortDirection: '',
+    sortBy: '',
+    questionCategory: '',
+    createdBy: '',
+  },
   isLoading: false,
   pagination: {
     totalPages: 1,
-    pageSize: 12,
+    pageSize: 10,
     totalItems: 0,
     hasNextPage: false,
     hasPreviousPage: false,
+    currentPage: 1,
   },
 };
 
@@ -40,52 +48,22 @@ const userPassageSlice = createSlice({
   name: 'userPassage',
   initialState,
   reducers: {
-    setUserFilters: (state, action: PayloadAction<UserPassageFilters>) => {
-      // Migrate old single values to arrays
-      const migratedFilters = { ...action.payload };
-      if (migratedFilters.ieltsType !== undefined && !Array.isArray(migratedFilters.ieltsType)) {
-        migratedFilters.ieltsType = [migratedFilters.ieltsType as any];
-      }
-      if (migratedFilters.partNumber !== undefined && !Array.isArray(migratedFilters.partNumber)) {
-        migratedFilters.partNumber = [migratedFilters.partNumber as any];
-      }
-      state.filters = migratedFilters;
+    setFilters: (state, action: PayloadAction<UserPassageFilters>) => {
+      state.filters = action.payload;
     },
-    updateUserFilter: (
-      state,
-      action: PayloadAction<{ key: keyof UserPassageFilters; value: any }>
-    ) => {
-      const { key, value } = action.payload;
-      if (value === undefined || value === '' || (Array.isArray(value) && value.length === 0)) {
-        delete state.filters[key];
-      } else {
-        state.filters[key] = value;
-      }
+    clearFilters: (state) => {
+      state.filters = initialState.filters;
     },
-    clearUserFilters: (state) => {
-      state.filters = {};
-      state.currentPage = 1;
+
+    clearState: (state) => {
+      state.filters = initialState.filters;
+      state.pagination = initialState.pagination;
     },
-    setUserCurrentPage: (state, action: PayloadAction<number>) => {
-      state.currentPage = action.payload;
-    },
-    setUserSort: (
-      state,
-      action: PayloadAction<{ sortBy: string; sortDirection: 'asc' | 'desc' }>
-    ) => {
-      state.sortBy = action.payload.sortBy;
-      state.sortDirection = action.payload.sortDirection;
-    },
-    setUserSortBy: (state, action: PayloadAction<string>) => {
-      state.sortBy = action.payload;
-    },
-    setUserSortDirection: (state, action: PayloadAction<'asc' | 'desc'>) => {
-      state.sortDirection = action.payload;
-    },
-    setUserLoading: (state, action: PayloadAction<boolean>) => {
+
+    setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-    setUserPagination: (
+    setPagination: (
       state,
       action: PayloadAction<{
         totalPages: number;
@@ -93,38 +71,15 @@ const userPassageSlice = createSlice({
         totalItems: number;
         hasNextPage: boolean;
         hasPreviousPage: boolean;
+        currentPage: number;
       }>
     ) => {
       state.pagination = action.payload;
     },
-    clearUserPassageState: (state) => {
-      state.filters = {};
-      state.currentPage = 1;
-      state.sortBy = 'createdAt';
-      state.sortDirection = 'desc';
-      state.isLoading = false;
-      state.pagination = {
-        totalPages: 1,
-        pageSize: 12,
-        totalItems: 0,
-        hasNextPage: false,
-        hasPreviousPage: false,
-      };
-    },
   },
 });
 
-export const {
-  setUserFilters,
-  updateUserFilter,
-  clearUserFilters,
-  setUserCurrentPage,
-  setUserSort,
-  setUserSortBy,
-  setUserSortDirection,
-  setUserLoading,
-  setUserPagination,
-  clearUserPassageState,
-} = userPassageSlice.actions;
+export const { setFilters, clearFilters, clearState, setLoading, setPagination } =
+  userPassageSlice.actions;
 
 export default userPassageSlice.reducer;

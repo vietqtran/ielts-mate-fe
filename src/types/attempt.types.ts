@@ -105,9 +105,10 @@ export interface GetReadingAttemptHistoryRequest {
   status?: number[];
   partNumber?: number[];
   sortBy?: string;
-  sortDirection?: 'asc' | 'desc';
+  sortDirection?: 'asc' | 'desc' | '';
   title?: string;
-  listeningTaskId?: string; // UUID as string, optional
+  passageId?: string; // UUID as string, optional
+  questionCategory?: string; // Optional, for filtering by question category
 }
 
 // payload for viewing listening attempt history
@@ -130,9 +131,10 @@ export interface ListeningAttemptHistoryRequest {
   status?: number[];
   partNumber?: number[];
   sortBy?: string;
-  sortDirection?: 'asc' | 'desc';
+  sortDirection?: 'asc' | 'desc' | '';
   title?: string;
   listeningTaskId?: string;
+  questionCategory?: string; // Optional, for filtering by question category
 }
 
 // Load attempt from history response for reading

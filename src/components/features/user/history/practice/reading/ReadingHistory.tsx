@@ -8,10 +8,9 @@ import { Separator } from '@/components/ui/separator';
 import useReadingAttempt from '@/hooks/apis/reading/useReadingAttempt';
 import {
   ReadingAttemptFilters,
-  clearReadingAttemptFilters,
-  setReadingAttemptFilters,
-  setReadingAttemptLoading,
-  setReadingAttemptPagination,
+  clearFilters,
+  setFilters,
+  setLoading,
 } from '@/store/slices/reading-attempt-filter-slice';
 import { setPagination } from '@/store/slices/reading-exam-attempt-filter-slice';
 import { AttemptStatusEnumIndex, ReadingAttemptHistoryResponse } from '@/types/attempt.types';
@@ -38,14 +37,18 @@ const ReadingHistory = () => {
   useEffect(() => {
     const loadAttempts = async () => {
       try {
-        dispatch(setReadingAttemptLoading(true));
+        dispatch(setLoading(true));
         const response = await getAllReadingAttemptHistory({
-          page: pagination?.currentPage || 1,
-          size: pagination?.pageSize || 12,
+          page: pagination?.currentPage,
+          size: pagination?.pageSize,
           ieltsType: filters.ieltsType,
           partNumber: filters.partNumber,
           status: filters.status,
           title: filters.searchText,
+          passageId: filters.passageId,
+          sortBy: filters.sortBy,
+          sortDirection: filters.sortDirection,
+          questionCategory: filters.questionCategory,
         });
 
         if (response) {
@@ -54,13 +57,13 @@ const ReadingHistory = () => {
           // Update pagination state from response
           if (response.pagination) {
             dispatch(
-              setReadingAttemptPagination({
+              setPagination({
                 totalPages: response.pagination.totalPages,
                 pageSize: response.pagination.pageSize,
                 totalItems: response.pagination.totalItems,
                 hasNextPage: response.pagination.hasNextPage,
                 hasPreviousPage: response.pagination.hasPreviousPage,
-                currentPage: response.pagination.currentPage || 1,
+                currentPage: response.pagination.currentPage,
               })
             );
           }
@@ -68,7 +71,7 @@ const ReadingHistory = () => {
       } catch (err) {
         console.error('Failed to load reading attempt history:', err);
       } finally {
-        dispatch(setReadingAttemptLoading(false));
+        dispatch(setLoading(false));
       }
     };
 
@@ -79,48 +82,12 @@ const ReadingHistory = () => {
     filters.status,
     filters.searchText,
     pagination?.pageSize,
+    pagination?.currentPage,
+    filters.passageId,
+    filters.sortBy,
+    filters.sortDirection,
+    filters.questionCategory,
   ]);
-
-  // Load attempts when page changes (pagination)
-  useEffect(() => {
-    const loadAttempts = async () => {
-      try {
-        dispatch(setReadingAttemptLoading(true));
-        const response = await getAllReadingAttemptHistory({
-          page: pagination?.currentPage || 1,
-          size: pagination?.pageSize || 12,
-          ieltsType: filters.ieltsType,
-          partNumber: filters.partNumber,
-          status: filters.status,
-          title: filters.searchText,
-        });
-
-        if (response) {
-          setAttemptHistoryData(response.data || []);
-
-          // Update pagination state from response
-          if (response.pagination) {
-            dispatch(
-              setReadingAttemptPagination({
-                totalPages: response.pagination.totalPages,
-                pageSize: response.pagination.pageSize,
-                totalItems: response.pagination.totalItems,
-                hasNextPage: response.pagination.hasNextPage,
-                hasPreviousPage: response.pagination.hasPreviousPage,
-                currentPage: response.pagination.currentPage || 1,
-              })
-            );
-          }
-        }
-      } catch (err) {
-        console.error('Failed to load reading attempt history:', err);
-      } finally {
-        dispatch(setReadingAttemptLoading(false));
-      }
-    };
-
-    loadAttempts();
-  }, [pagination?.currentPage]);
 
   const getStatusLabel = (status: number | null): string => {
     if (status === null) return 'Unknown';
@@ -165,16 +132,16 @@ const ReadingHistory = () => {
   };
 
   const handleFiltersChange = (newFilters: ReadingAttemptFilters) => {
-    dispatch(setReadingAttemptFilters(newFilters));
-    dispatch(setReadingAttemptPagination({ ...pagination, currentPage: 1 }));
+    dispatch(setFilters(newFilters));
+    dispatch(setPagination({ ...pagination, currentPage: 1 }));
   };
 
   const handleClearFilters = () => {
-    dispatch(clearReadingAttemptFilters());
+    dispatch(clearFilters());
   };
 
   const handlePageChange = (page: number) => {
-    dispatch(setReadingAttemptPagination({ ...pagination, currentPage: page }));
+    dispatch(setPagination({ ...pagination, currentPage: page }));
   };
 
   const handlePageSizeChange = (size: string) => {

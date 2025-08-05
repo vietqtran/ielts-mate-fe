@@ -26,7 +26,13 @@ const useReadingExamAttempt = () => {
   /**
    * Get all available reading exams for users
    */
-  const getAllAvailableExams = async () => {
+  const getAllAvailableExams = async (params: {
+    page: number;
+    size: number;
+    keyword?: string;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc' | '';
+  }) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }

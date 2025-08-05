@@ -1,6 +1,8 @@
 'use client';
 
+import { buildSWRKey, fetcher } from '@/lib/api/fetcher';
 import instance from '@/lib/axios';
+import { CommonPaginationResponseProperties } from '@/types/filter.types';
 import {
   AddGroupQuestionRequest,
   AddGroupQuestionResponse,
@@ -12,6 +14,7 @@ import {
   ListeningTaskUpdateRequest,
 } from '@/types/listening/listening.types';
 import { useRef, useState } from 'react';
+import useSWR from 'swr';
 
 export function useListeningTask() {
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
@@ -330,3 +333,15 @@ export function useListeningTask() {
     error,
   };
 }
+
+export const useGetListeningTaskCached = (params: ListeningTaskFilterParams) => {
+  const endpoint = 'listening/listens';
+  const key = buildSWRKey(endpoint, params);
+
+  const { data, error, isLoading, mutate } = useSWR<{
+    data: ListeningTaskResponse[];
+    pagination: CommonPaginationResponseProperties;
+  }>(key, fetcher);
+
+  return { data, error, isLoading, mutate };
+};

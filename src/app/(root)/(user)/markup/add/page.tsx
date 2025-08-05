@@ -1,5 +1,7 @@
+import AddMarkupPage from '@/components/features/markup/AddMarkup';
+
 const AddMarkup = () => {
-  return <div>AddMarkup</div>;
+  return <AddMarkupPage />;
 };
 
 export default AddMarkup;

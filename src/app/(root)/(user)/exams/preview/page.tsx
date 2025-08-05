@@ -31,7 +31,10 @@ const ExamPreviewPage = () => {
       setIsLoading(true);
 
       if (examType === 'reading') {
-        const response = await getAllAvailableExams();
+        const response = await getAllAvailableExams({
+          page: 1,
+          size: 1000,
+        });
         if (response && response.data) {
           // Find the exam with matching url_slug
           const exam = response.data.find(
@@ -45,9 +48,12 @@ const ExamPreviewPage = () => {
           }
         }
       } else if (examType === 'listening') {
-        await fetchListeningExamsList();
+        await fetchListeningExamsList({
+          page: 1,
+          size: 1000,
+        });
         // Find the listening exam with matching url_slug from the exams state
-        const exam = listeningExams.find(
+        const exam = listeningExams?.data.find(
           (exam: ListActiveListeningExamsResponse) => exam.url_slug === examUrl
         );
 
@@ -97,8 +103,13 @@ const ExamPreviewPage = () => {
 
   // Additional useEffect to handle listening exams data when it's available
   useEffect(() => {
-    if (examType === 'listening' && listeningExams.length > 0 && examUrl) {
-      const exam = listeningExams.find(
+    if (
+      examType === 'listening' &&
+      listeningExams?.data &&
+      listeningExams.data.length > 0 &&
+      examUrl
+    ) {
+      const exam = listeningExams.data.find(
         (exam: ListActiveListeningExamsResponse) => exam.url_slug === examUrl
       );
       if (exam) {

@@ -1,5 +1,8 @@
+import { buildSWRKey, fetcher } from '@/lib/api/fetcher';
 import instance from '@/lib/axios';
+import { CommonPaginationResponseProperties } from '@/types/filter.types';
 import {
+  GetListeningExamParams,
   ListActiveListeningExamsResponse,
   ListeningExamAttemptDetailsResponse,
   ListeningExamAttemptsHistoryResponse,
@@ -10,31 +13,48 @@ import {
 import { BaseResponse } from '@/types/reading/reading.types';
 import { useCallback, useState } from 'react';
 import { toast } from 'sonner';
+import useSWR from 'swr';
 
 // This hook is used to manage listening exam operations on the user side.
 export function useListeningExam() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [exams, setExams] = useState<ListActiveListeningExamsResponse[]>([]);
+  const [exams, setExams] = useState<BaseResponse<ListActiveListeningExamsResponse[]>>();
 
-  const fetchListeningExamsList = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
+  const fetchListeningExamsList = useCallback(
+    async (params: {
+      page: number;
+      size: number;
+      keyword?: string;
+      sortBy?: string;
+      sortDirection?: 'asc' | 'desc' | '';
+    }) => {
+      try {
+        setIsLoading(true);
+        setError(null);
 
-      const { data } = await instance.get('listening/exams/activate');
+        const res = await instance.get('listening/exams/activate', {
+          params: {
+            ...params,
+            keyword: params.keyword,
+            sortBy: params.sortBy,
+            sortDirection: params.sortDirection,
+          },
+        });
 
-      if (data && data.data) {
-        setExams(data.data);
+        if (res.data) {
+          setExams(res.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch listening exams:', err);
+        setError(err as Error);
+        toast.error('Failed to fetch listening exams');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (err) {
-      console.error('Failed to fetch listening exams:', err);
-      setError(err as Error);
-      toast.error('Failed to fetch listening exams');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+    },
+    []
+  );
 
   const submitListeningExamAnswers = useCallback(
     async (params: {
@@ -94,22 +114,31 @@ export function useListeningExam() {
     }
   }, []);
 
-  const getListeningExamAttemptsHistory = useCallback(async (params: { attempt_id: string }) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const res = await instance.get(`listening/exam/attempts/history`);
-
-      return res.data as BaseResponse<ListeningExamAttemptsHistoryResponse[]>;
-    } catch (err) {
-      console.error('Failed to fetch listening exams:', err);
-      setError(err as Error);
-      toast.error('Failed to fetch listening exams');
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const getListeningExamAttemptsHistory = useCallback(
+    async (params: {
+      page: number;
+      size: number;
+      listeningExamName?: string;
+      sortBy?: string;
+      sortDirection?: 'asc' | 'desc' | '';
+    }) => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const res = await instance.get(`listening/exam/attempts/history`, {
+          params,
+        });
+        return res.data as BaseResponse<ListeningExamAttemptsHistoryResponse[]>;
+      } catch (err) {
+        console.error('Failed to fetch listening exams:', err);
+        setError(err as Error);
+        toast.error('Failed to fetch listening exams');
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    []
+  );
 
   return {
     isLoading,
@@ -122,3 +151,15 @@ export function useListeningExam() {
     getListeningExamAttemptsHistory,
   };
 }
+
+export const useGetListListeningExamCached = (params: GetListeningExamParams) => {
+  const endpoint = 'listening/exams/activate';
+  const key = buildSWRKey(endpoint, params);
+
+  const { data, error, isLoading, mutate } = useSWR<{
+    data: ListActiveListeningExamsResponse[];
+    pagination: CommonPaginationResponseProperties;
+  }>(key, fetcher);
+
+  return { data, error, isLoading, mutate };
+};
