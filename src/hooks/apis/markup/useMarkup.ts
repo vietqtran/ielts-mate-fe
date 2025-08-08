@@ -28,9 +28,12 @@ export const useCreateMarkupTask = () => {
   const createMarkupTask = async (params: CreateTaskMarkupPayload) => {
     setIsLoading(true);
     try {
-      const { data } = await instance.post(`personal/markup`, params, {
-        notify: false,
-      });
+      const { data } = await instance.post(
+        `personal/markup?markUpType=${params.markUpType}&taskType=${params.taskType}&practiceType=${params.practiceType}&taskId=${params.taskId}`,
+        {
+          notify: false,
+        }
+      );
       return data as BaseResponse<any>;
     } catch (error) {
       if ((error as any).name !== 'AbortError') {

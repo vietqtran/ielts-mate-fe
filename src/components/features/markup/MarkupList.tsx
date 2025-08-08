@@ -16,6 +16,7 @@ import {
 import { GetTaskMarkupParams } from '@/types/markup/markup.types';
 import { RootState } from '@/types/store.types';
 import { Bookmark, Heart } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
@@ -24,6 +25,7 @@ import MarkupFilterToolbar from './components/MarkupFilterToolbar';
 
 export default function MarkupList() {
   const dispatch = useDispatch();
+  const router = useRouter();
   const { filters, isLoading, pagination } = useSelector((state: RootState) => state.markupTasks);
   const { deleteMarkupTask } = useDeleteMarkup();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -170,9 +172,18 @@ export default function MarkupList() {
       />
       <div className='container mx-auto px-4 py-8 space-y-6'>
         {/* Header */}
-        <div className='mb-8'>
-          <h1 className='text-3xl font-bold text-tekhelet-400 mb-2'>My Markup</h1>
-          <p className='text-medium-slate-blue-500'>Manage your bookmarked and favorite tasks</p>
+        <div className='flex justify-between items-center mb-8'>
+          <div>
+            <h1 className='text-3xl font-bold text-tekhelet-400 mb-2'>My Markup</h1>
+            <p className='text-medium-slate-blue-500'>Manage your bookmarked and favorite tasks</p>
+          </div>
+          <Button
+            className='bg-tekhelet-500 hover:bg-tekhelet-600 text-white'
+            onClick={() => router.push('/markup/add')}
+          >
+            <Bookmark className='h-4 w-4' />
+            Add Markup
+          </Button>
         </div>
 
         {/* Filter Toolbar */}
