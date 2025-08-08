@@ -320,7 +320,7 @@ export const ListeningAttemptFilterToolbar = memo(function ListeningAttemptFilte
                 </Button>
               )}
             </div>
-            <div className='flex gap-2 items-end justify-between'>
+            <div className='flex gap-2 items-end justify-between col-span-2'>
               <div className='space-y-2 flex-1'>
                 <Label htmlFor='questionCategory'>Question Category</Label>
                 <Combobox

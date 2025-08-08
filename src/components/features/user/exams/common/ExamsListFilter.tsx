@@ -1,6 +1,6 @@
 'use client';
 
-import { ArrowDown, ArrowUp, Loader2, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -143,13 +143,13 @@ export const ExamsListFilter = memo(function ExamsListFilterToolbar({
         )}
       </div>
 
-      {/* Loading indicator */}
+      {/* Loading indicator
       {isLoading && (
         <div className='flex items-center justify-center py-2'>
           <Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />
           <span className='text-sm text-muted-foreground ml-2'>Loading...</span>
         </div>
-      )}
+      )} */}
     </div>
   );
 });

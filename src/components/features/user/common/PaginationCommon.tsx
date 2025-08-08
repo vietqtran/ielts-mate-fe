@@ -48,6 +48,8 @@ const PaginationCommon = ({
   const startItem = totalItems > 0 ? (currentPage - 1) * pageSize + 1 : 0;
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
+  console.log(totalItems);
+
   // Generate page numbers to display
   const getVisiblePages = () => {
     const pages: (number | 'ellipsis')[] = [];

@@ -4,7 +4,6 @@ import { PaginationCommon } from '@/components/features/user/common';
 import ExamsListFilter from '@/components/features/user/exams/common/ExamsListFilter';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import LoadingSpinner from '@/components/ui/loading-spinner';
 import {
   Table,
   TableBody,
@@ -21,7 +20,7 @@ import {
 } from '@/store/slices/listening-exam-attempt-filter-slice';
 import { ListeningExamFilters, clearFilters } from '@/store/slices/listening-exam-filter-slice';
 import { RootState } from '@/types';
-import { Play } from 'lucide-react';
+import { Loader2, Play } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -77,15 +76,6 @@ export default function ListeningExamsTable({ className }: ListeningExamsTablePr
     pagination.currentPage,
     pagination.pageSize,
   ]);
-
-  if (reduxIsLoading || isLoading) {
-    return (
-      <div className='flex justify-center py-8'>
-        <LoadingSpinner />
-      </div>
-    );
-  }
-
   const handleFiltersChange = (newFilters: ListeningExamFilters['filters']) => {
     dispatch(setFilters(newFilters));
     dispatch(setPagination({ ...pagination, currentPage: 1 }));
@@ -120,13 +110,13 @@ export default function ListeningExamsTable({ className }: ListeningExamsTablePr
           </TableRow>
         </TableHeader>
         <TableBody>
-          {exams?.data.length === 0 ? (
+          {exams?.data.length === 0 && !reduxIsLoading ? (
             <TableRow>
               <TableCell colSpan={4} className='text-center py-6'>
                 No listening exams found at the moment.
               </TableCell>
             </TableRow>
-          ) : (
+          ) : !reduxIsLoading ? (
             exams?.data.map((exam) => (
               <TableRow key={exam.listening_exam_id}>
                 <TableCell className='font-medium'>{exam.exam_name || 'Listening Exam'}</TableCell>
@@ -161,6 +151,15 @@ export default function ListeningExamsTable({ className }: ListeningExamsTablePr
                 </TableCell>
               </TableRow>
             ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={4} className='py-6'>
+                <div className='flex items-center justify-center gap-2'>
+                  <Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />
+                  <span className='text-sm text-muted-foreground'>Loading...</span>
+                </div>
+              </TableCell>
+            </TableRow>
           )}
         </TableBody>
       </Table>

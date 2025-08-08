@@ -53,7 +53,7 @@ const ReadingExamHistory = () => {
           dispatch(
             setPagination({
               totalPages: response?.pagination?.totalPages || 1,
-              pageSize: response?.pagination?.pageSize || 12,
+              pageSize: response?.pagination?.pageSize || 10,
               totalItems: response?.pagination?.totalItems || 0,
               hasNextPage: response?.pagination?.hasNextPage || false,
               hasPreviousPage: response?.pagination?.hasPreviousPage || false,
