@@ -53,6 +53,17 @@ export default function ReadingExamsTable({ className }: ReadingExamsTableProps)
       });
       if (response) {
         setExams(response.data);
+
+        dispatch(
+          setPagination({
+            totalPages: response.pagination.totalPages,
+            pageSize: response.pagination.pageSize,
+            totalItems: response.pagination.totalItems,
+            hasNextPage: response.pagination.hasNextPage,
+            hasPreviousPage: response.pagination.hasPreviousPage,
+            currentPage: response.pagination.currentPage,
+          })
+        );
       }
     } catch (error) {
       toast.error('Failed to fetch reading exams');
