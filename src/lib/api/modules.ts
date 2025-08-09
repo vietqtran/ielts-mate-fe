@@ -96,6 +96,10 @@ export interface ModuleProgressRequest {
   time_spent: number;
 }
 
+export interface ModuleSessionTimeRequest {
+  time_spent: number;
+}
+
 export interface ModuleProgressResponse {
   module_id: string;
   user_id: string;
@@ -107,6 +111,30 @@ export interface ModuleProgressResponse {
   streak_count: number;
   created_at: string;
   updated_at: string;
+}
+
+// Extended progress response including flashcard details for study sessions
+export interface ModuleProgressDetailResponse extends ModuleProgressResponse {
+  id?: string;
+  module_name: string;
+  status?: number;
+  learning_status?: string;
+  last_index_read?: number;
+  flashcard_progresses: Array<{
+    flashcard_id: string;
+    status: number;
+    flashcard_detail: {
+      flashcard_id: string;
+      vocab: {
+        vocabulary_id: string;
+        word: string;
+        context: string;
+        meaning: string;
+        created_by: string;
+        created_at: string;
+      };
+    };
+  }>;
 }
 
 export interface BaseResponse<T> {
@@ -307,8 +335,8 @@ export const getMyRequestedModules = async (
  */
 export const getModuleProgress = async (
   moduleId: string
-): Promise<BaseResponse<ModuleProgressResponse>> => {
-  const response = await axios.get<BaseResponse<ModuleProgressResponse>>(
+): Promise<BaseResponse<ModuleProgressDetailResponse>> => {
+  const response = await axios.get<BaseResponse<ModuleProgressDetailResponse>>(
     `/personal/module-share/progress/${moduleId}`
   );
   return response.data;
@@ -326,6 +354,20 @@ export const updateModuleProgress = async (
 ): Promise<BaseResponse<string>> => {
   const response = await axios.put<BaseResponse<string>>(
     `/personal/module-share/progress/${moduleId}/flashcard`,
+    data
+  );
+  return response.data;
+};
+
+/**
+ * Update module session time (e.g., on exit/close)
+ */
+export const updateModuleSessionTime = async (
+  moduleId: string,
+  data: ModuleSessionTimeRequest
+): Promise<BaseResponse<string>> => {
+  const response = await axios.put<BaseResponse<string>>(
+    `/personal/module-share/progress/${moduleId}`,
     data
   );
   return response.data;

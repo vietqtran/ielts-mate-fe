@@ -24,7 +24,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppSelector } from '@/hooks';
 import { useModules } from '@/hooks/apis/modules/useModules';
 import { useVocabulary } from '@/hooks/apis/vocabulary/useVocabulary';
-import { ModuleResponse, ModuleUserResponse } from '@/lib/api/modules';
+import {
+  ModuleProgressDetailResponse,
+  ModuleResponse,
+  ModuleUserResponse,
+} from '@/lib/api/modules';
 import { VocabularyResponse } from '@/lib/api/vocabulary';
 import {
   Award,
@@ -118,6 +122,7 @@ export default function PersonalizedPage() {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
   const [isStudySessionOpen, setIsStudySessionOpen] = useState(false);
+  const [isFetchingStudyProgress, setIsFetchingStudyProgress] = useState(false);
   const [selectedModuleForShare, setSelectedModuleForShare] = useState<{
     id: string;
     name: string;
@@ -147,6 +152,7 @@ export default function PersonalizedPage() {
     getMySharedModules,
     getSharedModuleRequests,
     getMyRequestedModules,
+    getModuleProgress,
     isLoading: moduleLoading,
   } = useModules();
 
@@ -230,28 +236,51 @@ export default function PersonalizedPage() {
   };
 
   // Handle study session
-  const handleStartStudy = (module: ModuleResponse | ModuleUserResponse) => {
-    if ('module_id' in module) {
-      // Convert ModuleUserResponse to ModuleResponse format
-      const moduleForStudy: ModuleResponse = {
-        module_id: module.module_id,
-        module_name: module.module_name,
-        description: module.description,
-        is_public: module.is_public,
-        is_deleted: module.is_deleted || false,
-        flash_card_ids: module.flash_card_ids,
-        created_by: module.created_by,
-        created_at: module.created_at,
-        updated_by: module.updated_by || null,
-        updated_at: module.updated_at || null,
-        time_spent: module.time_spent,
-        progress: module.progress,
-      };
+  const handleStartStudy = async (module: ModuleResponse | ModuleUserResponse) => {
+    setIsFetchingStudyProgress(true);
+    try {
+      const baseModule = module as ModuleResponse;
+      const progressRes = await getModuleProgress(baseModule.module_id);
+      const progressData = progressRes?.data as ModuleProgressDetailResponse | undefined;
+
+      const moduleForStudy: ModuleResponse = progressData
+        ? {
+            module_id: progressData.module_id,
+            module_name: progressData.module_name,
+            description: baseModule.description,
+            is_public: baseModule.is_public,
+            is_deleted: baseModule.is_deleted || false,
+            flash_card_ids: progressData.flashcard_progresses.map((fp) => ({
+              flashcard_id: fp.flashcard_detail.flashcard_id,
+              vocab: fp.flashcard_detail.vocab,
+            })),
+            created_by: baseModule.created_by,
+            created_at: baseModule.created_at,
+            updated_by: baseModule.updated_by || null,
+            updated_at: baseModule.updated_at || null,
+            time_spent: progressData.time_spent,
+            progress: progressData.progress_percentage,
+          }
+        : {
+            module_id: baseModule.module_id,
+            module_name: baseModule.module_name,
+            description: baseModule.description,
+            is_public: baseModule.is_public,
+            is_deleted: baseModule.is_deleted || false,
+            flash_card_ids: baseModule.flash_card_ids,
+            created_by: baseModule.created_by,
+            created_at: baseModule.created_at,
+            updated_by: baseModule.updated_by || null,
+            updated_at: baseModule.updated_at || null,
+            time_spent: baseModule.time_spent,
+            progress: baseModule.progress,
+          };
+
       setSelectedModuleForStudy(moduleForStudy);
-    } else {
-      setSelectedModuleForStudy(module as ModuleResponse);
+      setIsStudySessionOpen(true);
+    } finally {
+      setIsFetchingStudyProgress(false);
     }
-    setIsStudySessionOpen(true);
   };
 
   const handleStudyComplete = async () => {
@@ -1175,6 +1204,16 @@ export default function PersonalizedPage() {
                 setSelectedModuleForStudy(null);
               }}
             />
+          </div>
+        </div>
+      )}
+
+      {/* Fetching Study Progress Overlay */}
+      {isFetchingStudyProgress && (
+        <div className='fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-10 w-10 border-4 border-[#bfd7ed] border-t-[#0074b7] mx-auto mb-4'></div>
+            <p className='text-white'>Preparing your study session...</p>
           </div>
         </div>
       )}

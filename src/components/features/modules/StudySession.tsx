@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useModules } from '@/hooks/apis/modules/useModules';
-import { ModuleProgressRequest, ModuleResponse } from '@/lib/api/modules';
+import { ModuleProgressRequest, ModuleResponse, ModuleSessionTimeRequest } from '@/lib/api/modules';
 import {
   ArrowLeft,
   ArrowRight,
@@ -51,7 +51,7 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
   const [cardStartTime, setCardStartTime] = useState(Date.now());
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
-  const { updateModuleProgress, isLoading } = useModules();
+  const { updateModuleProgress, updateModuleSessionTime, isLoading } = useModules();
 
   // Timer effect - starts when component mounts, stops when session completes
   useEffect(() => {
@@ -85,8 +85,43 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
     return () => stopTimer();
   }, [sessionCompleted]);
 
+  // Save on visibility change (tab close/minimize) and before unload
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && !sessionCompleted) {
+        persistSessionTime();
+      }
+    };
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!sessionCompleted && sessionStats.sessionTimeSpent > 0) {
+        // Fire-and-forget; navigator.sendBeacon could be used, but keep it simple
+        persistSessionTime();
+        // Optionally show a prompt (mostly ignored by modern browsers, but harmless)
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [sessionCompleted, sessionStats.sessionTimeSpent]);
+
+  // Persist session time
+  const persistSessionTime = async () => {
+    const payload: ModuleSessionTimeRequest = {
+      time_spent: sessionStats.sessionTimeSpent,
+    };
+    await updateModuleSessionTime(module.module_id, payload);
+  };
+
   // Helper function to stop timer and exit
-  const handleExit = () => {
+  const handleExit = async () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -96,6 +131,7 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
       ...prev,
       sessionTimeSpent: Math.floor((Date.now() - prev.startTime) / 1000),
     }));
+    await persistSessionTime();
     onExit?.();
   };
 
@@ -261,8 +297,10 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
               </Button>
               <Button
                 onClick={() => {
-                  onComplete?.();
-                  toast.success('Progress saved successfully!');
+                  persistSessionTime().finally(() => {
+                    onComplete?.();
+                    toast.success('Progress saved successfully!');
+                  });
                 }}
                 className='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] text-white rounded-xl px-8 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-200'
                 size='lg'

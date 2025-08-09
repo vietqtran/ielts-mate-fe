@@ -3,8 +3,9 @@ import {
   ModuleCreateRequest,
   ModuleCreateResponse,
   ModuleListResponse,
+  ModuleProgressDetailResponse,
   ModuleProgressRequest,
-  ModuleProgressResponse,
+  ModuleSessionTimeRequest,
   ModuleUserListResponse,
   ShareModuleRequest,
   createModule,
@@ -17,6 +18,7 @@ import {
   shareModule,
   updateModule,
   updateModuleProgress,
+  updateModuleSessionTime,
   updateSharedModuleRequest,
 } from '@/lib/api/modules';
 import { useState } from 'react';
@@ -35,6 +37,7 @@ export const useModules = () => {
     getMyRequestedModules?: boolean;
     getModuleProgress?: boolean;
     updateModuleProgress?: boolean;
+    updateModuleSessionTime?: boolean;
   }>({
     createModule: false,
     getMyModules: false,
@@ -47,6 +50,7 @@ export const useModules = () => {
     getMyRequestedModules: false,
     getModuleProgress: false,
     updateModuleProgress: false,
+    updateModuleSessionTime: false,
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -236,7 +240,7 @@ export const useModules = () => {
 
   const getModuleProgressFn = async (
     moduleId: string
-  ): Promise<BaseResponse<ModuleProgressResponse> | null> => {
+  ): Promise<BaseResponse<ModuleProgressDetailResponse> | null> => {
     setIsLoading((prev) => ({ ...prev, getModuleProgress: true }));
     setError(null);
 
@@ -271,6 +275,25 @@ export const useModules = () => {
     }
   };
 
+  const updateModuleSessionTimeFn = async (
+    moduleId: string,
+    data: ModuleSessionTimeRequest
+  ): Promise<BaseResponse<string> | null> => {
+    setIsLoading((prev) => ({ ...prev, updateModuleSessionTime: true }));
+    setError(null);
+
+    try {
+      const response = await updateModuleSessionTime(moduleId, data);
+      return response;
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Failed to update session time';
+      setError(errorMessage);
+      return null;
+    } finally {
+      setIsLoading((prev) => ({ ...prev, updateModuleSessionTime: false }));
+    }
+  };
+
   return {
     createModule: createModuleFn,
     getMyModules: getMyModulesFn,
@@ -283,6 +306,7 @@ export const useModules = () => {
     getMyRequestedModules: getMyRequestedModulesFn,
     getModuleProgress: getModuleProgressFn,
     updateModuleProgress: updateModuleProgressFn,
+    updateModuleSessionTime: updateModuleSessionTimeFn,
     isLoading,
     error,
   };
