@@ -236,6 +236,13 @@ export function DragDropManager({
     if (group.id && typeof group.id === 'string') {
       setTimeout(() => fetchAllDragItems(group.id as string), 0);
     }
+    // Also refresh the whole group data so updated question mappings are reflected
+    // This aligns with the requirement to re-sync questions of the group after drag item updates
+    try {
+      refetchPassageData?.();
+    } catch (e) {
+      // no-op
+    }
   };
 
   // Handle question creation/update success
