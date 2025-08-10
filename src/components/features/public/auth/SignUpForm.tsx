@@ -112,7 +112,11 @@ export function SignUpForm() {
 
   return (
     <Form {...form}>
-      <form className='mt-8 space-y-6' onSubmit={form.handleSubmit(handleSubmit)}>
+      <form
+        className='mt-8 space-y-6'
+        onSubmit={form.handleSubmit(handleSubmit)}
+        data-cy='sign-up-form'
+      >
         <div className='flex items-start gap-2'>
           <FormField
             control={form.control}
@@ -132,6 +136,7 @@ export function SignUpForm() {
                     placeholder='John'
                     className={`w-full rounded-md border px-3 py-2`}
                     isError={!!form.formState.errors.first_name}
+                    data-cy='first-name-input'
                     {...field}
                   />
                 </FormControl>
@@ -156,6 +161,7 @@ export function SignUpForm() {
                     placeholder='Doe'
                     className={`w-full rounded-md border px-3 py-2`}
                     isError={!!form.formState.errors.last_name}
+                    data-cy='last-name-input'
                     {...field}
                   />
                 </FormControl>
@@ -183,6 +189,7 @@ export function SignUpForm() {
                     placeholder='example@email.com'
                     className={`w-full rounded-md border px-3 py-2`}
                     isError={!!form.formState.errors.email}
+                    data-cy='email-input'
                     {...field}
                   />
                 </FormControl>
@@ -210,6 +217,7 @@ export function SignUpForm() {
                     placeholder='••••••••'
                     className={`w-full rounded-md border px-3 py-2`}
                     isError={!!form.formState.errors.password}
+                    data-cy='password-input'
                     {...field}
                   />
                 </FormControl>
@@ -240,6 +248,7 @@ export function SignUpForm() {
                     placeholder='••••••••'
                     className={`w-full rounded-md border px-3 py-2`}
                     isError={!!form.formState.errors.confirmPassword}
+                    data-cy='confirm-password-input'
                     {...field}
                   />
                 </FormControl>
@@ -250,12 +259,16 @@ export function SignUpForm() {
         </div>
 
         {errors.general && (
-          <div className='rounded-md bg-red-50 p-3'>
+          <div className='rounded-md bg-red-50 p-3' data-cy='general-error'>
             <p className='text-sm text-red-500'>{errors.general}</p>
           </div>
         )}
 
-        <Button type='submit' className='w-full cursor-pointer rounded-md py-2.5 text-white'>
+        <Button
+          type='submit'
+          className='w-full cursor-pointer rounded-md py-2.5 text-white'
+          data-cy='sign-up-submit'
+        >
           {isLoading ? <LoadingSpinner /> : 'Sign up'}
         </Button>
 

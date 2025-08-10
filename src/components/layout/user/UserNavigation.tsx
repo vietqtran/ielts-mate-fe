@@ -196,10 +196,14 @@ export function UserNavigation() {
           </div>
 
           {/* User Menu */}
-          <div className='flex items-center'>
+          <div className='flex items-center' data-cy='user-menu'>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
+                <Button
+                  variant='ghost'
+                  className='relative h-8 w-8 rounded-full'
+                  data-cy='avatar-button'
+                >
                   <Avatar className='h-8 w-8'>
                     <AvatarFallback>
                       {user?.firstName?.charAt(0)}
@@ -266,7 +270,7 @@ export function UserNavigation() {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
+                <DropdownMenuItem onClick={handleLogout} data-cy='logout-button'>
                   <LogOut className='mr-2 h-4 w-4' />
                   <span>Log out</span>
                 </DropdownMenuItem>

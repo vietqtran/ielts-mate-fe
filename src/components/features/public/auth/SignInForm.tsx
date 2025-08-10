@@ -103,7 +103,7 @@ export function SignInForm() {
       if (error_code === ERROR_CODE.EMAIL_UNVERIFIED) {
         dispatch(setUnverifyEmail(values.email));
         dispatch(setIsFirstSendOtp(true));
-        router.push('/otp/verify' + `?email=${values.email}`);
+        router.push('/otp/verify' + `?email=${encodeURIComponent(values.email)}`);
         return;
       }
       setErrors({ general: message });
@@ -120,7 +120,11 @@ export function SignInForm() {
 
   return (
     <Form {...form}>
-      <form className='mt-8 space-y-6' onSubmit={form.handleSubmit(handleSubmit)}>
+      <form
+        className='mt-8 space-y-6'
+        onSubmit={form.handleSubmit(handleSubmit)}
+        data-cy='sign-in-form'
+      >
         <div className='space-y-2'>
           <FormField
             control={form.control}
@@ -140,6 +144,7 @@ export function SignInForm() {
                     placeholder='example@email.com'
                     className={`w-full rounded-md border px-3 py-2`}
                     isError={!!form.formState.errors.email}
+                    data-cy='email-input'
                     {...field}
                   />
                 </FormControl>
@@ -167,6 +172,7 @@ export function SignInForm() {
                     placeholder='••••••••'
                     className={`w-full rounded-md border px-3 py-2`}
                     isError={!!form.formState.errors.password}
+                    data-cy='password-input'
                     {...field}
                   />
                 </FormControl>
@@ -175,17 +181,21 @@ export function SignInForm() {
             )}
           />
           <div className='flex justify-end mt-2'>
-            <CustomLink href='/forgot' text='Forgot password?' />
+            <CustomLink href='/forgot' text='Forgot password?' data-cy='forgot-link' />
           </div>
         </div>
 
         {errors.general && (
-          <div className='rounded-md bg-red-50 p-3'>
+          <div className='rounded-md bg-red-50 p-3' data-cy='general-error'>
             <p className='text-sm text-red-500'>{errors.general}</p>
           </div>
         )}
 
-        <Button type='submit' className='w-full cursor-pointer rounded-md py-2.5 text-white'>
+        <Button
+          type='submit'
+          className='w-full cursor-pointer rounded-md py-2.5 text-white'
+          data-cy='sign-in-submit'
+        >
           {isLoading ? <LoadingSpinner /> : 'Sign in'}
         </Button>
 
