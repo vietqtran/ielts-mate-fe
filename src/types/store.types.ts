@@ -1,3 +1,4 @@
+import { AddMarkupStates } from '@/store/slices/add-markup-slice';
 import { ListeningAttemptState } from '@/store/slices/listening-attempt-filter-slice';
 import { ListeningExamAttemptFilters } from '@/store/slices/listening-exam-attempt-filter-slice';
 import { ListeningExamFilters } from '@/store/slices/listening-exam-filter-slice';
@@ -24,6 +25,7 @@ export interface RootState {
   listeningExam: ListeningExamFilters;
   readingExam: ReadingExamFilters;
   markupTasks: MarkupStates;
+  addMarkup: AddMarkupStates;
 }
 
 export interface AuthState {

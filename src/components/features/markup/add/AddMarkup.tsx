@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -19,11 +19,13 @@ import {
 } from '@/components/ui/select';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, BookOpen, Bookmark, Headphones, Heart } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
+import AddMarkupFilter from '@/components/features/markup/components/AddMarkupFilter';
+import { PaginationCommon } from '@/components/features/user/common';
 import { useGetListListeningExamCached } from '@/hooks/apis/listening/useListeningExam';
 import { useGetListeningTaskCached } from '@/hooks/apis/listening/useListeningTask';
 import { useCreateMarkupTask } from '@/hooks/apis/markup/useMarkup';
@@ -31,8 +33,16 @@ import {
   useGetReadingExamCached,
   useGetReadingPassageCached,
 } from '@/hooks/apis/reading/usePassage';
+import {
+  AddMarkupFilters,
+  clearFilters,
+  setFilters,
+  setPagination,
+} from '@/store/slices/add-markup-slice';
+import { RootState } from '@/types';
 import { MarkupType, PracticeType, TaskType } from '@/types/markup/markup.enum';
 import { useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from 'react-redux';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_SIZE = 10;
@@ -62,8 +72,8 @@ function extractArray(res: any): any[] {
 }
 
 const AddMarkupPage = () => {
+  const dispatch = useDispatch();
   const router = useRouter();
-  // RHF form for controls
   const form = useForm<ControlsValues>({
     resolver: zodResolver(controlsSchema),
     defaultValues: {
@@ -73,33 +83,63 @@ const AddMarkupPage = () => {
     },
   });
 
-  // Using watch to drive queries and content
-  const { markupType, taskType, practiceType } = form.watch();
+  const filters = useSelector((state: RootState) => state.addMarkup.filters);
+  const pagination = useSelector((state: RootState) => state.addMarkup.pagination);
 
+  const { markupType, taskType, practiceType } = form.watch();
   const [addingId, setAddingId] = useState<string | null>(null);
 
   // Data sources for all cases
   const { data: listeningTasksRes, isLoading: loadingListeningTasks } = useGetListeningTaskCached({
-    page: DEFAULT_PAGE,
-    size: DEFAULT_SIZE,
+    page: pagination.currentPage,
+    size: pagination.pageSize,
+    title: filters.searchText,
+    sortBy: filters.sortBy,
+    sortDirection: filters.sortDirection,
   } as any);
 
   const { data: listeningExamsRes, isLoading: loadingListeningExams } =
     useGetListListeningExamCached({
-      page: DEFAULT_PAGE,
-      size: DEFAULT_SIZE,
+      page: pagination.currentPage,
+      size: pagination.pageSize,
+      keywords: filters.searchText,
+      sort_by: filters.sortBy,
+      sort_direction: filters.sortDirection,
     });
 
   const { data: readingPassagesRes, isLoading: loadingReadingPassages } =
     useGetReadingPassageCached({
-      page: DEFAULT_PAGE,
-      size: DEFAULT_SIZE,
+      page: pagination.currentPage,
+      size: pagination.pageSize,
+      title: filters.searchText,
+      sortBy: filters.sortBy,
+      sortDirection: filters.sortDirection,
     });
 
   const { data: readingExamsRes, isLoading: loadingReadingExams } = useGetReadingExamCached({
-    page: DEFAULT_PAGE,
-    size: DEFAULT_SIZE,
+    page: pagination.currentPage,
+    size: pagination.pageSize,
+    title: filters.searchText,
+    sortBy: filters.sortBy,
+    sortDirection: filters.sortDirection,
   });
+
+  const handleFiltersChange = (newFilters: AddMarkupFilters) => {
+    dispatch(setFilters(newFilters));
+    dispatch(setPagination({ ...pagination, currentPage: 1 }));
+  };
+
+  const handleClearFilters = () => {
+    dispatch(clearFilters());
+  };
+
+  const handlePageChange = (page: number) => {
+    dispatch(setPagination({ ...pagination, currentPage: page }));
+  };
+
+  const handlePageSizeChange = (size: string) => {
+    dispatch(setPagination({ ...pagination, pageSize: Number(size), currentPage: 1 }));
+  };
 
   const { createMarkupTask, isLoading: isSubmitting } = useCreateMarkupTask();
 
@@ -163,6 +203,75 @@ const AddMarkupPage = () => {
     listeningExamsRes?.data,
     readingPassagesRes?.data,
     readingExamsRes?.data,
+    listeningTasksRes?.pagination,
+    listeningExamsRes?.pagination,
+    readingPassagesRes?.pagination,
+    readingExamsRes?.pagination,
+  ]);
+
+  // Always reset to page 1 when switching the data source (taskType/practiceType)
+  // This prevents carrying over a page number from a previous source (e.g., page=2)
+  useEffect(() => {
+    dispatch(
+      setPagination({
+        ...pagination,
+        currentPage: DEFAULT_PAGE,
+      })
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taskType, practiceType]);
+
+  useEffect(() => {
+    let pg: any | undefined;
+
+    if (taskType == TaskType.LISTENING && practiceType == PracticeType.TASK) {
+      pg = listeningTasksRes?.pagination;
+    } else if (taskType == TaskType.LISTENING && practiceType == PracticeType.EXAM) {
+      pg = listeningExamsRes?.pagination;
+    } else if (taskType == TaskType.READING && practiceType == PracticeType.TASK) {
+      pg = readingPassagesRes?.pagination;
+    } else if (taskType == TaskType.READING && practiceType == PracticeType.EXAM) {
+      pg = readingExamsRes?.pagination;
+    }
+
+    if (!pg) return;
+
+    // If API pagination doesn't match current state (likely stale data from a previous page),
+    // skip applying it. We'll update once fresh data for the current page arrives.
+    if (typeof pg.currentPage === 'number' && pg.currentPage !== pagination.currentPage) {
+      return;
+    }
+
+    const next = {
+      totalPages: pg.totalPages ?? 1,
+      pageSize: pg.pageSize ?? DEFAULT_SIZE,
+      totalItems: pg.totalItems ?? 0,
+      hasNextPage: pg.hasNextPage ?? false,
+      hasPreviousPage: pg.hasPreviousPage ?? false,
+      currentPage: pg.currentPage ?? DEFAULT_PAGE,
+    };
+
+    const same =
+      pagination.totalPages === next.totalPages &&
+      pagination.pageSize === next.pageSize &&
+      pagination.totalItems === next.totalItems &&
+      pagination.hasNextPage === next.hasNextPage &&
+      pagination.hasPreviousPage === next.hasPreviousPage &&
+      pagination.currentPage === next.currentPage;
+
+    if (!same) {
+      dispatch(setPagination(next));
+    }
+    // Keep this effect in sync with API pagination changes so we don't lock
+    // onto a stale page value from a previous cache.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    taskType,
+    practiceType,
+    listeningTasksRes?.pagination,
+    listeningExamsRes?.pagination,
+    readingPassagesRes?.pagination,
+    readingExamsRes?.pagination,
   ]);
 
   const handleAdd = async (taskId: string) => {
@@ -315,6 +424,21 @@ const AddMarkupPage = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className='p-4 md:p-6'>
+              <div className='mb-4'>
+                <AddMarkupFilter
+                  filters={filters}
+                  onFiltersChange={(newFilters) =>
+                    handleFiltersChange({
+                      searchText: newFilters.searchText ?? '',
+                      sortBy: newFilters.sortBy ?? '',
+                      sortDirection: newFilters.sortDirection ?? '',
+                    })
+                  }
+                  onClearFilters={handleClearFilters}
+                  isLoading={isCurrentLoading}
+                  inputPlaceholder='Search by title...'
+                />
+              </div>
               {isCurrentLoading ? (
                 <div className='text-center py-12 text-tekhelet-500'>Loading...</div>
               ) : items?.length === 0 ? (
@@ -349,6 +473,15 @@ const AddMarkupPage = () => {
                 </div>
               )}
             </CardContent>
+            <CardFooter>
+              <div className='grow'>
+                <PaginationCommon
+                  pagination={pagination}
+                  onPageChange={handlePageChange}
+                  onPageSizeChange={handlePageSizeChange}
+                />
+              </div>
+            </CardFooter>
           </Card>
         </div>
       </div>
