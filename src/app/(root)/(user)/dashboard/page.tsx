@@ -45,7 +45,7 @@ const Dashboard = () => {
   if (error.getProgressOverview) {
     return (
       <div className='container mx-auto px-4 py-8 max-w-7xl'>
-        <Alert className='border-persimmon-400/50 bg-persimmon-900/10'>
+        <Alert className='border-persimmon-400/50'>
           <AlertCircle className='h-4 w-4 text-persimmon-400' />
           <AlertDescription className='text-persimmon-400'>
             Failed to load dashboard data. Please try again.

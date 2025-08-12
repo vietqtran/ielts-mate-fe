@@ -77,7 +77,7 @@ export const OverviewCards = ({ data }: OverviewCardsProps) => {
         return (
           <Card
             key={index}
-            className={`bg-white/70 backdrop-blur-lg ${card.borderColor} rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105`}
+            className={`backdrop-blur-lg ${card.borderColor} rounded-2xl shadow-sm hover:shadow-lg transition-all duration-300 hover:scale-101`}
           >
             <CardHeader className='pb-3'>
               <div className='flex items-center justify-between'>

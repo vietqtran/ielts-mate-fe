@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { AlertTriangle, BookOpen, Clock } from 'lucide-react';
 import React from 'react';
 
-export interface ExamTakeHeaderProps {
+export interface PracticeHeaderProps {
   title: string;
   description?: string;
   answered: number;
@@ -14,11 +14,14 @@ export interface ExamTakeHeaderProps {
   timeLeftSec: number;
   onSubmit?: () => void;
   submitting?: boolean;
+  saving?: boolean;
   showUnansweredWarning?: boolean;
   unansweredCount?: number;
   className?: string;
   submitText?: string;
   glass?: boolean; // enable glassmorphism by default
+  onSave: () => void;
+  saveText?: string;
 }
 
 function formatTime(sec: number) {
@@ -29,7 +32,7 @@ function formatTime(sec: number) {
   return `${mm}:${ss}`;
 }
 
-export const ExamTakeHeader: React.FC<ExamTakeHeaderProps> = ({
+export const PracticeHeader: React.FC<PracticeHeaderProps> = ({
   title,
   description,
   answered,
@@ -40,22 +43,13 @@ export const ExamTakeHeader: React.FC<ExamTakeHeaderProps> = ({
   showUnansweredWarning = false,
   unansweredCount = 0,
   className,
-  submitText = 'Submit Exam',
+  submitText = 'Submit',
   glass = true,
+  onSave,
+  saving = false,
+  saveText = 'Save Progress',
 }) => {
   const progress = total > 0 ? (answered / total) * 100 : 0;
-
-  const getTimerColor = () => {
-    if (timeLeftSec <= 300) return 'text-persimmon-600'; // last 5m
-    if (timeLeftSec <= 600) return 'text-tangerine-600'; // last 10m
-    return 'text-tekhelet-600';
-  };
-
-  const timerFrameClasses = () => {
-    if (timeLeftSec <= 300) return 'border-persimmon-300 bg-persimmon-50';
-    if (timeLeftSec <= 600) return 'border-tangerine-300 bg-tangerine-50';
-    return 'border-tekhelet-300 bg-tekhelet-50';
-  };
 
   return (
     <div
@@ -83,17 +77,21 @@ export const ExamTakeHeader: React.FC<ExamTakeHeaderProps> = ({
         </div>
 
         <div className='col-span-1 gap-2 flex justify-end'>
-          <div
-            className={cn(
-              'flex items-center justify-center gap-2 rounded-lg w-30',
-              timerFrameClasses()
-            )}
-          >
-            <Clock className={cn('w-5 h-5', getTimerColor())} />
-            <span className={cn('text-lg font-bold', getTimerColor())}>
-              {formatTime(timeLeftSec)}
-            </span>
+          <div className='flex items-center justify-center gap-2 rounded-lg w-30 text-tekhelet-600'>
+            <Clock className='w-5 h-5' />
+            <span className='text-lg font-semibold'>{formatTime(timeLeftSec)}</span>
           </div>
+          <Button
+            onClick={onSave}
+            className={cn(
+              'bg-tangerine-400 hover:bg-tangerine-500 text-white',
+              saving && 'opacity-80 cursor-not-allowed'
+            )}
+            size='lg'
+            disabled={saving}
+          >
+            {saving ? 'Saving...' : saveText}
+          </Button>
           <Button
             onClick={onSubmit}
             className={cn(
@@ -109,7 +107,7 @@ export const ExamTakeHeader: React.FC<ExamTakeHeaderProps> = ({
       </div>
 
       <div className='px-4 pb-4'>
-        <div className='flex justify-between text-xs text-medium-slate-blue-500 mb-2'>
+        <div className='flex justify-between text-xs text-medium-slate-blue-300 mb-2'>
           <span>Progress: {Math.round(progress)}%</span>
           {showUnansweredWarning && unansweredCount > 0 && (
             <span className='flex items-center gap-1 text-tangerine-300'>
@@ -124,4 +122,4 @@ export const ExamTakeHeader: React.FC<ExamTakeHeaderProps> = ({
   );
 };
 
-export default ExamTakeHeader;
+export default PracticeHeader;
