@@ -48,6 +48,9 @@ const GuestPage = () => {
   // Open reminder when landing on root page and user has no target config
   React.useEffect(() => {
     if (!user || isTargetLoading) return;
+    const isLearner =
+      Array.isArray(user.roles) && user.roles.some((r) => r?.toLowerCase() === 'user');
+    if (!isLearner) return;
     const hasConfig = Boolean((targetConfigData as any)?.data);
     const suppressed = typeof window !== 'undefined' && localStorage.getItem(dontRemindKey) === '1';
     if (!hasConfig && !suppressed) {
