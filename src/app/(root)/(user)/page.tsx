@@ -38,7 +38,8 @@ const GuestPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
   const user = useAppSelector((state) => state.auth.user);
-  const { data: targetConfigData, isLoading: isTargetLoading } = useGetTargetConfig();
+  const isLoggedIn = Boolean(user?.id);
+  const { data: targetConfigData, isLoading: isTargetLoading } = useGetTargetConfig(isLoggedIn);
 
   const [isReminderOpen, setIsReminderOpen] = useState(false);
   const [dontRemind, setDontRemind] = useState(false);
@@ -47,7 +48,7 @@ const GuestPage = () => {
 
   // Open reminder when landing on root page and user has no target config
   React.useEffect(() => {
-    if (!user || isTargetLoading) return;
+    if (!user || !isLoggedIn || isTargetLoading) return;
     const isLearner =
       Array.isArray(user.roles) && user.roles.some((r) => r?.toLowerCase() === 'user');
     if (!isLearner) return;
@@ -56,7 +57,7 @@ const GuestPage = () => {
     if (!hasConfig && !suppressed) {
       setIsReminderOpen(true);
     }
-  }, [user, targetConfigData, isTargetLoading]);
+  }, [user, isLoggedIn, targetConfigData, isTargetLoading]);
 
   const handleCloseReminder = () => {
     if (dontRemind) {
