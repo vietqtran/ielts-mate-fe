@@ -49,9 +49,9 @@ const DEFAULT_SIZE = 10;
 
 // Schema for controls (coerce Select string values -> enum numbers)
 const controlsSchema = z.object({
-  markupType: z.coerce.number().refine((v) => (MarkupType as any)[v] !== undefined, {
-    message: 'Invalid markup type',
-  }),
+  // markupType: z.coerce.number().refine((v) => (MarkupType as any)[v] !== undefined, {
+  //   message: 'Invalid markup type',
+  // }),
   taskType: z.coerce.number().refine((v) => (TaskType as any)[v] !== undefined, {
     message: 'Invalid task type',
   }),
@@ -77,7 +77,7 @@ const AddMarkupPage = () => {
   const form = useForm<ControlsValues>({
     resolver: zodResolver(controlsSchema),
     defaultValues: {
-      markupType: MarkupType.BOOKMARK,
+      // markupType: MarkupType.BOOKMARK,
       taskType: TaskType.LISTENING,
       practiceType: PracticeType.TASK,
     },
@@ -86,7 +86,7 @@ const AddMarkupPage = () => {
   const filters = useSelector((state: RootState) => state.addMarkup.filters);
   const pagination = useSelector((state: RootState) => state.addMarkup.pagination);
 
-  const { markupType, taskType, practiceType } = form.watch();
+  const { taskType, practiceType } = form.watch();
   const [addingId, setAddingId] = useState<string | null>(null);
 
   // Data sources for all cases
@@ -274,11 +274,11 @@ const AddMarkupPage = () => {
     readingExamsRes?.pagination,
   ]);
 
-  const handleAdd = async (taskId: string) => {
+  const handleAdd = async (taskId: string, markUpType: string) => {
     try {
       setAddingId(taskId);
       const payload = {
-        markUpType: markupType,
+        markUpType: markUpType,
         taskType: taskType,
         practiceType: practiceType,
         taskId,
@@ -323,7 +323,7 @@ const AddMarkupPage = () => {
           <Card className=' backdrop-blur-lg rounded-2xl shadow-xl p-4 md:p-6'>
             <Form {...form}>
               <form className='space-y-4'>
-                <FormField
+                {/* <FormField
                   control={form.control}
                   name='markupType'
                   render={({ field }) => (
@@ -351,7 +351,7 @@ const AddMarkupPage = () => {
                       <FormMessage />
                     </FormItem>
                   )}
-                />
+                /> */}
 
                 <FormField
                   control={form.control}
@@ -456,18 +456,26 @@ const AddMarkupPage = () => {
                           <p className='text-sm text-medium-slate-blue-500 mt-1'>{item.meta}</p>
                         )}
                       </div>
-                      <Button
-                        size='sm'
-                        className='bg-selective-yellow-300 text-white hover:bg-selective-yellow-300/90 grow'
-                        disabled={isSubmitting || addingId === item.id}
-                        onClick={() => handleAdd(item.id)}
-                      >
-                        {addingId === item.id
-                          ? 'Adding...'
-                          : `Add to ${
-                              markupType == MarkupType.BOOKMARK ? 'Bookmarks' : 'Favorites'
-                            }`}
-                      </Button>
+                      <div className='mt-4 flex items-center gap-2'>
+                        <Button
+                          size='sm'
+                          className='bg-selective-yellow-300 text-white hover:bg-selective-yellow-300/90 flex-1'
+                          disabled={addingId === item.id}
+                          onClick={() => handleAdd(item.id, String(MarkupType.BOOKMARK))}
+                        >
+                          <Bookmark className='w-4 h-4' />
+                          {addingId === item.id ? 'Adding...' : 'Add to Bookmark'}
+                        </Button>
+                        <Button
+                          size='sm'
+                          className='bg-tekhelet-500 text-white hover:bg-tekhelet-600  flex-1'
+                          disabled={addingId === item.id}
+                          onClick={() => handleAdd(item.id, String(MarkupType.FAVORITE))}
+                        >
+                          <Heart className='w-4 h-4' />
+                          {addingId === item.id ? 'Adding...' : 'Add to Favorite'}
+                        </Button>
+                      </div>
                     </Card>
                   ))}
                 </div>

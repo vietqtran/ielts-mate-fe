@@ -50,7 +50,7 @@ export const useCreateMarkupTask = () => {
 export const useDeleteMarkup = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const deleteMarkupTask = async (taskId: number) => {
+  const deleteMarkupTask = async (taskId: string) => {
     setIsLoading(true);
     try {
       const { data } = await instance.delete(`personal/markup/${taskId}`, {

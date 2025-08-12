@@ -29,7 +29,7 @@ export default function MarkupList() {
   const { filters, isLoading, pagination } = useSelector((state: RootState) => state.markupTasks);
   const { deleteMarkupTask } = useDeleteMarkup();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Build API params from filters and pagination
   const apiParams: GetTaskMarkupParams = useMemo(() => {
@@ -208,10 +208,10 @@ export default function MarkupList() {
             <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
               {data.data.map((item) => (
                 <MarkupItem
-                  key={item.markup_id}
+                  key={item.task_id}
                   item={item}
-                  onDelete={(markupId) => {
-                    setDeletingId(markupId);
+                  onDelete={(task_id) => {
+                    setDeletingId(task_id);
                     setIsDeleteModalOpen(true);
                   }}
                 />
