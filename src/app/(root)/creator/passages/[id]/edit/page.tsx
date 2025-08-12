@@ -122,16 +122,13 @@ export default function EditPassagePage() {
             section_order: group.section_order,
             section_label: group.section_label,
             instruction: group.instruction,
+            // Prefer group's question_type from API; fallback to first question's type; default to MULTIPLE_CHOICE
             question_type:
-              group.questions[0]?.question_type === 0
-                ? QuestionTypeEnumIndex.MULTIPLE_CHOICE
-                : group.questions[0]?.question_type === 1
-                  ? QuestionTypeEnumIndex.FILL_IN_THE_BLANKS
-                  : group.questions[0]?.question_type === 2
-                    ? QuestionTypeEnumIndex.MATCHING
-                    : group.questions[0]?.question_type === 3
-                      ? QuestionTypeEnumIndex.DRAG_AND_DROP
-                      : QuestionTypeEnumIndex.MULTIPLE_CHOICE,
+              typeof group?.question_type === 'number'
+                ? group.question_type
+                : typeof group?.questions?.[0]?.question_type === 'number'
+                  ? group.questions[0].question_type
+                  : QuestionTypeEnumIndex.MULTIPLE_CHOICE,
             questions: group.questions ?? [],
             drag_items: group.drag_items ?? [],
           }));
