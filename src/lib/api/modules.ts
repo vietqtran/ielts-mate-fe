@@ -154,6 +154,30 @@ export interface BaseResponse<T> {
   };
 }
 
+export interface ModuleRefreshRequest {
+  learning_status: string;
+}
+
+// Identity user info (looked up by email)
+export interface IdentityUserInfoResponse {
+  id: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  emailVerified: boolean;
+  createdTimestamp: number;
+  enabled: boolean;
+  totp: boolean;
+  access: {
+    manageGroupMembership: boolean;
+    view: boolean;
+    mapRoles: boolean;
+    impersonate: boolean;
+    manage: boolean;
+  };
+}
+
 /**
  * Create a new module
  * @param data Module data
@@ -164,6 +188,19 @@ export const createModule = async (data: ModuleCreateRequest): Promise<ModuleCre
   return response.data;
 };
 
+/**
+ * Refresh module progress for the current user
+ */
+export const refreshModuleProgress = async (
+  moduleId: string,
+  data?: ModuleRefreshRequest
+): Promise<BaseResponse<ModuleProgressDetailResponse>> => {
+  const response = await axios.put<BaseResponse<ModuleProgressDetailResponse>>(
+    `/personal/module-share/refresh-progress/${moduleId}`,
+    data ?? { learning_status: 'NEW' }
+  );
+  return response.data;
+};
 /**
  * Get user's modules/flashcards
  * @returns Promise with the modules list
@@ -372,6 +409,18 @@ export const updateModuleSessionTime = async (
   const response = await axios.put<BaseResponse<string>>(
     `/personal/module-share/progress/${moduleId}`,
     data
+  );
+  return response.data;
+};
+
+/**
+ * Get user info by email (identity service)
+ * @param email email address to lookup
+ */
+export const getUserInfoByEmail = async (email: string): Promise<IdentityUserInfoResponse> => {
+  const response = await axios.get<IdentityUserInfoResponse>(
+    `/identity/auth/get-user-info-by-email`,
+    { params: { email }, notifyError: false } as any
   );
   return response.data;
 };

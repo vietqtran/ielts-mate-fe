@@ -15,6 +15,8 @@ import {
   getMyRequestedModules,
   getMySharedModules,
   getSharedModuleRequests,
+  getUserInfoByEmail,
+  refreshModuleProgress,
   shareModule,
   updateModule,
   updateModuleProgress,
@@ -38,6 +40,8 @@ export const useModules = () => {
     getModuleProgress?: boolean;
     updateModuleProgress?: boolean;
     updateModuleSessionTime?: boolean;
+    getUserInfoByEmail?: boolean;
+    refreshModuleProgress?: boolean;
   }>({
     createModule: false,
     getMyModules: false,
@@ -51,6 +55,8 @@ export const useModules = () => {
     getModuleProgress: false,
     updateModuleProgress: false,
     updateModuleSessionTime: false,
+    getUserInfoByEmail: false,
+    refreshModuleProgress: false,
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -129,6 +135,24 @@ export const useModules = () => {
   };
 
   // Sharing functions
+  const getUserInfoByEmailFn = async (
+    email: string
+  ): Promise<import('@/lib/api/modules').IdentityUserInfoResponse | null> => {
+    setIsLoading((prev) => ({ ...prev, getUserInfoByEmail: true }));
+    setError(null);
+
+    try {
+      const response = await getUserInfoByEmail(email);
+      return response;
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Email not found';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return null;
+    } finally {
+      setIsLoading((prev) => ({ ...prev, getUserInfoByEmail: false }));
+    }
+  };
   const shareModuleFn = async (
     moduleId: string,
     data: ShareModuleRequest
@@ -294,12 +318,34 @@ export const useModules = () => {
     }
   };
 
+  const refreshModuleProgressFn = async (
+    moduleId: string,
+    learningStatus: string = 'NEW'
+  ): Promise<BaseResponse<ModuleProgressDetailResponse> | null> => {
+    setIsLoading((prev) => ({ ...prev, refreshModuleProgress: true }));
+    setError(null);
+
+    try {
+      const response = await refreshModuleProgress(moduleId, { learning_status: learningStatus });
+      toast.success('Module progress refreshed successfully');
+      return response;
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Failed to refresh progress';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return null;
+    } finally {
+      setIsLoading((prev) => ({ ...prev, refreshModuleProgress: false }));
+    }
+  };
+
   return {
     createModule: createModuleFn,
     getMyModules: getMyModulesFn,
     getModuleById: getModuleByIdFn,
     updateModule: updateModuleFn,
     shareModule: shareModuleFn,
+    getUserInfoByEmail: getUserInfoByEmailFn,
     getMySharedModules: getMySharedModulesFn,
     getSharedModuleRequests: getSharedModuleRequestsFn,
     updateSharedModuleRequest: updateSharedModuleRequestFn,
@@ -307,6 +353,7 @@ export const useModules = () => {
     getModuleProgress: getModuleProgressFn,
     updateModuleProgress: updateModuleProgressFn,
     updateModuleSessionTime: updateModuleSessionTimeFn,
+    refreshModuleProgress: refreshModuleProgressFn,
     isLoading,
     error,
   };

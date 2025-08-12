@@ -6,6 +6,16 @@ import ModuleShareCard from '@/components/features/modules/ModuleShareCard';
 import ShareModuleModal from '@/components/features/modules/ShareModuleModal';
 import StudySession from '@/components/features/modules/StudySession';
 import VocabularyCreateModal from '@/components/features/vocabulary/VocabularyCreateModal';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -131,6 +141,10 @@ export default function PersonalizedPage() {
     null
   );
   const [selectedModuleForStudy, setSelectedModuleForStudy] = useState<ModuleResponse | null>(null);
+  const [isResetPromptOpen, setIsResetPromptOpen] = useState(false);
+  const [pendingModuleForReset, setPendingModuleForReset] = useState<
+    ModuleResponse | ModuleUserResponse | null
+  >(null);
   const [vocabularies, setVocabularies] = useState<VocabularyResponse[]>([]);
   const [modules, setModules] = useState<ModuleResponse[]>([]);
   const [sharedModules, setSharedModules] = useState<ModuleUserResponse[]>([]);
@@ -153,6 +167,7 @@ export default function PersonalizedPage() {
     getSharedModuleRequests,
     getMyRequestedModules,
     getModuleProgress,
+    refreshModuleProgress,
     isLoading: moduleLoading,
   } = useModules();
 
@@ -236,7 +251,16 @@ export default function PersonalizedPage() {
   };
 
   // Handle study session
-  const handleStartStudy = async (module: ModuleResponse | ModuleUserResponse) => {
+  const handleStartStudy = async (
+    module: ModuleResponse | ModuleUserResponse,
+    skipPrompt: boolean = false
+  ) => {
+    const localProgress = (module as any).progress ?? 0;
+    if (!skipPrompt && localProgress === 100) {
+      setPendingModuleForReset(module as ModuleResponse);
+      setIsResetPromptOpen(true);
+      return;
+    }
     setIsFetchingStudyProgress(true);
     try {
       const baseModule = module as ModuleResponse;
@@ -1200,14 +1224,62 @@ export default function PersonalizedPage() {
             <StudySession
               module={selectedModuleForStudy}
               onComplete={handleStudyComplete}
-              onExit={() => {
+              onExit={async () => {
                 setIsStudySessionOpen(false);
                 setSelectedModuleForStudy(null);
+                const moduleResponse = await getMyModules();
+                if (moduleResponse) {
+                  setModules(moduleResponse.data);
+                }
               }}
             />
           </div>
         </div>
       )}
+
+      {/* Reset Progress Prompt */}
+      <AlertDialog open={isResetPromptOpen} onOpenChange={setIsResetPromptOpen}>
+        <AlertDialogContent className='bg-white/90 backdrop-blur-lg border border-tekhelet-200 rounded-2xl'>
+          <AlertDialogHeader>
+            <AlertDialogTitle className='text-tekhelet-400'>Reset progress?</AlertDialogTitle>
+            <AlertDialogDescription className='text-medium-slate-blue-500'>
+              This module is already at 100% progress. Do you want to reset progress and start over?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              className='border-medium-slate-blue-200 text-medium-slate-blue-600'
+              onClick={async () => {
+                if (!pendingModuleForReset) return;
+                setIsResetPromptOpen(false);
+                const next = pendingModuleForReset;
+                setPendingModuleForReset(null);
+                await handleStartStudy(next, true);
+              }}
+            >
+              Keep Progress
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (!pendingModuleForReset) return;
+                const res = await refreshModuleProgress(
+                  (pendingModuleForReset as any).module_id,
+                  'NEW'
+                );
+                if (res) {
+                  setIsResetPromptOpen(false);
+                  const next = pendingModuleForReset;
+                  setPendingModuleForReset(null);
+                  await handleStartStudy(next, true);
+                }
+              }}
+              className='bg-tekhelet-400 hover:bg-tekhelet-500 text-white'
+            >
+              Reset Progress
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Fetching Study Progress Overlay */}
       {isFetchingStudyProgress && (

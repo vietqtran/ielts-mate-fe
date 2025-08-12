@@ -1,5 +1,15 @@
 'use client';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -57,8 +67,10 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
     }, {})
   );
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [showResetPrompt, setShowResetPrompt] = useState<boolean>(false);
 
-  const { updateModuleProgress, updateModuleSessionTime, isLoading } = useModules();
+  const { updateModuleProgress, updateModuleSessionTime, refreshModuleProgress, isLoading } =
+    useModules();
 
   // Timer effect - starts when component mounts, stops when session completes
   useEffect(() => {
@@ -125,6 +137,22 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
       time_spent: sessionStats.sessionTimeSpent,
     };
     await updateModuleSessionTime(module.module_id, payload);
+  };
+
+  // Prompt reset on mount if progress is 100%
+  useEffect(() => {
+    if (module.progress === 100) {
+      setShowResetPrompt(true);
+    }
+  }, [module.progress]);
+
+  const onConfirmReset = async () => {
+    const res = await refreshModuleProgress(module.module_id);
+    if (res) {
+      // Reset local UI state to start fresh
+      handleRestart();
+      setShowResetPrompt(false);
+    }
   };
 
   // Helper function to stop timer and exit
@@ -333,6 +361,29 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
 
   return (
     <div className='max-w-4xl mx-auto space-y-6 p-6 bg-gradient-to-br from-[#bfd7ed]/30 to-[#60a3d9]/10 min-h-screen'>
+      <AlertDialog open={showResetPrompt} onOpenChange={setShowResetPrompt}>
+        <AlertDialogContent className='bg-white/90 backdrop-blur-xl border border-tekhelet-200 rounded-2xl'>
+          <AlertDialogHeader>
+            <AlertDialogTitle className='text-tekhelet-400'>Reset progress?</AlertDialogTitle>
+            <AlertDialogDescription className='text-medium-slate-blue-500'>
+              Your progress for "{module.module_name}" is at 100%. Do you want to reset progress to
+              start a new study session?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className='border-medium-slate-blue-200 text-medium-slate-blue-600'>
+              Keep Progress
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={onConfirmReset}
+              disabled={isLoading.refreshModuleProgress}
+              className='bg-tekhelet-400 hover:bg-tekhelet-500 text-white'
+            >
+              {isLoading.refreshModuleProgress ? 'Resetting...' : 'Reset Progress'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {/* Session Header */}
       <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20'>
         <CardHeader>
