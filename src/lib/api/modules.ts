@@ -17,6 +17,7 @@ export interface FlashCard {
     created_by: string;
     created_at: string;
   };
+  is_highlighted?: boolean;
 }
 
 export interface ModuleResponse {
@@ -94,6 +95,7 @@ export interface ModuleProgressRequest {
   flashcard_id: string;
   is_correct: boolean;
   time_spent: number;
+  is_highlighted?: boolean;
 }
 
 export interface ModuleSessionTimeRequest {
@@ -123,6 +125,7 @@ export interface ModuleProgressDetailResponse extends ModuleProgressResponse {
   flashcard_progresses: Array<{
     flashcard_id: string;
     status: number;
+    is_highlighted?: boolean;
     flashcard_detail: {
       flashcard_id: string;
       vocab: {

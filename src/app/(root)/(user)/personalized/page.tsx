@@ -253,6 +253,7 @@ export default function PersonalizedPage() {
             flash_card_ids: progressData.flashcard_progresses.map((fp) => ({
               flashcard_id: fp.flashcard_detail.flashcard_id,
               vocab: fp.flashcard_detail.vocab,
+              is_highlighted: fp.is_highlighted,
             })),
             created_by: baseModule.created_by,
             created_at: baseModule.created_at,

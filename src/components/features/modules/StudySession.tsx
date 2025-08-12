@@ -13,6 +13,7 @@ import {
   Check,
   Clock,
   RotateCcw,
+  Star,
   Target,
   Trophy,
   X,
@@ -49,6 +50,12 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
   });
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const [cardStartTime, setCardStartTime] = useState(Date.now());
+  const [highlightedMap, setHighlightedMap] = useState<Record<string, boolean>>(() =>
+    module.flash_card_ids.reduce<Record<string, boolean>>((acc, fc) => {
+      acc[fc.flashcard_id] = Boolean((fc as any).is_highlighted);
+      return acc;
+    }, {})
+  );
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   const { updateModuleProgress, updateModuleSessionTime, isLoading } = useModules();
@@ -137,6 +144,14 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
 
   const currentCard = module.flash_card_ids[currentCardIndex];
   const isLastCard = currentCardIndex === module.flash_card_ids.length - 1;
+  const isCurrentHighlighted = highlightedMap[currentCard.flashcard_id] ?? false;
+
+  const toggleHighlight = () => {
+    setHighlightedMap((prev) => ({
+      ...prev,
+      [currentCard.flashcard_id]: !isCurrentHighlighted,
+    }));
+  };
 
   const handleAnswer = async (isCorrect: boolean) => {
     const timeSpent = Math.floor((Date.now() - cardStartTime) / 1000);
@@ -146,6 +161,7 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
       flashcard_id: currentCard.flashcard_id,
       is_correct: isCorrect,
       time_spent: timeSpent,
+      is_highlighted: isCurrentHighlighted,
     };
 
     await updateModuleProgress(module.module_id, progressData);
@@ -401,6 +417,28 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
                     <p className='text-2xl text-[#003b73] font-semibold leading-relaxed'>
                       {currentCard.vocab.meaning}
                     </p>
+                  </div>
+
+                  {/* Highlight Toggle */}
+                  <div className='flex justify-center'>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      aria-pressed={isCurrentHighlighted}
+                      onClick={toggleHighlight}
+                      className={`rounded-xl px-6 py-3 text-base font-medium transition-all duration-200 ${
+                        isCurrentHighlighted
+                          ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white border-yellow-500 hover:from-yellow-500 hover:to-yellow-600'
+                          : 'border-[#60a3d9]/40 text-[#0074b7] hover:bg-[#60a3d9]/10 hover:border-[#0074b7]'
+                      }`}
+                    >
+                      <Star
+                        className={`h-5 w-5 mr-2 ${
+                          isCurrentHighlighted ? 'fill-white text-white' : 'text-[#0074b7]'
+                        }`}
+                      />
+                      {isCurrentHighlighted ? 'Highlighted' : 'Highlight'}
+                    </Button>
                   </div>
 
                   <div className='flex justify-center space-x-6'>
