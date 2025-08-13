@@ -46,9 +46,12 @@ const GuestPage = () => {
 
   const dontRemindKey = `dontRemindTargetSetup:${user?.id ?? 'guest'}`;
 
-  // Open reminder when landing on root page and user has no target config
+  // Open reminder after a successful login only
   React.useEffect(() => {
     if (!user || !isLoggedIn || isTargetLoading) return;
+    const justLoggedIn =
+      typeof window !== 'undefined' && sessionStorage.getItem('justLoggedIn') === '1';
+    if (!justLoggedIn) return;
     const isLearner =
       Array.isArray(user.roles) && user.roles.some((r) => r?.toLowerCase() === 'user');
     if (!isLearner) return;
@@ -57,6 +60,9 @@ const GuestPage = () => {
     if (!hasConfig && !suppressed) {
       setIsReminderOpen(true);
     }
+    try {
+      sessionStorage.removeItem('justLoggedIn');
+    } catch {}
   }, [user, isLoggedIn, targetConfigData, isTargetLoading]);
 
   const handleCloseReminder = () => {

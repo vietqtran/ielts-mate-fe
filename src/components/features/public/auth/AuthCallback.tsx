@@ -18,6 +18,9 @@ export function AuthCallback() {
       try {
         const success = await handleAuthCallback(searchParams);
         if (success) {
+          try {
+            sessionStorage.setItem('justLoggedIn', '1');
+          } catch {}
           router.replace('/');
         } else {
           setError('Authentication failed. Please try again.');

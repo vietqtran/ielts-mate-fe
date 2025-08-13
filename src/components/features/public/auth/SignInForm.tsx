@@ -93,6 +93,9 @@ export function SignInForm() {
       });
       if (data.status === 'success') {
         await new Promise((resolve) => setTimeout(resolve, COOKIE_SETUP_DELAY));
+        try {
+          sessionStorage.setItem('justLoggedIn', '1');
+        } catch {}
         router.replace('/');
       } else {
         setErrors({ general: data.message });
