@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowLeft, BookOpen, Bookmark, Headphones, Heart } from 'lucide-react';
+import { ArrowLeft, BookOpen, Bookmark, Headphones, Heart, Loader2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -90,7 +90,11 @@ const AddMarkupPage = () => {
   const [addingId, setAddingId] = useState<string | null>(null);
 
   // Data sources for all cases
-  const { data: listeningTasksRes, isLoading: loadingListeningTasks } = useGetListeningTaskCached({
+  const {
+    data: listeningTasksRes,
+    isLoading: loadingListeningTasks,
+    mutate: mutateListeningTasks,
+  } = useGetListeningTaskCached({
     page: pagination.currentPage,
     size: pagination.pageSize,
     title: filters.searchText,
@@ -98,25 +102,35 @@ const AddMarkupPage = () => {
     sortDirection: filters.sortDirection,
   } as any);
 
-  const { data: listeningExamsRes, isLoading: loadingListeningExams } =
-    useGetListListeningExamCached({
-      page: pagination.currentPage,
-      size: pagination.pageSize,
-      keywords: filters.searchText,
-      sort_by: filters.sortBy,
-      sort_direction: filters.sortDirection,
-    });
+  const {
+    data: listeningExamsRes,
+    isLoading: loadingListeningExams,
+    mutate: mutateListeningExams,
+  } = useGetListListeningExamCached({
+    page: pagination.currentPage,
+    size: pagination.pageSize,
+    keywords: filters.searchText,
+    sort_by: filters.sortBy,
+    sort_direction: filters.sortDirection,
+  });
 
-  const { data: readingPassagesRes, isLoading: loadingReadingPassages } =
-    useGetReadingPassageCached({
-      page: pagination.currentPage,
-      size: pagination.pageSize,
-      title: filters.searchText,
-      sortBy: filters.sortBy,
-      sortDirection: filters.sortDirection,
-    });
+  const {
+    data: readingPassagesRes,
+    isLoading: loadingReadingPassages,
+    mutate: mutateReadingPassages,
+  } = useGetReadingPassageCached({
+    page: pagination.currentPage,
+    size: pagination.pageSize,
+    title: filters.searchText,
+    sortBy: filters.sortBy,
+    sortDirection: filters.sortDirection,
+  });
 
-  const { data: readingExamsRes, isLoading: loadingReadingExams } = useGetReadingExamCached({
+  const {
+    data: readingExamsRes,
+    isLoading: loadingReadingExams,
+    mutate: mutateReadingExams,
+  } = useGetReadingExamCached({
     page: pagination.currentPage,
     size: pagination.pageSize,
     title: filters.searchText,
@@ -164,36 +178,40 @@ const AddMarkupPage = () => {
 
   const items = useMemo(() => {
     if (taskType == TaskType.LISTENING && practiceType == PracticeType.TASK) {
-      const list = extractArray(listeningTasksRes?.data);
-      return list.map((t: any) => ({
-        id: t.task_id as string,
-        title: t.title as string,
-        meta: `Part ${t.part_number}`,
-      }));
+      return listeningTasksRes?.data
+        .filter((t) => t.is_marked_up === false)
+        .map((t) => ({
+          id: t.task_id as string,
+          title: t.title as string,
+          meta: `Part ${t.part_number}`,
+        }));
     }
     if (taskType == TaskType.LISTENING && practiceType == PracticeType.EXAM) {
-      const list = extractArray(listeningExamsRes?.data);
-      return list.map((e: any) => ({
-        id: e.listening_exam_id as string,
-        title: e.exam_name as string,
-        meta: `Slug: ${e.url_slug}`,
-      }));
+      return listeningExamsRes?.data
+        .filter((e) => e.is_marked_up === false)
+        .map((e) => ({
+          id: e.listening_exam_id as string,
+          title: e.exam_name as string,
+          meta: `Slug: ${e.url_slug}`,
+        }));
     }
     if (taskType == TaskType.READING && practiceType == PracticeType.TASK) {
-      const list = extractArray(readingPassagesRes?.data);
-      return list.map((p: any) => ({
-        id: p.passage_id as string,
-        title: p.title as string,
-        meta: `Part ${p.part_number}`,
-      }));
+      return readingPassagesRes?.data
+        .filter((p) => p.is_marked_up === false)
+        .map((p) => ({
+          id: p.passage_id as string,
+          title: p.title as string,
+          meta: `Part ${p.part_number}`,
+        }));
     }
     if (taskType == TaskType.READING && practiceType == PracticeType.EXAM) {
-      const list = extractArray(readingExamsRes?.data);
-      return list.map((e: any) => ({
-        id: e.reading_exam_id as string,
-        title: e.reading_exam_name as string,
-        meta: `Slug: ${e.url_slug}`,
-      }));
+      return readingExamsRes?.data
+        .filter((e) => e.is_marked_up === false)
+        .map((e) => ({
+          id: e.reading_exam_id as string,
+          title: e.reading_exam_name as string,
+          meta: `Slug: ${e.url_slug}`,
+        }));
     }
     return [];
   }, [
@@ -282,11 +300,20 @@ const AddMarkupPage = () => {
         taskType: taskType,
         practiceType: practiceType,
         taskId,
-      } as const;
+      };
 
       const res = await createMarkupTask(payload as any);
       if (res) {
         toast.success('Added to your markup successfully');
+        if (taskType == TaskType.LISTENING && practiceType == PracticeType.TASK) {
+          mutateListeningTasks();
+        } else if (taskType == TaskType.LISTENING && practiceType == PracticeType.EXAM) {
+          mutateListeningExams();
+        } else if (taskType == TaskType.READING && practiceType == PracticeType.TASK) {
+          mutateReadingPassages();
+        } else if (taskType == TaskType.READING && practiceType == PracticeType.EXAM) {
+          mutateReadingExams();
+        }
       }
     } catch (error) {
       toast.error('Failed to add to markup');
@@ -440,7 +467,10 @@ const AddMarkupPage = () => {
                 />
               </div>
               {isCurrentLoading ? (
-                <div className='text-center py-12 text-tekhelet-500'>Loading...</div>
+                <div className='flex items-center justify-center py-2'>
+                  <Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />
+                  <span className='text-sm text-muted-foreground ml-2'>Loading...</span>
+                </div>
               ) : items?.length === 0 ? (
                 <div className='text-center py-12 text-medium-slate-blue-500'>No items found.</div>
               ) : (

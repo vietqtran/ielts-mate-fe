@@ -33,6 +33,7 @@ export interface ReadingExamResponse {
     reading_passage_id_part1: ReadingPassage;
     reading_passage_id_part2: ReadingPassage;
     reading_passage_id_part3: ReadingPassage;
+    is_marked_up: boolean;
   };
 }
 
