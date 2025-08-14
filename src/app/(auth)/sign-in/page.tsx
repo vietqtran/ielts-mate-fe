@@ -14,8 +14,11 @@ export default function SignInPage() {
   }, []);
 
   return (
-    <div className='flex flex-1 flex-col justify-center px-8 py-12 sm:px-16 lg:px-24 relative'>
-      <div className='mx-auto w-full max-w-sm'>
+    <div
+      className='flex flex-1 flex-col justify-center px-8 py-12 sm:px-16 lg:px-24 relative'
+      data-cy='sign-in-page'
+    >
+      <div className='mx-auto w-full max-w-sm' data-cy='sign-in-card'>
         <h1 className='text-3xl font-bold tracking-tight text-[#0c1421]'>
           Welcome Back <span className='inline-block'>👋</span>
         </h1>
@@ -28,7 +31,8 @@ export default function SignInPage() {
         <SignInForm />
 
         <p className='mt-8 text-center text-sm text-muted-foreground'>
-          Don&apos;t you have an account? <CustomLink href='/sign-up' text='Sign up' />
+          Don&apos;t you have an account?{' '}
+          <CustomLink href='/sign-up' text='Sign up' data-cy='go-to-sign-up' />
         </p>
 
         <p className='mt-10 text-center text-xs text-muted-foreground'>

@@ -34,6 +34,8 @@ const Dashboard = () => {
     fetchDashboardData();
   }, [timeFrame]);
 
+  // Target reminder has been moved to the root page
+
   const handleRefresh = () => {
     fetchDashboardData();
   };
@@ -164,6 +166,8 @@ const Dashboard = () => {
           )}
         </>
       )}
+
+      {/* Target Setup Reminder removed from dashboard */}
     </div>
   );
 };

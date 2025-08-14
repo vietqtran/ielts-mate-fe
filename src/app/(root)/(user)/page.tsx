@@ -3,6 +3,15 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { useGetTargetConfig } from '@/hooks/apis/config/useTargetConfig';
 import { useAppSelector } from '@/hooks/redux/useStore';
 import {
   ArrowRight,
@@ -23,15 +32,77 @@ import {
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 const GuestPage = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
   const user = useAppSelector((state) => state.auth.user);
+  const isLoggedIn = Boolean(user?.id);
+  const { data: targetConfigData, isLoading: isTargetLoading } = useGetTargetConfig(isLoggedIn);
+
+  const [isReminderOpen, setIsReminderOpen] = useState(false);
+  const [dontRemind, setDontRemind] = useState(false);
+
+  const dontRemindKey = `dontRemindTargetSetup:${user?.id ?? 'guest'}`;
+
+  // Open reminder after a successful login only
+  React.useEffect(() => {
+    if (!user || !isLoggedIn || isTargetLoading) return;
+    const justLoggedIn =
+      typeof window !== 'undefined' && sessionStorage.getItem('justLoggedIn') === '1';
+    if (!justLoggedIn) return;
+    const isLearner =
+      Array.isArray(user.roles) && user.roles.some((r) => r?.toLowerCase() === 'user');
+    if (!isLearner) return;
+    const hasConfig = Boolean((targetConfigData as any)?.data);
+    const suppressed = typeof window !== 'undefined' && localStorage.getItem(dontRemindKey) === '1';
+    if (!hasConfig && !suppressed) {
+      setIsReminderOpen(true);
+    }
+    try {
+      sessionStorage.removeItem('justLoggedIn');
+    } catch {}
+  }, [user, isLoggedIn, targetConfigData, isTargetLoading]);
+
+  const handleCloseReminder = () => {
+    if (dontRemind) {
+      try {
+        localStorage.setItem(dontRemindKey, '1');
+      } catch {}
+    }
+    setIsReminderOpen(false);
+  };
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50'>
+      <Dialog
+        open={isReminderOpen}
+        onOpenChange={(open) => (!open ? handleCloseReminder() : undefined)}
+      >
+        <DialogContent className='bg-white/80 backdrop-blur-lg border border-tekhelet-900/20 rounded-2xl shadow-xl'>
+          <DialogHeader>
+            <DialogTitle className='text-tekhelet-400'>Notification</DialogTitle>
+            <DialogDescription className='text-tekhelet-500'>
+              You haven’t set up goals for your listening and reading skills yet. Click the
+              <span className='font-semibold text-tekhelet-400'> Setup </span>
+              button in the Target page to add the configuration.
+            </DialogDescription>
+          </DialogHeader>
+          <div className='mt-2 flex items-center justify-between gap-4'>
+            <label className='flex items-center gap-2 text-tekhelet-500'>
+              <Checkbox checked={dontRemind} onCheckedChange={(v) => setDontRemind(Boolean(v))} />
+              <span>Don’t remind</span>
+            </label>
+            <Button
+              onClick={() => router.push('/target')}
+              className='bg-selective-yellow-300 text-white hover:bg-selective-yellow-300/90'
+            >
+              Setup
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
       {/* Navigation */}
       <nav className='fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200/50'>
         <div className='container mx-auto px-4'>

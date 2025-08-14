@@ -1,11 +1,21 @@
 'use client';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useModules } from '@/hooks/apis/modules/useModules';
-import { ModuleProgressRequest, ModuleResponse } from '@/lib/api/modules';
+import { ModuleProgressRequest, ModuleResponse, ModuleSessionTimeRequest } from '@/lib/api/modules';
 import {
   ArrowLeft,
   ArrowRight,
@@ -13,6 +23,7 @@ import {
   Check,
   Clock,
   RotateCcw,
+  Star,
   Target,
   Trophy,
   X,
@@ -49,9 +60,17 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
   });
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const [cardStartTime, setCardStartTime] = useState(Date.now());
+  const [highlightedMap, setHighlightedMap] = useState<Record<string, boolean>>(() =>
+    module.flash_card_ids.reduce<Record<string, boolean>>((acc, fc) => {
+      acc[fc.flashcard_id] = Boolean((fc as any).is_highlighted);
+      return acc;
+    }, {})
+  );
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [showResetPrompt, setShowResetPrompt] = useState<boolean>(false);
 
-  const { updateModuleProgress, isLoading } = useModules();
+  const { updateModuleProgress, updateModuleSessionTime, refreshModuleProgress, isLoading } =
+    useModules();
 
   // Timer effect - starts when component mounts, stops when session completes
   useEffect(() => {
@@ -85,8 +104,59 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
     return () => stopTimer();
   }, [sessionCompleted]);
 
+  // Save on visibility change (tab close/minimize) and before unload
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && !sessionCompleted) {
+        persistSessionTime();
+      }
+    };
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!sessionCompleted && sessionStats.sessionTimeSpent > 0) {
+        // Fire-and-forget; navigator.sendBeacon could be used, but keep it simple
+        persistSessionTime();
+        // Optionally show a prompt (mostly ignored by modern browsers, but harmless)
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [sessionCompleted, sessionStats.sessionTimeSpent]);
+
+  // Persist session time
+  const persistSessionTime = async () => {
+    const payload: ModuleSessionTimeRequest = {
+      time_spent: sessionStats.sessionTimeSpent,
+    };
+    await updateModuleSessionTime(module.module_id, payload);
+  };
+
+  // Prompt reset on mount if progress is 100%
+  useEffect(() => {
+    if (module.progress === 100) {
+      setShowResetPrompt(true);
+    }
+  }, [module.progress]);
+
+  const onConfirmReset = async () => {
+    const res = await refreshModuleProgress(module.module_id);
+    if (res) {
+      // Reset local UI state to start fresh
+      handleRestart();
+      setShowResetPrompt(false);
+    }
+  };
+
   // Helper function to stop timer and exit
-  const handleExit = () => {
+  const handleExit = async () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -96,11 +166,20 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
       ...prev,
       sessionTimeSpent: Math.floor((Date.now() - prev.startTime) / 1000),
     }));
+    await persistSessionTime();
     onExit?.();
   };
 
   const currentCard = module.flash_card_ids[currentCardIndex];
   const isLastCard = currentCardIndex === module.flash_card_ids.length - 1;
+  const isCurrentHighlighted = highlightedMap[currentCard.flashcard_id] ?? false;
+
+  const toggleHighlight = () => {
+    setHighlightedMap((prev) => ({
+      ...prev,
+      [currentCard.flashcard_id]: !isCurrentHighlighted,
+    }));
+  };
 
   const handleAnswer = async (isCorrect: boolean) => {
     const timeSpent = Math.floor((Date.now() - cardStartTime) / 1000);
@@ -110,6 +189,7 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
       flashcard_id: currentCard.flashcard_id,
       is_correct: isCorrect,
       time_spent: timeSpent,
+      is_highlighted: isCurrentHighlighted,
     };
 
     await updateModuleProgress(module.module_id, progressData);
@@ -261,8 +341,10 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
               </Button>
               <Button
                 onClick={() => {
-                  onComplete?.();
-                  toast.success('Progress saved successfully!');
+                  persistSessionTime().finally(() => {
+                    onComplete?.();
+                    toast.success('Progress saved successfully!');
+                  });
                 }}
                 className='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] text-white rounded-xl px-8 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-200'
                 size='lg'
@@ -279,6 +361,29 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
 
   return (
     <div className='max-w-4xl mx-auto space-y-6 p-6 bg-gradient-to-br from-[#bfd7ed]/30 to-[#60a3d9]/10 min-h-screen'>
+      <AlertDialog open={showResetPrompt} onOpenChange={setShowResetPrompt}>
+        <AlertDialogContent className='bg-white/90 backdrop-blur-xl border border-tekhelet-200 rounded-2xl'>
+          <AlertDialogHeader>
+            <AlertDialogTitle className='text-tekhelet-400'>Reset progress?</AlertDialogTitle>
+            <AlertDialogDescription className='text-medium-slate-blue-500'>
+              Your progress for "{module.module_name}" is at 100%. Do you want to reset progress to
+              start a new study session?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className='border-medium-slate-blue-200 text-medium-slate-blue-600'>
+              Keep Progress
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={onConfirmReset}
+              disabled={isLoading.refreshModuleProgress}
+              className='bg-tekhelet-400 hover:bg-tekhelet-500 text-white'
+            >
+              {isLoading.refreshModuleProgress ? 'Resetting...' : 'Reset Progress'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {/* Session Header */}
       <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20'>
         <CardHeader>
@@ -363,6 +468,28 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
                     <p className='text-2xl text-[#003b73] font-semibold leading-relaxed'>
                       {currentCard.vocab.meaning}
                     </p>
+                  </div>
+
+                  {/* Highlight Toggle */}
+                  <div className='flex justify-center'>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      aria-pressed={isCurrentHighlighted}
+                      onClick={toggleHighlight}
+                      className={`rounded-xl px-6 py-3 text-base font-medium transition-all duration-200 ${
+                        isCurrentHighlighted
+                          ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white border-yellow-500 hover:from-yellow-500 hover:to-yellow-600'
+                          : 'border-[#60a3d9]/40 text-[#0074b7] hover:bg-[#60a3d9]/10 hover:border-[#0074b7]'
+                      }`}
+                    >
+                      <Star
+                        className={`h-5 w-5 mr-2 ${
+                          isCurrentHighlighted ? 'fill-white text-white' : 'text-[#0074b7]'
+                        }`}
+                      />
+                      {isCurrentHighlighted ? 'Highlighted' : 'Highlight'}
+                    </Button>
                   </div>
 
                   <div className='flex justify-center space-x-6'>

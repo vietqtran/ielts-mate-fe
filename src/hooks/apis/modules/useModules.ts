@@ -3,8 +3,9 @@ import {
   ModuleCreateRequest,
   ModuleCreateResponse,
   ModuleListResponse,
+  ModuleProgressDetailResponse,
   ModuleProgressRequest,
-  ModuleProgressResponse,
+  ModuleSessionTimeRequest,
   ModuleUserListResponse,
   ShareModuleRequest,
   createModule,
@@ -14,9 +15,12 @@ import {
   getMyRequestedModules,
   getMySharedModules,
   getSharedModuleRequests,
+  getUserInfoByEmail,
+  refreshModuleProgress,
   shareModule,
   updateModule,
   updateModuleProgress,
+  updateModuleSessionTime,
   updateSharedModuleRequest,
 } from '@/lib/api/modules';
 import { useState } from 'react';
@@ -35,6 +39,9 @@ export const useModules = () => {
     getMyRequestedModules?: boolean;
     getModuleProgress?: boolean;
     updateModuleProgress?: boolean;
+    updateModuleSessionTime?: boolean;
+    getUserInfoByEmail?: boolean;
+    refreshModuleProgress?: boolean;
   }>({
     createModule: false,
     getMyModules: false,
@@ -47,6 +54,9 @@ export const useModules = () => {
     getMyRequestedModules: false,
     getModuleProgress: false,
     updateModuleProgress: false,
+    updateModuleSessionTime: false,
+    getUserInfoByEmail: false,
+    refreshModuleProgress: false,
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -125,6 +135,24 @@ export const useModules = () => {
   };
 
   // Sharing functions
+  const getUserInfoByEmailFn = async (
+    email: string
+  ): Promise<import('@/lib/api/modules').IdentityUserInfoResponse | null> => {
+    setIsLoading((prev) => ({ ...prev, getUserInfoByEmail: true }));
+    setError(null);
+
+    try {
+      const response = await getUserInfoByEmail(email);
+      return response;
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Email not found';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return null;
+    } finally {
+      setIsLoading((prev) => ({ ...prev, getUserInfoByEmail: false }));
+    }
+  };
   const shareModuleFn = async (
     moduleId: string,
     data: ShareModuleRequest
@@ -236,7 +264,7 @@ export const useModules = () => {
 
   const getModuleProgressFn = async (
     moduleId: string
-  ): Promise<BaseResponse<ModuleProgressResponse> | null> => {
+  ): Promise<BaseResponse<ModuleProgressDetailResponse> | null> => {
     setIsLoading((prev) => ({ ...prev, getModuleProgress: true }));
     setError(null);
 
@@ -271,18 +299,61 @@ export const useModules = () => {
     }
   };
 
+  const updateModuleSessionTimeFn = async (
+    moduleId: string,
+    data: ModuleSessionTimeRequest
+  ): Promise<BaseResponse<string> | null> => {
+    setIsLoading((prev) => ({ ...prev, updateModuleSessionTime: true }));
+    setError(null);
+
+    try {
+      const response = await updateModuleSessionTime(moduleId, data);
+      return response;
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Failed to update session time';
+      setError(errorMessage);
+      return null;
+    } finally {
+      setIsLoading((prev) => ({ ...prev, updateModuleSessionTime: false }));
+    }
+  };
+
+  const refreshModuleProgressFn = async (
+    moduleId: string,
+    learningStatus: string = 'NEW'
+  ): Promise<BaseResponse<ModuleProgressDetailResponse> | null> => {
+    setIsLoading((prev) => ({ ...prev, refreshModuleProgress: true }));
+    setError(null);
+
+    try {
+      const response = await refreshModuleProgress(moduleId, { learning_status: learningStatus });
+      toast.success('Module progress refreshed successfully');
+      return response;
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Failed to refresh progress';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return null;
+    } finally {
+      setIsLoading((prev) => ({ ...prev, refreshModuleProgress: false }));
+    }
+  };
+
   return {
     createModule: createModuleFn,
     getMyModules: getMyModulesFn,
     getModuleById: getModuleByIdFn,
     updateModule: updateModuleFn,
     shareModule: shareModuleFn,
+    getUserInfoByEmail: getUserInfoByEmailFn,
     getMySharedModules: getMySharedModulesFn,
     getSharedModuleRequests: getSharedModuleRequestsFn,
     updateSharedModuleRequest: updateSharedModuleRequestFn,
     getMyRequestedModules: getMyRequestedModulesFn,
     getModuleProgress: getModuleProgressFn,
     updateModuleProgress: updateModuleProgressFn,
+    updateModuleSessionTime: updateModuleSessionTimeFn,
+    refreshModuleProgress: refreshModuleProgressFn,
     isLoading,
     error,
   };
