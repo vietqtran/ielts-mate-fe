@@ -107,6 +107,15 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
     filters.sortDirection,
   ]);
 
+  // Clear incompatible selection when chosen part changes
+  useEffect(() => {
+    if (!selectedPassageId) return;
+    const current = passages.find((p) => p.passage_id === selectedPassageId);
+    if (current && current.part_number + 1 !== selectedPart) {
+      setSelectedPassageId('');
+    }
+  }, [selectedPart, passages, selectedPassageId]);
+
   const handlePageChange = (page: number) => {
     setPagination((prev) => ({ ...prev, currentPage: page }));
   };
@@ -259,7 +268,9 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
                     id='part-1'
                     name='part-select'
                     checked={selectedPart === 1}
-                    onChange={() => setSelectedPart(1)}
+                    onChange={() => {
+                      setSelectedPart(1);
+                    }}
                     className='h-4 w-4'
                   />
                   <Label htmlFor='part-1' className='cursor-pointer'>
@@ -272,7 +283,9 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
                     id='part-2'
                     name='part-select'
                     checked={selectedPart === 2}
-                    onChange={() => setSelectedPart(2)}
+                    onChange={() => {
+                      setSelectedPart(2);
+                    }}
                     className='h-4 w-4'
                   />
                   <Label htmlFor='part-2' className='cursor-pointer'>
@@ -285,7 +298,9 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
                     id='part-3'
                     name='part-select'
                     checked={selectedPart === 3}
-                    onChange={() => setSelectedPart(3)}
+                    onChange={() => {
+                      setSelectedPart(3);
+                    }}
                     className='h-4 w-4'
                   />
                   <Label htmlFor='part-3' className='cursor-pointer'>
@@ -384,6 +399,7 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
                         checked={selectedPassageId === passage.passage_id}
                         onChange={() => setSelectedPassageId(passage.passage_id)}
                         className='h-4 w-4'
+                        disabled={passage.part_number + 1 !== selectedPart}
                       />
                     </TableCell>
                     <TableCell className='font-medium'>{passage.title}</TableCell>

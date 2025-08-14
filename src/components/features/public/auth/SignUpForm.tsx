@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -9,21 +10,18 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
-import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
-import { useEffect, useState } from 'react';
-
-import GoogleSocialButton from '@/components/common/social/GoogleSocialButton';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import LoadingSpinner from '@/components/ui/loading-spinner';
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
+import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
 import { signUpSchema } from '@/schemas/auth.schema';
 import { setSignUpForm } from '@/store/slices/auth-form-slice';
+import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
 import { extractAxiosErrorData } from '@/utils/error';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -271,19 +269,6 @@ export function SignUpForm() {
         >
           {isLoading ? <LoadingSpinner /> : 'Sign up'}
         </Button>
-
-        <div className='relative'>
-          <div className='absolute inset-0 flex items-center'>
-            <div className='w-full border-t border-[#d4d7e3]'></div>
-          </div>
-          <div className='relative flex justify-center text-sm'>
-            <span className='bg-white px-4 text-[#8897ad]'>Or</span>
-          </div>
-        </div>
-
-        <div className='space-y-3'>
-          <GoogleSocialButton />
-        </div>
       </form>
     </Form>
   );

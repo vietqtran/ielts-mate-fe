@@ -33,17 +33,18 @@ instance.interceptors.response.use(
     return res;
   },
   (err) => {
+    // Show API errors by default but keep server errors generic.
     const notify = (err.config as CustomAxiosRequestConfig)?.notify ?? true;
     const notifyError = (err.config as CustomAxiosRequestConfig)?.notifyError ?? true;
-    if (!notify || !notifyError) return Promise.reject(err);
-
-    if (axios.isAxiosError(err)) {
-      const errorMessage = err.response?.data?.message || 'An error occurred';
-      if (notifyError) {
-        toast.error(errorMessage);
+    if (notify && notifyError) {
+      let message = 'Something went wrong. Please try again.';
+      if (axios.isAxiosError(err)) {
+        const status = err.response?.status ?? 0;
+        if (status >= 400 && status < 500) {
+          message = (err.response?.data as any)?.message || 'Request failed. Please try again.';
+        }
       }
-    } else {
-      toast.error('An unexpected error occurred');
+      toast.error(message);
     }
     return Promise.reject(err);
   }
