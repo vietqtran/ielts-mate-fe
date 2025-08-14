@@ -33,17 +33,17 @@ instance.interceptors.response.use(
     return res;
   },
   (err) => {
-    const notify = (err.config as CustomAxiosRequestConfig)?.notify ?? true;
-    const notifyError = (err.config as CustomAxiosRequestConfig)?.notifyError ?? true;
-    if (!notify || !notifyError) return Promise.reject(err);
-
-    if (axios.isAxiosError(err)) {
-      const errorMessage = err.response?.data?.message || 'An error occurred';
-      if (notifyError) {
-        toast.error(errorMessage);
+    // By default, do NOT surface error details to the UI.
+    // Only show a generic error toast if the caller explicitly opts in via { notifyError: true }.
+    const notify = (err.config as CustomAxiosRequestConfig)?.notify ?? false;
+    const notifyError = (err.config as CustomAxiosRequestConfig)?.notifyError ?? false;
+    if (notify && notifyError) {
+      const genericMessage = 'Something went wrong. Please try again.';
+      if (axios.isAxiosError(err)) {
+        toast.error(genericMessage);
+      } else {
+        toast.error(genericMessage);
       }
-    } else {
-      toast.error('An unexpected error occurred');
     }
     return Promise.reject(err);
   }

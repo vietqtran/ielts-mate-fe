@@ -5,9 +5,9 @@ import React, { Suspense } from 'react';
 
 import FullPageLoading from '@/components/common/loader/FullPageLoading';
 import { Toaster } from '@/components/ui/sonner';
+import SWRProvider from '@/providers/SWRProvider';
 import StoreProvider from '@/providers/StoreProvider';
 import type { Metadata } from 'next';
-import { SWRConfig } from 'swr';
 
 export const metadata: Metadata = {
   title: {
@@ -45,18 +45,13 @@ export default function RootLayout({
     <html lang='en'>
       <body className='antialiased bg-background text-foreground relative'>
         <StoreProvider>
-          <SWRConfig
-            value={{
-              dedupingInterval: 2000, // 2 seconds
-              keepPreviousData: true,
-            }}
-          >
+          <SWRProvider>
             <Suspense fallback={null}>
               {children}
               <FullPageLoading />
               <Toaster theme='light' richColors />
             </Suspense>
-          </SWRConfig>
+          </SWRProvider>
         </StoreProvider>
       </body>
     </html>

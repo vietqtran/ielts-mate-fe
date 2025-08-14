@@ -29,9 +29,26 @@ export const fetchListeningExams = async (params?: {
   sortBy?: string;
   sortDirection?: string;
   keyword?: string;
-}) => {
+}): Promise<{
+  data: any[];
+  pagination?: {
+    totalPages: number;
+    pageSize: number;
+    totalItems: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    currentPage: number;
+  };
+  status?: string;
+  message?: string;
+}> => {
   const res = await axios.get('/listening/exams/creator', { params });
-  return res.data.data;
+  return {
+    data: res.data.data ?? [],
+    pagination: res.data.pagination,
+    status: res.data.status,
+    message: res.data.message,
+  };
 };
 
 // Tạo mới exam

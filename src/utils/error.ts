@@ -5,7 +5,8 @@ export const extractAxiosErrorData = (error: unknown, defaultMessage?: string) =
     const axiosError = error as AxiosError<{ message: string; error_code: string }>;
     if (axiosError.isAxiosError && axiosError.response) {
       return {
-        message: axiosError.response.data.message || 'An error occurred',
+        // Never expose backend error details directly
+        message: defaultMessage ?? 'Something went wrong. Please try again.',
         error_code: axiosError.response.data.error_code || 'UNKNOWN_ERROR',
         name: axiosError.name,
       };
@@ -13,7 +14,7 @@ export const extractAxiosErrorData = (error: unknown, defaultMessage?: string) =
   }
 
   return {
-    message: defaultMessage ?? 'An unexpected error occurred',
+    message: defaultMessage ?? 'Something went wrong. Please try again.',
     error_code: 'UNKNOWN_ERROR',
     name: 'UnknownError',
   };
