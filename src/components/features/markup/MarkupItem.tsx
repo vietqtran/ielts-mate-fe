@@ -10,7 +10,7 @@ import { memo } from 'react';
 
 interface MarkupItemProps {
   item: GetTaskMarkupResponse;
-  onDelete: (markupId: number) => void;
+  onDelete: (task_id: string) => void;
   isDeleting?: boolean;
 }
 
@@ -86,7 +86,7 @@ export const MarkupItem = memo(function MarkupItem({
   isDeleting = false,
 }: Readonly<MarkupItemProps>) {
   const handleDelete = () => {
-    onDelete(item.markup_id);
+    onDelete(item.task_id);
   };
 
   return (

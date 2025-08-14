@@ -113,7 +113,9 @@ const useListeningAttempt = () => {
     setErrorState('saveAttemptProgress', null);
 
     try {
-      const { data } = await instance.put(`listening/attempts/save/${attempt_id}`, payload);
+      const { data } = await instance.put(`listening/attempts/save/${attempt_id}`, payload, {
+        notifyError: false,
+      });
       return data as BaseResponse<any>;
     } catch (error) {
       if (abortControllerRef.current === currentController) {

@@ -115,6 +115,7 @@ export interface ListActiveListeningExamsResponse {
   display_version: number;
   is_original: boolean;
   is_deleted: boolean;
+  is_marked_up: boolean;
 }
 
 /**

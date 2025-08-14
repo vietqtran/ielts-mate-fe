@@ -26,13 +26,14 @@ interface ExamListFilterToolbarProps {
   onFiltersChange: (filters: ExamListFilterProps) => void;
   onClearFilters: () => void;
   isLoading?: boolean;
+  inputPlaceholder?: string;
 }
 
 const sortOptions = [
   { value: 'updatedAt', label: 'Finished At' },
-  { value: 'totalPoints', label: 'Score' },
-  { value: 'duration', label: 'Duration' },
   { value: 'createdAt', label: 'Created At' },
+  { value: 'title', label: 'Title' },
+  { value: 'duration', label: 'Duration' },
 ];
 
 export const ExamsListFilter = memo(function ExamsListFilterToolbar({
@@ -40,6 +41,7 @@ export const ExamsListFilter = memo(function ExamsListFilterToolbar({
   onFiltersChange,
   onClearFilters,
   isLoading = false,
+  inputPlaceholder = 'Search by exam name...',
 }: Readonly<ExamListFilterToolbarProps>) {
   const [searchTerm, setSearchTerm] = useState(filters.searchText || '');
   const debouncedSearchTerm = useDebounce(searchTerm, 800);
@@ -88,7 +90,7 @@ export const ExamsListFilter = memo(function ExamsListFilterToolbar({
         <div className='flex-1 flex gap-2 items-center min-w-0'>
           <div className='flex-1 min-w-0'>
             <Input
-              placeholder='Search by exam name...'
+              placeholder={inputPlaceholder}
               value={searchTerm}
               onChange={handleSearchTextChange}
             />

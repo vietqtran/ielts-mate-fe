@@ -50,7 +50,7 @@ export const RecentActivityCard = ({ lastLearningDate }: RecentActivityCardProps
   const status = getActivityStatus(lastLearningDate);
 
   return (
-    <Card className='bg-white/70 backdrop-blur-lg border border-tekhelet-900/20 rounded-2xl shadow-xl'>
+    <Card className='backdrop-blur-lg border rounded-2xl shadow-sm'>
       <CardHeader>
         <div className='flex items-center gap-3'>
           <div className='p-3 bg-gradient-to-br from-persimmon-900/30 to-persimmon-800/10 rounded-xl border border-persimmon-800/20 backdrop-blur-sm'>

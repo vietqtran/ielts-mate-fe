@@ -129,18 +129,16 @@ export function AppSidebar() {
             className='w-full text-sm'
             onClick={() => {
               // Determine the current view based on URL
-              const isCreatorView = window.location.pathname.includes('/creator');
+              const isCreatorView = pathname.startsWith('/creator');
               // Navigate to the opposite view
               if (isCreatorView) {
-                replace('/');
+                replace('/dashboard');
               } else {
                 replace('/creator');
               }
             }}
           >
-            {window.location.pathname.includes('/creator')
-              ? 'Switch to User View'
-              : 'Switch to Creator View'}
+            {pathname.startsWith('/creator') ? 'Switch to User View' : 'Switch to Creator View'}
           </Button>
         )}
 

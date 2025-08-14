@@ -1,3 +1,4 @@
+import addMarkupReducer from './add-markup-slice';
 import authFormReducer from './auth-form-slice';
 import authReducer from './auth-slice';
 import commonReducer from './common-slice';
@@ -25,4 +26,5 @@ export {
   markupSliceReducer,
   listeningExamReducer,
   readingExamReducer,
+  addMarkupReducer,
 };

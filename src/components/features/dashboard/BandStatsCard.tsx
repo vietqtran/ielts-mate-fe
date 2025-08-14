@@ -39,7 +39,7 @@ export const BandStatsCard = ({ data }: BandStatsCardProps) => {
   };
 
   return (
-    <Card className='bg-white/70 backdrop-blur-lg border border-tekhelet-900/20 rounded-2xl shadow-xl'>
+    <Card className='backdrop-blur-lg border rounded-2xl shadow-sm'>
       <CardHeader>
         <div className='flex items-center gap-3'>
           <div className='p-3 bg-gradient-to-br from-tekhelet-900/30 to-tekhelet-800/10 rounded-xl border border-tekhelet-800/20 backdrop-blur-sm'>

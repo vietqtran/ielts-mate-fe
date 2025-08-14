@@ -234,7 +234,7 @@ export default function ReadingExamsPage() {
                             </Link>
                           </Button>
                           <Button variant='outline' size='icon' asChild>
-                            <Link href={`/reading-exams/${exam.reading_exam_id}/edit`}>
+                            <Link href={`creator/reading-exams/${exam.reading_exam_id}/edit`}>
                               <Pencil className='h-4 w-4' />
                             </Link>
                           </Button>
