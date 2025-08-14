@@ -33,17 +33,18 @@ instance.interceptors.response.use(
     return res;
   },
   (err) => {
-    // By default, do NOT surface error details to the UI.
-    // Only show a generic error toast if the caller explicitly opts in via { notifyError: true }.
-    const notify = (err.config as CustomAxiosRequestConfig)?.notify ?? false;
-    const notifyError = (err.config as CustomAxiosRequestConfig)?.notifyError ?? false;
+    // Show API errors by default but keep server errors generic.
+    const notify = (err.config as CustomAxiosRequestConfig)?.notify ?? true;
+    const notifyError = (err.config as CustomAxiosRequestConfig)?.notifyError ?? true;
     if (notify && notifyError) {
-      const genericMessage = 'Something went wrong. Please try again.';
+      let message = 'Something went wrong. Please try again.';
       if (axios.isAxiosError(err)) {
-        toast.error(genericMessage);
-      } else {
-        toast.error(genericMessage);
+        const status = err.response?.status ?? 0;
+        if (status >= 400 && status < 500) {
+          message = (err.response?.data as any)?.message || 'Request failed. Please try again.';
+        }
       }
+      toast.error(message);
     }
     return Promise.reject(err);
   }
