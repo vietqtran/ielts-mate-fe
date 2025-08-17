@@ -94,7 +94,11 @@ export function SignInForm() {
         try {
           sessionStorage.setItem('justLoggedIn', '1');
         } catch {}
-        router.replace('/');
+        if (data.is_creator) {
+          router.replace('/creator');
+        } else {
+          router.replace('/dashboard');
+        }
       } else {
         setErrors({ general: data.message });
         setIsLoading(false);
