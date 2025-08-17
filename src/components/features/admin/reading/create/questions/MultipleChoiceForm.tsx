@@ -107,7 +107,9 @@ export function MultipleChoiceForm({
     const correctCount = data.choices.filter((choice) => choice.is_correct).length;
 
     if (correctCount === 0) {
-      form.setError('choices', { message: 'At least one choice must be correct' });
+      form.setError('choices', {
+        message: 'At least one choice must be correct',
+      });
       return;
     }
 
@@ -161,6 +163,7 @@ export function MultipleChoiceForm({
                         type='number'
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
+                        min={1}
                       />
                     </FormControl>
                     <FormMessage />
@@ -179,6 +182,7 @@ export function MultipleChoiceForm({
                         type='number'
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
+                        min={1}
                       />
                     </FormControl>
                     <FormMessage />
@@ -195,7 +199,7 @@ export function MultipleChoiceForm({
                     <FormControl>
                       <Input
                         type='number'
-                        min='1'
+                        min={1}
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
                       />
