@@ -10,6 +10,7 @@ import {
   persistStore,
 } from 'redux-persist';
 import {
+  addMarkupReducer,
   authFormReducer,
   authReducer,
   commonReducer,
@@ -47,6 +48,7 @@ const persistConfig = {
     'listeningExam',
     'readingExam',
     'readingExamAttempt',
+    'addMarkup',
   ],
 };
 
@@ -64,6 +66,7 @@ const rootReducer = combineReducers({
   listeningExam: listeningExamReducer,
   listeningExamAttempt: listeningExamAttemptReducer,
   markupTasks: markupSliceReducer,
+  addMarkup: addMarkupReducer,
 });
 
 const persistedReducer = persistReducer<RootState>(persistConfig, rootReducer);

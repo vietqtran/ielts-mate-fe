@@ -25,4 +25,5 @@ export interface GetTaskMarkupResponse {
   task_type: TaskType;
   practice_type: PracticeType;
   task_title: string;
+  task_id: string;
 }

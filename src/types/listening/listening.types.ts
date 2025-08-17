@@ -22,6 +22,7 @@ export interface ListeningTaskResponse {
   updated_by: UserInformation;
   created_at: string;
   updated_at: string;
+  is_marked_up: boolean;
 }
 
 export interface ListeningTaskDetailResponse {
