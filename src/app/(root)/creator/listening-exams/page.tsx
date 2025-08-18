@@ -1,5 +1,15 @@
 'use client';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,28 +31,44 @@ import {
   setPagination,
 } from '@/store/slices/listening-exam-filter-slice';
 import { RootState } from '@/types/store.types';
-import { ArrowDown, ArrowUp, Eye, Pencil, PlusCircle, Trash2 } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowUp,
+  ArrowUpDown,
+  Eye,
+  Pencil,
+  PlusCircle,
+  RotateCcw,
+  Trash2,
+} from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
 
 export default function ListeningExamsPage() {
-  const { getAllExams, deleteExam, isLoading } = useListeningExam();
+  const { getAllExams, deleteExam, isLoading, updateExam } = useListeningExam();
   const [exams, setExams] = useState<any[]>([]);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [deletingExamId, setDeletingExamId] = useState<string | null>(null);
   const dispatch = useDispatch();
   const filters = useSelector((state: RootState) => state.listeningExam.filters);
   const pagination = useSelector((state: RootState) => state.listeningExam.pagination);
 
-  const fetchExams = async (page = pagination.currentPage, size = pagination.pageSize) => {
+  const fetchExams = async (
+    page = pagination.currentPage,
+    size = pagination.pageSize,
+    filterState: typeof filters = filters
+  ) => {
     try {
       dispatch(setLoading(true));
       const response = await getAllExams({
         page: page - 1, // backend expects 0-based page in ExamController
         size,
-        sortBy: filters.sortBy || 'createdAt',
-        sortDirection: filters.sortDirection || 'desc',
-        keyword: filters.searchText || undefined,
+        sortBy: filterState.sortBy || 'createdAt',
+        sortDirection: filterState.sortDirection || 'desc',
+        // Avoid sending whitespace-only keywords which serialize as '+' in query string
+        keyword: (filterState.searchText || '').trim() || undefined,
       });
       if (response) {
         setExams(response.data || []);
@@ -63,14 +89,12 @@ export default function ListeningExamsPage() {
   }, []);
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this listening exam?')) {
-      try {
-        await deleteExam(id);
-        toast.success('Listening exam deleted successfully');
-        fetchExams();
-      } catch (error) {
-        toast.error('Failed to delete listening exam');
-      }
+    try {
+      await deleteExam(id);
+      toast.success('Listening exam deleted successfully');
+      fetchExams();
+    } catch (error) {
+      toast.error('Failed to delete listening exam');
     }
   };
 
@@ -101,7 +125,7 @@ export default function ListeningExamsPage() {
                   const next = { ...filters, searchText: e.target.value };
                   dispatch(setFilters(next));
                   dispatch(setPagination({ ...pagination, currentPage: 1 }));
-                  fetchExams(1, pagination.pageSize);
+                  fetchExams(1, pagination.pageSize, next);
                 }}
               />
             </div>
@@ -114,16 +138,19 @@ export default function ListeningExamsPage() {
                     isCurrent && filters.sortDirection === 'asc' ? 'desc' : 'asc';
                   const next = { ...filters, sortBy: 'createdAt', sortDirection: nextDir };
                   dispatch(setFilters(next));
-                  fetchExams();
+                  fetchExams(pagination.currentPage, pagination.pageSize, next);
                 }}
               >
                 Sort: Created At{' '}
-                {filters.sortBy === 'createdAt' &&
-                  (filters.sortDirection === 'asc' ? (
-                    <ArrowUp className='h-4 w-4' />
+                {filters.sortBy === 'createdAt' ? (
+                  filters.sortDirection === 'asc' ? (
+                    <ArrowUp className='ml-2 h-4 w-4' />
                   ) : (
-                    <ArrowDown className='h-4 w-4' />
-                  ))}
+                    <ArrowDown className='ml-2 h-4 w-4' />
+                  )
+                ) : (
+                  <ArrowUpDown className='ml-2 h-4 w-4 text-muted-foreground' />
+                )}
               </Button>
               <Button
                 variant='outline'
@@ -133,22 +160,29 @@ export default function ListeningExamsPage() {
                     isCurrent && filters.sortDirection === 'asc' ? 'desc' : 'asc';
                   const next = { ...filters, sortBy: 'updatedAt', sortDirection: nextDir };
                   dispatch(setFilters(next));
-                  fetchExams();
+                  fetchExams(pagination.currentPage, pagination.pageSize, next);
                 }}
               >
                 Sort: Updated At{' '}
-                {filters.sortBy === 'updatedAt' &&
-                  (filters.sortDirection === 'asc' ? (
-                    <ArrowUp className='h-4 w-4' />
+                {filters.sortBy === 'updatedAt' ? (
+                  filters.sortDirection === 'asc' ? (
+                    <ArrowUp className='ml-2 h-4 w-4' />
                   ) : (
-                    <ArrowDown className='h-4 w-4' />
-                  ))}
+                    <ArrowDown className='ml-2 h-4 w-4' />
+                  )
+                ) : (
+                  <ArrowUpDown className='ml-2 h-4 w-4 text-muted-foreground' />
+                )}
               </Button>
               <Button
                 variant='ghost'
                 onClick={() => {
                   dispatch(clearFilters());
-                  fetchExams(1, pagination.pageSize);
+                  fetchExams(1, pagination.pageSize, {
+                    searchText: '',
+                    sortBy: '',
+                    sortDirection: '',
+                  } as typeof filters);
                 }}
               >
                 Clear
@@ -173,16 +207,19 @@ export default function ListeningExamsPage() {
                           isCurrent && filters.sortDirection === 'asc' ? 'desc' : 'asc';
                         const next = { ...filters, sortBy: 'examName', sortDirection: nextDir };
                         dispatch(setFilters(next));
-                        fetchExams();
+                        fetchExams(pagination.currentPage, pagination.pageSize, next);
                       }}
                     >
                       Exam Name
-                      {filters.sortBy === 'examName' &&
-                        (filters.sortDirection === 'asc' ? (
+                      {filters.sortBy === 'examName' ? (
+                        filters.sortDirection === 'asc' ? (
                           <ArrowUp className='h-4 w-4' />
                         ) : (
                           <ArrowDown className='h-4 w-4' />
-                        ))}
+                        )
+                      ) : (
+                        <ArrowUpDown className='h-4 w-4 text-muted-foreground' />
+                      )}
                     </button>
                   </TableHead>
                   <TableHead>
@@ -195,26 +232,36 @@ export default function ListeningExamsPage() {
                           isCurrent && filters.sortDirection === 'asc' ? 'desc' : 'asc';
                         const next = { ...filters, sortBy: 'urlSlug', sortDirection: nextDir };
                         dispatch(setFilters(next));
-                        fetchExams();
+                        fetchExams(pagination.currentPage, pagination.pageSize, next);
                       }}
                     >
                       URL Slug
-                      {filters.sortBy === 'urlSlug' &&
-                        (filters.sortDirection === 'asc' ? (
+                      {filters.sortBy === 'urlSlug' ? (
+                        filters.sortDirection === 'asc' ? (
                           <ArrowUp className='h-4 w-4' />
                         ) : (
                           <ArrowDown className='h-4 w-4' />
-                        ))}
+                        )
+                      ) : (
+                        <ArrowUpDown className='h-4 w-4 text-muted-foreground' />
+                      )}
                     </button>
                   </TableHead>
-                  <TableHead>Listening Parts</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Part 1</TableHead>
+                  <TableHead>Part 2</TableHead>
+                  <TableHead>Part 3</TableHead>
+                  <TableHead>Part 4</TableHead>
+                  <TableHead>Created At</TableHead>
+                  <TableHead>Updated At</TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead className='text-right'>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {exams.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={4} className='text-center py-6'>
+                    <TableCell colSpan={11} className='text-center py-6'>
                       No listening exams found. Create your first one.
                     </TableCell>
                   </TableRow>
@@ -223,17 +270,88 @@ export default function ListeningExamsPage() {
                     <TableRow key={exam.listening_exam_id}>
                       <TableCell className='font-medium'>{exam.exam_name}</TableCell>
                       <TableCell>{exam.url_slug}</TableCell>
+                      <TableCell>{exam.exam_description || '-'}</TableCell>
                       <TableCell>
-                        <div>
-                          {['part1', 'part2', 'part3', 'part4'].map((part, idx) =>
-                            exam[part] && exam[part].title ? (
-                              <div key={part}>
-                                <Badge variant='outline'>
-                                  Part {idx + 1}: {exam[part].title}
-                                </Badge>
-                              </div>
-                            ) : null
-                          )}
+                        {exam.part1?.title ? (
+                          <Link
+                            href={`/creator/listenings/${exam.part1.task_id}/preview`}
+                            className='hover:underline'
+                          >
+                            {exam.part1.title}
+                          </Link>
+                        ) : (
+                          '-'
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {exam.part2?.title ? (
+                          <Link
+                            href={`/creator/listenings/${exam.part2.task_id}/preview`}
+                            className='hover:underline'
+                          >
+                            {exam.part2.title}
+                          </Link>
+                        ) : (
+                          '-'
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {exam.part3?.title ? (
+                          <Link
+                            href={`/creator/listenings/${exam.part3.task_id}/preview`}
+                            className='hover:underline'
+                          >
+                            {exam.part3.title}
+                          </Link>
+                        ) : (
+                          '-'
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {exam.part4?.title ? (
+                          <Link
+                            href={`/creator/listenings/${exam.part4.task_id}/preview`}
+                            className='hover:underline'
+                          >
+                            {exam.part4.title}
+                          </Link>
+                        ) : (
+                          '-'
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {exam.created_at ? new Date(exam.created_at).toLocaleString() : '-'}
+                      </TableCell>
+                      <TableCell>
+                        {exam.updated_at ? new Date(exam.updated_at).toLocaleString() : '-'}
+                      </TableCell>
+                      <TableCell>
+                        <div className='flex flex-wrap gap-1'>
+                          {exam.is_current ? (
+                            <Badge variant='outline' className='bg-green-500 text-white'>
+                              Current
+                            </Badge>
+                          ) : null}
+                          {exam.is_original ? (
+                            <Badge variant='outline' className='bg-blue-500 text-white'>
+                              Original
+                            </Badge>
+                          ) : null}
+                          {exam.is_deleted ? (
+                            <Badge variant='outline' className='bg-red-500 text-white'>
+                              Deleted
+                            </Badge>
+                          ) : null}
+                          {exam.is_marked_up ? (
+                            <Badge variant='outline' className='bg-yellow-500 text-white'>
+                              Marked Up
+                            </Badge>
+                          ) : null}
+                          {exam.markup_type ? (
+                            <Badge variant='outline' className='bg-gray-500 text-white'>
+                              Markup: {String(exam.markup_type)}
+                            </Badge>
+                          ) : null}
                         </div>
                       </TableCell>
                       <TableCell className='text-right'>
@@ -253,10 +371,30 @@ export default function ListeningExamsPage() {
                           <Button
                             variant='outline'
                             size='icon'
-                            onClick={() => handleDelete(exam.listening_exam_id)}
+                            onClick={() => {
+                              setDeletingExamId(exam.listening_exam_id);
+                              setConfirmOpen(true);
+                            }}
                           >
                             <Trash2 className='h-4 w-4' />
                           </Button>
+                          {exam.is_deleted ? (
+                            <Button
+                              variant='outline'
+                              size='icon'
+                              onClick={async () => {
+                                try {
+                                  await updateExam(exam.listening_exam_id, { is_deleted: false });
+                                  toast.success('Exam restored');
+                                  fetchExams(pagination.currentPage, pagination.pageSize);
+                                } catch (err) {
+                                  toast.error('Failed to restore exam');
+                                }
+                              }}
+                            >
+                              <RotateCcw className='h-4 w-4' />
+                            </Button>
+                          ) : null}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -296,6 +434,30 @@ export default function ListeningExamsPage() {
           </div>
         </CardContent>
       </Card>
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete listening exam?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the exam.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeletingExamId(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={async () => {
+                if (deletingExamId) {
+                  await handleDelete(deletingExamId);
+                }
+                setDeletingExamId(null);
+                setConfirmOpen(false);
+              }}
+            >
+              Confirm
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
