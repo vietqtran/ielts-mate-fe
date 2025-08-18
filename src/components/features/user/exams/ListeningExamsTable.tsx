@@ -14,15 +14,17 @@ import {
 } from '@/components/ui/table';
 import { useListeningExam } from '@/hooks/apis/listening/useListeningExam';
 import {
+  ListeningExamFilters,
+  clearFilters,
   setFilters,
   setLoading,
   setPagination,
-} from '@/store/slices/listening-exam-attempt-filter-slice';
-import { ListeningExamFilters, clearFilters } from '@/store/slices/listening-exam-filter-slice';
+} from '@/store/slices/listening-exam-filter-slice';
 import { RootState } from '@/types';
+import { ListActiveListeningExamsResponse } from '@/types/listening/listening-exam.types';
 import { Loader2, Play } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
 
@@ -32,42 +34,49 @@ interface ListeningExamsTableProps {
 
 export default function ListeningExamsTable({ className }: ListeningExamsTableProps) {
   const dispatch = useDispatch();
+  const { fetchListeningExamsList, isLoading, error } = useListeningExam();
+  const [exams, setExams] = useState<ListActiveListeningExamsResponse[]>([]);
   const filters = useSelector((state: RootState) => state.listeningExam.filters);
   const reduxIsLoading = useSelector((state: RootState) => state.listeningExam.isLoading);
   const pagination = useSelector((state: RootState) => state.listeningExam.pagination);
-  const { fetchListeningExamsList, isLoading, error, exams } = useListeningExam();
+
+  const loadExams = async () => {
+    try {
+      dispatch(setLoading(true));
+      console.log(pagination);
+
+      const res = await fetchListeningExamsList({
+        page: pagination.currentPage,
+        size: pagination.pageSize,
+        keyword: filters.searchText,
+        sortBy: filters.sortBy,
+        sortDirection: filters.sortDirection,
+      });
+
+      if (res?.data) {
+        setExams(res.data);
+      }
+
+      if (res?.pagination) {
+        dispatch(
+          setPagination({
+            totalPages: res.pagination.totalPages || 1,
+            pageSize: res.pagination.pageSize || 10,
+            totalItems: res.pagination.totalItems || 0,
+            hasNextPage: res.pagination.hasNextPage || false,
+            hasPreviousPage: res.pagination.hasPreviousPage || false,
+            currentPage: res.pagination.currentPage || 1,
+          })
+        );
+      }
+    } catch (error) {
+      toast.error('Failed to fetch listening exams');
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
 
   useEffect(() => {
-    const loadExams = async () => {
-      try {
-        dispatch(setLoading(true));
-        await fetchListeningExamsList({
-          page: pagination.currentPage,
-          size: pagination.pageSize,
-          keyword: filters.searchText,
-          sortBy: filters.sortBy,
-          sortDirection: filters.sortDirection,
-        });
-
-        if (exams?.pagination) {
-          dispatch(
-            setPagination({
-              totalPages: exams.pagination.totalPages,
-              pageSize: exams.pagination.pageSize,
-              totalItems: exams.pagination.totalItems,
-              hasNextPage: exams.pagination.hasNextPage,
-              hasPreviousPage: exams.pagination.hasPreviousPage,
-              currentPage: exams.pagination.currentPage,
-            })
-          );
-        }
-      } catch (error) {
-        toast.error('Failed to fetch listening exams');
-      } finally {
-        dispatch(setLoading(false));
-      }
-    };
-
     loadExams();
   }, [
     filters.searchText,
@@ -110,14 +119,14 @@ export default function ListeningExamsTable({ className }: ListeningExamsTablePr
           </TableRow>
         </TableHeader>
         <TableBody>
-          {exams?.data.length === 0 && !reduxIsLoading ? (
+          {exams.length === 0 && !reduxIsLoading ? (
             <TableRow>
               <TableCell colSpan={4} className='text-center py-6'>
                 No listening exams found at the moment.
               </TableCell>
             </TableRow>
           ) : !reduxIsLoading ? (
-            exams?.data.map((exam) => (
+            exams.map((exam) => (
               <TableRow key={exam.listening_exam_id}>
                 <TableCell className='font-medium'>{exam.exam_name || 'Listening Exam'}</TableCell>
                 <TableCell>

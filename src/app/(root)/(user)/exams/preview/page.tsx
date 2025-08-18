@@ -20,9 +20,10 @@ const ExamPreviewPage = () => {
   const [listeningExamData, setListeningExamData] =
     useState<ListActiveListeningExamsResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [listeningExams, setListeningExams] = useState<ListActiveListeningExamsResponse[]>([]);
 
   const { getAllAvailableExams } = useReadingExamAttempt();
-  const { fetchListeningExamsList, exams: listeningExams } = useListeningExam();
+  const { fetchListeningExamsList } = useListeningExam();
 
   const fetchExamData = async () => {
     if (!examUrl || !examType) return;
@@ -48,12 +49,14 @@ const ExamPreviewPage = () => {
           }
         }
       } else if (examType === 'listening') {
-        await fetchListeningExamsList({
+        const res = await fetchListeningExamsList({
           page: 1,
           size: 1000,
         });
+
+        setListeningExams(res?.data || []);
         // Find the listening exam with matching url_slug from the exams state
-        const exam = listeningExams?.data.find(
+        const exam = res?.data.find(
           (exam: ListActiveListeningExamsResponse) => exam.url_slug === examUrl
         );
 
@@ -103,13 +106,8 @@ const ExamPreviewPage = () => {
 
   // Additional useEffect to handle listening exams data when it's available
   useEffect(() => {
-    if (
-      examType === 'listening' &&
-      listeningExams?.data &&
-      listeningExams.data.length > 0 &&
-      examUrl
-    ) {
-      const exam = listeningExams.data.find(
+    if (examType === 'listening' && listeningExams && listeningExams.length > 0 && examUrl) {
+      const exam = listeningExams.find(
         (exam: ListActiveListeningExamsResponse) => exam.url_slug === examUrl
       );
       if (exam) {

@@ -4,7 +4,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Filter, Loader2, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Combobox } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect } from '@/components/ui/multi-select';
@@ -16,12 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ReadingAttemptFilters } from '@/store/slices/reading-attempt-filter-slice';
-import {
-  ieltsTypeOptions,
-  isUUID,
-  partNumberOptions,
-  questionCategoryOptions,
-} from '@/utils/filter';
+import { ieltsTypeOptions, isUUID, partNumberOptions } from '@/utils/filter';
 import { useDebounce } from '@uidotdev/usehooks';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -180,9 +174,9 @@ export const ReadingAttemptFilterToolbar = memo(function ReadingAttemptFilterToo
         </div>
 
         {isExpanded && (
-          <div className='grid mt-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-            <div className='grid grid-cols-2 gap-4 col-span-full'>
-              <div className='flex gap-2 justify-between items-end'>
+          <div className='grid mt-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+            <div className='col-span-full'>
+              <div className='flex items-end w-full'>
                 <div className='space-y-2 flex-1'>
                   <Label htmlFor='title'>Search</Label>
                   <Input
@@ -190,6 +184,7 @@ export const ReadingAttemptFilterToolbar = memo(function ReadingAttemptFilterToo
                     placeholder='Search by title'
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    className='w-full'
                   />
                 </div>
                 {searchTerm && (
@@ -199,39 +194,6 @@ export const ReadingAttemptFilterToolbar = memo(function ReadingAttemptFilterToo
                       className='mt-2'
                       size='icon'
                       onClick={() => updateFilter('searchText', '')}
-                    >
-                      <X className='h-4 w-4' />
-                    </Button>
-                  </div>
-                )}
-              </div>
-              <div className='flex gap-2 justify-between items-end'>
-                <div className='space-y-2 flex-1'>
-                  <Input
-                    id='passageId'
-                    placeholder='Search by passage ID'
-                    value={passageId}
-                    onChange={(e) => setPassageId(e.target.value)}
-                    aria-invalid={!!error.passageId}
-                    aria-describedby={error.passageId ? 'passageId-error' : undefined}
-                  />
-                  {error.passageId && (
-                    <span
-                      id='passageId-error'
-                      className='text-red-500 text-xs mt-1 block'
-                      role='alert'
-                    >
-                      {error.passageId}
-                    </span>
-                  )}
-                </div>
-                {passageId && (
-                  <div>
-                    <Button
-                      variant='ghost'
-                      className='mt-2'
-                      size='icon'
-                      onClick={handleClearPassageId}
                     >
                       <X className='h-4 w-4' />
                     </Button>
@@ -320,27 +282,27 @@ export const ReadingAttemptFilterToolbar = memo(function ReadingAttemptFilterToo
                 </Button>
               )}
             </div>
-            <div className='flex gap-2 items-end justify-between col-span-2'>
-              <div className='space-y-2 flex-1'>
-                <Label htmlFor='questionCategory'>Question Category</Label>
-                <Combobox
-                  options={questionCategoryOptions}
-                  value={filters.questionCategory}
-                  onValueChange={handleQuestionCategoryChange}
-                  placeholder='Select question category'
-                  className='w-full'
-                />
-              </div>
-              {filters.questionCategory && (
-                <Button
-                  variant='ghost'
-                  size='icon'
-                  onClick={() => updateFilter('questionCategory', '')}
-                >
-                  <X className='h-4 w-4' />
-                </Button>
-              )}
-            </div>
+            {/* <div className="flex gap-2 items-end justify-between col-span-2">
+                <div className="space-y-2 flex-1">
+                  <Label htmlFor="questionCategory">Question Category</Label>
+                  <Combobox
+                    options={questionCategoryOptions}
+                    value={filters.questionCategory}
+                    onValueChange={handleQuestionCategoryChange}
+                    placeholder="Select question category"
+                    className="w-full"
+                  />
+                </div>
+                {filters.questionCategory && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => updateFilter("questionCategory", "")}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                )}
+              </div> */}
           </div>
         )}
       </CardContent>

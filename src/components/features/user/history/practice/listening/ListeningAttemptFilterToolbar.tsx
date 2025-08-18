@@ -4,7 +4,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Filter, Loader2, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Combobox } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect } from '@/components/ui/multi-select';
@@ -16,12 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ListeningAttemptFilters } from '@/store/slices/listening-attempt-filter-slice';
-import {
-  ieltsTypeOptions,
-  isUUID,
-  partNumberOptions,
-  questionCategoryOptions,
-} from '@/utils/filter';
+import { ieltsTypeOptions, isUUID, partNumberOptions } from '@/utils/filter';
 import { useDebounce } from '@uidotdev/usehooks';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -180,9 +174,9 @@ export const ListeningAttemptFilterToolbar = memo(function ListeningAttemptFilte
         </div>
 
         {isExpanded && (
-          <div className='grid mt-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
-            <div className='grid grid-cols-2 gap-4 col-span-full'>
-              <div className='flex gap-2 justify-between items-end'>
+          <div className='grid mt-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
+            <div className='col-span-full'>
+              <div className='flex w-full items-end'>
                 <div className='space-y-2 flex-1'>
                   <Label htmlFor='title'>Search</Label>
                   <Input
@@ -190,6 +184,7 @@ export const ListeningAttemptFilterToolbar = memo(function ListeningAttemptFilte
                     placeholder='Search by title'
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
+                    className='w-full'
                   />
                 </div>
                 {searchTerm && (
@@ -205,7 +200,7 @@ export const ListeningAttemptFilterToolbar = memo(function ListeningAttemptFilte
                   </div>
                 )}
               </div>
-              <div className='flex gap-2 justify-between items-end'>
+              {/* <div className='flex gap-2 justify-between items-end'>
                 <div className='space-y-2 flex-1'>
                   <Input
                     id='listeningTaskId'
@@ -237,7 +232,7 @@ export const ListeningAttemptFilterToolbar = memo(function ListeningAttemptFilte
                     </Button>
                   </div>
                 )}
-              </div>
+              </div> */}
             </div>
 
             <div className='flex gap-2 items-end justify-between'>
@@ -320,7 +315,7 @@ export const ListeningAttemptFilterToolbar = memo(function ListeningAttemptFilte
                 </Button>
               )}
             </div>
-            <div className='flex gap-2 items-end justify-between col-span-2'>
+            {/* <div className='flex gap-2 items-end justify-between col-span-2'>
               <div className='space-y-2 flex-1'>
                 <Label htmlFor='questionCategory'>Question Category</Label>
                 <Combobox
@@ -340,7 +335,7 @@ export const ListeningAttemptFilterToolbar = memo(function ListeningAttemptFilte
                   <X className='h-4 w-4' />
                 </Button>
               )}
-            </div>
+            </div> */}
           </div>
         )}
       </CardContent>

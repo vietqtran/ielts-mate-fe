@@ -56,12 +56,12 @@ export default function ReadingExamsTable({ className }: ReadingExamsTableProps)
 
         dispatch(
           setPagination({
-            totalPages: response.pagination.totalPages,
-            pageSize: response.pagination.pageSize,
-            totalItems: response.pagination.totalItems,
-            hasNextPage: response.pagination.hasNextPage,
-            hasPreviousPage: response.pagination.hasPreviousPage,
-            currentPage: response.pagination.currentPage,
+            totalPages: response.pagination.totalPages || 1,
+            pageSize: response.pagination.pageSize || 10,
+            totalItems: response.pagination.totalItems || 0,
+            hasNextPage: response.pagination.hasNextPage || false,
+            hasPreviousPage: response.pagination.hasPreviousPage || false,
+            currentPage: response.pagination.currentPage || 1,
           })
         );
       }
@@ -99,6 +99,11 @@ export default function ReadingExamsTable({ className }: ReadingExamsTableProps)
     pagination.pageSize,
   ]);
 
+  const sortOptions = [
+    { value: 'createdAt', label: 'Created At' },
+    { value: 'updatedAt', label: 'Updated At' },
+  ];
+
   return (
     <div className={className}>
       <ExamsListFilter
@@ -106,6 +111,7 @@ export default function ReadingExamsTable({ className }: ReadingExamsTableProps)
         onFiltersChange={handleFiltersChange}
         onClearFilters={handleClearFilters}
         isLoading={reduxIsLoading}
+        sortOptions={sortOptions}
       />
       <Table className='mt-4'>
         <TableHeader>
