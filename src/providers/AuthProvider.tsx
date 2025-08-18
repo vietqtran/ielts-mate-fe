@@ -33,7 +33,7 @@ const AuthProvider = ({ children, isAuthPage = false }: Props) => {
       dispatch(setFullPageLoading(true));
       try {
         // Always ensure we have the freshest user when mounting an auth boundary.
-        if (!user && !fetchedRef.current) {
+        if (!user || !fetchedRef.current) {
           fetchedRef.current = true;
           await refetchUser();
         }
