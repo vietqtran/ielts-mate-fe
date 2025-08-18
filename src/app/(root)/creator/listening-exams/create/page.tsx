@@ -50,6 +50,7 @@ export default function CreateListeningExamPage() {
     size: 10,
     sort_by: 'updatedAt',
     sort_direction: 'desc',
+    status: ['4'], // Only fetch tasks with status = 4 (test)
   });
 
   const [form, setForm] = useState({
@@ -239,9 +240,7 @@ export default function CreateListeningExamPage() {
                       )}
                     </TableCell>
                     <TableCell>{task ? task.part_number + 1 : '-'}</TableCell>
-                    <TableCell>
-                      {task ? (task.status === 1 ? 'Published' : 'Draft') : '-'}
-                    </TableCell>
+                    <TableCell>{task ? 'Test' : '-'}</TableCell>
                     <TableCell>
                       {task && (
                         <Button size='sm' variant='outline' onClick={() => handleRemovePart(part)}>
@@ -259,7 +258,7 @@ export default function CreateListeningExamPage() {
       {/* Main Task Table with filter/search and radio selection */}
       <Card>
         <CardHeader>
-          <CardTitle>Available Listening Tasks</CardTitle>
+          <CardTitle>Available Test Listening Tasks</CardTitle>
         </CardHeader>
         <CardContent>
           {/* Filter & Sort toolbar */}
@@ -293,24 +292,6 @@ export default function CreateListeningExamPage() {
                   <SelectItem value='2'>Part 2</SelectItem>
                   <SelectItem value='3'>Part 3</SelectItem>
                   <SelectItem value='4'>Part 4</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={
-                  Array.isArray(filters.status) && filters.status.length > 0
-                    ? String(filters.status[0])
-                    : ''
-                }
-                onValueChange={(v) => handleFilterChange({ status: v === 'all' ? undefined : [v] })}
-              >
-                <SelectTrigger className='w-[150px]'>
-                  <SelectValue placeholder='All Statuses' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='all'>All Statuses</SelectItem>
-                  <SelectItem value='1'>Published</SelectItem>
-                  <SelectItem value='0'>Draft</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -374,7 +355,13 @@ export default function CreateListeningExamPage() {
               <Button
                 variant='ghost'
                 onClick={() =>
-                  setFilters({ page: 1, size: 10, sort_by: 'updatedAt', sort_direction: 'desc' })
+                  setFilters({
+                    page: 1,
+                    size: 10,
+                    sort_by: 'updatedAt',
+                    sort_direction: 'desc',
+                    status: ['4'], // Maintain status filter for test tasks
+                  })
                 }
               >
                 Clear
@@ -393,7 +380,6 @@ export default function CreateListeningExamPage() {
                   <TableRow>
                     <TableHead>Title</TableHead>
                     <TableHead>Part</TableHead>
-                    <TableHead>Status</TableHead>
                     <TableHead>Created At</TableHead>
                     {PART_LABELS.map((label) => (
                       <TableHead key={label}>{label}</TableHead>
@@ -412,7 +398,6 @@ export default function CreateListeningExamPage() {
                       <TableRow key={task.task_id}>
                         <TableCell>{task.title}</TableCell>
                         <TableCell>{task.part_number + 1}</TableCell>
-                        <TableCell>{task.status === 1 ? 'Published' : 'Draft'}</TableCell>
                         <TableCell>
                           {task.created_at ? new Date(task.created_at).toLocaleString() : ''}
                         </TableCell>

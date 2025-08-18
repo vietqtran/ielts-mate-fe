@@ -171,6 +171,10 @@ export function ListeningTaskTable({
             Deactivated
           </span>
         );
+      case ListeningTaskStatus.TEST:
+        return (
+          <span className='px-2 py-1 rounded-full bg-blue-200 text-blue-700 text-xs'>Test</span>
+        );
       default:
         return (
           <span className='px-2 py-1 rounded-full bg-gray-200 text-gray-700 text-xs'>Unknown</span>
