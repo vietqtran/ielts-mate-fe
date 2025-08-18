@@ -50,15 +50,19 @@ export default function ReadingExamsPage() {
     }
   };
 
-  const applyFetch = async (page = pagination.currentPage, size = pagination.pageSize) => {
+  const applyFetch = async (
+    page = pagination.currentPage,
+    size = pagination.pageSize,
+    filterState: typeof filters = filters
+  ) => {
     try {
       dispatch(setLoading(true));
       const response = await getAllExams({
         page,
         size,
-        sortBy: filters.sortBy || 'updatedAt',
-        sortDirection: (filters.sortDirection as 'asc' | 'desc') || 'desc',
-        keyword: filters.searchText || undefined,
+        sortBy: filterState.sortBy || 'updatedAt',
+        sortDirection: (filterState.sortDirection as 'asc' | 'desc') || 'desc',
+        keyword: (filterState.searchText || '').trim() || undefined,
       });
       if (response) {
         setExams(response.data);
@@ -101,7 +105,7 @@ export default function ReadingExamsPage() {
                   const next = { ...filters, searchText: e.target.value };
                   dispatch(setFilters(next));
                   dispatch(setPagination({ ...pagination, currentPage: 1 }));
-                  applyFetch(1, pagination.pageSize);
+                  applyFetch(1, pagination.pageSize, next);
                 }}
               />
             </div>
@@ -111,7 +115,7 @@ export default function ReadingExamsPage() {
                 onClick={() => {
                   const next = { ...filters, sortBy: 'updatedAt' };
                   dispatch(setFilters(next));
-                  applyFetch();
+                  applyFetch(pagination.currentPage, pagination.pageSize, next);
                 }}
               >
                 Sort: Updated At
@@ -121,7 +125,7 @@ export default function ReadingExamsPage() {
                 onClick={() => {
                   const next = { ...filters, sortBy: 'createdAt' };
                   dispatch(setFilters(next));
-                  applyFetch();
+                  applyFetch(pagination.currentPage, pagination.pageSize, next);
                 }}
               >
                 Sort: Created At
@@ -132,7 +136,7 @@ export default function ReadingExamsPage() {
                   const nextDir: 'asc' | 'desc' = filters.sortDirection === 'asc' ? 'desc' : 'asc';
                   const next = { ...filters, sortDirection: nextDir };
                   dispatch(setFilters(next));
-                  applyFetch();
+                  applyFetch(pagination.currentPage, pagination.pageSize, next);
                 }}
                 title='Toggle sort direction'
               >
@@ -146,7 +150,11 @@ export default function ReadingExamsPage() {
                 variant='ghost'
                 onClick={() => {
                   dispatch(clearFilters());
-                  applyFetch(1, pagination.pageSize);
+                  applyFetch(1, pagination.pageSize, {
+                    searchText: '',
+                    sortBy: '',
+                    sortDirection: '',
+                  } as typeof filters);
                 }}
               >
                 Clear
@@ -171,7 +179,7 @@ export default function ReadingExamsPage() {
                           isCurrent && filters.sortDirection === 'asc' ? 'desc' : 'asc';
                         const next = { ...filters, sortBy: 'examName', sortDirection: nextDir };
                         dispatch(setFilters(next));
-                        applyFetch();
+                        applyFetch(pagination.currentPage, pagination.pageSize, next);
                       }}
                     >
                       Exam Name
@@ -193,7 +201,7 @@ export default function ReadingExamsPage() {
                           isCurrent && filters.sortDirection === 'asc' ? 'desc' : 'asc';
                         const next = { ...filters, sortBy: 'urlSlug', sortDirection: nextDir };
                         dispatch(setFilters(next));
-                        applyFetch();
+                        applyFetch(pagination.currentPage, pagination.pageSize, next);
                       }}
                     >
                       URL Slug
@@ -229,12 +237,12 @@ export default function ReadingExamsPage() {
                       <TableCell className='text-right'>
                         <div className='flex justify-end gap-2'>
                           <Button variant='outline' size='icon' asChild>
-                            <Link href={`/reading-exams/${exam.reading_exam_id}`}>
+                            <Link href={`/creator/reading-exams/${exam.reading_exam_id}`}>
                               <Eye className='h-4 w-4' />
                             </Link>
                           </Button>
                           <Button variant='outline' size='icon' asChild>
-                            <Link href={`creator/reading-exams/${exam.reading_exam_id}/edit`}>
+                            <Link href={`/creator/reading-exams/${exam.reading_exam_id}/edit`}>
                               <Pencil className='h-4 w-4' />
                             </Link>
                           </Button>
