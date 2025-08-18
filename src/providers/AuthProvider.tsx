@@ -32,6 +32,12 @@ const AuthProvider = ({ children, isAuthPage = false }: Props) => {
     const init = async () => {
       dispatch(setFullPageLoading(true));
       try {
+        // Skip refetchUser for reset password page to avoid unnecessary API calls
+        if (pathname === '/reset') {
+          dispatch(setFullPageLoading(false));
+          return;
+        }
+
         // Always ensure we have the freshest user when mounting an auth boundary.
         if (!user || !fetchedRef.current) {
           fetchedRef.current = true;
@@ -49,7 +55,7 @@ const AuthProvider = ({ children, isAuthPage = false }: Props) => {
       cancelled = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [pathname]);
 
   // Redirect logic reacting to user & path changes (after user state known)
   useEffect(() => {
@@ -62,7 +68,8 @@ const AuthProvider = ({ children, isAuthPage = false }: Props) => {
       const targetHome = resolveHomePath();
 
       // Prevent access to auth pages & landing page when logged in
-      if (isAuthPage || pathname === '/') {
+      // But allow access to reset page even when authenticated (for password reset)
+      if ((isAuthPage && pathname !== '/reset') || pathname === '/') {
         if (pathname !== targetHome) replace(targetHome);
         return;
       }
@@ -77,7 +84,8 @@ const AuthProvider = ({ children, isAuthPage = false }: Props) => {
     }
 
     // Unauthenticated user on a protected (non-auth) page -> send to landing or sign-in
-    if (!user && !isAuthPage) {
+    // But allow access to reset page for unauthenticated users
+    if (!user && !isAuthPage && pathname !== '/reset') {
       // Keep existing behavior of sending to root landing (could be marketing page)
       if (pathname !== '/') replace('/');
     }
