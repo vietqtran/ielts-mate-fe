@@ -20,12 +20,34 @@ import {
   setPagination,
 } from '@/store/slices/reading-exam-filter-slice';
 import { RootState } from '@/types';
-import { ReadingExamResponse } from '@/types/reading/reading-exam.types';
+import { ReadingExamResponse, Status } from '@/types/reading/reading-exam.types';
 import { ArrowDown, ArrowUp, Eye, Pencil, PlusCircle, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
+
+const getStatusLabel = (status: number): string => {
+  switch (status) {
+    case Status.ACTIVE:
+      return 'Active';
+    case Status.INACTIVE:
+      return 'Inactive';
+    default:
+      return 'Unknown';
+  }
+};
+
+const getStatusColor = (status: number): string => {
+  switch (status) {
+    case Status.ACTIVE:
+      return 'bg-green-100 text-green-800';
+    case Status.INACTIVE:
+      return 'bg-red-100 text-red-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
 
 export default function ReadingExamsPage() {
   const { getAllExams, deleteExam, isLoading } = useReadingExam();
@@ -213,6 +235,7 @@ export default function ReadingExamsPage() {
                         ))}
                     </button>
                   </TableHead>
+                  <TableHead>Status</TableHead>
                   <TableHead>Part 1</TableHead>
                   <TableHead>Part 2</TableHead>
                   <TableHead>Part 3</TableHead>
@@ -222,7 +245,7 @@ export default function ReadingExamsPage() {
               <TableBody>
                 {exams.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className='text-center py-6'>
+                    <TableCell colSpan={7} className='text-center py-6'>
                       No reading exams found. Create your first one.
                     </TableCell>
                   </TableRow>
@@ -231,6 +254,13 @@ export default function ReadingExamsPage() {
                     <TableRow key={exam.reading_exam_id}>
                       <TableCell className='font-medium'>{exam.reading_exam_name}</TableCell>
                       <TableCell>{exam.url_slug}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(exam.status)}`}
+                        >
+                          {getStatusLabel(exam.status)}
+                        </span>
+                      </TableCell>
                       <TableCell>{exam.reading_passage_id_part1?.reading_passage_name}</TableCell>
                       <TableCell>{exam.reading_passage_id_part2?.reading_passage_name}</TableCell>
                       <TableCell>{exam.reading_passage_id_part3?.reading_passage_name}</TableCell>
