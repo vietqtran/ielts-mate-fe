@@ -13,18 +13,8 @@ import {
 } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { useModules } from '@/hooks/apis/modules/useModules';
-import { ModuleProgressResponse, ModuleResponse } from '@/lib/api/modules';
-import {
-  Award,
-  BarChart3,
-  BookOpen,
-  Calendar,
-  Clock,
-  Play,
-  Target,
-  TrendingUp,
-  Zap,
-} from 'lucide-react';
+import { ModuleProgressDetailResponse, ModuleResponse } from '@/lib/api/modules';
+import { Award, BarChart3, BookOpen, Clock, Play, Target, TrendingUp, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 interface ModuleProgressModalProps {
@@ -40,7 +30,7 @@ export default function ModuleProgressModal({
   module,
   onStartStudy,
 }: ModuleProgressModalProps) {
-  const [progress, setProgress] = useState<ModuleProgressResponse | null>(null);
+  const [progress, setProgress] = useState<ModuleProgressDetailResponse | null>(null);
   const { getModuleProgress, isLoading } = useModules();
 
   useEffect(() => {
@@ -80,11 +70,26 @@ export default function ModuleProgressModal({
     return { level: 'Beginner', color: 'text-red-600', icon: BookOpen };
   };
 
-  const progressPercentage = progress?.progress_percentage || 0;
-  const cardsCompleted = progress?.cards_completed || 0;
+  const getLearningStatusColor = (status: string) => {
+    switch (status) {
+      case 'MASTERED':
+        return 'bg-green-100 text-green-800';
+      case 'LEARNING':
+        return 'bg-blue-100 text-blue-800';
+      case 'NEW':
+        return 'bg-gray-100 text-gray-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const progressPercentage = progress?.progress || 0;
+  const cardsCompleted =
+    progress?.flashcard_progresses?.filter((fp) => fp.status === 2).length || 0;
   const totalCards = module.flash_card_ids.length;
   const timeSpent = progress?.time_spent || 0;
-  const streakCount = progress?.streak_count || 0;
+  const learningStatus = progress?.learning_status || 'NEW';
+  const attempts = progress?.attempts || 0;
 
   const levelInfo = getProgressLevel(progressPercentage);
   const LevelIcon = levelInfo.icon;
@@ -116,11 +121,18 @@ export default function ModuleProgressModal({
               <CardHeader>
                 <CardTitle className='flex items-center justify-between'>
                   <span className='text-[#003b73] font-bold text-lg'>Overall Progress</span>
-                  <Badge
-                    className={`text-white font-semibold px-3 py-1 rounded-xl ${getProgressColor(progressPercentage)}`}
-                  >
-                    {progressPercentage.toFixed(1)}%
-                  </Badge>
+                  <div className='flex gap-2'>
+                    <Badge
+                      className={`text-white font-semibold px-3 py-1 rounded-xl ${getProgressColor(progressPercentage)}`}
+                    >
+                      {progressPercentage.toFixed(1)}%
+                    </Badge>
+                    <Badge
+                      className={`font-semibold px-3 py-1 rounded-xl ${getLearningStatusColor(learningStatus)}`}
+                    >
+                      {learningStatus}
+                    </Badge>
+                  </div>
                 </CardTitle>
               </CardHeader>
               <CardContent className='space-y-4'>
@@ -152,13 +164,13 @@ export default function ModuleProgressModal({
                       Based on your completion rate
                     </p>
                   </div>
-                  {streakCount > 0 && (
+                  {attempts > 0 && (
                     <div className='text-center'>
                       <div className='flex items-center justify-center mb-1'>
                         <Zap className='h-6 w-6 text-yellow-500' />
                       </div>
-                      <p className='text-xl font-bold text-yellow-600'>{streakCount}</p>
-                      <p className='text-xs text-[#0074b7] font-medium'>Study Streak</p>
+                      <p className='text-xl font-bold text-yellow-600'>{attempts}</p>
+                      <p className='text-xs text-[#0074b7] font-medium'>Study Attempts</p>
                     </div>
                   )}
                 </div>
@@ -196,22 +208,51 @@ export default function ModuleProgressModal({
               </Card>
             </div>
 
-            {/* Last Study Session */}
-            {progress?.last_studied && (
+            {/* Flashcard Progress Details */}
+            {progress?.flashcard_progresses && progress.flashcard_progresses.length > 0 && (
               <Card className='border-[#60a3d9]/30 rounded-2xl shadow-lg bg-white/90 backdrop-blur-sm'>
                 <CardHeader>
                   <CardTitle className='flex items-center space-x-2 text-[#003b73] font-semibold'>
-                    <Calendar className='h-5 w-5' />
-                    <span>Last Study Session</span>
+                    <BookOpen className='h-5 w-5' />
+                    <span>Flashcard Progress</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p className='text-[#0074b7] font-medium'>
-                    {new Date(progress.last_studied).toLocaleString()}
-                  </p>
-                  <p className='text-sm text-[#0074b7] font-medium mt-1'>
-                    Keep up the momentum! Regular practice leads to better retention.
-                  </p>
+                  <div className='space-y-3'>
+                    {progress.flashcard_progresses.map((fp) => (
+                      <div
+                        key={fp.flashcard_id}
+                        className='flex items-center justify-between p-3 bg-gray-50 rounded-lg'
+                      >
+                        <div className='flex-1'>
+                          <p className='font-medium text-[#003b73]'>
+                            {fp.flashcard_detail.vocab.word}
+                          </p>
+                          <p className='text-sm text-[#0074b7]'>
+                            {fp.flashcard_detail.vocab.meaning}
+                          </p>
+                        </div>
+                        <div className='flex items-center gap-2'>
+                          <Badge
+                            className={`text-xs ${
+                              fp.status === 2
+                                ? 'bg-green-100 text-green-800'
+                                : fp.status === 1
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-gray-100 text-gray-800'
+                            }`}
+                          >
+                            {fp.status === 2 ? 'Mastered' : fp.status === 1 ? 'Learning' : 'New'}
+                          </Badge>
+                          {fp.is_highlighted && (
+                            <Badge className='bg-yellow-100 text-yellow-800 text-xs'>
+                              Highlighted
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </CardContent>
               </Card>
             )}

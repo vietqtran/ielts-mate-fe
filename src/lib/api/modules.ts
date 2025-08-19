@@ -122,6 +122,8 @@ export interface ModuleProgressDetailResponse extends ModuleProgressResponse {
   status?: number;
   learning_status?: string;
   last_index_read?: number;
+  progress?: number; // Progress as percentage (0 to 100)
+  attempts?: number; // Number of study attempts
   flashcard_progresses: Array<{
     flashcard_id: string;
     status: number;
