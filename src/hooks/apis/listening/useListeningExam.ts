@@ -19,7 +19,6 @@ import useSWR from 'swr';
 export function useListeningExam() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
-  const [exams, setExams] = useState<BaseResponse<ListActiveListeningExamsResponse[]>>();
 
   const fetchListeningExamsList = useCallback(
     async (params: {
@@ -34,17 +33,10 @@ export function useListeningExam() {
         setError(null);
 
         const res = await instance.get('listening/exams/activate', {
-          params: {
-            ...params,
-            keyword: params.keyword,
-            sortBy: params.sortBy,
-            sortDirection: params.sortDirection,
-          },
+          params,
         });
 
-        if (res.data) {
-          setExams(res.data);
-        }
+        return res.data as BaseResponse<ListActiveListeningExamsResponse[]>;
       } catch (err) {
         console.error('Failed to fetch listening exams:', err);
         setError(err as Error);
@@ -143,7 +135,6 @@ export function useListeningExam() {
   return {
     isLoading,
     error,
-    exams,
     fetchListeningExamsList,
     submitListeningExamAnswers,
     startNewListeningExamAttempt,

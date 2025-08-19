@@ -27,13 +27,12 @@ interface ExamListFilterToolbarProps {
   onClearFilters: () => void;
   isLoading?: boolean;
   inputPlaceholder?: string;
+  sortOptions?: Array<{ value: string; label: string }>;
 }
 
-const sortOptions = [
-  { value: 'updatedAt', label: 'Finished At' },
+const defaultSortOptions = [
   { value: 'createdAt', label: 'Created At' },
-  { value: 'title', label: 'Title' },
-  { value: 'duration', label: 'Duration' },
+  { value: 'updatedAt', label: 'Updated At' },
 ];
 
 export const ExamsListFilter = memo(function ExamsListFilterToolbar({
@@ -42,6 +41,7 @@ export const ExamsListFilter = memo(function ExamsListFilterToolbar({
   onClearFilters,
   isLoading = false,
   inputPlaceholder = 'Search by exam name...',
+  sortOptions = defaultSortOptions,
 }: Readonly<ExamListFilterToolbarProps>) {
   const [searchTerm, setSearchTerm] = useState(filters.searchText || '');
   const debouncedSearchTerm = useDebounce(searchTerm, 800);

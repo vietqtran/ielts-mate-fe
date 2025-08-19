@@ -44,7 +44,12 @@ const useReadingExamAttempt = () => {
     setErrorState('getAllAvailableExams', null);
 
     try {
-      const response = await instance.get('reading/reading-exams/active-exams');
+      const response = await instance.get('reading/reading-exams/active-exams', {
+        params: {
+          ...params,
+        },
+        signal: currentController.signal,
+      });
 
       // Only return data if this is still the current request
       if (abortControllerRef.current === currentController) {
