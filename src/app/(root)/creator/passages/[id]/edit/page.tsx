@@ -55,6 +55,7 @@ export default function EditPassagePage() {
   const [questionGroups, setQuestionGroups] = useState<LocalQuestionGroup[]>([]);
   const [activeTab, setActiveTab] = useState('passage');
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [originalFormData, setOriginalFormData] = useState<PassageFormData | null>(null);
 
   const form = useForm<PassageFormData>({
     resolver: zodResolver(passageSchema),
@@ -106,14 +107,17 @@ export default function EditPassagePage() {
           }
         };
 
-        form.reset({
+        const formData = {
           title: passageResponse.data.title,
           instruction: passageResponse.data.instruction,
           content: passageResponse.data.content,
           ielts_type: getielts_typeEnum(passageResponse.data.ielts_type),
           part_number: getpart_numberEnum(passageResponse.data.part_number),
           passage_status: getpassage_statusEnum(passageResponse.data.passage_status),
-        });
+        };
+
+        form.reset(formData);
+        setOriginalFormData(formData);
 
         const passageDetail = passageResponse.data as any;
         if (passageDetail.question_groups) {
@@ -150,6 +154,24 @@ export default function EditPassagePage() {
 
   const handleBasicInfoSubmit = async (data: PassageFormData) => {
     try {
+      // Check if form data has changed
+      if (originalFormData) {
+        const hasChanged =
+          data.title !== originalFormData.title ||
+          data.instruction !== originalFormData.instruction ||
+          data.content !== originalFormData.content ||
+          data.ielts_type !== originalFormData.ielts_type ||
+          data.part_number !== originalFormData.part_number ||
+          data.passage_status !== originalFormData.passage_status;
+
+        if (!hasChanged) {
+          // No changes made, just proceed to questions tab
+          setCurrentStep('questions');
+          setActiveTab('questions');
+          return;
+        }
+      }
+
       // Map frontend enums to backend ordinal values
       const getielts_typeOrdinal = (ielts_type: IeltsType) => {
         switch (ielts_type) {
@@ -195,9 +217,27 @@ export default function EditPassagePage() {
       };
 
       await updatePassage(passage_id, request);
+
+      // Update the original form data after successful update
+      setOriginalFormData(data);
+
       setCurrentStep('questions');
       setActiveTab('questions');
     } catch (error) {}
+  };
+
+  const checkFormChanges = (): boolean => {
+    if (!originalFormData) return false;
+
+    const currentData = form.getValues();
+    return (
+      currentData.title !== originalFormData.title ||
+      currentData.instruction !== originalFormData.instruction ||
+      currentData.content !== originalFormData.content ||
+      currentData.ielts_type !== originalFormData.ielts_type ||
+      currentData.part_number !== originalFormData.part_number ||
+      currentData.passage_status !== originalFormData.passage_status
+    );
   };
 
   const handleAddQuestionGroup = (group: LocalQuestionGroup) => {
@@ -517,6 +557,7 @@ export default function EditPassagePage() {
               onSubmit={handleBasicInfoSubmit}
               isLoading={isLoading.updatePassage}
               isCompleted={false}
+              hasChanges={checkFormChanges()}
             />
           )}
           {!isDataLoaded && (

@@ -116,6 +116,14 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
     }
   }, [selectedPart, passages, selectedPassageId]);
 
+  // Auto-filter passages by selected part
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      partNumber: selectedPart - 1, // Convert to 0-based index for API
+    }));
+  }, [selectedPart]);
+
   const handlePageChange = (page: number) => {
     setPagination((prev) => ({ ...prev, currentPage: page }));
   };
@@ -205,7 +213,8 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
       <CardHeader>
         <CardTitle>Select Reading Passages</CardTitle>
         <CardDescription>
-          Choose passages with "Test" status to include in this exam
+          Choose passages with "Test" status to include in this exam. The table automatically shows
+          only passages for the selected part.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -237,18 +246,12 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
               </select>
             </div>
             <div className='flex-1'>
-              <Label htmlFor='partNumber'>Part Number</Label>
+              <Label htmlFor='partNumber'>Part Number (Auto-filtered)</Label>
               <select
-                className='w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm'
-                value={filters.partNumber === undefined ? '' : filters.partNumber}
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    partNumber: e.target.value ? Number(e.target.value) : undefined,
-                  }))
-                }
+                className='w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm bg-gray-50'
+                value={selectedPart - 1}
+                disabled
               >
-                <option value=''>All Parts</option>
                 {partNumberOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -260,7 +263,9 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
 
           <div className='flex items-center space-x-4'>
             <div>
-              <Label htmlFor='part-select'>Add selected passage to:</Label>
+              <Label htmlFor='part-select'>
+                Select Part (Table will show only passages for this part):
+              </Label>
               <div className='flex items-center space-x-4 mt-2'>
                 <div className='flex items-center space-x-2'>
                   <input
@@ -399,7 +404,6 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
                         checked={selectedPassageId === passage.passage_id}
                         onChange={() => setSelectedPassageId(passage.passage_id)}
                         className='h-4 w-4'
-                        disabled={passage.part_number + 1 !== selectedPart}
                       />
                     </TableCell>
                     <TableCell className='font-medium'>{passage.title}</TableCell>

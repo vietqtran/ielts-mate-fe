@@ -42,24 +42,34 @@ export function MatchingManager({
   }, [group.questions, group.id]);
 
   const questionApi = isListening ? useListeningQuestion() : useQuestion();
-  const { createQuestions, updateQuestionInfo, deleteQuestion, isLoading } = questionApi;
+  const { createQuestions, updateQuestionInfo, updateQuestionOrder, deleteQuestion, isLoading } =
+    questionApi;
 
   const handleFormSubmit = async (data: MatchingFormData) => {
     if (!group.id) {
       return;
     }
 
-    const questionRequest = {
-      ...data,
-      question_type: 2, // MATCHING
-      question_group_id: group.id,
-      question_categories: [],
-      number_of_correct_answers: 0, // Not applicable
-    };
-
     try {
       if (editingQuestion) {
-        // Update existing question
+        // Update question order separately if it changed
+        if (data.question_order !== editingQuestion.question_order) {
+          await updateQuestionOrder(
+            group.id,
+            editingQuestion.question_id,
+            { order: data.question_order },
+            isListening
+          );
+        }
+
+        // Update existing question info (excluding question_order)
+        const questionRequest = {
+          ...data,
+          question_type: 2, // MATCHING
+          question_group_id: group.id,
+          question_categories: [],
+          number_of_correct_answers: 0, // Not applicable
+        };
         const response = await updateQuestionInfo(
           group.id,
           editingQuestion.question_id,
@@ -89,6 +99,13 @@ export function MatchingManager({
         }
       } else {
         // Create new question
+        const questionRequest = {
+          ...data,
+          question_type: 2, // MATCHING
+          question_group_id: group.id,
+          question_categories: [],
+          number_of_correct_answers: 0, // Not applicable
+        };
         const response = await createQuestions(group.id, [questionRequest], isListening);
         if (response.data && Array.isArray(response.data)) {
           // Ensure consistent structure with question_id field

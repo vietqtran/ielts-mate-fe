@@ -31,6 +31,7 @@ interface PassageBasicInfoFormProps {
   onSubmit: (data: any) => void;
   isLoading: boolean;
   isCompleted: boolean;
+  hasChanges?: boolean;
 }
 
 const getielts_typeLabel = (type: IeltsType): string => {
@@ -67,6 +68,7 @@ export function PassageBasicInfoForm({
   onSubmit,
   isLoading,
   isCompleted,
+  hasChanges = true,
 }: Readonly<PassageBasicInfoFormProps>) {
   const formData = form.getValues();
 
@@ -122,10 +124,19 @@ export function PassageBasicInfoForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Step 1: Passage Information</CardTitle>
-        <p className='text-sm text-muted-foreground'>
-          Enter the basic information and content for your IELTS reading passage
-        </p>
+        <div className='flex items-center justify-between'>
+          <div>
+            <CardTitle>Step 1: Passage Information</CardTitle>
+            <p className='text-sm text-muted-foreground'>
+              Enter the basic information and content for your IELTS reading passage
+            </p>
+          </div>
+          {isEdit && hasChanges && (
+            <Badge variant='outline' className='bg-yellow-50 text-yellow-700 border-yellow-200'>
+              Unsaved Changes
+            </Badge>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -277,7 +288,11 @@ export function PassageBasicInfoForm({
             <div className='flex justify-end'>
               {isEdit ? (
                 <Button type='submit' disabled={isLoading} className='gap-2'>
-                  Go to edit Questions
+                  {isLoading
+                    ? 'Saving Changes...'
+                    : hasChanges
+                      ? 'Save Changes & Go to Questions'
+                      : 'Go to edit Questions'}
                   <ArrowRight className='h-4 w-4' />
                 </Button>
               ) : (

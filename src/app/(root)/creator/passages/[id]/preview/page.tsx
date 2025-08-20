@@ -93,18 +93,32 @@ export default function PassagePreviewPage() {
             ielts_type: backendData.ielts_type,
             part_number: backendData.part_number,
             passage_status: backendData.passage_status,
-            created_by: {
-              user_id: backendData.created_by.id || backendData.created_by.user_id,
-              first_name: backendData.created_by.first_name,
-              last_name: backendData.created_by.last_name,
-              email: backendData.created_by.email,
-            },
-            updated_by: {
-              user_id: backendData.updated_by.id || backendData.updated_by.user_id,
-              first_name: backendData.updated_by.first_name,
-              last_name: backendData.updated_by.last_name,
-              email: backendData.updated_by.email,
-            },
+            created_by: backendData.created_by
+              ? {
+                  user_id: backendData.created_by.id || backendData.created_by.user_id,
+                  first_name: backendData.created_by.first_name,
+                  last_name: backendData.created_by.last_name,
+                  email: backendData.created_by.email,
+                }
+              : {
+                  user_id: '',
+                  first_name: '',
+                  last_name: '',
+                  email: '',
+                },
+            updated_by: backendData.updated_by
+              ? {
+                  user_id: backendData.updated_by.id || backendData.updated_by.user_id,
+                  first_name: backendData.updated_by.first_name,
+                  last_name: backendData.updated_by.last_name,
+                  email: backendData.updated_by.email,
+                }
+              : {
+                  user_id: '',
+                  first_name: '',
+                  last_name: '',
+                  email: '',
+                },
             created_at: backendData.created_at,
             updated_at: backendData.updated_at,
             question_groups: backendData.question_groups || [],
@@ -112,7 +126,10 @@ export default function PassagePreviewPage() {
           setPassageData(mappedData);
         }
       } catch (error) {
-        console.log(error);
+        console.error('Error loading passage data:', error);
+        console.error('API Response structure issue. Expected created_by and updated_by fields.');
+        // Still set passage data to null to show "Passage not found"
+        setPassageData(null);
       }
     };
 
@@ -130,12 +147,8 @@ export default function PassagePreviewPage() {
   };
 
   const renderQuestion = (question: Question, groupIndex: number, questionIndex: number) => {
-    // Calculate continuous question numbering across all groups
-    let totalQuestionsBefore = 0;
-    for (let i = 0; i < groupIndex; i++) {
-      totalQuestionsBefore += passageData!.question_groups[i].questions.length;
-    }
-    const questionNumber = totalQuestionsBefore + questionIndex + 1;
+    // Use the actual question order from the API response
+    const questionNumber = question.question_order;
 
     switch (question.question_type) {
       case 0: // Multiple Choice

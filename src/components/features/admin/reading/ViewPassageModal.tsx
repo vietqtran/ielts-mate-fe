@@ -125,7 +125,9 @@ export function ViewPassageModal({
         case QuestionTypeEnumIndex.FILL_IN_THE_BLANKS: // Fill in Blank
           return (
             <div key={index} className='space-y-2'>
-              <h5 className='font-medium'>Blank {question.blank_index}</h5>
+              <h5 className='font-medium'>
+                Question {question.question_order} (Blank {question.blank_index})
+              </h5>
               <p className='text-sm text-green-600 font-medium'>
                 Answer: {question.correct_answer}
               </p>
@@ -151,7 +153,9 @@ export function ViewPassageModal({
         case QuestionTypeEnumIndex.DRAG_AND_DROP: // Drag and Drop
           return (
             <div key={index} className='space-y-2'>
-              <h5 className='font-medium'>Zone {question.zone_index}</h5>
+              <h5 className='font-medium'>
+                Question {question.question_order} (Zone {question.zone_index})
+              </h5>
               <p className='text-sm text-green-600 font-medium'>
                 Correct Item: {question.dragItemContent}
               </p>
