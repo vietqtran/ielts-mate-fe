@@ -57,7 +57,7 @@ export function useListeningExam() {
         setIsLoading(true);
         setError(null);
 
-        const res = await instance.put(
+        const res = await instance.post(
           `listening/exam/attempts/save/${params.attempt_id}`,
           params.payload
         );

@@ -229,7 +229,7 @@ const useReadingExamAttempt = () => {
     setErrorState('submitExamAttempt', null);
 
     try {
-      const response = await instance.put(
+      const response = await instance.post(
         `reading/exam/attempts/save/${params.attemptId}`,
         params.payload
       );
