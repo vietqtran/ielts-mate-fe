@@ -14,7 +14,7 @@ const ExamsTabController = async ({ params }: ExamsTabControllerProps) => {
     case 'listening':
       return <ListeningExamHistory />;
     default:
-      return <div>Exams History</div>;
+      return <ReadingExamHistory />;
   }
 };
 
