@@ -84,7 +84,7 @@ const navigationGroups = [
     ],
   },
   {
-    name: 'Personalized',
+    name: 'Vocabulary',
     href: '/personalized',
     icon: User,
   },

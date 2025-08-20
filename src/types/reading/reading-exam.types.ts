@@ -1,3 +1,8 @@
+export enum Status {
+  INACTIVE = 0,
+  ACTIVE = 1,
+}
+
 export interface ReadingPassage {
   reading_passage_id: string;
   reading_passage_name: string;
@@ -11,6 +16,7 @@ export interface ReadingExamCreateRequest {
   reading_passage_id_part1: string;
   reading_passage_id_part2: string;
   reading_passage_id_part3: string;
+  status?: number;
 }
 
 export interface ReadingExamUpdateRequest {
@@ -20,6 +26,7 @@ export interface ReadingExamUpdateRequest {
   reading_passage_id_part1?: string;
   reading_passage_id_part2?: string;
   reading_passage_id_part3?: string;
+  status?: number;
 }
 
 export interface ReadingExamResponse {
@@ -34,6 +41,7 @@ export interface ReadingExamResponse {
     reading_passage_id_part2: ReadingPassage;
     reading_passage_id_part3: ReadingPassage;
     is_marked_up: boolean;
+    status: number;
   };
 }
 

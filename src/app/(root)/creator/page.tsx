@@ -3,10 +3,19 @@
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DatePickerWithRange } from '@/components/ui/date-picker';
 import instance from '@/lib/axios';
 import { format } from 'date-fns';
-import { ClipboardCheck, Ear, FileText, Headphones, LayoutDashboard } from 'lucide-react';
+import {
+  ClipboardCheck,
+  Ear,
+  FileText,
+  Headphones,
+  LayoutDashboard,
+  RefreshCw,
+} from 'lucide-react';
 import type { DateRange } from 'react-day-picker';
 import {
   Bar,
@@ -365,25 +374,55 @@ const Page = () => {
               : 'No data in selected range'
           }
         >
-          <div className='h-64 px-2 pb-2'>
-            <ResponsiveContainer>
-              <BarChart data={readingCorrect} barSize={28}>
-                <CartesianGrid strokeDasharray='3 3' stroke='#cfd8ea66' />
-                <XAxis
-                  dataKey='question_type'
-                  tickFormatter={formatQuestionTypeLabel as any}
-                  tick={{ fill: '#5b6a93' }}
+          <div className='space-y-4'>
+            {/* Date Filter for Reading Question Type Correct */}
+            <div className='flex items-center gap-3'>
+              <div className='flex-1'>
+                <DatePickerWithRange
+                  dateRange={readingDateRange}
+                  onDateRangeChange={setReadingDateRange}
+                  placeholder='Select date range for Reading Correct'
                 />
-                <YAxis allowDecimals={false} tick={{ fill: '#5b6a93' }} />
-                <Tooltip cursor={{ fill: '#e8eefb80' }} />
-                <Bar dataKey='correct_count' name='Correct' fill='#457ddb'>
-                  {readingCorrect.map((entry, index) => (
-                    // eslint-disable-next-line react/no-array-index-key
-                    <Cell key={`cell-rc-${index}`} fill={entry.fill || '#457ddb'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+              </div>
+              <Button
+                onClick={fetchReadingQuestionTypeStats}
+                disabled={readingStatsLoading || !readingDateRange?.from || !readingDateRange?.to}
+                className='bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white border-0'
+                size='sm'
+              >
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${readingStatsLoading ? 'animate-spin' : ''}`}
+                />
+                Apply
+              </Button>
+            </div>
+
+            <div className='h-64 px-2 pb-2'>
+              {readingStatsLoading ? (
+                <div className='h-full w-full flex items-center justify-center text-tekhelet-500 text-sm'>
+                  Loading...
+                </div>
+              ) : (
+                <ResponsiveContainer>
+                  <BarChart data={readingCorrect} barSize={28}>
+                    <CartesianGrid strokeDasharray='3 3' stroke='#cfd8ea66' />
+                    <XAxis
+                      dataKey='question_type'
+                      tickFormatter={formatQuestionTypeLabel as any}
+                      tick={{ fill: '#5b6a93' }}
+                    />
+                    <YAxis allowDecimals={false} tick={{ fill: '#5b6a93' }} />
+                    <Tooltip cursor={{ fill: '#e8eefb80' }} />
+                    <Bar dataKey='correct_count' name='Correct' fill='#457ddb'>
+                      {readingCorrect.map((entry, index) => (
+                        // eslint-disable-next-line react/no-array-index-key
+                        <Cell key={`cell-rc-${index}`} fill={entry.fill || '#457ddb'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </div>
         </SectionCard>
 
@@ -398,25 +437,57 @@ const Page = () => {
               : 'No data in selected range'
           }
         >
-          <div className='h-64 px-2 pb-2'>
-            <ResponsiveContainer>
-              <BarChart data={listeningCorrect} barSize={28}>
-                <CartesianGrid strokeDasharray='3 3' stroke='#cfd8ea66' />
-                <XAxis
-                  dataKey='question_type'
-                  tickFormatter={formatQuestionTypeLabel as any}
-                  tick={{ fill: '#5b6a93' }}
+          <div className='space-y-4'>
+            {/* Date Filter for Listening Question Type Correct */}
+            <div className='flex items-center gap-3'>
+              <div className='flex-1'>
+                <DatePickerWithRange
+                  dateRange={listeningDateRange}
+                  onDateRangeChange={setListeningDateRange}
+                  placeholder='Select date range for Listening Correct'
                 />
-                <YAxis allowDecimals={false} tick={{ fill: '#5b6a93' }} />
-                <Tooltip cursor={{ fill: '#e8eefb80' }} />
-                <Bar dataKey='correct_count' name='Correct' fill='#6da5ef'>
-                  {listeningCorrect.map((entry, index) => (
-                    // eslint-disable-next-line react/no-array-index-key
-                    <Cell key={`cell-lc-${index}`} fill={entry.fill || '#6da5ef'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+              </div>
+              <Button
+                onClick={fetchListeningQuestionTypeStats}
+                disabled={
+                  listeningStatsLoading || !listeningDateRange?.from || !listeningDateRange?.to
+                }
+                className='bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white border-0'
+                size='sm'
+              >
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${listeningStatsLoading ? 'animate-spin' : ''}`}
+                />
+                Apply
+              </Button>
+            </div>
+
+            <div className='h-64 px-2 pb-2'>
+              {listeningStatsLoading ? (
+                <div className='h-full w-full flex items-center justify-center text-tekhelet-500 text-sm'>
+                  Loading...
+                </div>
+              ) : (
+                <ResponsiveContainer>
+                  <BarChart data={listeningCorrect} barSize={28}>
+                    <CartesianGrid strokeDasharray='3 3' stroke='#cfd8ea66' />
+                    <XAxis
+                      dataKey='question_type'
+                      tickFormatter={formatQuestionTypeLabel as any}
+                      tick={{ fill: '#5b6a93' }}
+                    />
+                    <YAxis allowDecimals={false} tick={{ fill: '#5b6a93' }} />
+                    <Tooltip cursor={{ fill: '#e8eefb80' }} />
+                    <Bar dataKey='correct_count' name='Correct' fill='#6da5ef'>
+                      {listeningCorrect.map((entry, index) => (
+                        // eslint-disable-next-line react/no-array-index-key
+                        <Cell key={`cell-lc-${index}`} fill={entry.fill || '#6da5ef'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </div>
         </SectionCard>
       </div>
@@ -428,25 +499,55 @@ const Page = () => {
             hasData(readingWrong as any, 'wrong_count') ? undefined : 'No data in selected range'
           }
         >
-          <div className='h-64 px-2 pb-2'>
-            <ResponsiveContainer>
-              <BarChart data={readingWrong} barSize={28}>
-                <CartesianGrid strokeDasharray='3 3' stroke='#cfd8ea66' />
-                <XAxis
-                  dataKey='question_type'
-                  tickFormatter={formatQuestionTypeLabel as any}
-                  tick={{ fill: '#5b6a93' }}
+          <div className='space-y-4'>
+            {/* Date Filter for Reading Question Type Wrong */}
+            <div className='flex items-center gap-3'>
+              <div className='flex-1'>
+                <DatePickerWithRange
+                  dateRange={readingDateRange}
+                  onDateRangeChange={setReadingDateRange}
+                  placeholder='Select date range for Reading Wrong'
                 />
-                <YAxis allowDecimals={false} tick={{ fill: '#5b6a93' }} />
-                <Tooltip cursor={{ fill: '#e8eefb80' }} />
-                <Bar dataKey='wrong_count' name='Wrong' fill='#75adf3'>
-                  {readingWrong.map((entry, index) => (
-                    // eslint-disable-next-line react/no-array-index-key
-                    <Cell key={`cell-rw-${index}`} fill={entry.fill || '#75adf3'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+              </div>
+              <Button
+                onClick={fetchReadingQuestionTypeStats}
+                disabled={readingStatsLoading || !readingDateRange?.from || !readingDateRange?.to}
+                className='bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white border-0'
+                size='sm'
+              >
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${readingStatsLoading ? 'animate-spin' : ''}`}
+                />
+                Apply
+              </Button>
+            </div>
+
+            <div className='h-64 px-2 pb-2'>
+              {readingStatsLoading ? (
+                <div className='h-full w-full flex items-center justify-center text-tekhelet-500 text-sm'>
+                  Loading...
+                </div>
+              ) : (
+                <ResponsiveContainer>
+                  <BarChart data={readingWrong} barSize={28}>
+                    <CartesianGrid strokeDasharray='3 3' stroke='#cfd8ea66' />
+                    <XAxis
+                      dataKey='question_type'
+                      tickFormatter={formatQuestionTypeLabel as any}
+                      tick={{ fill: '#5b6a93' }}
+                    />
+                    <YAxis allowDecimals={false} tick={{ fill: '#5b6a93' }} />
+                    <Tooltip cursor={{ fill: '#e8eefb80' }} />
+                    <Bar dataKey='wrong_count' name='Wrong' fill='#75adf3'>
+                      {readingWrong.map((entry, index) => (
+                        // eslint-disable-next-line react/no-array-index-key
+                        <Cell key={`cell-rw-${index}`} fill={entry.fill || '#75adf3'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </div>
         </SectionCard>
 
@@ -456,25 +557,57 @@ const Page = () => {
             hasData(listeningWrong as any, 'wrong_count') ? undefined : 'No data in selected range'
           }
         >
-          <div className='h-64 px-2 pb-2'>
-            <ResponsiveContainer>
-              <BarChart data={listeningWrong} barSize={28}>
-                <CartesianGrid strokeDasharray='3 3' stroke='#cfd8ea66' />
-                <XAxis
-                  dataKey='question_type'
-                  tickFormatter={formatQuestionTypeLabel as any}
-                  tick={{ fill: '#5b6a93' }}
+          <div className='space-y-4'>
+            {/* Date Filter for Listening Question Type Wrong */}
+            <div className='flex items-center gap-3'>
+              <div className='flex-1'>
+                <DatePickerWithRange
+                  dateRange={listeningDateRange}
+                  onDateRangeChange={setListeningDateRange}
+                  placeholder='Select date range for Listening Wrong'
                 />
-                <YAxis allowDecimals={false} tick={{ fill: '#5b6a93' }} />
-                <Tooltip cursor={{ fill: '#e8eefb80' }} />
-                <Bar dataKey='wrong_count' name='Wrong' fill='#6da5ef'>
-                  {listeningWrong.map((entry, index) => (
-                    // eslint-disable-next-line react/no-array-index-key
-                    <Cell key={`cell-lw-${index}`} fill={entry.fill || '#6da5ef'} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+              </div>
+              <Button
+                onClick={fetchListeningQuestionTypeStats}
+                disabled={
+                  listeningStatsLoading || !listeningDateRange?.from || !listeningDateRange?.to
+                }
+                className='bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white border-0'
+                size='sm'
+              >
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${listeningStatsLoading ? 'animate-spin' : ''}`}
+                />
+                Apply
+              </Button>
+            </div>
+
+            <div className='h-64 px-2 pb-2'>
+              {listeningStatsLoading ? (
+                <div className='h-full w-full flex items-center justify-center text-tekhelet-500 text-sm'>
+                  Loading...
+                </div>
+              ) : (
+                <ResponsiveContainer>
+                  <BarChart data={listeningWrong} barSize={28}>
+                    <CartesianGrid strokeDasharray='3 3' stroke='#cfd8ea66' />
+                    <XAxis
+                      dataKey='question_type'
+                      tickFormatter={formatQuestionTypeLabel as any}
+                      tick={{ fill: '#5b6a93' }}
+                    />
+                    <YAxis allowDecimals={false} tick={{ fill: '#5b6a93' }} />
+                    <Tooltip cursor={{ fill: '#e8eefb80' }} />
+                    <Bar dataKey='wrong_count' name='Wrong' fill='#6da5ef'>
+                      {listeningWrong.map((entry, index) => (
+                        // eslint-disable-next-line react/no-array-index-key
+                        <Cell key={`cell-lw-${index}`} fill={entry.fill || '#6da5ef'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </div>
           </div>
         </SectionCard>
       </div>

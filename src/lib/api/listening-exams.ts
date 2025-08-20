@@ -42,7 +42,18 @@ export const fetchListeningExams = async (params?: {
   status?: string;
   message?: string;
 }> => {
-  const res = await axios.get('/listening/exams/creator', { params });
+  // Clean params to avoid sending whitespace-only keyword which serializes to '+'
+  const cleanedParams = { ...params } as typeof params;
+  if (cleanedParams && typeof cleanedParams.keyword === 'string') {
+    const trimmed = cleanedParams.keyword.trim();
+    if (!trimmed) {
+      delete (cleanedParams as any).keyword;
+    } else {
+      (cleanedParams as any).keyword = trimmed;
+    }
+  }
+
+  const res = await axios.get('/listening/exams/creator', { params: cleanedParams });
   return {
     data: res.data.data ?? [],
     pagination: res.data.pagination,
