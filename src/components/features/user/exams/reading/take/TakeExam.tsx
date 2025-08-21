@@ -16,12 +16,10 @@ import {
   ReadingExamData,
   SubmitExamAnswerRequest,
   SubmitExamAttemptAnswersRequest,
-  SubmitExamResultResponse,
 } from '@/types/reading/reading-exam-attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import ExamResult from './ExamResult';
 
 export interface HandleAnswerChangeParams {
   questionId: string;
@@ -67,8 +65,6 @@ const TakeExam = ({ examData, initialAnswers }: TakeExamProps) => {
   const [activeTab, setActiveTab] = useState<string>('part1');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<boolean>(false);
-  const [examResult, setExamResult] = useState<SubmitExamResultResponse | null>(null);
-  const [showResult, setShowResult] = useState<boolean>(false);
 
   // 60 minutes = 3600 seconds
   const EXAM_DURATION = 60 * 60;
@@ -107,8 +103,6 @@ const TakeExam = ({ examData, initialAnswers }: TakeExamProps) => {
       title: 'Part 3',
     },
   ];
-
-  const currentPart = parts.find((part) => part.key === activeTab);
 
   // Calculate total questions and answered questions
   const getTotalQuestions = () => {
@@ -264,13 +258,9 @@ const TakeExam = ({ examData, initialAnswers }: TakeExamProps) => {
         payload: payload,
       });
 
-      // Close modal on success
       setIsModalOpen(false);
-
-      // Store result and show result screen
       if (result) {
-        setExamResult(result);
-        setShowResult(true);
+        router.push(`history/exams/details?mode=reading&examId=${examData.exam_attempt_id}`);
       } else {
         // Fallback if no result is returned
         alert('Exam submitted successfully!');
@@ -309,114 +299,104 @@ const TakeExam = ({ examData, initialAnswers }: TakeExamProps) => {
 
   return (
     <>
-      {showResult && examResult ? (
-        <ExamResult
-          result={examResult}
-          examName={examData.reading_exam.reading_exam_name}
-          examDescription={examData.reading_exam.reading_exam_description}
-        />
-      ) : (
-        <>
-          <ConfirmSubmitModal
-            isOpen={isModalOpen}
-            setIsOpen={(open) => {
-              if (!isLoading.submitExamAttempt) setIsModalOpen(open);
-            }}
-            onConfirm={handleSubmit}
-            onCancel={() => {
-              if (!isLoading.submitExamAttempt) setIsModalOpen(false);
-            }}
-            title='Submit Exam'
-            description={`Are you sure you want to submit your exam? ${
-              notAnsweredQuestions.length > 0
-                ? `You have ${notAnsweredQuestions.length} unanswered questions. These will not be graded.`
-                : 'All questions answered!'
-            }`}
-            confirmText={isLoading.submitExamAttempt ? 'Submitting...' : 'Submit'}
-            cancelText={isLoading.submitExamAttempt ? 'Please wait...' : 'Cancel'}
+      <ConfirmSubmitModal
+        isOpen={isModalOpen}
+        setIsOpen={(open) => {
+          if (!isLoading.submitExamAttempt) setIsModalOpen(open);
+        }}
+        onConfirm={handleSubmit}
+        onCancel={() => {
+          if (!isLoading.submitExamAttempt) setIsModalOpen(false);
+        }}
+        title='Submit Exam'
+        description={`Are you sure you want to submit your exam? ${
+          notAnsweredQuestions.length > 0
+            ? `You have ${notAnsweredQuestions.length} unanswered questions. These will not be graded.`
+            : 'All questions answered!'
+        }`}
+        confirmText={isLoading.submitExamAttempt ? 'Submitting...' : 'Submit'}
+        cancelText={isLoading.submitExamAttempt ? 'Please wait...' : 'Cancel'}
+      />
+
+      <ExamTakeShell
+        header={
+          <ExamTakeHeader
+            title={examData.reading_exam.reading_exam_name || 'Reading Exam'}
+            description={examData.reading_exam.reading_exam_description}
+            answered={answeredQuestions}
+            total={totalQuestions}
+            timeLeftSec={timeLeft}
+            onSubmit={() => setIsModalOpen(true)}
+            submitting={isLoading.submitExamAttempt}
+            showUnansweredWarning={notAnsweredQuestions.length > 0}
+            unansweredCount={notAnsweredQuestions.length}
+            submitText='Submit'
+            glass={false}
           />
+        }
+      >
+        <ExamTakeTabs
+          parts={parts}
+          activeKey={activeTab}
+          onChange={setActiveTab}
+          renderLeftColumn={(part) => (
+            <>
+              <CardHeader className='flex-shrink-0'>
+                <CardTitle className='text-center text-lg text-medium-slate-blue-400'>
+                  {part.title} - Reading Passage
+                </CardTitle>
+              </CardHeader>
+              <CardContent className='flex-1 overflow-y-auto p-4 min-h-0'>
+                <PassageBox content={part.data.content} />
+              </CardContent>
+            </>
+          )}
+          renderCenterColumn={(part) => (
+            <>
+              <CardHeader className='bg-medium-slate-blue-50 flex-shrink-0'>
+                <CardTitle className='text-center text-lg text-medium-slate-blue-400'>
+                  {part.title} - Questions
+                </CardTitle>
+              </CardHeader>
+              <CardContent className='flex-1 min-h-0 p-4 overflow-y-auto'>
+                <QuestionRenderer
+                  questionGroups={part.data.question_groups}
+                  onAnswerChange={handleAnswerChange}
+                  answers={answers[part.key] || {}}
+                />
+              </CardContent>
+            </>
+          )}
+          renderRightColumn={() => {
+            const partsProgress = parts.map((p) => {
+              const partAnswers = answers[p.key] || {};
+              const partTotal = p.data.question_groups.reduce(
+                (total, group) => total + group.questions.length,
+                0
+              );
+              const partAnswered = Object.values(partAnswers).filter((answer: any) =>
+                Array.isArray(answer.answer_id)
+                  ? answer.answer_id.length > 0
+                  : answer.answer_id.toString().trim() !== ''
+              ).length;
+              return {
+                key: p.key,
+                title: p.title,
+                answered: partAnswered,
+                total: partTotal,
+              };
+            });
 
-          <ExamTakeShell
-            header={
-              <ExamTakeHeader
-                title={examData.reading_exam.reading_exam_name || 'Reading Exam'}
-                description={examData.reading_exam.reading_exam_description}
-                answered={answeredQuestions}
-                total={totalQuestions}
-                timeLeftSec={timeLeft}
-                onSubmit={() => setIsModalOpen(true)}
-                submitting={isLoading.submitExamAttempt}
-                showUnansweredWarning={notAnsweredQuestions.length > 0}
-                unansweredCount={notAnsweredQuestions.length}
-                submitText='Submit'
-                glass={false}
+            return (
+              <ExamStatusPanel
+                parts={partsProgress}
+                activeKey={activeTab}
+                onNavigate={setActiveTab}
               />
-            }
-          >
-            <ExamTakeTabs
-              parts={parts}
-              activeKey={activeTab}
-              onChange={setActiveTab}
-              renderLeftColumn={(part) => (
-                <>
-                  <CardHeader className='flex-shrink-0'>
-                    <CardTitle className='text-center text-lg text-medium-slate-blue-400'>
-                      {part.title} - Reading Passage
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className='flex-1 overflow-y-auto p-4 min-h-0'>
-                    <PassageBox content={part.data.content} />
-                  </CardContent>
-                </>
-              )}
-              renderCenterColumn={(part) => (
-                <>
-                  <CardHeader className='bg-medium-slate-blue-50 flex-shrink-0'>
-                    <CardTitle className='text-center text-lg text-medium-slate-blue-400'>
-                      {part.title} - Questions
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className='flex-1 min-h-0 p-4 overflow-y-auto'>
-                    <QuestionRenderer
-                      questionGroups={part.data.question_groups}
-                      onAnswerChange={handleAnswerChange}
-                      answers={answers[part.key] || {}}
-                    />
-                  </CardContent>
-                </>
-              )}
-              renderRightColumn={() => {
-                const partsProgress = parts.map((p) => {
-                  const partAnswers = answers[p.key] || {};
-                  const partTotal = p.data.question_groups.reduce(
-                    (total, group) => total + group.questions.length,
-                    0
-                  );
-                  const partAnswered = Object.values(partAnswers).filter((answer: any) =>
-                    Array.isArray(answer.answer_id)
-                      ? answer.answer_id.length > 0
-                      : answer.answer_id.toString().trim() !== ''
-                  ).length;
-                  return {
-                    key: p.key,
-                    title: p.title,
-                    answered: partAnswered,
-                    total: partTotal,
-                  };
-                });
-
-                return (
-                  <ExamStatusPanel
-                    parts={partsProgress}
-                    activeKey={activeTab}
-                    onNavigate={setActiveTab}
-                  />
-                );
-              }}
-            />
-          </ExamTakeShell>
-        </>
-      )}
+            );
+          }}
+        />
+      </ExamTakeShell>
     </>
   );
 };

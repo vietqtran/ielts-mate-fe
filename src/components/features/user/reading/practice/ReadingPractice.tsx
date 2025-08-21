@@ -11,7 +11,7 @@ import { QuestionRenderer } from '@/components/features/user/reading/questions';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import useReadingAttempt from '@/hooks/apis/reading/useReadingAttempt';
 import { useIncrementalTimer } from '@/hooks/utils/useTimer';
-import { AttemptData, DataResponse } from '@/types/attempt.types';
+import { AttemptData } from '@/types/attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
@@ -52,10 +52,8 @@ const ReadingPractice = ({ passages, initialAnswers, initialDuration }: ReadingP
         }
       >
     >(initialAnswers);
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<boolean>(false);
-  const [submittedData, setSubmittedData] = useState<DataResponse>();
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const time = useIncrementalTimer(initialDuration, startTime);

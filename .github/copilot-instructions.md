@@ -48,33 +48,15 @@ Built for usability, accessibility, and effective IELTS skill-building.
 
 > Never use faded text or inaccessible contrast. Always meet accessibility standards.
 
-### 3.3. Glassmorphism (Aero Effect)
-
-- Apply a glassmorphism effect to all main content surfaces (cards, panels, modals, navigation). Use:
-
-  - Semi-transparent backgrounds (bg-white/60, bg-tekhelet-100/60)
-  - Backdrop blur (backdrop-blur-md or backdrop-blur-lg)
-  - Soft shadows (shadow-xl)
-  - Rounded corners (rounded-2xl)
-
-- Text must remain clear and accessible over blurred backgrounds.
-  Example:
-
-```jsx
-<div className="backdrop-blur-lg border rounded-2xl p-6">{/* Content */}</div>
-```
-
-### 3.4. Styling & Component Rules
+### 3.3. Styling & Component Rules
 
 - Tailwind Only: Use Tailwind classes for all color and effect styling.
 - No inline CSS for colors unless absolutely necessary.
-- Always map every color/effect to the palette and glassmorphism instructions above.
 - When unsure of color, use the nearest semantic match from the palette.
 - DO NOT add border lines unless specified. Use shadows for depth.
 
 ### 4. Summary Checklist
 
 - Use ONLY the provided OKLCH color palette for all design.
-- All content surfaces should use a gentle glassmorphism effect.
 - All styling should use Tailwind classes.
 - Ensure accessibility and responsive design at every step.

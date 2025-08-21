@@ -258,23 +258,19 @@ const Reading = () => {
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             {passages.map((passage) => (
-              <Card key={passage.passage_id} className='hover:shadow-md transition-shadow'>
-                <CardHeader>
-                  <div className='flex items-start justify-between'>
-                    <div className='flex-1'>
-                      <CardTitle className='text-lg leading-tight mb-2 text-tekhelet-600'>
-                        {passage.title}
-                      </CardTitle>
-                      <div className='flex items-center gap-2 mb-2'>
-                        <Badge
-                          className={getIeltsTypeBadgeColor(passage.ielts_type)}
-                          variant='outline'
-                        >
-                          {getIeltsTypeLabel(passage.ielts_type)}
-                        </Badge>
-                        <Badge variant='outline'>{getPartNumberLabel(passage.part_number)}</Badge>
-                      </div>
-                    </div>
+              <Card key={passage.passage_id} className='hover:shadow-md transition-shadow w-full'>
+                <CardHeader className='min-w-0'>
+                  <CardTitle
+                    className='text-lg mb-2 text-tekhelet-600 w-full truncate'
+                    title={passage.title}
+                  >
+                    {passage.title}
+                  </CardTitle>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <Badge className={getIeltsTypeBadgeColor(passage.ielts_type)} variant='outline'>
+                      {getIeltsTypeLabel(passage.ielts_type)}
+                    </Badge>
+                    <Badge variant='outline'>{getPartNumberLabel(passage.part_number)}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>

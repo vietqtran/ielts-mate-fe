@@ -212,7 +212,10 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
   const nextCard = () => {
     if (currentCardIndex < module.flash_card_ids.length - 1) {
       setCurrentCardIndex((prev) => prev + 1);
-      setSessionStats((prev) => ({ ...prev, currentCard: prev.currentCard + 1 }));
+      setSessionStats((prev) => ({
+        ...prev,
+        currentCard: prev.currentCard + 1,
+      }));
       setShowAnswer(false);
       setCardStartTime(Date.now());
     }
@@ -221,7 +224,10 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
   const previousCard = () => {
     if (currentCardIndex > 0) {
       setCurrentCardIndex((prev) => prev - 1);
-      setSessionStats((prev) => ({ ...prev, currentCard: prev.currentCard - 1 }));
+      setSessionStats((prev) => ({
+        ...prev,
+        currentCard: prev.currentCard - 1,
+      }));
       setShowAnswer(false);
       setCardStartTime(Date.now());
     }
@@ -260,8 +266,8 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
     const isGood = accuracy >= 60;
 
     return (
-      <div className='max-w-3xl mx-auto space-y-6 p-6 bg-gradient-to-br from-[#bfd7ed]/30 to-[#60a3d9]/10 min-h-screen'>
-        <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20'>
+      <div className='max-w-3xl mx-auto space-y-6 p-6 min-h-screen'>
+        <Card className='border rounded-3xl'>
           <CardHeader className='text-center'>
             <div className='flex justify-center mb-4'>
               <Trophy className='h-16 w-16 text-[#0074b7]' />
@@ -360,7 +366,7 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
   }
 
   return (
-    <div className='max-w-4xl mx-auto space-y-6 p-6 bg-gradient-to-br from-[#bfd7ed]/30 to-[#60a3d9]/10 min-h-screen'>
+    <div className='max-w-4xl mx-auto space-y-6 p-6 min-h-screen'>
       <AlertDialog open={showResetPrompt} onOpenChange={setShowResetPrompt}>
         <AlertDialogContent className='bg-white/90 backdrop-blur-xl border border-tekhelet-200 rounded-2xl'>
           <AlertDialogHeader>
@@ -385,30 +391,29 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
         </AlertDialogContent>
       </AlertDialog>
       {/* Session Header */}
-      <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20'>
+      <Card className='border'>
         <CardHeader>
           <div className='flex items-center justify-between'>
             <div>
-              <CardTitle className='text-[#003b73] flex items-center font-bold text-xl'>
-                <BookOpen className='h-6 w-6 mr-3 text-[#0074b7]' />
+              <CardTitle className='text-tekhelet-400 flex items-center font-bold text-xl'>
+                <BookOpen className='h-6 w-6 mr-3 text-tekhelet-400' />
                 {module.module_name}
               </CardTitle>
-              <CardDescription className='text-[#0074b7] font-medium text-base mt-1'>
+              <CardDescription className='text-muted-foreground font-medium text-base mt-1'>
                 Card {sessionStats.currentCard} of {sessionStats.totalCards}
               </CardDescription>
             </div>
-            <div className='text-right'>
-              <div className='flex items-center space-x-2 mb-2'>
-                <Clock className='h-5 w-5 text-[#0074b7]' />
-                <span className='text-sm text-[#003b73] font-semibold'>
+            <div className='flex items-center gap-3'>
+              <div className='flex items-center gap-2'>
+                <Clock className='h-5 w-5 text-tekhelet-500' />
+                <p className='text-sm text-tekhelet-500 font-semibold'>
                   {formatTime(sessionStats.sessionTimeSpent)}
-                </span>
+                </p>
               </div>
               <Button
-                variant='outline'
                 size='sm'
                 onClick={handleExit}
-                className='border-[#60a3d9]/40 text-[#0074b7] hover:bg-[#60a3d9]/10 hover:border-[#0074b7] rounded-xl transition-all duration-200'
+                className='bg-selective-yellow-200 hover:bg-selective-yellow-300'
               >
                 Exit
               </Button>
@@ -420,23 +425,25 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
             <Progress
               value={(sessionStats.currentCard / sessionStats.totalCards) * 100}
               className='h-3 rounded-full'
-              indicatorClassName='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] rounded-full'
+              indicatorClassName='bg-selective-yellow-400 rounded-full'
             />
             <div className='flex justify-between text-sm text-[#0074b7] font-medium'>
-              <span>✓ {sessionStats.correctAnswers} correct</span>
-              <span>✗ {sessionStats.incorrectAnswers} incorrect</span>
+              <p className='text-green-800'>{sessionStats.correctAnswers} correct</p>
+              <p className='text-red-800'>{sessionStats.incorrectAnswers} incorrect</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Flashcard */}
-      <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20 min-h-[500px]'>
+      <Card className='border min-h-[500px]'>
         <CardContent className='p-10'>
           <div className='text-center space-y-8'>
             {/* Word */}
             <div>
-              <h2 className='text-5xl font-bold text-[#003b73] mb-4'>{currentCard.vocab.word}</h2>
+              <h2 className='text-5xl font-bold text-tekhelet-400 mb-4'>
+                {currentCard.vocab.word}
+              </h2>
               <Badge
                 variant='secondary'
                 className='text-base px-4 py-2 bg-gradient-to-r from-[#bfd7ed]/50 to-[#60a3d9]/20 text-[#003b73] border-[#60a3d9]/30 rounded-xl font-medium'
@@ -447,7 +454,7 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
 
             {/* Context */}
             <div className='max-w-2xl mx-auto'>
-              <p className='text-xl text-[#0074b7] italic font-medium leading-relaxed'>
+              <p className='text-xl text-tekhelet-500 italic font-medium leading-relaxed'>
                 "{currentCard.vocab.context}"
               </p>
             </div>
@@ -457,14 +464,15 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
               {!showAnswer ? (
                 <Button
                   onClick={() => setShowAnswer(true)}
-                  className='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] text-white rounded-2xl px-12 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-200'
                   size='lg'
+                  variant={'outline'}
+                  className='text-selective-yellow-300 hover:text-selective-yellow-300'
                 >
                   Show Meaning
                 </Button>
               ) : (
                 <div className='space-y-8'>
-                  <div className='p-8 bg-gradient-to-br from-[#bfd7ed]/40 to-[#60a3d9]/20 border border-[#60a3d9]/30 rounded-2xl backdrop-blur-md shadow-lg'>
+                  <div className='p-8 border rounded-2xl bg-tekhelet-500/10'>
                     <p className='text-2xl text-[#003b73] font-semibold leading-relaxed'>
                       {currentCard.vocab.meaning}
                     </p>

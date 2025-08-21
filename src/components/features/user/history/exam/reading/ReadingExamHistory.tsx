@@ -205,18 +205,17 @@ const ReadingExamHistory = () => {
                 key={attempt.exam_attempt_id}
                 className='bg-white backdrop-blur-lg rounded-2xl shadow-xl hover:shadow-2xl transition-shadow'
               >
-                <CardHeader>
-                  <div className='flex items-start justify-between'>
-                    <div className='flex-1'>
-                      <CardTitle className='text-lg mb-2 line-clamp-2 text-tekhelet-700'>
-                        {attempt.reading_exam.reading_exam_name || 'Untitled Exam'}
-                      </CardTitle>
-                      <div className='flex items-center gap-2 mb-2'>
-                        <Badge variant={'outline'} className='bg-emerald-100 !text-emerald-800'>
-                          Completed
-                        </Badge>
-                      </div>
-                    </div>
+                <CardHeader className='min-w-0'>
+                  <CardTitle
+                    className='text-lg mb-2 line-clamp-2 text-tekhelet-700 w-full truncate'
+                    title={attempt.reading_exam.reading_exam_name || 'Untitled Exam'}
+                  >
+                    {attempt.reading_exam.reading_exam_name || 'Untitled Exam'}
+                  </CardTitle>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <Badge variant={'outline'} className='bg-emerald-100 !text-emerald-800'>
+                      Completed
+                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent>

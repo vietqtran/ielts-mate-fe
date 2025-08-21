@@ -257,22 +257,21 @@ const Listening = () => {
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             {listenings.map((listening) => (
               <Card key={listening.task_id} className='hover:shadow-md transition-shadow'>
-                <CardHeader>
-                  <div className='flex items-start justify-between'>
-                    <div className='flex-1'>
-                      <CardTitle className='text-lg leading-tight mb-2 text-tekhelet-500'>
-                        {listening.title}
-                      </CardTitle>
-                      <div className='flex items-center gap-2 mb-2'>
-                        <Badge
-                          className={getIeltsTypeBadgeColor(listening.ielts_type)}
-                          variant='outline'
-                        >
-                          {getIeltsTypeLabel(listening.ielts_type)}
-                        </Badge>
-                        <Badge variant='outline'>{getPartNumberLabel(listening.part_number)}</Badge>
-                      </div>
-                    </div>
+                <CardHeader className='min-w-0'>
+                  <CardTitle
+                    className='text-lg leading-tight mb-2 text-tekhelet-500 w-full truncate'
+                    title={listening.title}
+                  >
+                    {listening.title}
+                  </CardTitle>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <Badge
+                      className={getIeltsTypeBadgeColor(listening.ielts_type)}
+                      variant='outline'
+                    >
+                      {getIeltsTypeLabel(listening.ielts_type)}
+                    </Badge>
+                    <Badge variant='outline'>{getPartNumberLabel(listening.part_number)}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>

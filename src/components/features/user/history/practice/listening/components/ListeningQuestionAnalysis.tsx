@@ -81,7 +81,7 @@ export const ListeningQuestionAnalysis = ({
                   // Check if the answer is correct by comparing with the correct_answer
                   const isCorrect =
                     answer.filled_text_answer === question.correct_answer ||
-                    (answer.choice_ids && answer.choice_ids.includes(question.correct_answer));
+                    (answer.choice_ids && answer.choice_ids.includes(question.correct_answer!));
 
                   return (
                     <Collapsible
