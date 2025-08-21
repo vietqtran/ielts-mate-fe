@@ -159,7 +159,7 @@ const ReadingHistory = () => {
   };
 
   const handleViewAttempt = (attemptId: string) => {
-    router.push(`/history/practices/reading/${attemptId}`);
+    router.push(`/history/practices/details?mode=reading&attemptId=${attemptId}`);
   };
 
   const handleContinueAttempt = (attemptId: string, passageId: string) => {

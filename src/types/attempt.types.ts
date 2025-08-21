@@ -45,13 +45,6 @@ export interface Question {
   choices?: Choice[];
 }
 
-export interface Choice {
-  choice_id: string;
-  label: string;
-  content: string;
-  choice_order: number;
-}
-
 export interface DragItem {
   drag_item_id: string;
   content: string;

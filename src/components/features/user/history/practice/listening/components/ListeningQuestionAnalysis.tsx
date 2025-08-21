@@ -166,7 +166,11 @@ export const ListeningQuestionAnalysis = ({
                                   isCorrect ? 'text-green-700' : 'text-red-700'
                                 }`}
                               >
-                                {question.correct_answer}
+                                {
+                                  question.choices.find(
+                                    (choice) => choice.choice_id === question.correct_answer
+                                  )?.content
+                                }
                               </p>
                             </div>
                           </div>

@@ -7,7 +7,6 @@ import {
 } from '@/components/features/user/common/take';
 import PassageBox from '@/components/features/user/reading/PassageBox';
 import ConfirmSubmitModal from '@/components/features/user/reading/finish/ConfirmSubmitModal';
-import FinishScreen from '@/components/features/user/reading/finish/FinishScreen';
 import { QuestionRenderer } from '@/components/features/user/reading/questions';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import useReadingAttempt from '@/hooks/apis/reading/useReadingAttempt';
@@ -154,10 +153,7 @@ const ReadingPractice = ({ passages, initialAnswers, initialDuration }: ReadingP
         payload,
       });
       if (res) {
-        // @ts-ignore
-        setSubmittedData(res.data);
-        setStartTime(false);
-        setIsSubmitted(true);
+        router.push(`/history/practices/details?mode=reading&attemptId=${passages.attempt_id}`);
       } else {
         console.error('Failed to submit attempt');
       }
@@ -179,25 +175,6 @@ const ReadingPractice = ({ passages, initialAnswers, initialDuration }: ReadingP
       },
     }));
   };
-
-  if (isSubmitted) {
-    return (
-      <FinishScreen
-        duration={submittedData?.duration}
-        key={passages?.attempt_id}
-        resultSets={submittedData?.result_sets || []}
-        score={submittedData?.result_sets?.filter((r) => r.is_correct).length || 0}
-        total={submittedData?.result_sets?.length || 0}
-        onHome={() => {
-          router.push('/reading');
-        }}
-        onReview={() => {}}
-      />
-    );
-  }
-
-  const payloadSize = JSON.stringify(buildPayload()).length;
-  console.log(payloadSize);
 
   // useUnloadSubmit({
   //   endpoint: `reading/attempts/submit/${passages.attempt_id}`,
