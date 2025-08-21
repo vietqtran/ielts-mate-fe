@@ -76,9 +76,9 @@ export default function ModuleShareCard({
   const isActionable = type === 'received' && moduleShare.status === 0;
 
   return (
-    <Card className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300'>
-      <CardHeader className='pb-4'>
-        <div className='flex items-start justify-between'>
+    <Card className='border rounded-2xl hover:shadow-lg transition-all duration-300'>
+      <CardHeader>
+        <div className='flex items-center justify-between mb-5'>
           <div className='flex items-center space-x-2'>
             <BookOpen className='h-4 w-4 text-tekhelet-400' />
             <Badge variant={'outline'} className={getStatusColor(moduleShare.status)}>
@@ -90,7 +90,7 @@ export default function ModuleShareCard({
               </Badge>
             )}
           </div>
-          <span className='text-xs text-medium-slate-blue-500 flex items-center'>
+          <span className='text-xs text-selective-yellow-200 flex items-center'>
             <Calendar className='h-3 w-3 mr-1' />
             {new Date(moduleShare.created_at).toLocaleDateString()}
           </span>
@@ -104,21 +104,21 @@ export default function ModuleShareCard({
         {/* Sharing Details */}
         <div className='space-y-2'>
           <div className='flex items-center justify-between text-sm'>
-            <span className='text-medium-slate-blue-500 flex items-center'>
+            <span className='text-tekhelet-400 flex items-center'>
               <User className='h-3 w-3 mr-1' />
               Created by:
             </span>
             <span className='text-tekhelet-400 font-medium'>{moduleShare.created_by}</span>
           </div>
           <div className='flex items-center justify-between text-sm'>
-            <span className='text-medium-slate-blue-500 flex items-center'>
+            <span className='text-tekhelet-400 flex items-center'>
               <Share2 className='h-3 w-3 mr-1' />
               Shared to:
             </span>
             <span className='text-tekhelet-400 font-medium'>{moduleShare.share_to}</span>
           </div>
           <div className='flex items-center justify-between text-sm'>
-            <span className='text-medium-slate-blue-500 flex items-center'>
+            <span className='text-tekhelet-400 flex items-center'>
               <TrendingUp className='h-3 w-3 mr-1' />
               Vocabulary Count:
             </span>
@@ -128,7 +128,7 @@ export default function ModuleShareCard({
           </div>
           {moduleShare.progress !== undefined && (
             <div className='flex items-center justify-between text-sm'>
-              <span className='text-medium-slate-blue-500 flex items-center'>
+              <span className='text-tekhelet-400 flex items-center'>
                 <TrendingUp className='h-3 w-3 mr-1' />
                 Progress:
               </span>
@@ -137,7 +137,7 @@ export default function ModuleShareCard({
           )}
           {moduleShare.time_spent !== undefined && (
             <div className='flex items-center justify-between text-sm'>
-              <span className='text-medium-slate-blue-500 flex items-center'>
+              <span className='text-tekhelet-400 flex items-center'>
                 <Timer className='h-3 w-3 mr-1' />
                 Time Spent:
               </span>
@@ -148,11 +148,11 @@ export default function ModuleShareCard({
           )}
           {moduleShare.updated_at && (
             <div className='flex items-center justify-between text-sm'>
-              <span className='text-medium-slate-blue-500 flex items-center'>
+              <span className='text-tekhelet-400 flex items-center'>
                 <Clock className='h-3 w-3 mr-1' />
                 Last Updated:
               </span>
-              <span className='text-medium-slate-blue-500'>
+              <span className='text-tekhelet-400'>
                 {new Date(moduleShare.updated_at).toLocaleDateString()}
               </span>
             </div>

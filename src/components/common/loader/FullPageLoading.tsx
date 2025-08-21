@@ -1,8 +1,8 @@
 'use client';
 
+import LoadingSpinner from '@/components/ui/loading-spinner';
 import { useAppSelector } from '@/hooks';
 import { RootState } from '@/types';
-import LoadingSpinner from '../../ui/loading-spinner';
 
 const FullPageLoading = () => {
   const { isFullPageLoading } = useAppSelector((state: RootState) => state.common);

@@ -55,7 +55,7 @@ export const PracticeHeader: React.FC<PracticeHeaderProps> = ({
     <div
       className={cn(
         'w-full border-b',
-        glass ? 'bg-white/80 backdrop-blur-lg border-tekhelet-200 shadow-sm' : 'bg-white',
+        glass ? 'bg-white backdrop-blur-lg shadow-sm' : 'bg-white',
         className
       )}
     >

@@ -12,8 +12,8 @@ import {
   clearFilters,
   setFilters,
   setLoading,
+  setPagination,
 } from '@/store/slices/reading-attempt-filter-slice';
-import { setPagination } from '@/store/slices/reading-exam-attempt-filter-slice';
 import { AttemptStatusEnumIndex, ReadingAttemptHistoryResponse } from '@/types/attempt.types';
 import { RootState } from '@/types/store.types';
 import { formatDate, formatDuration } from '@/utils/time';
@@ -166,19 +166,23 @@ const ReadingHistory = () => {
     router.push(`/reading/${passageId}/practice?attempt=${attemptId}`);
   };
 
+  console.log();
+
   return (
     <div className='container mx-auto p-6'>
       <div className='space-y-6'>
         {/* Header */}
         <div className='flex items-center justify-between'>
           <div>
-            <h1 className='text-2xl font-bold tracking-tight'>Reading Practice History</h1>
+            <h1 className='text-2xl font-bold tracking-tight text-tekhelet-500'>
+              Reading Practice History
+            </h1>
             <p className='text-muted-foreground'>View and manage your reading practice attempts</p>
           </div>
           <div className='flex items-center gap-2'>
-            <Badge variant='secondary'>
-              {pagination?.totalItems || 0} attempt
-              {(pagination?.totalItems || 0) !== 1 ? 's' : ''}
+            <Badge variant='outline' className='text-selective-yellow-200'>
+              {pagination.totalItems} attempt
+              {pagination.totalItems !== 1 ? 's' : ''}
             </Badge>
           </div>
         </div>
@@ -198,19 +202,19 @@ const ReadingHistory = () => {
                 <CardHeader>
                   <div className='flex items-start justify-between'>
                     <div className='flex-1'>
-                      <CardTitle className='h-6 w-3/4 bg-gray-200 rounded animate-pulse mb-2' />
+                      <CardTitle className='h-6 w-3/4 bg-tekhelet-700 rounded animate-pulse mb-2' />
                       <div className='flex items-center gap-2 mb-2'>
-                        <div className='h-4 w-20 bg-gray-200 rounded animate-pulse' />
-                        <div className='h-4 w-16 bg-gray-200 rounded animate-pulse' />
+                        <div className='h-4 w-20 bg-tekhelet-700 rounded animate-pulse' />
+                        <div className='h-4 w-16 bg-tekhelet-700 rounded animate-pulse' />
                       </div>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className='space-y-3'>
-                    <div className='h-4 w-full bg-gray-200 rounded animate-pulse' />
-                    <div className='h-4 w-full bg-gray-200 rounded animate-pulse' />
-                    <div className='h-4 w-2/3 bg-gray-200 rounded animate-pulse' />
+                    <div className='h-4 w-full bg-tekhelet-700 rounded animate-pulse' />
+                    <div className='h-4 w-full bg-tekhelet-700 rounded animate-pulse' />
+                    <div className='h-4 w-2/3 bg-tekhelet-700 rounded animate-pulse' />
                   </div>
                 </CardContent>
               </Card>
@@ -241,23 +245,22 @@ const ReadingHistory = () => {
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             {attemptHistoryData.map((attempt) => (
               <Card key={attempt.attempt_id} className='hover:shadow-md transition-shadow'>
-                <CardHeader>
-                  <div className='flex items-start justify-between'>
-                    <div className='flex-1'>
-                      <CardTitle className='text-lg mb-2 line-clamp-2'>
-                        {attempt.title || 'Untitled Passage'}
-                      </CardTitle>
-                      <div className='flex items-center gap-2 mb-2'>
-                        <Badge variant='secondary' className={getStatusColor(attempt.status)}>
-                          {getStatusIcon(attempt.status)}
-                          <span className='ml-1'>{getStatusLabel(attempt.status)}</span>
-                        </Badge>
-                      </div>
-                    </div>
+                <CardHeader className='min-w-0'>
+                  <CardTitle
+                    className='text-lg mb-2 w-full truncate text-tekhelet-500'
+                    title={attempt.title || 'Untitled Passage'}
+                  >
+                    {attempt.title || 'Untitled Passage'}
+                  </CardTitle>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <Badge variant='outline' className={getStatusColor(attempt.status)}>
+                      {getStatusIcon(attempt.status)}
+                      <span className='ml-1'>{getStatusLabel(attempt.status)}</span>
+                    </Badge>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <div className='space-y-3'>
+                <CardContent className='h-full'>
+                  <div className='space-y-3 flex flex-col justify-between h-full'>
                     {/* Metadata */}
                     <div className='grid grid-cols-2 gap-2 text-sm'>
                       <div className='flex items-center gap-1 text-muted-foreground'>
@@ -293,33 +296,31 @@ const ReadingHistory = () => {
                         </>
                       )}
                     </div>
-
-                    <Separator />
-
-                    {/* Action buttons */}
-                    <div className='flex gap-2'>
-                      {attempt.status === AttemptStatusEnumIndex.IN_PROGRESS ? (
-                        <Button
-                          className='flex-1'
-                          size='sm'
-                          onClick={() =>
-                            handleContinueAttempt(attempt.attempt_id, attempt.reading_passage_id)
-                          }
-                        >
-                          <PlayCircle className='h-4 w-4 mr-2' />
-                          Continue
-                        </Button>
-                      ) : (
-                        <Button
-                          className='flex-1'
-                          variant='outline'
-                          size='sm'
-                          onClick={() => handleViewAttempt(attempt.attempt_id)}
-                        >
-                          <Eye className='h-4 w-4 mr-2' />
-                          View Results
-                        </Button>
-                      )}
+                    <div>
+                      <Separator className='mb-4' />
+                      <div className='flex gap-2'>
+                        {attempt.status === AttemptStatusEnumIndex.IN_PROGRESS ? (
+                          <Button
+                            className='flex-1 bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white'
+                            size='sm'
+                            onClick={() =>
+                              handleContinueAttempt(attempt.attempt_id, attempt.reading_passage_id)
+                            }
+                          >
+                            <PlayCircle className='h-4 w-4' />
+                            Continue
+                          </Button>
+                        ) : (
+                          <Button
+                            className='flex-1 bg-tekhelet-400 hover:bg-tekhelet-500 text-white'
+                            size='sm'
+                            onClick={() => handleViewAttempt(attempt.attempt_id)}
+                          >
+                            <Eye className='h-4 w-4' />
+                            View Results
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>

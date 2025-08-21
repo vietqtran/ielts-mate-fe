@@ -94,6 +94,7 @@ export interface ListeningTaskQuestion {
   point: number;
   number_of_correct_answers: number;
   choices: Choice[];
+  correct_answer?: string;
 }
 
 export interface ListeningAttemptAnswer extends AttemptAnswer {}

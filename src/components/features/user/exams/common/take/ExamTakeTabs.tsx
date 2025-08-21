@@ -49,7 +49,7 @@ export const ExamTakeTabs = <TData,>({
         <div
           className={cn(
             'px-4 py-2 flex-shrink-0 border-b',
-            glass ? 'bg-white/80 backdrop-blur-lg' : 'bg-white'
+            glass ? 'backdrop-blur-lg' : 'bg-white'
           )}
         >
           <TabsList className='flex w-full flex-wrap gap-2'>
@@ -70,7 +70,7 @@ export const ExamTakeTabs = <TData,>({
             <div className={cn('h-full min-h-0 grid grid-cols-12 gap-4 p-4', gridClassName)}>
               <Card
                 className={cn(
-                  'bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden flex flex-col min-h-0 border border-tekhelet-200 h-full col-span-5',
+                  'backdrop-blur-lg rounded-2xl overflow-hidden flex flex-col min-h-0 border h-full col-span-5',
                   leftColClassName
                 )}
               >
@@ -79,7 +79,7 @@ export const ExamTakeTabs = <TData,>({
 
               <Card
                 className={cn(
-                  'bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden flex flex-col min-h-0 border border-medium-slate-blue-200 h-full col-span-5',
+                  'backdrop-blur-lg rounded-2xl overflow-hidden flex flex-col min-h-0 border h-full col-span-5',
                   centerColClassName
                 )}
               >
@@ -88,7 +88,7 @@ export const ExamTakeTabs = <TData,>({
 
               <Card
                 className={cn(
-                  'flex flex-col bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl border border-selective-yellow-300 h-full min-h-0 overflow-hidden col-span-2',
+                  'flex flex-col backdrop-blur-lg rounded-2xl border border-selective-yellow-300 h-full min-h-0 overflow-hidden col-span-2',
                   rightColClassName
                 )}
               >

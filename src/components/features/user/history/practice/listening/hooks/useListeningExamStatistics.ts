@@ -50,7 +50,7 @@ export const useListeningExamStatistics = (
         // Check if the answer is correct
         const isCorrect =
           answer.filled_text_answer === question.correct_answer ||
-          (answer.choice_ids && answer.choice_ids.includes(question.correct_answer));
+          (answer.choice_ids && answer.choice_ids.includes(question.correct_answer!));
 
         if (isCorrect) {
           groupCorrect++;

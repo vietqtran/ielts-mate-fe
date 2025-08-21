@@ -8,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Button } from '@/components/ui/button';
 import { Dispatch, SetStateAction } from 'react';
 
 interface ConfirmSubmitModalProps {
@@ -35,14 +36,25 @@ const ConfirmSubmitModal = ({
     <AlertDialog open={isOpen} onOpenChange={(open) => setIsOpen(open)}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{title || 'Are you absolutely sure?'}</AlertDialogTitle>
+          <AlertDialogTitle className='text-tekhelet-500'>
+            {title || 'Are you absolutely sure?'}
+          </AlertDialogTitle>
           <AlertDialogDescription>
             {description || 'This action cannot be undone.'}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCancel}>{cancelText || 'Cancel'}</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>{confirmText || 'Continue'}</AlertDialogAction>
+          <AlertDialogCancel
+            onClick={onCancel}
+            className='text-tekhelet-600 hover:text-tekhelet-700'
+          >
+            {cancelText || 'Cancel'}
+          </AlertDialogCancel>
+          <AlertDialogAction onClick={onConfirm} asChild>
+            <Button className='bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white'>
+              {confirmText || 'Continue'}
+            </Button>
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

@@ -11,11 +11,11 @@ import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import useListeningAttempt from '@/hooks/apis/listening/useListeningAttempt';
 import useListeningAudio from '@/hooks/apis/listening/useListeningAudio';
-import { formatTime, useIncrementalTimer } from '@/hooks/utils/useTimer';
+import { useIncrementalTimer } from '@/hooks/utils/useTimer';
 import { Answer } from '@/types/attempt.types';
 import { StartListeningAttemptResponse } from '@/types/listening/listening-attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
-import { AlertTriangle, Pause, Play, Volume2 } from 'lucide-react';
+import { AlertTriangle, Volume2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
@@ -48,9 +48,11 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
   initialDuration,
 }) => {
   const router = useRouter();
+  const [audioId, setAudioId] = useState<string | null>(null);
 
   const { submitAttempt, isLoading, saveAttemptProgress } = useListeningAttempt();
-  const { getAudio, audioUrl, isLoading: audioLoading, cleanup } = useListeningAudio();
+
+  const { objectUrl, error, isLoading: audioLoading } = useListeningAudio(audioId);
 
   const [answers, setAnswers] =
     useState<
@@ -67,24 +69,15 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<boolean>(false);
-
-  // Audio controls
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [currentTime, setCurrentTime] = useState<number>(0);
-  const [duration, setDuration] = useState<number>(0);
-  const [volume, setVolume] = useState<number>(1);
-
   const time = useIncrementalTimer(initialDuration, startTime);
 
   useEffect(() => {
     const initializeAudio = async () => {
       try {
         setStartTime(true);
-
-        // Load audio if available
         if (propAttemptData.audio_file_id) {
-          await getAudio(propAttemptData.audio_file_id);
+          setAudioId(propAttemptData.audio_file_id);
         }
       } catch (error) {
         console.error('Failed to load audio:', error);
@@ -95,72 +88,7 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
     if (propAttemptData) {
       initializeAudio();
     }
-
-    // Cleanup on unmount
-    return () => {
-      cleanup();
-    };
   }, [propAttemptData]);
-
-  // Audio event handlers
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const updateTime = () => setCurrentTime(audio.currentTime);
-    const updateDuration = () => setDuration(audio.duration);
-    const handleEnded = () => setIsPlaying(false);
-    const handleError = () => {
-      console.error('Audio playback error');
-      setIsPlaying(false);
-    };
-
-    audio.addEventListener('timeupdate', updateTime);
-    audio.addEventListener('loadedmetadata', updateDuration);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError);
-
-    return () => {
-      audio.removeEventListener('timeupdate', updateTime);
-      audio.removeEventListener('loadedmetadata', updateDuration);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('error', handleError);
-    };
-  }, [audioUrl]);
-
-  const togglePlayPause = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play().catch((error) => {
-        console.error('Error playing audio:', error);
-        toast.error('Failed to play audio');
-        setIsPlaying(false);
-      });
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const newTime = (parseFloat(e.target.value) / 100) * duration;
-    audio.currentTime = newTime;
-    setCurrentTime(newTime);
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const audio = audioRef.current;
-    const newVolume = parseFloat(e.target.value) / 100;
-    setVolume(newVolume);
-    if (audio) {
-      audio.volume = newVolume;
-    }
-  };
 
   const getTotalQuestions = () => {
     if (!propAttemptData) return 0;
@@ -365,64 +293,29 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
                 {/* Instructions */}
                 <div className='space-y-4'>
                   <h3 className='font-semibold text-tekhelet-600'>Instructions:</h3>
-                  <p className='text-sm text-medium-slate-blue-500 leading-relaxed'>
-                    {propAttemptData.instruction}
-                  </p>
+                  <p
+                    className='text-sm text-medium-slate-blue-500 leading-relaxed'
+                    dangerouslySetInnerHTML={{
+                      __html: propAttemptData.instruction,
+                    }}
+                  />
                 </div>
 
                 {/* Audio Controls */}
-                {audioUrl ? (
+                {objectUrl ? (
                   <div className='space-y-4'>
-                    <audio ref={audioRef} src={audioUrl} preload='metadata' />
-
-                    {/* Play/Pause Button */}
-                    <div className='flex justify-center'>
-                      <Button
-                        onClick={togglePlayPause}
-                        size='lg'
-                        className='bg-tekhelet-500 hover:bg-tekhelet-600 text-white rounded-full w-16 h-16 shadow-lg'
-                        disabled={audioLoading.getAudio}
-                      >
-                        {isPlaying ? (
-                          <Pause className='w-6 h-6' />
-                        ) : (
-                          <Play className='w-6 h-6 ml-1' />
-                        )}
-                      </Button>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className='space-y-2'>
-                      <input
-                        type='range'
-                        min='0'
-                        max='100'
-                        value={duration > 0 ? (currentTime / duration) * 100 : 0}
-                        onChange={handleSeek}
-                        className='w-full h-2 bg-medium-slate-blue-100 rounded-lg appearance-none cursor-pointer slider'
-                      />
-                      <div className='flex justify-between text-xs text-medium-slate-blue-500 font-medium'>
-                        <span>{formatTime(Math.floor(currentTime))}</span>
-                        <span>{formatTime(Math.floor(duration))}</span>
-                      </div>
-                    </div>
-
-                    {/* Volume Control */}
-                    <div className='space-y-2'>
-                      <label className='text-xs font-semibold text-tekhelet-600'>Volume</label>
-                      <input
-                        type='range'
-                        min='0'
-                        max='100'
-                        value={volume * 100}
-                        onChange={handleVolumeChange}
-                        className='w-full h-2 bg-medium-slate-blue-100 rounded-lg appearance-none cursor-pointer slider'
-                      />
-                    </div>
+                    <audio
+                      ref={audioRef}
+                      src={objectUrl}
+                      preload='metadata'
+                      controls
+                      controlsList='nodownload'
+                      className='w-full'
+                    />
                   </div>
                 ) : (
                   <div className='text-center py-8'>
-                    {audioLoading.getAudio ? (
+                    {audioLoading ? (
                       <div className='space-y-2'>
                         <div className='animate-spin rounded-full h-8 w-8 border-4 border-medium-slate-blue-200 border-t-tekhelet-500 mx-auto'></div>
                         <p className='text-sm text-medium-slate-blue-500 font-medium'>
@@ -502,28 +395,6 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
       </PracticeShell>
 
       {/* Custom slider styles */}
-      <style jsx>{`
-        .slider::-webkit-slider-thumb {
-          appearance: none;
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background: #5b5bd6; /* tekhelet-500 */
-          cursor: pointer;
-          border: 2px solid white;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .slider::-moz-range-thumb {
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background: #5b5bd6; /* tekhelet-500 */
-          cursor: pointer;
-          border: 2px solid white;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-      `}</style>
     </>
   );
 };

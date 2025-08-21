@@ -200,18 +200,14 @@ const ListeningExamHistory = () => {
                 key={attempt.exam_attempt_id}
                 className='bg-white/60 backdrop-blur-lg border rounded-2xl shadow-xl hover:shadow-2xl transition-shadow'
               >
-                <CardHeader>
-                  <div className='flex items-start justify-between'>
-                    <div className='flex-1'>
-                      <CardTitle className='text-lg mb-2 line-clamp-2 text-tekhelet-700'>
-                        {attempt.listening_exam.listening_exam_name || 'Untitled Exam'}
-                      </CardTitle>
-                      <div className='flex items-center gap-2 mb-2'>
-                        <Badge variant={'outline'} className='bg-emerald-100 !text-emerald-800'>
-                          Completed
-                        </Badge>
-                      </div>
-                    </div>
+                <CardHeader className='min-w-0'>
+                  <CardTitle className='text-lg mb-2 line-clamp-2 text-tekhelet-700 w-full truncate'>
+                    {attempt.listening_exam.listening_exam_name || 'Untitled Exam'}
+                  </CardTitle>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <Badge variant={'outline'} className='bg-emerald-100 !text-emerald-800'>
+                      Completed
+                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent>

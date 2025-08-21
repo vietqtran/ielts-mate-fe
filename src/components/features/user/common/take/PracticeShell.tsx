@@ -11,12 +11,7 @@ export interface PracticeShellProps {
 
 export const PracticeShell: React.FC<PracticeShellProps> = ({ header, children, className }) => {
   return (
-    <div
-      className={cn(
-        'h-screen w-full grid grid-rows-[auto_1fr] bg-medium-slate-blue-900',
-        className
-      )}
-    >
+    <div className={cn('h-screen w-full grid grid-rows-[auto_1fr]', className)}>
       {header}
       <div className='h-full overflow-hidden'>{children}</div>
     </div>
