@@ -298,7 +298,7 @@ export function QuestionGroupsManager({
                           </div>
                           {group.instruction && (
                             <div
-                              className='text-xs text-muted-foreground mt-1 max-w-md truncate prose prose-xs'
+                              className='text-xs text-muted-foreground mt-1 max-w-md'
                               dangerouslySetInnerHTML={{ __html: group.instruction }}
                             />
                           )}

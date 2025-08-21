@@ -102,12 +102,14 @@ export function ViewPassageModal({
           return (
             <div key={index} className='space-y-2'>
               <h5 className='font-medium'>Question {question.question_order}</h5>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: question.instruction_for_choice,
-                }}
-              />
-              {question.choices && (
+              {question.instruction_for_choice && (
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: question.instruction_for_choice,
+                  }}
+                />
+              )}
+              {question.choices && question.choices.length > 0 && (
                 <div className='space-y-1 ml-4'>
                   {question.choices.map((choice: any, choiceIndex: number) => (
                     <div
@@ -120,45 +122,99 @@ export function ViewPassageModal({
                   ))}
                 </div>
               )}
+              {question.explanation && (
+                <div className='mt-3 p-3 bg-yellow-50 rounded-md'>
+                  <p className='text-sm font-medium text-yellow-800 mb-2'>Explanation:</p>
+                  <div
+                    className='text-sm prose prose-sm max-w-none'
+                    dangerouslySetInnerHTML={{
+                      __html: question.explanation,
+                    }}
+                  />
+                </div>
+              )}
             </div>
           );
         case QuestionTypeEnumIndex.FILL_IN_THE_BLANKS: // Fill in Blank
           return (
             <div key={index} className='space-y-2'>
               <h5 className='font-medium'>
-                Question {question.question_order} (Blank {question.blank_index})
+                Question {question.question_order}{' '}
+                {question.blank_index && `(Blank ${question.blank_index})`}
               </h5>
-              <p className='text-sm text-green-600 font-medium'>
-                Answer: {question.correct_answer}
-              </p>
+              {question.correct_answer && (
+                <p className='text-sm text-green-600 font-medium'>
+                  Answer: {question.correct_answer}
+                </p>
+              )}
+              {question.explanation && (
+                <div className='mt-3 p-3 bg-yellow-50 rounded-md'>
+                  <p className='text-sm font-medium text-yellow-800 mb-2'>Explanation:</p>
+                  <div
+                    className='text-sm prose prose-sm max-w-none'
+                    dangerouslySetInnerHTML={{
+                      __html: question.explanation,
+                    }}
+                  />
+                </div>
+              )}
             </div>
           );
         case QuestionTypeEnumIndex.MATCHING: // Matching
           return (
             <div key={index} className='space-y-2'>
               <h5 className='font-medium'>Question {question.question_order}</h5>
-              <div
-                dangerouslySetInnerHTML={{
-                  __html: question.instruction_for_matching,
-                }}
-              />
-              <div className='text-sm'>
-                <p className='font-medium'>Correct Answers:</p>
-                <p className='font-mono bg-gray-50 p-2 rounded'>
-                  {question.correct_answer_for_matching}
-                </p>
-              </div>
+              {question.instruction_for_matching && (
+                <div
+                  dangerouslySetInnerHTML={{
+                    __html: question.instruction_for_matching,
+                  }}
+                />
+              )}
+              {question.correct_answer_for_matching && (
+                <div className='text-sm'>
+                  <p className='font-medium'>Correct Answers:</p>
+                  <p className='font-mono bg-gray-50 p-2 rounded'>
+                    {question.correct_answer_for_matching}
+                  </p>
+                </div>
+              )}
+              {question.explanation && (
+                <div className='mt-3 p-3 bg-yellow-50 rounded-md'>
+                  <p className='text-sm font-medium text-yellow-800 mb-2'>Explanation:</p>
+                  <div
+                    className='text-sm prose prose-sm max-w-none'
+                    dangerouslySetInnerHTML={{
+                      __html: question.explanation,
+                    }}
+                  />
+                </div>
+              )}
             </div>
           );
         case QuestionTypeEnumIndex.DRAG_AND_DROP: // Drag and Drop
           return (
             <div key={index} className='space-y-2'>
               <h5 className='font-medium'>
-                Question {question.question_order} (Zone {question.zone_index})
+                Question {question.question_order}{' '}
+                {question.zone_index && `(Zone ${question.zone_index})`}
               </h5>
-              <p className='text-sm text-green-600 font-medium'>
-                Correct Item: {question.dragItemContent}
-              </p>
+              {question.drag_item_content && (
+                <p className='text-sm text-green-600 font-medium'>
+                  Correct Item: {question.drag_item_content}
+                </p>
+              )}
+              {question.explanation && (
+                <div className='mt-3 p-3 bg-yellow-50 rounded-md'>
+                  <p className='text-sm font-medium text-yellow-800 mb-2'>Explanation:</p>
+                  <div
+                    className='text-sm prose prose-sm max-w-none'
+                    dangerouslySetInnerHTML={{
+                      __html: question.explanation,
+                    }}
+                  />
+                </div>
+              )}
             </div>
           );
         default:
@@ -321,17 +377,27 @@ export function ViewPassageModal({
                             </div>
                           )}
 
-                          <div className='grid gap-4'>{renderQuestionsByType(group.questions)}</div>
+                          <div className='grid gap-4'>
+                            {renderQuestionsByType(
+                              group.questions.sort(
+                                (a: any, b: any) => a.question_order - b.question_order
+                              )
+                            )}
+                          </div>
 
                           {/* Show drag items if this is a drag & drop group */}
-                          {group.questions.some((q: any) => q.question_type === 3) && (
+                          {group.drag_item && group.drag_item.length > 0 && (
                             <div className='mt-4 p-3 bg-blue-50 rounded-md'>
                               <p className='text-sm font-medium mb-2'>Available Drag Items:</p>
                               <div className='flex flex-wrap gap-2'>
-                                {/* This would need to be populated from drag items API */}
-                                <span className='text-sm text-muted-foreground'>
-                                  Drag items would be loaded separately
-                                </span>
+                                {group.drag_item.map((item: any, index: number) => (
+                                  <div
+                                    key={item.drag_item_id}
+                                    className='px-3 py-2 bg-blue-100 text-blue-800 rounded-md text-sm'
+                                  >
+                                    {item.content}
+                                  </div>
+                                ))}
                               </div>
                             </div>
                           )}

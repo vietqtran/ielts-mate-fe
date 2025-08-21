@@ -18,7 +18,6 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import instance from '@/lib/axios';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -65,7 +64,8 @@ export function MultipleChoiceForm({
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
-      question_order: questions.length + 1,
+      question_order:
+        questions.length > 0 ? Math.max(...questions.map((q: any) => q.question_order)) + 1 : 1,
       point: 1,
       explanation: '',
       instruction_for_choice: '',
@@ -138,7 +138,8 @@ export function MultipleChoiceForm({
       }
 
       form.reset({
-        question_order: questions.length + 2,
+        question_order:
+          questions.length > 0 ? Math.max(...questions.map((q: any) => q.question_order)) + 2 : 2,
         point: 1,
         explanation: '',
         instruction_for_choice: '',
@@ -282,7 +283,11 @@ export function MultipleChoiceForm({
                   <FormItem>
                     <FormLabel>Explanation</FormLabel>
                     <FormControl>
-                      <Textarea placeholder='Enter explanation for the answer' {...field} />
+                      <TiptapEditor
+                        content={field.value}
+                        onChange={field.onChange}
+                        placeholder='Enter explanation for the answer'
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

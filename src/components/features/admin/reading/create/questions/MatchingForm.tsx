@@ -145,9 +145,10 @@ export function MatchingForm({
                 <FormItem>
                   <FormLabel>Explanation</FormLabel>
                   <FormControl>
-                    <Textarea
+                    <TiptapEditor
+                      content={field.value}
+                      onChange={field.onChange}
                       placeholder='Explain the correct answers and key clues...'
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />

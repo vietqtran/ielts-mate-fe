@@ -160,10 +160,16 @@ export function FillInBlanksManager({
   };
 
   const defaultInitialData = {
-    question_order: localQuestions.length + 1,
+    question_order:
+      localQuestions.length > 0
+        ? Math.max(...localQuestions.map((q: any) => q.question_order)) + 1
+        : 1,
     point: 1,
     explanation: '',
-    blank_index: localQuestions.length + 1,
+    blank_index:
+      localQuestions.length > 0
+        ? Math.max(...localQuestions.map((q: any) => q.blank_index)) + 1
+        : 1,
     correct_answer: '',
   };
 

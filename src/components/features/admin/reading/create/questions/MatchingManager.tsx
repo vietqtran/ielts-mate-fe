@@ -160,7 +160,10 @@ export function MatchingManager({
   };
 
   const defaultInitialData = {
-    question_order: localQuestions.length + 1,
+    question_order:
+      localQuestions.length > 0
+        ? Math.max(...localQuestions.map((q: any) => q.question_order)) + 1
+        : 1,
     point: 1,
     explanation: '',
     instruction_for_matching: '',

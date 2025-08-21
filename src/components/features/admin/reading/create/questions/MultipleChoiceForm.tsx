@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 const choiceSchema = z.object({
   id: z.string().optional(),
@@ -110,6 +111,7 @@ export function MultipleChoiceForm({
       form.setError('choices', {
         message: 'At least one choice must be correct',
       });
+      toast.error('At least one choice must be correct');
       return;
     }
 
@@ -117,6 +119,9 @@ export function MultipleChoiceForm({
       form.setError('number_of_correct_answers', {
         message: `Number of correct answers (${data.number_of_correct_answers}) must match selected correct choices (${correctCount})`,
       });
+      toast.error(
+        `Number of correct answers (${data.number_of_correct_answers}) must match selected correct choices (${correctCount})`
+      );
       return;
     }
 
@@ -312,9 +317,10 @@ export function MultipleChoiceForm({
                 <FormItem>
                   <FormLabel>Explanation</FormLabel>
                   <FormControl>
-                    <Textarea
+                    <TiptapEditor
+                      content={field.value}
+                      onChange={field.onChange}
                       placeholder='Explain why the correct answer(s) are correct and why others are wrong'
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />

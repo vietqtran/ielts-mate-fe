@@ -18,7 +18,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
+import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { useQuestion } from '@/hooks/apis/admin/useQuestion';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Save, X } from 'lucide-react';
@@ -302,9 +302,10 @@ export function QuestionForm({
                 <FormItem>
                   <FormLabel>Explanation</FormLabel>
                   <FormControl>
-                    <Textarea
+                    <TiptapEditor
+                      content={field.value}
+                      onChange={field.onChange}
                       placeholder='Explain why this drag item is correct for this drop zone'
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />

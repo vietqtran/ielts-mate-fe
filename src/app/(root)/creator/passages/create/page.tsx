@@ -20,6 +20,7 @@ import { usePassage } from '@/hooks/apis/reading/usePassage';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 const passageSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -34,7 +35,7 @@ type PassageFormData = z.infer<typeof passageSchema>;
 
 export default function CreatePassagePage() {
   const router = useRouter();
-  const { createPassage, isLoading } = usePassage();
+  const { createPassage, deleteGroupQuestion, isLoading } = usePassage();
 
   const [currentStep, setCurrentStep] = useState<'basic' | 'questions' | 'preview'>('basic');
   const [createdpassage_id, setCreatedpassage_id] = useState<string | null>(null);
@@ -173,8 +174,25 @@ export default function CreatePassagePage() {
     setQuestionGroups((prev) => prev.map((g, i) => (i === index ? group : g)));
   };
 
-  const handleDeleteQuestionGroup = (index: number) => {
-    setQuestionGroups((prev) => prev.filter((_, i) => i !== index));
+  const handleDeleteQuestionGroup = async (index: number) => {
+    const groupToDelete = questionGroups[index];
+
+    // If the group has an ID, it means it has been saved to the database, so we need to delete it via API
+    if (groupToDelete.id && createdpassage_id) {
+      try {
+        await deleteGroupQuestion(createdpassage_id, groupToDelete.id);
+        // Remove from local state after successful API deletion
+        setQuestionGroups((prev) => prev.filter((_, i) => i !== index));
+        toast.success('Question group deleted successfully');
+      } catch (error) {
+        console.error('Failed to delete question group:', error);
+        toast.error('Failed to delete question group');
+        // You might want to show a toast notification here
+      }
+    } else {
+      // If the group doesn't have an ID, it hasn't been saved to the database yet, so just remove from local state
+      setQuestionGroups((prev) => prev.filter((_, i) => i !== index));
+    }
   };
 
   const handlePreview = () => {

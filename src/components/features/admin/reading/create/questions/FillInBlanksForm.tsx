@@ -14,7 +14,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Save } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -152,9 +152,10 @@ export function FillInBlanksForm({
                 <FormItem>
                   <FormLabel>Explanation</FormLabel>
                   <FormControl>
-                    <Textarea
+                    <TiptapEditor
+                      content={field.value}
+                      onChange={field.onChange}
                       placeholder="Explain where in the passage the answer can be found and why it's correct"
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />
