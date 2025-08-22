@@ -37,6 +37,7 @@ import { useModules } from '@/hooks/apis/modules/useModules';
 import { useVocabulary } from '@/hooks/apis/vocabulary/useVocabulary';
 import { ModuleResponse, ModuleUserResponse } from '@/lib/api/modules';
 import { VocabularyResponse } from '@/lib/api/vocabulary';
+import { Trash2 } from 'lucide-react';
 import {
   Award,
   BarChart3,
@@ -139,6 +140,10 @@ export default function PersonalizedPage() {
   const [pendingModuleForReset, setPendingModuleForReset] = useState<
     ModuleResponse | ModuleUserResponse | null
   >(null);
+  const [isDeleteVocabPromptOpen, setIsDeleteVocabPromptOpen] = useState(false);
+  const [pendingVocabForDelete, setPendingVocabForDelete] = useState<VocabularyResponse | null>(
+    null
+  );
   const [vocabularies, setVocabularies] = useState<VocabularyResponse[]>([]);
   const [modules, setModules] = useState<ModuleResponse[]>([]);
   const [sharedModules, setSharedModules] = useState<ModuleUserResponse[]>([]);
@@ -154,13 +159,12 @@ export default function PersonalizedPage() {
   });
 
   const { user } = useAppSelector((state) => state.auth);
-  const { getMyVocabulary } = useVocabulary();
+  const { getMyVocabulary, deleteVocabulary } = useVocabulary();
   const {
     getMyModules,
     getMySharedModules,
     getSharedModuleRequests,
     getMyRequestedModules,
-    getModuleProgress,
     refreshModuleProgress,
     isLoading: moduleLoading,
   } = useModules();
@@ -235,6 +239,41 @@ export default function PersonalizedPage() {
     }
     if (requestsResponse) {
       setShareRequests(requestsResponse.data);
+    }
+  };
+
+  // Refresh vocabulary list
+  const refreshVocabularyList = async () => {
+    const response = await getMyVocabulary({
+      page: 1,
+      size: 50,
+      sortBy: 'createdAt',
+      sortDirection: 'desc',
+    });
+
+    if (response) {
+      setVocabularies(response.data);
+      setPagination(response.pagination);
+    }
+  };
+
+  // Handle vocabulary delete
+  const handleDeleteVocabulary = (vocab: VocabularyResponse) => {
+    setPendingVocabForDelete(vocab);
+    setIsDeleteVocabPromptOpen(true);
+  };
+
+  const confirmDeleteVocabulary = async () => {
+    if (!pendingVocabForDelete) return;
+
+    try {
+      const result = await deleteVocabulary(pendingVocabForDelete.vocabulary_id);
+      await refreshVocabularyList();
+      setIsDeleteVocabPromptOpen(false);
+      setPendingVocabForDelete(null);
+    } catch (error) {
+      console.error('Error deleting vocabulary:', error);
+      // Keep modal open if there's an error
     }
   };
 
@@ -997,12 +1036,20 @@ export default function PersonalizedPage() {
                           </div>
                         </div>
                       </div>
-                      <div className='flex gap-5 items-center'>
+                      <div className='flex gap-3 items-center'>
                         <p className='text-xs text-selective-yellow-100'>
                           Created: {new Date(vocab.created_at).toLocaleDateString()}
                         </p>
                         <Button variant='outline' size='sm' className='text-tekhelet-400'>
                           Edit
+                        </Button>
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          className='text-persimmon-400 border-persimmon-300 hover:bg-persimmon-50 hover:text-persimmon-500'
+                          onClick={() => handleDeleteVocabulary(vocab)}
+                        >
+                          <Trash2 className='h-4 w-4' />
                         </Button>
                       </div>
                     </div>
@@ -1229,6 +1276,36 @@ export default function PersonalizedPage() {
                 className='bg-tekhelet-400 hover:bg-tekhelet-500 text-white'
               >
                 Reset Progress
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Delete Vocabulary Prompt */}
+        <AlertDialog open={isDeleteVocabPromptOpen} onOpenChange={setIsDeleteVocabPromptOpen}>
+          <AlertDialogContent className='bg-white/90 backdrop-blur-lg border border-tekhelet-200 rounded-2xl'>
+            <AlertDialogHeader>
+              <AlertDialogTitle className='text-tekhelet-400'>Delete vocabulary?</AlertDialogTitle>
+              <AlertDialogDescription className='text-medium-slate-blue-500'>
+                Are you sure you want to delete "{pendingVocabForDelete?.word}"? This action cannot
+                be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                className='border-medium-slate-blue-200 text-medium-slate-blue-600'
+                onClick={() => {
+                  setIsDeleteVocabPromptOpen(false);
+                  setPendingVocabForDelete(null);
+                }}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDeleteVocabulary}
+                className='bg-persimmon-400 hover:bg-persimmon-500 text-white'
+              >
+                Delete
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

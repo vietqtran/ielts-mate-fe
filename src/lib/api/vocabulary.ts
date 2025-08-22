@@ -40,6 +40,12 @@ export interface VocabularyListResponse {
   };
 }
 
+export interface VocabularyDeleteResponse {
+  status: string;
+  message: string;
+  data: null;
+}
+
 export interface VocabularyListParams {
   page?: number;
   size?: number;
@@ -78,5 +84,17 @@ export const getMyVocabulary = async (
 
   const url = `/personal/vocabulary/my-vocabulary${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
   const response = await axios.get<VocabularyListResponse>(url);
+  return response.data;
+};
+
+/**
+ * Delete a vocabulary by ID
+ * @param vocabularyId Vocabulary ID to delete
+ * @returns Promise with the delete response
+ */
+export const deleteVocabulary = async (vocabularyId: string): Promise<VocabularyDeleteResponse> => {
+  const response = await axios.delete<VocabularyDeleteResponse>(
+    `/personal/vocabulary/${vocabularyId}`
+  );
   return response.data;
 };
