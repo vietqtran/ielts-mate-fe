@@ -39,6 +39,7 @@ interface QuestionGroupFormProps {
   onCancel: () => void;
   isLoading: boolean;
   initialData?: Partial<QuestionGroupFormData>;
+  existingGroupsCount?: number;
 }
 
 const QUESTION_TYPE_INFO = {
@@ -70,11 +71,12 @@ export function QuestionGroupForm({
   onCancel,
   isLoading,
   initialData,
+  existingGroupsCount = 0,
 }: QuestionGroupFormProps) {
   const form = useForm<QuestionGroupFormData>({
     resolver: zodResolver(questionGroupSchema),
     defaultValues: {
-      section_order: initialData?.section_order || 1,
+      section_order: initialData?.section_order || existingGroupsCount + 1,
       section_label: initialData?.section_label || '',
       instruction: initialData?.instruction || '',
       question_type: initialData?.question_type || QuestionType.MULTIPLE_CHOICE,
@@ -113,6 +115,7 @@ export function QuestionGroupForm({
                   <FormLabel>Section Order</FormLabel>
                   <FormControl>
                     <Input
+                      className='bg-white'
                       type='number'
                       min='1'
                       {...field}
@@ -131,7 +134,7 @@ export function QuestionGroupForm({
                 <FormItem>
                   <FormLabel>Section Label</FormLabel>
                   <FormControl>
-                    <Input placeholder='e.g., Questions 1-5' {...field} />
+                    <Input className='bg-white' placeholder='e.g., Questions 1-5' {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -178,6 +181,7 @@ export function QuestionGroupForm({
                 <FormLabel>Instruction</FormLabel>
                 <FormControl>
                   <TiptapEditor
+                    className='bg-white'
                     content={field.value}
                     onChange={field.onChange}
                     placeholder="Enter the instruction for this question group (e.g., 'Choose the correct letter A, B, C or D')"

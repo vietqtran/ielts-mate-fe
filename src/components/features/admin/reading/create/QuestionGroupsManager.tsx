@@ -259,6 +259,7 @@ export function QuestionGroupsManager({
                 onSubmit={handleCreateGroup}
                 onCancel={() => setIsCreatingGroup(false)}
                 isLoading={isLoading.addGroupQuestion}
+                existingGroupsCount={questionGroups.length}
               />
             </div>
           )}
