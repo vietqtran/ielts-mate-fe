@@ -9,6 +9,7 @@ import {
   ModuleUserListResponse,
   ShareModuleRequest,
   createModule,
+  deleteModule,
   getModuleById,
   getModuleProgress,
   getMyModules,
@@ -42,6 +43,7 @@ export const useModules = () => {
     updateModuleSessionTime?: boolean;
     getUserInfoByEmail?: boolean;
     refreshModuleProgress?: boolean;
+    deleteModule?: boolean;
   }>({
     createModule: false,
     getMyModules: false,
@@ -57,6 +59,7 @@ export const useModules = () => {
     updateModuleSessionTime: false,
     getUserInfoByEmail: false,
     refreshModuleProgress: false,
+    deleteModule: false,
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -339,6 +342,24 @@ export const useModules = () => {
     }
   };
 
+  const deleteModuleFn = async (moduleId: string): Promise<BaseResponse<void> | null> => {
+    setIsLoading((prev) => ({ ...prev, deleteModule: true }));
+    setError(null);
+
+    try {
+      const response = await deleteModule(moduleId);
+      toast.success('Module deleted successfully');
+      return response;
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Failed to delete module';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return null;
+    } finally {
+      setIsLoading((prev) => ({ ...prev, deleteModule: false }));
+    }
+  };
+
   return {
     createModule: createModuleFn,
     getMyModules: getMyModulesFn,
@@ -354,6 +375,7 @@ export const useModules = () => {
     updateModuleProgress: updateModuleProgressFn,
     updateModuleSessionTime: updateModuleSessionTimeFn,
     refreshModuleProgress: refreshModuleProgressFn,
+    deleteModule: deleteModuleFn,
     isLoading,
     error,
   };

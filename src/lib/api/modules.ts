@@ -236,6 +236,16 @@ export const updateModule = async (
   return response.data;
 };
 
+/**
+ * Delete a module by id
+ * @param id Module id
+ * @returns Promise with the delete response
+ */
+export const deleteModule = async (id: string): Promise<BaseResponse<void>> => {
+  const response = await axios.delete<BaseResponse<void>>(`/personal/module/${id}`);
+  return response.data;
+};
+
 // Sharing API functions
 
 /**

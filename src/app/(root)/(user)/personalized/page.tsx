@@ -91,11 +91,15 @@ export default function PersonalizedPage() {
     const timeInSeconds = Math.floor(timeInMs / 1000);
     const hours = Math.floor(timeInSeconds / 3600);
     const minutes = Math.floor((timeInSeconds % 3600) / 60);
+    const seconds = timeInSeconds % 60;
 
     if (hours > 0) {
-      return `${hours}h ${minutes}m`;
+      return `${hours}h ${minutes}m ${seconds}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    } else {
+      return `${seconds}s`;
     }
-    return `${minutes}m`;
   };
 
   // Helper function to check if module is created by current user
@@ -144,6 +148,8 @@ export default function PersonalizedPage() {
   const [pendingVocabForDelete, setPendingVocabForDelete] = useState<VocabularyResponse | null>(
     null
   );
+  const [isDeleteModulePromptOpen, setIsDeleteModulePromptOpen] = useState(false);
+  const [pendingModuleForDelete, setPendingModuleForDelete] = useState<ModuleResponse | null>(null);
   const [vocabularies, setVocabularies] = useState<VocabularyResponse[]>([]);
   const [modules, setModules] = useState<ModuleResponse[]>([]);
   const [sharedModules, setSharedModules] = useState<ModuleUserResponse[]>([]);
@@ -166,6 +172,7 @@ export default function PersonalizedPage() {
     getSharedModuleRequests,
     getMyRequestedModules,
     refreshModuleProgress,
+    deleteModule,
     isLoading: moduleLoading,
   } = useModules();
 
@@ -273,6 +280,29 @@ export default function PersonalizedPage() {
       setPendingVocabForDelete(null);
     } catch (error) {
       console.error('Error deleting vocabulary:', error);
+      // Keep modal open if there's an error
+    }
+  };
+
+  // Handle module delete
+  const handleDeleteModule = (module: ModuleResponse) => {
+    setPendingModuleForDelete(module);
+    setIsDeleteModulePromptOpen(true);
+  };
+
+  const confirmDeleteModule = async () => {
+    if (!pendingModuleForDelete) return;
+
+    try {
+      const result = await deleteModule(pendingModuleForDelete.module_id);
+      const moduleResponse = await getMyModules();
+      if (moduleResponse) {
+        setModules(moduleResponse.data);
+      }
+      setIsDeleteModulePromptOpen(false);
+      setPendingModuleForDelete(null);
+    } catch (error) {
+      console.error('Error deleting module:', error);
       // Keep modal open if there's an error
     }
   };
@@ -946,22 +976,35 @@ export default function PersonalizedPage() {
                         >
                           <BarChart3 className='h-4 w-4' />
                         </Button>
-                        <Button
-                          variant='outline'
-                          className='border-[#bfd7ed]/40 text-tekhelet-400'
-                          asChild
-                        >
-                          <Link href={`/personalized/update-module?id=${module.module_id}`}>
-                            Edit
-                          </Link>
-                        </Button>
-                        <Button
-                          variant='outline'
-                          className='border-[#bfd7ed]/40 text-tekhelet-400'
-                          onClick={() => handleShareModule(module.module_id, module.module_name)}
-                        >
-                          <Share2 className='h-4 w-4' />
-                        </Button>
+                        {isMyModule(module.created_by) && (
+                          <>
+                            <Button
+                              variant='outline'
+                              className='border-[#bfd7ed]/40 text-tekhelet-400'
+                              asChild
+                            >
+                              <Link href={`/personalized/update-module?id=${module.module_id}`}>
+                                Edit
+                              </Link>
+                            </Button>
+                            <Button
+                              variant='outline'
+                              className='border-[#bfd7ed]/40 text-tekhelet-400'
+                              onClick={() =>
+                                handleShareModule(module.module_id, module.module_name)
+                              }
+                            >
+                              <Share2 className='h-4 w-4' />
+                            </Button>
+                            <Button
+                              variant='outline'
+                              className='border-persimmon-300 text-persimmon-400 hover:bg-persimmon-50 hover:text-persimmon-500'
+                              onClick={() => handleDeleteModule(module)}
+                            >
+                              <Trash2 className='h-4 w-4' />
+                            </Button>
+                          </>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
@@ -1303,6 +1346,36 @@ export default function PersonalizedPage() {
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={confirmDeleteVocabulary}
+                className='bg-persimmon-400 hover:bg-persimmon-500 text-white'
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+
+        {/* Delete Module Prompt */}
+        <AlertDialog open={isDeleteModulePromptOpen} onOpenChange={setIsDeleteModulePromptOpen}>
+          <AlertDialogContent className='bg-white/90 backdrop-blur-lg border border-tekhelet-200 rounded-2xl'>
+            <AlertDialogHeader>
+              <AlertDialogTitle className='text-tekhelet-400'>Delete module?</AlertDialogTitle>
+              <AlertDialogDescription className='text-medium-slate-blue-500'>
+                Are you sure you want to delete "{pendingModuleForDelete?.module_name}"? This action
+                cannot be undone and will also remove all progress data.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                className='border-medium-slate-blue-200 text-medium-slate-blue-600'
+                onClick={() => {
+                  setIsDeleteModulePromptOpen(false);
+                  setPendingModuleForDelete(null);
+                }}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                onClick={confirmDeleteModule}
                 className='bg-persimmon-400 hover:bg-persimmon-500 text-white'
               >
                 Delete

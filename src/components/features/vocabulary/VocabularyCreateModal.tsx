@@ -32,10 +32,7 @@ const formSchema = z.object({
     .string()
     .min(1, 'Context is required')
     .max(500, 'Context must be less than 500 characters'),
-  meaning: z
-    .string()
-    .min(1, 'Meaning is required')
-    .max(300, 'Meaning must be less than 300 characters'),
+  meaning: z.string().max(300, 'Meaning must be less than 300 characters').optional().nullable(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -63,7 +60,13 @@ export default function VocabularyCreateModal({
   });
 
   const onSubmit = async (values: FormValues) => {
-    const result = await createVocabulary(values);
+    // Convert empty string to null for meaning
+    const requestData = {
+      ...values,
+      meaning: values.meaning?.trim() || null,
+    };
+
+    const result = await createVocabulary(requestData);
     if (result) {
       form.reset();
       onClose();
@@ -112,10 +115,10 @@ export default function VocabularyCreateModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className='text-selective-yellow-200 font-semibold text-sm'>
-                    Meaning
+                    Meaning (optional)
                   </FormLabel>
                   <FormControl>
-                    <Input placeholder='Enter the meaning' {...field} />
+                    <Input placeholder='Enter the meaning' {...field} value={field.value || ''} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

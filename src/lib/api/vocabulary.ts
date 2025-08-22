@@ -3,7 +3,7 @@ import axios from '../axios';
 export interface VocabularyCreateRequest {
   word: string;
   context: string;
-  meaning: string;
+  meaning?: string | null;
 }
 
 export interface VocabularyResponse {
