@@ -6,18 +6,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useModules } from '@/hooks/apis/modules/useModules';
 import { ModuleUserResponse } from '@/lib/api/modules';
 import { BookOpen, Calendar, Check, Clock, Share2, Timer, TrendingUp, User, X } from 'lucide-react';
+import Link from 'next/link';
 
 interface ModuleShareCardProps {
   moduleShare: ModuleUserResponse;
   onUpdate?: () => void;
-  onStudy?: (module: ModuleUserResponse) => void;
   type?: 'received' | 'sent' | 'accepted';
 }
 
 export default function ModuleShareCard({
   moduleShare,
   onUpdate,
-  onStudy,
   type = 'received',
 }: ModuleShareCardProps) {
   const { updateSharedModuleRequest, isLoading } = useModules();
@@ -162,12 +161,11 @@ export default function ModuleShareCard({
         {/* Actions */}
         <div className='flex gap-2'>
           {type === 'accepted' && (
-            <Button
-              className='flex-1 bg-tekhelet-400 hover:bg-tekhelet-500 text-white'
-              onClick={() => onStudy?.(moduleShare)}
-            >
-              <BookOpen className='h-4 w-4 mr-2' />
-              Study
+            <Button className='flex-1 bg-tekhelet-400 hover:bg-tekhelet-500 text-white' asChild>
+              <Link href={`/personalized/study/${moduleShare.module_id}`}>
+                <BookOpen className='h-4 w-4 mr-2' />
+                Study
+              </Link>
             </Button>
           )}
 

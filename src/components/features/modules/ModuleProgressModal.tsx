@@ -15,21 +15,16 @@ import { Progress } from '@/components/ui/progress';
 import { useModules } from '@/hooks/apis/modules/useModules';
 import { ModuleProgressDetailResponse, ModuleResponse } from '@/lib/api/modules';
 import { Award, BarChart3, BookOpen, Clock, Play, Target, TrendingUp, Zap } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 interface ModuleProgressModalProps {
   isOpen: boolean;
   onClose: () => void;
   module: ModuleResponse;
-  onStartStudy?: () => void;
 }
 
-export default function ModuleProgressModal({
-  isOpen,
-  onClose,
-  module,
-  onStartStudy,
-}: ModuleProgressModalProps) {
+export default function ModuleProgressModal({ isOpen, onClose, module }: ModuleProgressModalProps) {
   const [progress, setProgress] = useState<ModuleProgressDetailResponse | null>(null);
   const { getModuleProgress, isLoading } = useModules();
 
@@ -281,14 +276,13 @@ export default function ModuleProgressModal({
           </Button>
           {progressPercentage < 100 && (
             <Button
-              onClick={() => {
-                onStartStudy?.();
-                onClose();
-              }}
+              asChild
               className='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] text-white rounded-xl px-6 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-200'
             >
-              <Play className='h-5 w-5 mr-2' />
-              Continue Studying
+              <Link href={`/personalized/study/${module.module_id}`}>
+                <Play className='h-5 w-5 mr-2' />
+                Continue Studying
+              </Link>
             </Button>
           )}
         </DialogFooter>

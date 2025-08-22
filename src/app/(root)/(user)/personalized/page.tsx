@@ -4,7 +4,7 @@ import ModuleProgressBar from '@/components/features/modules/ModuleProgressBar';
 import ModuleProgressModal from '@/components/features/modules/ModuleProgressModal';
 import ModuleShareCard from '@/components/features/modules/ModuleShareCard';
 import ShareModuleModal from '@/components/features/modules/ShareModuleModal';
-import StudySession from '@/components/features/modules/StudySession';
+
 import VocabularyCreateModal from '@/components/features/vocabulary/VocabularyCreateModal';
 import {
   AlertDialog,
@@ -35,11 +35,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppSelector } from '@/hooks';
 import { useModules } from '@/hooks/apis/modules/useModules';
 import { useVocabulary } from '@/hooks/apis/vocabulary/useVocabulary';
-import {
-  ModuleProgressDetailResponse,
-  ModuleResponse,
-  ModuleUserResponse,
-} from '@/lib/api/modules';
+import { ModuleResponse, ModuleUserResponse } from '@/lib/api/modules';
 import { VocabularyResponse } from '@/lib/api/vocabulary';
 import {
   Award,
@@ -132,8 +128,6 @@ export default function PersonalizedPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
-  const [isStudySessionOpen, setIsStudySessionOpen] = useState(false);
-  const [isFetchingStudyProgress, setIsFetchingStudyProgress] = useState(false);
   const [selectedModuleForShare, setSelectedModuleForShare] = useState<{
     id: string;
     name: string;
@@ -141,7 +135,6 @@ export default function PersonalizedPage() {
   const [selectedModuleForProgress, setSelectedModuleForProgress] = useState<ModuleResponse | null>(
     null
   );
-  const [selectedModuleForStudy, setSelectedModuleForStudy] = useState<ModuleResponse | null>(null);
   const [isResetPromptOpen, setIsResetPromptOpen] = useState(false);
   const [pendingModuleForReset, setPendingModuleForReset] = useState<
     ModuleResponse | ModuleUserResponse | null
@@ -249,74 +242,6 @@ export default function PersonalizedPage() {
   const handleShowProgress = (module: ModuleResponse) => {
     setSelectedModuleForProgress(module);
     setIsProgressModalOpen(true);
-  };
-
-  // Handle study session
-  const handleStartStudy = async (
-    module: ModuleResponse | ModuleUserResponse,
-    skipPrompt: boolean = false
-  ) => {
-    const localProgress = (module as any).progress ?? 0;
-    if (!skipPrompt && localProgress === 100) {
-      setPendingModuleForReset(module as ModuleResponse);
-      setIsResetPromptOpen(true);
-      return;
-    }
-    setIsFetchingStudyProgress(true);
-    try {
-      const baseModule = module as ModuleResponse;
-      const progressRes = await getModuleProgress(baseModule.module_id);
-      const progressData = progressRes?.data as ModuleProgressDetailResponse | undefined;
-
-      const moduleForStudy: ModuleResponse = progressData
-        ? {
-            module_id: progressData.module_id,
-            module_name: progressData.module_name,
-            description: baseModule.description,
-            is_public: baseModule.is_public,
-            is_deleted: baseModule.is_deleted || false,
-            flash_card_ids: progressData.flashcard_progresses.map((fp) => ({
-              flashcard_id: fp.flashcard_detail.flashcard_id,
-              vocab: fp.flashcard_detail.vocab,
-              is_highlighted: fp.is_highlighted,
-            })),
-            created_by: baseModule.created_by,
-            created_at: baseModule.created_at,
-            updated_by: baseModule.updated_by || null,
-            updated_at: baseModule.updated_at || null,
-            time_spent: progressData.time_spent,
-            progress: progressData.progress_percentage,
-          }
-        : {
-            module_id: baseModule.module_id,
-            module_name: baseModule.module_name,
-            description: baseModule.description,
-            is_public: baseModule.is_public,
-            is_deleted: baseModule.is_deleted || false,
-            flash_card_ids: baseModule.flash_card_ids,
-            created_by: baseModule.created_by,
-            created_at: baseModule.created_at,
-            updated_by: baseModule.updated_by || null,
-            updated_at: baseModule.updated_at || null,
-            time_spent: baseModule.time_spent,
-            progress: baseModule.progress,
-          };
-
-      setSelectedModuleForStudy(moduleForStudy);
-      setIsStudySessionOpen(true);
-    } finally {
-      setIsFetchingStudyProgress(false);
-    }
-  };
-
-  const handleStudyComplete = async () => {
-    setIsStudySessionOpen(false);
-    setSelectedModuleForStudy(null);
-    // Refresh modules to get updated progress
-    const moduleResponse = await getMyModules();
-    if (moduleResponse) {
-      setModules(moduleResponse.data);
-    }
   };
 
   // Filter and sort modules
@@ -968,10 +893,12 @@ export default function PersonalizedPage() {
                       <div className='flex gap-2'>
                         <Button
                           className='flex-1 bg-tekhelet-400 hover:bg-tekhelet-500 text-white'
-                          onClick={() => handleStartStudy(module)}
+                          asChild
                         >
-                          <Play className='h-4 w-4 mr-2' />
-                          Study
+                          <Link href={`/personalized/study/${module.module_id}`}>
+                            <Play className='h-4 w-4 mr-2' />
+                            Study
+                          </Link>
                         </Button>
                         <Button
                           variant='outline'
@@ -1121,7 +1048,6 @@ export default function PersonalizedPage() {
                     moduleShare={moduleShare}
                     type='accepted'
                     onUpdate={handleRequestUpdate}
-                    onStudy={handleStartStudy}
                   />
                 ))}
               </div>
@@ -1264,28 +1190,7 @@ export default function PersonalizedPage() {
               setSelectedModuleForProgress(null);
             }}
             module={selectedModuleForProgress}
-            onStartStudy={() => handleStartStudy(selectedModuleForProgress)}
           />
-        )}
-
-        {/* Study Session Modal/Overlay */}
-        {selectedModuleForStudy && isStudySessionOpen && (
-          <div className='fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4'>
-            <div className='w-full max-w-4xl max-h-[90vh] overflow-y-auto'>
-              <StudySession
-                module={selectedModuleForStudy}
-                onComplete={handleStudyComplete}
-                onExit={async () => {
-                  setIsStudySessionOpen(false);
-                  setSelectedModuleForStudy(null);
-                  const moduleResponse = await getMyModules();
-                  if (moduleResponse) {
-                    setModules(moduleResponse.data);
-                  }
-                }}
-              />
-            </div>
-          </div>
         )}
 
         {/* Reset Progress Prompt */}
@@ -1304,9 +1209,7 @@ export default function PersonalizedPage() {
                 onClick={async () => {
                   if (!pendingModuleForReset) return;
                   setIsResetPromptOpen(false);
-                  const next = pendingModuleForReset;
                   setPendingModuleForReset(null);
-                  await handleStartStudy(next, true);
                 }}
               >
                 Keep Progress
@@ -1320,9 +1223,7 @@ export default function PersonalizedPage() {
                   );
                   if (res) {
                     setIsResetPromptOpen(false);
-                    const next = pendingModuleForReset;
                     setPendingModuleForReset(null);
-                    await handleStartStudy(next, true);
                   }
                 }}
                 className='bg-tekhelet-400 hover:bg-tekhelet-500 text-white'
@@ -1332,16 +1233,6 @@ export default function PersonalizedPage() {
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-
-        {/* Fetching Study Progress Overlay */}
-        {isFetchingStudyProgress && (
-          <div className='fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center'>
-            <div className='text-center'>
-              <div className='animate-spin rounded-full h-10 w-10 border-4 border-[#bfd7ed] border-t-[#0074b7] mx-auto mb-4'></div>
-              <p className='text-white'>Preparing your study session...</p>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
