@@ -7,6 +7,7 @@ import { FillInBlanksForm, FillInBlanksFormData } from './FillInBlanksForm';
 
 import { Button } from '@/components/ui/button';
 import { useListeningQuestion, useQuestion } from '@/hooks';
+import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 
 interface QuestionGroup {
   id?: string;
@@ -215,7 +216,11 @@ export function FillInBlanksManager({
                       </p>
                       {question.explanation && (
                         <p className='text-muted-foreground mt-1'>
-                          <strong>Explanation:</strong> {question.explanation}
+                          <strong>Explanation:</strong>
+                          <SafeHtmlRenderer
+                            htmlContent={question.explanation || ''}
+                            className='mt-1'
+                          />
                         </p>
                       )}
                     </div>

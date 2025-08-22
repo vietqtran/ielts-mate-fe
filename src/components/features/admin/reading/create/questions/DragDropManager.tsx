@@ -8,6 +8,7 @@ import { QuestionForm } from './QuestionForm';
 
 import { Button } from '@/components/ui/button';
 import { useListeningQuestion, useQuestion } from '@/hooks';
+import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 import { toast } from 'sonner';
 
 // Define proper type interfaces
@@ -601,7 +602,11 @@ export function DragDropManager({
                             {dragItemContent || 'None assigned'}
                           </p>
                           <p>
-                            <span className='font-medium'>Explanation:</span> {question.explanation}
+                            <span className='font-medium'>Explanation:</span>
+                            <SafeHtmlRenderer
+                              htmlContent={question.explanation || ''}
+                              className='mt-1'
+                            />
                           </p>
                         </div>
                       </div>

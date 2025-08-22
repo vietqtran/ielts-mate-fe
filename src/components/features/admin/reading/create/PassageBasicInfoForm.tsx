@@ -17,7 +17,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { IeltsType, PassageStatus } from '@/types/reading/reading.types';
-import { ArrowRight, CheckCircle } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,6 +32,8 @@ interface PassageBasicInfoFormProps {
   isLoading: boolean;
   isCompleted: boolean;
   hasChanges?: boolean;
+  onEdit?: () => void;
+  originalStatus?: string;
 }
 
 const getielts_typeLabel = (type: IeltsType): string => {
@@ -69,57 +71,18 @@ export function PassageBasicInfoForm({
   isLoading,
   isCompleted,
   hasChanges = true,
+  onEdit,
+  originalStatus,
 }: Readonly<PassageBasicInfoFormProps>) {
   const formData = form.getValues();
 
-  if (isCompleted) {
-    return (
-      <Card>
-        <CardHeader>
-          <div className='flex items-center justify-between'>
-            <div className='flex items-center gap-2'>
-              <CheckCircle className='h-5 w-5 text-green-600' />
-              <CardTitle>Passage Information - Completed</CardTitle>
-            </div>
-            <Button variant='outline' onClick={() => form.reset()}>
-              Edit Information
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent className='space-y-4'>
-          <div className='grid grid-cols-2 gap-6'>
-            <div>
-              <h3 className='font-semibold text-lg'>{formData.title}</h3>
-              <div className='flex gap-2 mt-2'>
-                <Badge variant='outline'>{getielts_typeLabel(formData.ielts_type)}</Badge>
-                <Badge variant='outline'>Part {formData.part_number}</Badge>
-                <Badge variant='outline'>{getStatusLabel(formData.passage_status)}</Badge>
-              </div>
-            </div>
-            <div>
-              <p className='text-sm text-muted-foreground'>Instruction</p>
-              <p className='text-sm mt-1'>{formData.instruction}</p>
-            </div>
-          </div>
+  console.log('PassageBasicInfoForm render:', { isEdit, isCompleted, hasChanges });
 
-          <div>
-            <p className='text-sm text-muted-foreground mb-2'>Reading Content</p>
-            <div
-              className='prose prose-sm max-w-none p-4 bg-gray-50 rounded-md max-h-40 overflow-y-auto'
-              dangerouslySetInnerHTML={{ __html: formData.content }}
-            />
-          </div>
-
-          <div className='flex justify-end'>
-            <p className='text-sm text-green-600 flex items-center gap-2'>
-              <CheckCircle className='h-4 w-4' />
-              Passage created successfully. You can now add question groups.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const handleSubmit = (data: any) => {
+    console.log('PassageBasicInfoForm handleSubmit called with isEdit:', isEdit);
+    console.log('Submit data:', data);
+    onSubmit(data);
+  };
 
   return (
     <Card>
@@ -140,7 +103,7 @@ export function PassageBasicInfoForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className='space-y-6'>
             <div className='grid grid-cols-2 gap-4'>
               <FormField
                 control={form.control}
@@ -213,24 +176,41 @@ export function PassageBasicInfoForm({
               <FormField
                 control={form.control}
                 name='passage_status'
-                render={({ field }: any) => (
-                  <FormItem>
-                    <FormLabel>Status *</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value ?? ''}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Select status' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={PassageStatus.DRAFT}>Draft</SelectItem>
-                        <SelectItem value={PassageStatus.PUBLISHED}>Published</SelectItem>
-                        <SelectItem value={PassageStatus.TEST}>Test</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }: any) => {
+                  const currentStatus = field.value;
+                  // Check if the original status from database was TEST
+                  const isOriginalTestStatus = originalStatus === PassageStatus.TEST;
+
+                  return (
+                    <FormItem>
+                      <FormLabel>Status *</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value ?? ''}
+                        disabled={isOriginalTestStatus}
+                      >
+                        <FormControl>
+                          <SelectTrigger
+                            className={isOriginalTestStatus ? 'opacity-50 cursor-not-allowed' : ''}
+                          >
+                            <SelectValue placeholder='Select status' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value={PassageStatus.DRAFT}>Draft</SelectItem>
+                          <SelectItem value={PassageStatus.PUBLISHED}>Published</SelectItem>
+                          <SelectItem value={PassageStatus.TEST}>Test</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {isOriginalTestStatus && (
+                        <p className='text-xs text-muted-foreground'>
+                          Status cannot be changed when passage is in Test mode
+                        </p>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
             </div>
 
@@ -292,7 +272,7 @@ export function PassageBasicInfoForm({
                     ? 'Saving Changes...'
                     : hasChanges
                       ? 'Save Changes & Go to Questions'
-                      : 'Go to edit Questions'}
+                      : 'Go to Questions'}
                   <ArrowRight className='h-4 w-4' />
                 </Button>
               ) : (

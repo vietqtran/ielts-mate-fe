@@ -35,12 +35,13 @@ type PassageFormData = z.infer<typeof passageSchema>;
 
 export default function CreatePassagePage() {
   const router = useRouter();
-  const { createPassage, deleteGroupQuestion, isLoading } = usePassage();
+  const { createPassage, updatePassage, deleteGroupQuestion, isLoading } = usePassage();
 
   const [currentStep, setCurrentStep] = useState<'basic' | 'questions' | 'preview'>('basic');
   const [createdpassage_id, setCreatedpassage_id] = useState<string | null>(null);
   const [questionGroups, setQuestionGroups] = useState<LocalQuestionGroup[]>([]);
   const [activeTab, setActiveTab] = useState('passage');
+  const [originalStatus, setOriginalStatus] = useState<PassageStatus | null>(null);
 
   const form = useForm<PassageFormData>({
     resolver: zodResolver(passageSchema),
@@ -103,6 +104,81 @@ export default function CreatePassagePage() {
 
   const handleBasicInfoSubmit = async (data: PassageFormData) => {
     try {
+      console.log('Create page handleBasicInfoSubmit called');
+      console.log('Form data:', data);
+      console.log('createdpassage_id:', createdpassage_id);
+
+      // If passage has already been created, switch to update mode
+      if (createdpassage_id) {
+        console.log('Passage already exists, calling updatePassage instead');
+
+        // Check if the original status was TEST and prevent status change
+        if (originalStatus === PassageStatus.TEST) {
+          if (data.passage_status !== PassageStatus.TEST) {
+            // Status is being changed from TEST, which is not allowed
+            toast.error('Status cannot be changed when passage is in Test mode');
+            return;
+          }
+        }
+
+        // Map frontend enums to backend ordinal values
+        const getielts_typeOrdinal = (ielts_type: IeltsType) => {
+          switch (ielts_type) {
+            case IeltsType.ACADEMIC:
+              return 0;
+            case IeltsType.GENERAL_TRAINING:
+              return 1;
+            default:
+              return 0;
+          }
+        };
+
+        const getpart_numberOrdinal = (part_number: number) => {
+          // Convert 1,2,3 to 0,1,2 (PART_1, PART_2, PART_3)
+          return part_number - 1;
+        };
+
+        const getpassage_statusOrdinal = (status: PassageStatus) => {
+          switch (status) {
+            case PassageStatus.DRAFT:
+              return 0;
+            case PassageStatus.PUBLISHED:
+              return 1;
+            case PassageStatus.DEACTIVATED:
+              return 2;
+            case PassageStatus.FINISHED:
+              return 3;
+            case PassageStatus.TEST:
+              return 4; // But this might be rejected by DB constraint
+            default:
+              return 0; // Default to DRAFT
+          }
+        };
+
+        const request = {
+          title: data.title,
+          instruction: data.instruction,
+          content: data.content,
+          content_with_highlight_keywords: data.content,
+          ielts_type: getielts_typeOrdinal(data.ielts_type),
+          part_number: getpart_numberOrdinal(data.part_number),
+          passage_status: getpassage_statusOrdinal(data.passage_status),
+        };
+
+        console.log('Calling updatePassage with request:', request);
+        await updatePassage(createdpassage_id, request);
+        console.log('updatePassage completed successfully');
+
+        // Update original status after successful update
+        setOriginalStatus(data.passage_status);
+
+        // Navigate to questions tab after successful update
+        setCurrentStep('questions');
+        setActiveTab('questions');
+        return;
+      }
+
+      // Original create logic for new passages
       // Map frontend enums to backend ordinal values
       const getielts_typeOrdinal = (ielts_type: IeltsType) => {
         switch (ielts_type) {
@@ -147,9 +223,12 @@ export default function CreatePassagePage() {
         passage_status: getpassage_statusOrdinal(data.passage_status),
       };
 
+      console.log('Calling createPassage with request:', request);
       const response = await createPassage(request);
+      console.log('createPassage response:', response);
       if (response.data?.passage_id) {
         setCreatedpassage_id(response.data.passage_id);
+        setOriginalStatus(data.passage_status); // Store the original status
         setCurrentStep('questions');
         setActiveTab('questions');
         // Clear draft after successful creation
@@ -351,11 +430,12 @@ export default function CreatePassagePage() {
 
         <TabsContent value='passage' className='space-y-6'>
           <PassageBasicInfoForm
-            isEdit={false}
+            isEdit={!!createdpassage_id}
             form={form}
             onSubmit={handleBasicInfoSubmit}
-            isLoading={isLoading.createPassage}
+            isLoading={isLoading.createPassage || isLoading.updatePassage}
             isCompleted={!!createdpassage_id}
+            originalStatus={originalStatus || undefined}
           />
         </TabsContent>
 

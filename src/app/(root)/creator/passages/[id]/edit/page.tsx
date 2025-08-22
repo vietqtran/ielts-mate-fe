@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/apis/reading/usePassage';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 const passageSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -56,6 +57,7 @@ export default function EditPassagePage() {
   const [activeTab, setActiveTab] = useState('passage');
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [originalFormData, setOriginalFormData] = useState<PassageFormData | null>(null);
+  const [isPassageCompleted, setIsPassageCompleted] = useState(false);
 
   const form = useForm<PassageFormData>({
     resolver: zodResolver(passageSchema),
@@ -154,6 +156,18 @@ export default function EditPassagePage() {
 
   const handleBasicInfoSubmit = async (data: PassageFormData) => {
     try {
+      console.log('Edit page handleBasicInfoSubmit called with passage_id:', passage_id);
+      console.log('Form data:', data);
+
+      // Check if the original status was TEST and prevent status change
+      if (originalFormData && originalFormData.passage_status === PassageStatus.TEST) {
+        if (data.passage_status !== PassageStatus.TEST) {
+          // Status is being changed from TEST, which is not allowed
+          toast.error('Status cannot be changed when passage is in Test mode');
+          return;
+        }
+      }
+
       // Check if form data has changed
       if (originalFormData) {
         const hasChanged =
@@ -216,10 +230,15 @@ export default function EditPassagePage() {
         passage_status: getpassage_statusOrdinal(data.passage_status),
       };
 
+      console.log('Calling updatePassage with request:', request);
       await updatePassage(passage_id, request);
+      console.log('updatePassage completed successfully');
 
       // Update the original form data after successful update
       setOriginalFormData(data);
+
+      // Set passage as completed after successful save
+      setIsPassageCompleted(true);
 
       setCurrentStep('questions');
       setActiveTab('questions');
@@ -333,6 +352,16 @@ export default function EditPassagePage() {
     try {
       setIsSaving(true);
       const formData = form.getValues();
+
+      // Check if the original status was TEST and prevent status change
+      if (originalFormData && originalFormData.passage_status === PassageStatus.TEST) {
+        if (formData.passage_status !== PassageStatus.TEST) {
+          // Status is being changed from TEST, which is not allowed
+          toast.error('Status cannot be changed when passage is in Test mode');
+          setIsSaving(false);
+          return;
+        }
+      }
 
       // First save all unsaved question groups
       const unsavedGroups = questionGroups.filter((group) => !group.id);
@@ -552,12 +581,16 @@ export default function EditPassagePage() {
           {isDataLoaded && (
             <PassageBasicInfoForm
               isEdit={true}
-              key={`passage-form-${isDataLoaded}`}
+              key={`passage-form-${isDataLoaded}-${isPassageCompleted}`}
               form={form}
               onSubmit={handleBasicInfoSubmit}
               isLoading={isLoading.updatePassage}
-              isCompleted={false}
+              isCompleted={isPassageCompleted}
               hasChanges={checkFormChanges()}
+              onEdit={() => {
+                setIsPassageCompleted(false);
+              }}
+              originalStatus={originalFormData?.passage_status}
             />
           )}
           {!isDataLoaded && (

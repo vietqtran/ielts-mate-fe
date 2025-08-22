@@ -7,6 +7,7 @@ import { MatchingForm, MatchingFormData } from './MatchingForm';
 
 import { Button } from '@/components/ui/button';
 import { useListeningQuestion, useQuestion } from '@/hooks';
+import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 
 interface QuestionGroup {
   id?: string;
@@ -220,7 +221,11 @@ export function MatchingManager({
                       </div>
                       {question.explanation && (
                         <p className='text-muted-foreground'>
-                          <strong>Explanation:</strong> {question.explanation}
+                          <strong>Explanation:</strong>
+                          <SafeHtmlRenderer
+                            htmlContent={question.explanation || ''}
+                            className='mt-1'
+                          />
                         </p>
                       )}
                     </div>

@@ -2,6 +2,7 @@
 
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 import { CheckCircle, ChevronDown, ChevronUp, XCircle } from 'lucide-react';
 
 interface Question {
@@ -85,11 +86,9 @@ export const QuestionItem = ({ question, userAnswers, isOpen, onToggle }: Questi
           {question.instruction_for_choice && (
             <div>
               <p className='text-sm font-medium text-tekhelet-400 mb-1'>Question:</p>
-              <div
+              <SafeHtmlRenderer
+                htmlContent={question.instruction_for_choice}
                 className='text-tekhelet-500 text-sm prose prose-sm max-w-none'
-                dangerouslySetInnerHTML={{
-                  __html: question.instruction_for_choice,
-                }}
               />
             </div>
           )}
@@ -155,7 +154,10 @@ export const QuestionItem = ({ question, userAnswers, isOpen, onToggle }: Questi
           {question.explanation && (
             <div>
               <p className='text-sm font-medium text-tekhelet-400 mb-1'>Explanation:</p>
-              <p className='text-tekhelet-500 text-sm'>{question.explanation}</p>
+              <SafeHtmlRenderer
+                htmlContent={question.explanation}
+                className='text-tekhelet-500 text-sm'
+              />
             </div>
           )}
           <div className='flex justify-between text-xs text-tekhelet-400'>

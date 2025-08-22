@@ -17,6 +17,7 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
+import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 
@@ -311,7 +312,8 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
                       </div>
                       {question.explanation && (
                         <div className='text-sm text-muted-foreground mt-1'>
-                          Explanation: {question.explanation}
+                          <span className='font-medium'>Explanation:</span>
+                          <SafeHtmlRenderer htmlContent={question.explanation} className='mt-1' />
                         </div>
                       )}
                     </div>
