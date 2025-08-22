@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
 import { IeltsType, PassageStatus } from '@/types/reading/reading.types';
-import { ArrowLeft, Eye, Save } from 'lucide-react';
+import { ArrowLeft, Eye } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 import { PassageBasicInfoForm } from '@/components/features/admin/reading/create/PassageBasicInfoForm';
@@ -250,7 +250,12 @@ export default function CreatePassagePage() {
 
     // In create page, we're just updating local state without API calls,
     // but we still need to preserve the special flags
-    setQuestionGroups((prev) => prev.map((g, i) => (i === index ? group : g)));
+    console.log('handleUpdateQuestionGroup called with:', { index, group });
+    setQuestionGroups((prev) => {
+      const updated = prev.map((g, i) => (i === index ? group : g));
+      console.log('Updated question groups:', updated);
+      return updated;
+    });
   };
 
   const handleDeleteQuestionGroup = async (index: number) => {
@@ -340,10 +345,10 @@ export default function CreatePassagePage() {
             <Eye className='h-4 w-4 mr-2' />
             Preview
           </Button>
-          <Button onClick={handleFinish} disabled={!canPreview}>
+          {/* <Button onClick={handleFinish} disabled={!canPreview}>
             <Save className='h-4 w-4 mr-2' />
             Finish & Save
-          </Button>
+          </Button> */}
         </div>
       </div>
 

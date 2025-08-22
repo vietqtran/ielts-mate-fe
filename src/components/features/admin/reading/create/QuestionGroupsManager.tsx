@@ -145,6 +145,10 @@ export function QuestionGroupsManager({
       group: group, // Pass group directly since types now match
       groupIndex,
       onUpdateGroup: (updatedGroup: any, isStateSyncOnly: boolean = true) => {
+        console.log('QuestionGroupsManager onUpdateGroup called with:', {
+          updatedGroup,
+          isStateSyncOnly,
+        });
         // Check if this contains newly created questions that shouldn't be updated again
         const hasJustCreatedQuestions = updatedGroup._justCreatedQuestions === true;
         const createdQuestionIds = updatedGroup._createdQuestionIds || [];
@@ -183,6 +187,7 @@ export function QuestionGroupsManager({
           localGroup._isStateSyncOnly = true;
         }
 
+        console.log('Calling parent onUpdateGroup with:', localGroup);
         onUpdateGroup(groupIndex, localGroup);
       },
       refetchPassageData: refetchPassageData,

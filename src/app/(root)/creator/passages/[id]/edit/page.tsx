@@ -12,7 +12,7 @@ import {
   QuestionCreationRequest,
   QuestionTypeEnumIndex,
 } from '@/types/reading/reading.types';
-import { ArrowLeft, Eye, Save } from 'lucide-react';
+import { ArrowLeft, Eye } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -462,7 +462,7 @@ export default function EditPassagePage() {
             <Eye className='h-4 w-4 mr-2' />
             Preview
           </Button>
-          <Button
+          {/* <Button
             onClick={handleFinish}
             disabled={
               !canPreview || isLoading.updatePassage || isLoading.addGroupQuestion || isSaving
@@ -470,7 +470,7 @@ export default function EditPassagePage() {
           >
             <Save className='h-4 w-4 mr-2' />
             Finish & Save
-          </Button>
+          </Button> */}
         </div>
       </div>
 
