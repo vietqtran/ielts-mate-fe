@@ -151,21 +151,46 @@ export function PassageTable({
 
     return passages.map((passage) => (
       <TableRow key={passage.passage_id}>
-        <TableCell className='font-medium'>{passage.title}</TableCell>
-        <TableCell>
-          <Badge variant='outline'>{getielts_typeLabel(passage.ielts_type)}</Badge>
+        <TableCell className='font-medium max-w-[200px]'>
+          <div className='truncate' title={passage.title}>
+            {passage.title}
+          </div>
         </TableCell>
-        <TableCell>Part {passage.part_number + 1}</TableCell>
-        <TableCell>
-          <Badge variant={'outline'} className={getStatusColor(passage.passage_status)}>
+        <TableCell className='max-w-[120px]'>
+          <Badge variant='outline' title={`IELTS Type: ${getielts_typeLabel(passage.ielts_type)}`}>
+            {getielts_typeLabel(passage.ielts_type)}
+          </Badge>
+        </TableCell>
+        <TableCell className='max-w-[80px]'>
+          <div title={`Part: ${passage.part_number + 1}`}>Part {passage.part_number + 1}</div>
+        </TableCell>
+        <TableCell className='max-w-[120px]'>
+          <Badge
+            variant={'outline'}
+            className={getStatusColor(passage.passage_status)}
+            title={`Status: ${getStatusLabel(passage.passage_status)}`}
+          >
             {getStatusLabel(passage.passage_status)}
           </Badge>
         </TableCell>
-        <TableCell>
-          {passage.created_by?.first_name} {passage.created_by?.last_name}
+        <TableCell className='max-w-[150px]'>
+          <div
+            className='truncate'
+            title={`${passage.created_by?.first_name} ${passage.created_by?.last_name}`}
+          >
+            {passage.created_by?.first_name} {passage.created_by?.last_name}
+          </div>
         </TableCell>
-        <TableCell>{new Date(passage.created_at).toLocaleString()}</TableCell>
-        <TableCell>{new Date(passage.updated_at).toLocaleString()}</TableCell>
+        <TableCell className='max-w-[150px]'>
+          <div className='truncate' title={new Date(passage.created_at).toLocaleString()}>
+            {new Date(passage.created_at).toLocaleString()}
+          </div>
+        </TableCell>
+        <TableCell className='max-w-[150px]'>
+          <div className='truncate' title={new Date(passage.updated_at).toLocaleString()}>
+            {new Date(passage.updated_at).toLocaleString()}
+          </div>
+        </TableCell>
         <TableCell className='text-right'>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

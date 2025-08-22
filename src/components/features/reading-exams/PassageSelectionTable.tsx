@@ -406,19 +406,41 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
                         className='h-4 w-4'
                       />
                     </TableCell>
-                    <TableCell className='font-medium'>{passage.title}</TableCell>
-                    <TableCell>
-                      <Badge variant='outline'>{getielts_typeLabel(passage.ielts_type)}</Badge>
+                    <TableCell className='font-medium max-w-[200px]'>
+                      <div className='truncate' title={passage.title}>
+                        {passage.title}
+                      </div>
                     </TableCell>
-                    <TableCell>Part {passage.part_number + 1}</TableCell>
-                    <TableCell>
-                      <Badge variant={'outline'} className={getStatusColor(passage.passage_status)}>
+                    <TableCell className='max-w-[120px]'>
+                      <Badge
+                        variant='outline'
+                        title={`IELTS Type: ${getielts_typeLabel(passage.ielts_type)}`}
+                      >
+                        {getielts_typeLabel(passage.ielts_type)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className='max-w-[80px]'>
+                      <div title={`Part: ${passage.part_number + 1}`}>
+                        Part {passage.part_number + 1}
+                      </div>
+                    </TableCell>
+                    <TableCell className='max-w-[120px]'>
+                      <Badge
+                        variant={'outline'}
+                        className={getStatusColor(passage.passage_status)}
+                        title={`Status: ${getStatusLabel(passage.passage_status)}`}
+                      >
                         {getStatusLabel(passage.passage_status)}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className='max-w-[120px]'>
                       {isPassageSelected(passage.passage_id) && (
-                        <Badge variant='secondary'>{getAssignedPart(passage.passage_id)}</Badge>
+                        <Badge
+                          variant='secondary'
+                          title={`Assigned to: ${getAssignedPart(passage.passage_id)}`}
+                        >
+                          {getAssignedPart(passage.passage_id)}
+                        </Badge>
                       )}
                     </TableCell>
                   </TableRow>

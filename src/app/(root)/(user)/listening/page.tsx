@@ -268,22 +268,34 @@ const Listening = () => {
                     <Badge
                       className={getIeltsTypeBadgeColor(listening.ielts_type)}
                       variant='outline'
+                      title={`IELTS Type: ${getIeltsTypeLabel(listening.ielts_type)}`}
                     >
                       {getIeltsTypeLabel(listening.ielts_type)}
                     </Badge>
-                    <Badge variant='outline'>{getPartNumberLabel(listening.part_number)}</Badge>
+                    <Badge
+                      variant='outline'
+                      title={`Part: ${getPartNumberLabel(listening.part_number)}`}
+                    >
+                      {getPartNumberLabel(listening.part_number)}
+                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className='space-y-3'>
                     <div className='flex items-center justify-between text-xs text-muted-foreground'>
-                      <div className='flex items-center gap-1'>
+                      <div
+                        className='flex items-center gap-1'
+                        title={`Created by: ${listening.created_by.first_name} ${listening.created_by.last_name}`}
+                      >
                         <User className='h-3 w-3' />
-                        <span>
+                        <span className='truncate'>
                           {listening.created_by.first_name} {listening.created_by.last_name}
                         </span>
                       </div>
-                      <div className='flex items-center gap-1'>
+                      <div
+                        className='flex items-center gap-1'
+                        title={`Created at: ${new Date(listening.created_at).toLocaleString()}`}
+                      >
                         <Calendar className='h-3 w-3' />
                         <span>{new Date(listening.created_at).toLocaleDateString()}</span>
                       </div>

@@ -188,108 +188,140 @@ export default function ReadingExamsPage() {
               <LoadingSpinner />
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>
-                    <button
-                      type='button'
-                      className='flex items-center gap-2'
-                      onClick={() => {
-                        const isCurrent = filters.sortBy === 'examName';
-                        const nextDir: 'asc' | 'desc' =
-                          isCurrent && filters.sortDirection === 'asc' ? 'desc' : 'asc';
-                        const next = { ...filters, sortBy: 'examName', sortDirection: nextDir };
-                        dispatch(setFilters(next));
-                        applyFetch(pagination.currentPage, pagination.pageSize, next);
-                      }}
-                    >
-                      Exam Name
-                      {filters.sortBy === 'examName' &&
-                        (filters.sortDirection === 'asc' ? (
-                          <ArrowUp className='h-4 w-4' />
-                        ) : (
-                          <ArrowDown className='h-4 w-4' />
-                        ))}
-                    </button>
-                  </TableHead>
-                  <TableHead>
-                    <button
-                      type='button'
-                      className='flex items-center gap-2'
-                      onClick={() => {
-                        const isCurrent = filters.sortBy === 'urlSlug';
-                        const nextDir: 'asc' | 'desc' =
-                          isCurrent && filters.sortDirection === 'asc' ? 'desc' : 'asc';
-                        const next = { ...filters, sortBy: 'urlSlug', sortDirection: nextDir };
-                        dispatch(setFilters(next));
-                        applyFetch(pagination.currentPage, pagination.pageSize, next);
-                      }}
-                    >
-                      URL Slug
-                      {filters.sortBy === 'urlSlug' &&
-                        (filters.sortDirection === 'asc' ? (
-                          <ArrowUp className='h-4 w-4' />
-                        ) : (
-                          <ArrowDown className='h-4 w-4' />
-                        ))}
-                    </button>
-                  </TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Part 1</TableHead>
-                  <TableHead>Part 2</TableHead>
-                  <TableHead>Part 3</TableHead>
-                  <TableHead className='text-right'>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {exams.length === 0 ? (
+            <div className='overflow-x-auto'>
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={7} className='text-center py-6'>
-                      No reading exams found. Create your first one.
-                    </TableCell>
+                    <TableHead>
+                      <button
+                        type='button'
+                        className='flex items-center gap-2'
+                        onClick={() => {
+                          const isCurrent = filters.sortBy === 'examName';
+                          const nextDir: 'asc' | 'desc' =
+                            isCurrent && filters.sortDirection === 'asc' ? 'desc' : 'asc';
+                          const next = { ...filters, sortBy: 'examName', sortDirection: nextDir };
+                          dispatch(setFilters(next));
+                          applyFetch(pagination.currentPage, pagination.pageSize, next);
+                        }}
+                      >
+                        Exam Name
+                        {filters.sortBy === 'examName' &&
+                          (filters.sortDirection === 'asc' ? (
+                            <ArrowUp className='h-4 w-4' />
+                          ) : (
+                            <ArrowDown className='h-4 w-4' />
+                          ))}
+                      </button>
+                    </TableHead>
+                    <TableHead>
+                      <button
+                        type='button'
+                        className='flex items-center gap-2'
+                        onClick={() => {
+                          const isCurrent = filters.sortBy === 'urlSlug';
+                          const nextDir: 'asc' | 'desc' =
+                            isCurrent && filters.sortDirection === 'asc' ? 'desc' : 'asc';
+                          const next = { ...filters, sortBy: 'urlSlug', sortDirection: nextDir };
+                          dispatch(setFilters(next));
+                          applyFetch(pagination.currentPage, pagination.pageSize, next);
+                        }}
+                      >
+                        URL Slug
+                        {filters.sortBy === 'urlSlug' &&
+                          (filters.sortDirection === 'asc' ? (
+                            <ArrowUp className='h-4 w-4' />
+                          ) : (
+                            <ArrowDown className='h-4 w-4' />
+                          ))}
+                      </button>
+                    </TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Part 1</TableHead>
+                    <TableHead>Part 2</TableHead>
+                    <TableHead>Part 3</TableHead>
+                    <TableHead className='text-right'>Actions</TableHead>
                   </TableRow>
-                ) : (
-                  exams.map((exam) => (
-                    <TableRow key={exam.reading_exam_id}>
-                      <TableCell className='font-medium'>{exam.reading_exam_name}</TableCell>
-                      <TableCell>{exam.url_slug}</TableCell>
-                      <TableCell>
-                        <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(exam.status)}`}
-                        >
-                          {getStatusLabel(exam.status)}
-                        </span>
-                      </TableCell>
-                      <TableCell>{exam.reading_passage_id_part1?.reading_passage_name}</TableCell>
-                      <TableCell>{exam.reading_passage_id_part2?.reading_passage_name}</TableCell>
-                      <TableCell>{exam.reading_passage_id_part3?.reading_passage_name}</TableCell>
-                      <TableCell className='text-right'>
-                        <div className='flex justify-end gap-2'>
-                          <Button variant='outline' size='icon' asChild>
-                            <Link href={`/creator/reading-exams/${exam.reading_exam_id}`}>
-                              <Eye className='h-4 w-4' />
-                            </Link>
-                          </Button>
-                          <Button variant='outline' size='icon' asChild>
-                            <Link href={`/creator/reading-exams/${exam.reading_exam_id}/edit`}>
-                              <Pencil className='h-4 w-4' />
-                            </Link>
-                          </Button>
-                          <Button
-                            variant='outline'
-                            size='icon'
-                            onClick={() => handleDelete(exam.reading_exam_id)}
-                          >
-                            <Trash2 className='h-4 w-4' />
-                          </Button>
-                        </div>
+                </TableHeader>
+                <TableBody>
+                  {exams.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={7} className='text-center py-6'>
+                        No reading exams found. Create your first one.
                       </TableCell>
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  ) : (
+                    exams.map((exam) => (
+                      <TableRow key={exam.reading_exam_id}>
+                        <TableCell className='font-medium max-w-[150px]'>
+                          <div className='truncate' title={exam.reading_exam_name}>
+                            {exam.reading_exam_name}
+                          </div>
+                        </TableCell>
+                        <TableCell className='max-w-[150px]'>
+                          <div className='truncate' title={exam.url_slug}>
+                            {exam.url_slug}
+                          </div>
+                        </TableCell>
+                        <TableCell className='max-w-[100px]'>
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(exam.status)}`}
+                            title={`Status: ${getStatusLabel(exam.status)}`}
+                          >
+                            {getStatusLabel(exam.status)}
+                          </span>
+                        </TableCell>
+                        <TableCell className='max-w-[150px]'>
+                          <div
+                            className='truncate'
+                            title={exam.reading_passage_id_part1?.reading_passage_name || '-'}
+                          >
+                            {exam.reading_passage_id_part1?.reading_passage_name || '-'}
+                          </div>
+                        </TableCell>
+                        <TableCell className='max-w-[150px]'>
+                          <div
+                            className='truncate'
+                            title={exam.reading_passage_id_part2?.reading_passage_name || '-'}
+                          >
+                            {exam.reading_passage_id_part2?.reading_passage_name || '-'}
+                          </div>
+                        </TableCell>
+                        <TableCell className='max-w-[150px]'>
+                          <div
+                            className='truncate'
+                            title={exam.reading_passage_id_part3?.reading_passage_name || '-'}
+                          >
+                            {exam.reading_passage_id_part3?.reading_passage_name || '-'}
+                          </div>
+                        </TableCell>
+                        <TableCell className='text-right'>
+                          <div className='flex justify-end gap-2'>
+                            <Button variant='outline' size='icon' asChild>
+                              <Link href={`/creator/reading-exams/${exam.reading_exam_id}`}>
+                                <Eye className='h-4 w-4' />
+                              </Link>
+                            </Button>
+                            <Button variant='outline' size='icon' asChild>
+                              <Link href={`/creator/reading-exams/${exam.reading_exam_id}/edit`}>
+                                <Pencil className='h-4 w-4' />
+                              </Link>
+                            </Button>
+                            <Button
+                              variant='outline'
+                              size='icon'
+                              onClick={() => handleDelete(exam.reading_exam_id)}
+                            >
+                              <Trash2 className='h-4 w-4' />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </div>
           )}
           {/* Pagination */}
           <div className='mt-4 flex items-center justify-between'>
