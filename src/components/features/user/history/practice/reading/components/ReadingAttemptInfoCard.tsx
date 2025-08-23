@@ -36,7 +36,7 @@ export const ReadingAttemptInfoCard = ({
             IELTS Type: {passage.ielts_type === 0 ? 'Academic' : 'General'}
           </Badge>
           <Badge variant='outline' className='text-xs text-tekhelet-500'>
-            Part: {passage.part_number}
+            Part: {passage.part_number + 1}
           </Badge>
         </div>
       </CardHeader>
