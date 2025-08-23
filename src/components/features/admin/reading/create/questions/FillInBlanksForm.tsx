@@ -14,7 +14,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Save } from 'lucide-react';
 import { useForm } from 'react-hook-form';
@@ -35,6 +35,7 @@ interface FillInBlanksFormProps {
   onSubmit: (data: FillInBlanksFormData) => void;
   onCancel: () => void;
   isSubmitting: boolean;
+  isEditing?: boolean;
 }
 
 export function FillInBlanksForm({
@@ -42,6 +43,7 @@ export function FillInBlanksForm({
   onSubmit,
   onCancel,
   isSubmitting,
+  isEditing = false,
 }: Readonly<FillInBlanksFormProps>) {
   const form = useForm<FillInBlanksFormData>({
     resolver: zodResolver(questionSchema),
@@ -53,8 +55,6 @@ export function FillInBlanksForm({
       correct_answer: '',
     },
   });
-
-  const isEditing = !!initialData?.id;
 
   return (
     <Card>
@@ -152,9 +152,10 @@ export function FillInBlanksForm({
                 <FormItem>
                   <FormLabel>Explanation</FormLabel>
                   <FormControl>
-                    <Textarea
+                    <TiptapEditor
+                      content={field.value}
+                      onChange={field.onChange}
                       placeholder="Explain where in the passage the answer can be found and why it's correct"
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />

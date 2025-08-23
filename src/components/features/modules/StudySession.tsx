@@ -1,11 +1,21 @@
 'use client';
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { useModules } from '@/hooks/apis/modules/useModules';
-import { ModuleProgressRequest, ModuleResponse } from '@/lib/api/modules';
+import { ModuleProgressRequest, ModuleResponse, ModuleSessionTimeRequest } from '@/lib/api/modules';
 import {
   ArrowLeft,
   ArrowRight,
@@ -13,6 +23,7 @@ import {
   Check,
   Clock,
   RotateCcw,
+  Star,
   Target,
   Trophy,
   X,
@@ -49,9 +60,17 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
   });
   const [sessionCompleted, setSessionCompleted] = useState(false);
   const [cardStartTime, setCardStartTime] = useState(Date.now());
+  const [highlightedMap, setHighlightedMap] = useState<Record<string, boolean>>(() =>
+    module.flash_card_ids.reduce<Record<string, boolean>>((acc, fc) => {
+      acc[fc.flashcard_id] = Boolean((fc as any).is_highlighted);
+      return acc;
+    }, {})
+  );
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [showResetPrompt, setShowResetPrompt] = useState<boolean>(false);
 
-  const { updateModuleProgress, isLoading } = useModules();
+  const { updateModuleProgress, updateModuleSessionTime, refreshModuleProgress, isLoading } =
+    useModules();
 
   // Timer effect - starts when component mounts, stops when session completes
   useEffect(() => {
@@ -85,8 +104,59 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
     return () => stopTimer();
   }, [sessionCompleted]);
 
+  // Save on visibility change (tab close/minimize) and before unload
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden' && !sessionCompleted) {
+        persistSessionTime();
+      }
+    };
+
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!sessionCompleted && sessionStats.sessionTimeSpent > 0) {
+        // Fire-and-forget; navigator.sendBeacon could be used, but keep it simple
+        persistSessionTime();
+        // Optionally show a prompt (mostly ignored by modern browsers, but harmless)
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [sessionCompleted, sessionStats.sessionTimeSpent]);
+
+  // Persist session time
+  const persistSessionTime = async () => {
+    const payload: ModuleSessionTimeRequest = {
+      time_spent: sessionStats.sessionTimeSpent,
+    };
+    await updateModuleSessionTime(module.module_id, payload);
+  };
+
+  // Prompt reset on mount if progress is 100%
+  useEffect(() => {
+    if (module.progress === 100) {
+      setShowResetPrompt(true);
+    }
+  }, [module.progress]);
+
+  const onConfirmReset = async () => {
+    const res = await refreshModuleProgress(module.module_id);
+    if (res) {
+      // Reset local UI state to start fresh
+      handleRestart();
+      setShowResetPrompt(false);
+    }
+  };
+
   // Helper function to stop timer and exit
-  const handleExit = () => {
+  const handleExit = async () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
@@ -96,11 +166,20 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
       ...prev,
       sessionTimeSpent: Math.floor((Date.now() - prev.startTime) / 1000),
     }));
+    await persistSessionTime();
     onExit?.();
   };
 
   const currentCard = module.flash_card_ids[currentCardIndex];
   const isLastCard = currentCardIndex === module.flash_card_ids.length - 1;
+  const isCurrentHighlighted = highlightedMap[currentCard.flashcard_id] ?? false;
+
+  const toggleHighlight = () => {
+    setHighlightedMap((prev) => ({
+      ...prev,
+      [currentCard.flashcard_id]: !isCurrentHighlighted,
+    }));
+  };
 
   const handleAnswer = async (isCorrect: boolean) => {
     const timeSpent = Math.floor((Date.now() - cardStartTime) / 1000);
@@ -110,6 +189,7 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
       flashcard_id: currentCard.flashcard_id,
       is_correct: isCorrect,
       time_spent: timeSpent,
+      is_highlighted: isCurrentHighlighted,
     };
 
     await updateModuleProgress(module.module_id, progressData);
@@ -132,7 +212,10 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
   const nextCard = () => {
     if (currentCardIndex < module.flash_card_ids.length - 1) {
       setCurrentCardIndex((prev) => prev + 1);
-      setSessionStats((prev) => ({ ...prev, currentCard: prev.currentCard + 1 }));
+      setSessionStats((prev) => ({
+        ...prev,
+        currentCard: prev.currentCard + 1,
+      }));
       setShowAnswer(false);
       setCardStartTime(Date.now());
     }
@@ -141,7 +224,10 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
   const previousCard = () => {
     if (currentCardIndex > 0) {
       setCurrentCardIndex((prev) => prev - 1);
-      setSessionStats((prev) => ({ ...prev, currentCard: prev.currentCard - 1 }));
+      setSessionStats((prev) => ({
+        ...prev,
+        currentCard: prev.currentCard - 1,
+      }));
       setShowAnswer(false);
       setCardStartTime(Date.now());
     }
@@ -180,8 +266,8 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
     const isGood = accuracy >= 60;
 
     return (
-      <div className='max-w-3xl mx-auto space-y-6 p-6 bg-gradient-to-br from-[#bfd7ed]/30 to-[#60a3d9]/10 min-h-screen'>
-        <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20'>
+      <div className='max-w-3xl mx-auto space-y-6 p-6 min-h-screen'>
+        <Card className='border rounded-3xl'>
           <CardHeader className='text-center'>
             <div className='flex justify-center mb-4'>
               <Trophy className='h-16 w-16 text-[#0074b7]' />
@@ -261,8 +347,10 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
               </Button>
               <Button
                 onClick={() => {
-                  onComplete?.();
-                  toast.success('Progress saved successfully!');
+                  persistSessionTime().finally(() => {
+                    onComplete?.();
+                    toast.success('Progress saved successfully!');
+                  });
                 }}
                 className='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] text-white rounded-xl px-8 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-200'
                 size='lg'
@@ -278,32 +366,54 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
   }
 
   return (
-    <div className='max-w-4xl mx-auto space-y-6 p-6 bg-gradient-to-br from-[#bfd7ed]/30 to-[#60a3d9]/10 min-h-screen'>
+    <div className='max-w-4xl mx-auto space-y-6 p-6 min-h-screen'>
+      <AlertDialog open={showResetPrompt} onOpenChange={setShowResetPrompt}>
+        <AlertDialogContent className='bg-white/90 backdrop-blur-xl border border-tekhelet-200 rounded-2xl'>
+          <AlertDialogHeader>
+            <AlertDialogTitle className='text-tekhelet-400'>Reset progress?</AlertDialogTitle>
+            <AlertDialogDescription className='text-medium-slate-blue-500'>
+              Your progress for "{module.module_name}" is at 100%. Do you want to reset progress to
+              start a new study session?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className='border-medium-slate-blue-200 text-medium-slate-blue-600'>
+              Keep Progress
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={onConfirmReset}
+              disabled={isLoading.refreshModuleProgress}
+              className='bg-tekhelet-400 hover:bg-tekhelet-500 text-white'
+            >
+              {isLoading.refreshModuleProgress ? 'Resetting...' : 'Reset Progress'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
       {/* Session Header */}
-      <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20'>
+      <Card className='border'>
         <CardHeader>
           <div className='flex items-center justify-between'>
             <div>
-              <CardTitle className='text-[#003b73] flex items-center font-bold text-xl'>
-                <BookOpen className='h-6 w-6 mr-3 text-[#0074b7]' />
+              <CardTitle className='text-tekhelet-400 flex items-center font-bold text-xl'>
+                <BookOpen className='h-6 w-6 mr-3 text-tekhelet-400' />
                 {module.module_name}
               </CardTitle>
-              <CardDescription className='text-[#0074b7] font-medium text-base mt-1'>
+              <CardDescription className='text-muted-foreground font-medium text-base mt-1'>
                 Card {sessionStats.currentCard} of {sessionStats.totalCards}
               </CardDescription>
             </div>
-            <div className='text-right'>
-              <div className='flex items-center space-x-2 mb-2'>
-                <Clock className='h-5 w-5 text-[#0074b7]' />
-                <span className='text-sm text-[#003b73] font-semibold'>
+            <div className='flex items-center gap-3'>
+              <div className='flex items-center gap-2'>
+                <Clock className='h-5 w-5 text-tekhelet-500' />
+                <p className='text-sm text-tekhelet-500 font-semibold'>
                   {formatTime(sessionStats.sessionTimeSpent)}
-                </span>
+                </p>
               </div>
               <Button
-                variant='outline'
                 size='sm'
                 onClick={handleExit}
-                className='border-[#60a3d9]/40 text-[#0074b7] hover:bg-[#60a3d9]/10 hover:border-[#0074b7] rounded-xl transition-all duration-200'
+                className='bg-selective-yellow-200 hover:bg-selective-yellow-300'
               >
                 Exit
               </Button>
@@ -315,23 +425,25 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
             <Progress
               value={(sessionStats.currentCard / sessionStats.totalCards) * 100}
               className='h-3 rounded-full'
-              indicatorClassName='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] rounded-full'
+              indicatorClassName='bg-selective-yellow-400 rounded-full'
             />
             <div className='flex justify-between text-sm text-[#0074b7] font-medium'>
-              <span>✓ {sessionStats.correctAnswers} correct</span>
-              <span>✗ {sessionStats.incorrectAnswers} incorrect</span>
+              <p className='text-green-800'>{sessionStats.correctAnswers} correct</p>
+              <p className='text-red-800'>{sessionStats.incorrectAnswers} incorrect</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Flashcard */}
-      <Card className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20 min-h-[500px]'>
+      <Card className='border min-h-[500px]'>
         <CardContent className='p-10'>
           <div className='text-center space-y-8'>
             {/* Word */}
             <div>
-              <h2 className='text-5xl font-bold text-[#003b73] mb-4'>{currentCard.vocab.word}</h2>
+              <h2 className='text-5xl font-bold text-tekhelet-400 mb-4'>
+                {currentCard.vocab.word}
+              </h2>
               <Badge
                 variant='secondary'
                 className='text-base px-4 py-2 bg-gradient-to-r from-[#bfd7ed]/50 to-[#60a3d9]/20 text-[#003b73] border-[#60a3d9]/30 rounded-xl font-medium'
@@ -342,7 +454,7 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
 
             {/* Context */}
             <div className='max-w-2xl mx-auto'>
-              <p className='text-xl text-[#0074b7] italic font-medium leading-relaxed'>
+              <p className='text-xl text-tekhelet-500 italic font-medium leading-relaxed'>
                 "{currentCard.vocab.context}"
               </p>
             </div>
@@ -352,17 +464,40 @@ export default function StudySession({ module, onComplete, onExit }: StudySessio
               {!showAnswer ? (
                 <Button
                   onClick={() => setShowAnswer(true)}
-                  className='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] text-white rounded-2xl px-12 py-4 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all duration-200'
                   size='lg'
+                  variant={'outline'}
+                  className='text-selective-yellow-300 hover:text-selective-yellow-300'
                 >
                   Show Meaning
                 </Button>
               ) : (
                 <div className='space-y-8'>
-                  <div className='p-8 bg-gradient-to-br from-[#bfd7ed]/40 to-[#60a3d9]/20 border border-[#60a3d9]/30 rounded-2xl backdrop-blur-md shadow-lg'>
+                  <div className='p-8 border rounded-2xl bg-tekhelet-500/10'>
                     <p className='text-2xl text-[#003b73] font-semibold leading-relaxed'>
                       {currentCard.vocab.meaning}
                     </p>
+                  </div>
+
+                  {/* Highlight Toggle */}
+                  <div className='flex justify-center'>
+                    <Button
+                      type='button'
+                      variant='outline'
+                      aria-pressed={isCurrentHighlighted}
+                      onClick={toggleHighlight}
+                      className={`rounded-xl px-6 py-3 text-base font-medium transition-all duration-200 ${
+                        isCurrentHighlighted
+                          ? 'bg-gradient-to-r from-yellow-400 to-yellow-500 text-white border-yellow-500 hover:from-yellow-500 hover:to-yellow-600'
+                          : 'border-[#60a3d9]/40 text-[#0074b7] hover:bg-[#60a3d9]/10 hover:border-[#0074b7]'
+                      }`}
+                    >
+                      <Star
+                        className={`h-5 w-5 mr-2 ${
+                          isCurrentHighlighted ? 'fill-white text-white' : 'text-[#0074b7]'
+                        }`}
+                      />
+                      {isCurrentHighlighted ? 'Highlighted' : 'Highlight'}
+                    </Button>
                   </div>
 
                   <div className='flex justify-center space-x-6'>

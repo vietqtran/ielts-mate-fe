@@ -8,6 +8,7 @@ import { QuestionForm } from './QuestionForm';
 
 import { Button } from '@/components/ui/button';
 import { useListeningQuestion, useQuestion } from '@/hooks';
+import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 import { toast } from 'sonner';
 
 // Define proper type interfaces
@@ -74,6 +75,7 @@ export function DragDropManager({
   const isUpdatingFromParent = useRef(false);
   const isInitialMount = useRef(true);
   const hasUserChanges = useRef(false); // Track if user has made actual changes
+  const isFetchingDragItems = useRef(false); // Track if we're currently fetching drag items
   const lastUpdateRef = useRef<{ questions: Question[]; drag_items: DragItem[] }>({
     questions: group.questions || [],
     drag_items: group.drag_items || [],
@@ -104,7 +106,9 @@ export function DragDropManager({
 
   // Function to fetch all drag items for a group
   const fetchAllDragItems = async (groupId: string) => {
-    if (!groupId) return;
+    if (!groupId || isFetchingDragItems.current) return;
+
+    isFetchingDragItems.current = true;
     try {
       const response = await getAllDragItemsByGroup(groupId, isListening);
       let items: any[] = [];
@@ -122,12 +126,17 @@ export function DragDropManager({
           item_content: item.content || item.item_content || '',
         }));
         setLocalDragItems(fetchedItems);
+
+        // Don't mark as user changes when fetching - this prevents infinite loop
+        // hasUserChanges.current = true;
       } else {
         setLocalDragItems([]);
       }
     } catch (error) {
       console.error('Failed to fetch drag items:', error);
       setLocalDragItems([]);
+    } finally {
+      isFetchingDragItems.current = false;
     }
   };
 
@@ -201,7 +210,12 @@ export function DragDropManager({
 
     // Only fetch drag items if we don't have any local drag items yet
     // This prevents infinite loop between fetch and update
-    if (group.id && localDragItems.length === 0 && normalizedDragItems.length === 0) {
+    if (
+      group.id &&
+      localDragItems.length === 0 &&
+      normalizedDragItems.length === 0 &&
+      !isFetchingDragItems.current
+    ) {
       fetchAllDragItems(group.id);
     }
 
@@ -221,7 +235,9 @@ export function DragDropManager({
     if (
       group.id &&
       localDragItems.length === 0 &&
-      (!group.drag_items || group.drag_items.length === 0)
+      (!group.drag_items || group.drag_items.length === 0) &&
+      isInitialMount.current &&
+      !isFetchingDragItems.current
     ) {
       fetchAllDragItems(group.id);
     }
@@ -232,9 +248,48 @@ export function DragDropManager({
     setFormMode('viewing');
     setEditingDragItem(null);
     setFormClosedKey((k) => k + 1); // force re-render
-    // Fetch the latest drag items from backend after create/edit
+
+    // Mark that user has made changes
+    hasUserChanges.current = true;
+
+    if (editingDragItem) {
+      // Update existing drag item
+      setLocalDragItems((prev) =>
+        prev.map((item) =>
+          item.item_id === editingDragItem.item_id
+            ? {
+                ...item,
+                content: dragItem.content,
+                item_content: dragItem.content,
+              }
+            : item
+        )
+      );
+    } else {
+      // Add the new drag item to local state immediately
+      const newDragItem: DragItem = {
+        id: dragItem.item_id,
+        drag_item_id: dragItem.item_id,
+        item_id: dragItem.item_id,
+        content: dragItem.content,
+        item_content: dragItem.content,
+      };
+
+      setLocalDragItems((prev) => [...prev, newDragItem]);
+    }
+
+    // Fetch the latest drag items from backend after create/edit to ensure consistency
     if (group.id && typeof group.id === 'string') {
-      setTimeout(() => fetchAllDragItems(group.id as string), 0);
+      setTimeout(() => {
+        fetchAllDragItems(group.id as string);
+      }, 0);
+    }
+    // Also refresh the whole group data so updated question mappings are reflected
+    // This aligns with the requirement to re-sync questions of the group after drag item updates
+    try {
+      refetchPassageData?.();
+    } catch (e) {
+      // no-op
     }
   };
 
@@ -251,8 +306,8 @@ export function DragDropManager({
       content: string;
     }>;
   }) => {
-    // Don't mark as user changes since this is handled by individual API calls
-    // hasUserChanges.current = true; // Mark that user has made changes
+    // Mark that user has made changes
+    hasUserChanges.current = true;
 
     if (editingQuestion) {
       // Update existing question
@@ -311,6 +366,7 @@ export function DragDropManager({
         JSON.stringify(currentState.drag_items) !== JSON.stringify(lastState.drag_items);
 
       if (hasChanges) {
+        console.log('Updating parent with changes:', { currentState, lastState });
         isUpdatingFromParent.current = true;
         lastUpdateRef.current = currentState;
 
@@ -322,6 +378,8 @@ export function DragDropManager({
           question_type: group.question_type,
           questions: localQuestions,
           drag_items: localDragItems,
+          // @ts-ignore - Mark as state sync only to prevent redundant API calls
+          _isStateSyncOnly: true,
         };
         updateParentGroup(updatedGroup);
       }
@@ -338,6 +396,26 @@ export function DragDropManager({
     group.question_type,
   ]);
 
+  // Force sync to parent when component becomes visible (when switching tabs)
+  useEffect(() => {
+    if (formMode === 'viewing' && !isInitialMount.current && hasUserChanges.current) {
+      // Force a sync to parent to ensure data is up to date
+      const updatedGroup = {
+        id: group.id,
+        section_order: group.section_order,
+        section_label: group.section_label,
+        instruction: group.instruction,
+        question_type: group.question_type,
+        questions: localQuestions,
+        drag_items: localDragItems,
+        // @ts-ignore - Mark as state sync only to prevent redundant API calls
+        _isStateSyncOnly: true,
+      };
+      console.log('Force syncing to parent:', updatedGroup);
+      updateParentGroup(updatedGroup);
+    }
+  }, [formMode]);
+
   // Handle drag item deletion
   const handleDeleteDragItem = async (itemId: string) => {
     if (!group.id) {
@@ -347,9 +425,17 @@ export function DragDropManager({
 
     try {
       await deleteDragItem(group.id, itemId, isListening);
-      // Only mark as user changes for deletion since we need to update group state
+      // Mark as user changes for deletion since we need to update group state
       hasUserChanges.current = true;
       setLocalDragItems((prev) => prev.filter((item) => item.item_id !== itemId));
+
+      // Also remove the drag item from questions that reference it
+      setLocalQuestions((prev) =>
+        prev.map((q) =>
+          q.drag_item_id === itemId ? { ...q, drag_item_id: undefined, drag_items: [] } : q
+        )
+      );
+
       toast.success('Drag item deleted successfully');
     } catch (error) {
       toast.error('Failed to delete drag item');
@@ -365,7 +451,7 @@ export function DragDropManager({
 
     try {
       await deleteQuestion(group.id, questionId, isListening);
-      // Only mark as user changes for deletion since we need to update group state
+      // Mark as user changes for deletion since we need to update group state
       hasUserChanges.current = true;
       setLocalQuestions((prev) =>
         prev.filter((q) => q.id !== questionId && q.question_id !== questionId)
@@ -592,7 +678,11 @@ export function DragDropManager({
                             {dragItemContent || 'None assigned'}
                           </p>
                           <p>
-                            <span className='font-medium'>Explanation:</span> {question.explanation}
+                            <span className='font-medium'>Explanation:</span>
+                            <SafeHtmlRenderer
+                              htmlContent={question.explanation || ''}
+                              className='mt-1'
+                            />
                           </p>
                         </div>
                       </div>

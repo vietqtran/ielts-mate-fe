@@ -3,7 +3,7 @@ import axios from '../axios';
 export interface VocabularyCreateRequest {
   word: string;
   context: string;
-  meaning: string;
+  meaning?: string | null;
 }
 
 export interface VocabularyResponse {
@@ -38,6 +38,12 @@ export interface VocabularyListResponse {
     hasNextPage: boolean;
     hasPreviousPage: boolean;
   };
+}
+
+export interface VocabularyDeleteResponse {
+  status: string;
+  message: string;
+  data: null;
 }
 
 export interface VocabularyListParams {
@@ -78,5 +84,17 @@ export const getMyVocabulary = async (
 
   const url = `/personal/vocabulary/my-vocabulary${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
   const response = await axios.get<VocabularyListResponse>(url);
+  return response.data;
+};
+
+/**
+ * Delete a vocabulary by ID
+ * @param vocabularyId Vocabulary ID to delete
+ * @returns Promise with the delete response
+ */
+export const deleteVocabulary = async (vocabularyId: string): Promise<VocabularyDeleteResponse> => {
+  const response = await axios.delete<VocabularyDeleteResponse>(
+    `/personal/vocabulary/${vocabularyId}`
+  );
   return response.data;
 };

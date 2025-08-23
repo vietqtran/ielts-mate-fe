@@ -53,7 +53,7 @@ export enum PassageStatusEnumIndex {
 }
 
 export interface UserInformation {
-  id: string;
+  user_id: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -87,6 +87,7 @@ export interface PassageGetResponse {
   updated_by: UserInformation;
   created_at: string;
   updated_at: string;
+  is_marked_up: boolean;
 }
 
 export interface PassageCreationRequest {

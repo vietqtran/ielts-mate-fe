@@ -10,18 +10,23 @@ import {
   persistStore,
 } from 'redux-persist';
 import {
+  addMarkupReducer,
   authFormReducer,
   authReducer,
   commonReducer,
   listeningAttemptReducer,
+  listeningExamAttemptReducer,
+  listeningExamReducer,
   listeningTasksReducer,
+  markupSliceReducer,
   passageReducer,
   readingAttemptReducer,
   readingExamAttemptReducer,
+  readingExamReducer,
   userPassageReducer,
 } from './slices';
 
-import { RootState } from '@/types';
+import { RootState } from '@/types/store.types';
 import storage from 'redux-persist/lib/storage';
 
 const persistConfig = {
@@ -34,8 +39,16 @@ const persistConfig = {
     'common',
     'passage',
     'userPassage',
+    'listeningTasks',
     'readingAttempt',
     'readingExamAttempt',
+    'listeningAttempt',
+    'markupTasks',
+    'listeningExamAttempt',
+    'listeningExam',
+    'readingExam',
+    'readingExamAttempt',
+    'addMarkup',
   ],
 };
 
@@ -45,10 +58,15 @@ const rootReducer = combineReducers({
   authForm: authFormReducer,
   passage: passageReducer,
   userPassage: userPassageReducer,
-  listeningTasks: listeningTasksReducer,
   readingAttempt: readingAttemptReducer,
-  listeningAttempt: listeningAttemptReducer,
+  readingExam: readingExamReducer,
   readingExamAttempt: readingExamAttemptReducer,
+  listeningTasks: listeningTasksReducer,
+  listeningAttempt: listeningAttemptReducer,
+  listeningExam: listeningExamReducer,
+  listeningExamAttempt: listeningExamAttemptReducer,
+  markupTasks: markupSliceReducer,
+  addMarkup: addMarkupReducer,
 });
 
 const persistedReducer = persistReducer<RootState>(persistConfig, rootReducer);

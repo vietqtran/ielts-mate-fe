@@ -16,7 +16,8 @@ import { useFieldArray, useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import { TiptapEditor } from '@/components/ui/tiptap-editor';
+import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
 
@@ -45,7 +46,8 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
     defaultValues: {
-      question_order: questions.length + 1,
+      question_order:
+        questions.length > 0 ? Math.max(...questions.map((q: any) => q.question_order)) + 1 : 1,
       point: 1,
       explanation: '',
       blankAnswers: [{ blank_index: 1, correct_answer: '' }],
@@ -85,7 +87,10 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
     }
 
     form.reset({
-      question_order: questions.length + newQuestions.length + 1,
+      question_order:
+        questions.length > 0
+          ? Math.max(...questions.map((q: any) => q.question_order)) + newQuestions.length + 1
+          : newQuestions.length + 1,
       point: 1,
       explanation: '',
       blankAnswers: [{ blank_index: 1, correct_answer: '' }],
@@ -191,7 +196,11 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
                   <FormItem>
                     <FormLabel>Explanation</FormLabel>
                     <FormControl>
-                      <Textarea placeholder='Enter explanation for the answers' {...field} />
+                      <TiptapEditor
+                        content={field.value}
+                        onChange={field.onChange}
+                        placeholder='Enter explanation for the answers'
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -303,7 +312,8 @@ export function FillInBlankForm({ questions, onQuestionsChange }: FillInBlankFor
                       </div>
                       {question.explanation && (
                         <div className='text-sm text-muted-foreground mt-1'>
-                          Explanation: {question.explanation}
+                          <span className='font-medium'>Explanation:</span>
+                          <SafeHtmlRenderer htmlContent={question.explanation} className='mt-1' />
                         </div>
                       )}
                     </div>

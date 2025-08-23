@@ -5,9 +5,9 @@ import {
   CreateTaskMarkupPayload,
   GetTaskMarkupParams,
   GetTaskMarkupResponse,
-} from '@/types/markup/task/task.types';
+} from '@/types/markup/markup.types';
 import { BaseResponse } from '@/types/reading/reading.types';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import useSWR from 'swr';
 
 export const useGetMarkupTask = (params: GetTaskMarkupParams) => {
@@ -22,70 +22,47 @@ export const useGetMarkupTask = (params: GetTaskMarkupParams) => {
   return { data, error, isLoading, mutate };
 };
 
-export const useUpdateMarkupTask = (params: CreateTaskMarkupPayload) => {
+export const useCreateMarkupTask = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const abortControllerRef = useRef<AbortController | null>(null);
-  if (abortControllerRef.current) {
-    abortControllerRef.current.abort();
-  }
-  abortControllerRef.current = new AbortController();
-  const currentController = abortControllerRef.current;
-
-  const updateMarkupTask = async () => {
+  const createMarkupTask = async (params: CreateTaskMarkupPayload) => {
     setIsLoading(true);
     try {
-      const { data } = await instance.put(`personal/markup`, params, {
-        signal: currentController.signal,
-        notify: false,
-      });
+      const { data } = await instance.post(
+        `personal/markup?markUpType=${params.markUpType}&taskType=${params.taskType}&practiceType=${params.practiceType}&taskId=${params.taskId}`,
+        {
+          notify: false,
+        }
+      );
       return data as BaseResponse<any>;
     } catch (error) {
-      if (abortControllerRef.current === currentController) {
-        if ((error as any).name !== 'AbortError') {
-          throw error;
-        }
+      if ((error as any).name !== 'AbortError') {
+        throw error;
       }
     } finally {
-      if (abortControllerRef.current === currentController) {
-        setIsLoading(false);
-      }
-      abortControllerRef.current = null;
+      setIsLoading(false);
     }
   };
 
-  return { updateMarkupTask, isLoading };
+  return { createMarkupTask, isLoading };
 };
 
-export const useDeleteMarkup = (params: { taskId: string }) => {
+export const useDeleteMarkup = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const abortControllerRef = useRef<AbortController | null>(null);
-  if (abortControllerRef.current) {
-    abortControllerRef.current.abort();
-  }
-  abortControllerRef.current = new AbortController();
-  const currentController = abortControllerRef.current;
-
-  const deleteMarkupTask = async () => {
+  const deleteMarkupTask = async (taskId: string) => {
     setIsLoading(true);
     try {
-      const { data } = await instance.post(`personal/markup/${params.taskId}`, {
-        signal: currentController.signal,
+      const { data } = await instance.delete(`personal/markup/${taskId}`, {
         notify: false,
       });
       return data as BaseResponse<any>;
     } catch (error) {
-      if (abortControllerRef.current === currentController) {
-        if ((error as any).name !== 'AbortError') {
-          throw error;
-        }
+      if ((error as any).name !== 'AbortError') {
+        throw error;
       }
     } finally {
-      if (abortControllerRef.current === currentController) {
-        setIsLoading(false);
-      }
-      abortControllerRef.current = null;
+      setIsLoading(false);
     }
   };
 

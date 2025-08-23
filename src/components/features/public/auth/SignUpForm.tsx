@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -9,21 +10,18 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
-import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
-import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
-import { useEffect, useState } from 'react';
-
-import GoogleSocialButton from '@/components/common/social/GoogleSocialButton';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import LoadingSpinner from '@/components/ui/loading-spinner';
+import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
+import { useAppDispatch, useAppSelector, useAuth } from '@/hooks';
 import { signUpSchema } from '@/schemas/auth.schema';
 import { setSignUpForm } from '@/store/slices/auth-form-slice';
+import { setIsFirstSendOtp, setUnverifyEmail } from '@/store/slices/common-slice';
 import { extractAxiosErrorData } from '@/utils/error';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
@@ -112,7 +110,11 @@ export function SignUpForm() {
 
   return (
     <Form {...form}>
-      <form className='mt-8 space-y-6' onSubmit={form.handleSubmit(handleSubmit)}>
+      <form
+        className='mt-8 space-y-6'
+        onSubmit={form.handleSubmit(handleSubmit)}
+        data-cy='sign-up-form'
+      >
         <div className='flex items-start gap-2'>
           <FormField
             control={form.control}
@@ -132,6 +134,7 @@ export function SignUpForm() {
                     placeholder='John'
                     className={`w-full rounded-md border px-3 py-2`}
                     isError={!!form.formState.errors.first_name}
+                    data-cy='first-name-input'
                     {...field}
                   />
                 </FormControl>
@@ -156,6 +159,7 @@ export function SignUpForm() {
                     placeholder='Doe'
                     className={`w-full rounded-md border px-3 py-2`}
                     isError={!!form.formState.errors.last_name}
+                    data-cy='last-name-input'
                     {...field}
                   />
                 </FormControl>
@@ -183,6 +187,7 @@ export function SignUpForm() {
                     placeholder='example@email.com'
                     className={`w-full rounded-md border px-3 py-2`}
                     isError={!!form.formState.errors.email}
+                    data-cy='email-input'
                     {...field}
                   />
                 </FormControl>
@@ -210,6 +215,7 @@ export function SignUpForm() {
                     placeholder='••••••••'
                     className={`w-full rounded-md border px-3 py-2`}
                     isError={!!form.formState.errors.password}
+                    data-cy='password-input'
                     {...field}
                   />
                 </FormControl>
@@ -240,6 +246,7 @@ export function SignUpForm() {
                     placeholder='••••••••'
                     className={`w-full rounded-md border px-3 py-2`}
                     isError={!!form.formState.errors.confirmPassword}
+                    data-cy='confirm-password-input'
                     {...field}
                   />
                 </FormControl>
@@ -250,27 +257,18 @@ export function SignUpForm() {
         </div>
 
         {errors.general && (
-          <div className='rounded-md bg-red-50 p-3'>
+          <div className='rounded-md bg-red-50 p-3' data-cy='general-error'>
             <p className='text-sm text-red-500'>{errors.general}</p>
           </div>
         )}
 
-        <Button type='submit' className='w-full cursor-pointer rounded-md py-2.5 text-white'>
+        <Button
+          type='submit'
+          className='w-full cursor-pointer rounded-md py-2.5 text-white'
+          data-cy='sign-up-submit'
+        >
           {isLoading ? <LoadingSpinner /> : 'Sign up'}
         </Button>
-
-        <div className='relative'>
-          <div className='absolute inset-0 flex items-center'>
-            <div className='w-full border-t border-[#d4d7e3]'></div>
-          </div>
-          <div className='relative flex justify-center text-sm'>
-            <span className='bg-white px-4 text-[#8897ad]'>Or</span>
-          </div>
-        </div>
-
-        <div className='space-y-3'>
-          <GoogleSocialButton />
-        </div>
       </form>
     </Form>
   );

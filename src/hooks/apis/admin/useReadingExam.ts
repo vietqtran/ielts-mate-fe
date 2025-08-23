@@ -107,7 +107,13 @@ export function useReadingExam() {
   /**
    * Get all reading exams (for creator only)
    */
-  const getAllExams = async () => {
+  const getAllExams = async (params?: {
+    page?: number;
+    size?: number;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc' | '';
+    keyword?: string;
+  }) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -119,7 +125,7 @@ export function useReadingExam() {
     setErrorState('getAllExams', null);
 
     try {
-      const response = await getReadingExams();
+      const response = await getReadingExams(params);
 
       // Only return data if this is still the current request
       if (abortControllerRef.current === currentController) {

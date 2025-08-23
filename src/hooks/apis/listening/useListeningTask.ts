@@ -1,6 +1,8 @@
 'use client';
 
+import { buildSWRKey, fetcher } from '@/lib/api/fetcher';
 import instance from '@/lib/axios';
+import { CommonPaginationResponseProperties } from '@/types/filter.types';
 import {
   AddGroupQuestionRequest,
   AddGroupQuestionResponse,
@@ -12,6 +14,7 @@ import {
   ListeningTaskUpdateRequest,
 } from '@/types/listening/listening.types';
 import { useRef, useState } from 'react';
+import useSWR from 'swr';
 
 export function useListeningTask() {
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
@@ -92,9 +95,9 @@ export function useListeningTask() {
         params: {
           page: params?.page,
           size: params?.size,
-          ielts_type: params?.ielts_type,
-          part_number: params?.part_number,
-          status: params?.status,
+          ielts_type: params?.ielts_type?.length ? params.ielts_type.join(',') : undefined,
+          part_number: params?.part_number?.length ? params.part_number.join(',') : undefined,
+          status: params?.status?.length ? params.status.join(',') : undefined,
           question_category: params?.question_category,
           sort_by: params?.sort_by,
           sort_direction: params?.sort_direction,
@@ -330,3 +333,15 @@ export function useListeningTask() {
     error,
   };
 }
+
+export const useGetListeningTaskCached = (params: ListeningTaskFilterParams) => {
+  const endpoint = 'listening/listens';
+  const key = buildSWRKey(endpoint, params);
+
+  const { data, error, isLoading, mutate } = useSWR<{
+    data: ListeningTaskResponse[];
+    pagination: CommonPaginationResponseProperties;
+  }>(key, fetcher);
+
+  return { data, error, isLoading, mutate };
+};

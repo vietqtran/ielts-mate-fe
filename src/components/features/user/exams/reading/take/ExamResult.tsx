@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 import { SubmitExamResultResponse } from '@/types/reading/reading-exam-attempt.types';
 import {
   Award,
@@ -202,7 +203,10 @@ const ExamResult = ({ result, examName, examDescription }: ExamResultProps) => {
 
             {/* Performance Badge */}
             <div className='flex justify-center'>
-              <Badge className={`px-4 py-2 text-lg font-semibold ${performance.color}`}>
+              <Badge
+                variant={'outline'}
+                className={`px-4 py-2 text-lg font-semibold ${performance.color}`}
+              >
                 {performance.level}
               </Badge>
             </div>
@@ -337,9 +341,10 @@ const ExamResult = ({ result, examName, examDescription }: ExamResultProps) => {
                         {question.explanation && (
                           <div className='space-y-2'>
                             <h4 className='font-semibold text-tekhelet-600'>Explanation:</h4>
-                            <p className='text-medium-slate-blue-600 bg-tekhelet-50 p-3 rounded leading-relaxed'>
-                              {question.explanation}
-                            </p>
+                            <SafeHtmlRenderer
+                              htmlContent={question.explanation}
+                              className='text-medium-slate-blue-600 bg-tekhelet-50 p-3 rounded leading-relaxed'
+                            />
                           </div>
                         )}
                       </div>
@@ -410,9 +415,10 @@ const ExamResult = ({ result, examName, examDescription }: ExamResultProps) => {
                             <span className='text-sm font-medium text-tekhelet-600'>
                               Explanation:
                             </span>
-                            <p className='text-medium-slate-blue-600 mt-1'>
-                              {question.explanation}
-                            </p>
+                            <SafeHtmlRenderer
+                              htmlContent={question.explanation}
+                              className='text-medium-slate-blue-600 mt-1'
+                            />
                           </div>
                         )}
                       </div>

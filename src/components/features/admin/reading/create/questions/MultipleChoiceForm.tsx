@@ -21,6 +21,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect } from 'react';
+import { toast } from 'sonner';
 
 const choiceSchema = z.object({
   id: z.string().optional(),
@@ -47,6 +48,7 @@ interface MultipleChoiceFormProps {
   onSubmit: (data: QuestionFormData) => void;
   onCancel: () => void;
   isSubmitting: boolean;
+  isEditing?: boolean;
 }
 
 export function MultipleChoiceForm({
@@ -54,6 +56,7 @@ export function MultipleChoiceForm({
   onSubmit,
   onCancel,
   isSubmitting,
+  isEditing = false,
 }: Readonly<MultipleChoiceFormProps>) {
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
@@ -105,7 +108,10 @@ export function MultipleChoiceForm({
     const correctCount = data.choices.filter((choice) => choice.is_correct).length;
 
     if (correctCount === 0) {
-      form.setError('choices', { message: 'At least one choice must be correct' });
+      form.setError('choices', {
+        message: 'At least one choice must be correct',
+      });
+      toast.error('At least one choice must be correct');
       return;
     }
 
@@ -113,6 +119,9 @@ export function MultipleChoiceForm({
       form.setError('number_of_correct_answers', {
         message: `Number of correct answers (${data.number_of_correct_answers}) must match selected correct choices (${correctCount})`,
       });
+      toast.error(
+        `Number of correct answers (${data.number_of_correct_answers}) must match selected correct choices (${correctCount})`
+      );
       return;
     }
 
@@ -139,8 +148,6 @@ export function MultipleChoiceForm({
     }
   };
 
-  const isEditing = !!initialData?.id;
-
   return (
     <Card>
       <CardHeader>
@@ -161,6 +168,7 @@ export function MultipleChoiceForm({
                         type='number'
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
+                        min={1}
                       />
                     </FormControl>
                     <FormMessage />
@@ -179,6 +187,7 @@ export function MultipleChoiceForm({
                         type='number'
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
+                        min={1}
                       />
                     </FormControl>
                     <FormMessage />
@@ -195,7 +204,7 @@ export function MultipleChoiceForm({
                     <FormControl>
                       <Input
                         type='number'
-                        min='1'
+                        min={1}
                         {...field}
                         onChange={(e) => field.onChange(Number(e.target.value))}
                       />
@@ -308,9 +317,10 @@ export function MultipleChoiceForm({
                 <FormItem>
                   <FormLabel>Explanation</FormLabel>
                   <FormControl>
-                    <Textarea
+                    <TiptapEditor
+                      content={field.value}
+                      onChange={field.onChange}
                       placeholder='Explain why the correct answer(s) are correct and why others are wrong'
-                      {...field}
                     />
                   </FormControl>
                   <FormMessage />

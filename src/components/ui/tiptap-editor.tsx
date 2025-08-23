@@ -43,6 +43,7 @@ export function TiptapEditor({ content, onChange, placeholder, className }: Tipt
         levels: [1, 2, 3],
       }),
       Image.configure({
+        allowBase64: true,
         HTMLAttributes: {
           class: 'max-w-full h-auto',
         },
@@ -70,6 +71,32 @@ export function TiptapEditor({ content, onChange, placeholder, className }: Tipt
       onChange(editor.getHTML());
     },
     editorProps: {
+      handlePaste: (_view, event) => {
+        const clipboardData = event.clipboardData;
+        if (!clipboardData) return false;
+
+        const items = Array.from(clipboardData.items || []);
+        const imageItems = items.filter((item) => item.type && item.type.startsWith('image/'));
+
+        if (imageItems.length === 0) return false;
+
+        event.preventDefault();
+
+        imageItems.forEach((item) => {
+          const file = item.getAsFile();
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = () => {
+            const src = String(reader.result || '');
+            if (!src) return;
+            editor?.chain().focus().setImage({ src }).run();
+          };
+          reader.readAsDataURL(file);
+        });
+
+        return true;
+      },
       attributes: {
         class: cn(
           'prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl mx-auto focus:outline-none min-h-[200px] p-4',

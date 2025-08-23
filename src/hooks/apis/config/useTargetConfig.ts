@@ -8,8 +8,11 @@ import { BaseResponse } from '@/types/reading/reading.types';
 import { useState } from 'react';
 import useSWR from 'swr';
 
-export const useGetTargetConfig = () => {
-  const { data, error, isLoading, mutate } = useSWR('personal/config/target', fetcher);
+export const useGetTargetConfig = (enabled: boolean = true) => {
+  const { data, error, isLoading, mutate } = useSWR(
+    enabled ? 'personal/config/target' : null,
+    fetcher
+  );
   return { data, error, isLoading, mutate };
 };
 

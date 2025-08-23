@@ -51,7 +51,13 @@ export default function ForgotPasswordForm() {
     },
   });
 
+  const watch = form.watch();
+  useEffect(() => {
+    setErrors({});
+  }, [watch.email]);
+
   async function handleSubmit(values: ForgotPasswordFormValues) {
+    if (isLoading) return;
     setIsLoading(true);
     setErrors({});
 
@@ -68,7 +74,7 @@ export default function ForgotPasswordForm() {
   }
 
   return (
-    <div className='mx-auto max-w-md space-y-6 p-8'>
+    <div className='mx-auto max-w-md space-y-6 p-8' data-cy='forgot-page'>
       <div className='text-center'>
         <h1 className='text-2xl font-bold text-[#313957]'>Forgot Password</h1>
         <p className='mt-2 text-[#8897ad]'>
@@ -77,7 +83,11 @@ export default function ForgotPasswordForm() {
         </p>
       </div>
       <Form {...form}>
-        <form className='space-y-6' onSubmit={form.handleSubmit(handleSubmit)}>
+        <form
+          className='space-y-6'
+          onSubmit={form.handleSubmit(handleSubmit)}
+          data-cy='forgot-form'
+        >
           <div className='space-y-2'>
             <FormField
               control={form.control}
@@ -97,6 +107,7 @@ export default function ForgotPasswordForm() {
                       placeholder='example@email.com'
                       className={`w-full rounded-md border px-3 py-2`}
                       isError={!!form.formState.errors.email}
+                      data-cy='email-input'
                       {...field}
                     />
                   </FormControl>
@@ -107,17 +118,21 @@ export default function ForgotPasswordForm() {
           </div>
 
           {errors.general && (
-            <div className='rounded-md bg-red-50 p-3'>
+            <div className='rounded-md bg-red-50 p-3' data-cy='general-error'>
               <p className='text-sm text-red-500'>{errors.general}</p>
             </div>
           )}
 
-          <Button type='submit' className='w-full cursor-pointer rounded-md py-2.5 text-white'>
+          <Button
+            type='submit'
+            className='w-full cursor-pointer rounded-md py-2.5 text-white'
+            data-cy='submit-button'
+          >
             {isLoading ? <LoadingSpinner /> : 'Send verification code'}
           </Button>
 
           <div className='text-center'>
-            <CustomLink href='/sign-in' text='Back to sign in' />
+            <CustomLink href='/sign-in' text='Back to sign in' data-cy='back-to-sign-in' />
           </div>
         </form>
       </Form>

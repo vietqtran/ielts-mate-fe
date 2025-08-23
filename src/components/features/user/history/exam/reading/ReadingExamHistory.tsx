@@ -39,11 +39,11 @@ const ReadingExamHistory = () => {
       try {
         dispatch(setLoading(true));
         const response = await getExamAttemptHistory({
-          size: pagination?.pageSize || 12,
-          readingExamName: filters.searchText || '',
-          page: pagination?.currentPage || 1,
-          sortBy: filters.sortBy || '',
-          sortDirection: filters.sortDirection || 'desc',
+          size: pagination?.pageSize,
+          readingExamName: filters.searchText,
+          page: pagination?.currentPage,
+          sortBy: filters.sortBy,
+          sortDirection: filters.sortDirection,
         });
 
         if (response) {
@@ -53,7 +53,7 @@ const ReadingExamHistory = () => {
           dispatch(
             setPagination({
               totalPages: response?.pagination?.totalPages || 1,
-              pageSize: response?.pagination?.pageSize || 12,
+              pageSize: response?.pagination?.pageSize || 10,
               totalItems: response?.pagination?.totalItems || 0,
               hasNextPage: response?.pagination?.hasNextPage || false,
               hasPreviousPage: response?.pagination?.hasPreviousPage || false,
@@ -205,18 +205,17 @@ const ReadingExamHistory = () => {
                 key={attempt.exam_attempt_id}
                 className='bg-white backdrop-blur-lg rounded-2xl shadow-xl hover:shadow-2xl transition-shadow'
               >
-                <CardHeader>
-                  <div className='flex items-start justify-between'>
-                    <div className='flex-1'>
-                      <CardTitle className='text-lg mb-2 line-clamp-2 text-tekhelet-700'>
-                        {attempt.reading_exam.reading_exam_name || 'Untitled Exam'}
-                      </CardTitle>
-                      <div className='flex items-center gap-2 mb-2'>
-                        <Badge variant={'outline'} className='bg-emerald-100 !text-emerald-800'>
-                          Completed
-                        </Badge>
-                      </div>
-                    </div>
+                <CardHeader className='min-w-0'>
+                  <CardTitle
+                    className='text-lg mb-2 line-clamp-2 text-tekhelet-700 w-full truncate'
+                    title={attempt.reading_exam.reading_exam_name || 'Untitled Exam'}
+                  >
+                    {attempt.reading_exam.reading_exam_name || 'Untitled Exam'}
+                  </CardTitle>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <Badge variant={'outline'} className='bg-emerald-100 !text-emerald-800'>
+                      Completed
+                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent>

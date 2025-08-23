@@ -81,7 +81,7 @@ export const ListeningQuestionAnalysis = ({
                   // Check if the answer is correct by comparing with the correct_answer
                   const isCorrect =
                     answer.filled_text_answer === question.correct_answer ||
-                    (answer.choice_ids && answer.choice_ids.includes(question.correct_answer));
+                    (answer.choice_ids && answer.choice_ids.includes(question.correct_answer!));
 
                   return (
                     <Collapsible
@@ -166,7 +166,11 @@ export const ListeningQuestionAnalysis = ({
                                   isCorrect ? 'text-green-700' : 'text-red-700'
                                 }`}
                               >
-                                {question.correct_answer}
+                                {
+                                  question.choices.find(
+                                    (choice) => choice.choice_id === question.correct_answer
+                                  )?.content
+                                }
                               </p>
                             </div>
                           </div>

@@ -245,26 +245,42 @@ export function EditPassageModal({
               <FormField
                 control={form.control}
                 name='passage_status'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Select status' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={PassageStatus.DRAFT}>Draft</SelectItem>
-                        <SelectItem value={PassageStatus.PUBLISHED}>Published</SelectItem>
-                        <SelectItem value={PassageStatus.TEST}>Test</SelectItem>
-                        <SelectItem value={PassageStatus.DEACTIVATED}>Deactivated</SelectItem>
-                        <SelectItem value={PassageStatus.FINISHED}>Finished</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  const currentStatus = getpassage_statusFromNumber(passage.passage_status);
+                  const isTestStatus = currentStatus === PassageStatus.TEST;
+
+                  return (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        disabled={isTestStatus}
+                      >
+                        <FormControl>
+                          <SelectTrigger
+                            className={isTestStatus ? 'opacity-50 cursor-not-allowed' : ''}
+                          >
+                            <SelectValue placeholder='Select status' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value={PassageStatus.DRAFT}>Draft</SelectItem>
+                          <SelectItem value={PassageStatus.PUBLISHED}>Published</SelectItem>
+                          <SelectItem value={PassageStatus.TEST}>Test</SelectItem>
+                          <SelectItem value={PassageStatus.DEACTIVATED}>Deactivated</SelectItem>
+                          <SelectItem value={PassageStatus.FINISHED}>Finished</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {isTestStatus && (
+                        <p className='text-xs text-muted-foreground'>
+                          Status cannot be changed when passage is in Test mode
+                        </p>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
             </div>
 

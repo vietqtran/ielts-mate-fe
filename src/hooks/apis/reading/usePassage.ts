@@ -10,7 +10,11 @@ import {
 } from '@/types/reading/reading.types';
 import { useRef, useState } from 'react';
 
+import { buildSWRKey, fetcher } from '@/lib/api/fetcher';
 import instance from '@/lib/axios';
+import { CommonPaginationResponseProperties } from '@/types/filter.types';
+import { ReadingExamResponse } from '@/types/reading/reading-exam.types';
+import useSWR from 'swr';
 
 export function usePassage() {
   const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
@@ -303,3 +307,45 @@ export function usePassage() {
     error,
   };
 }
+
+export const useGetReadingPassageCached = (params?: {
+  page?: number;
+  size?: number;
+  ieltsType?: string[];
+  partNumber?: string[];
+  questionCategory?: string;
+  title?: string;
+  sortBy?: string;
+  sortDirection?: string;
+}) => {
+  const endpoint = 'reading/passages';
+  const key = buildSWRKey(endpoint, params);
+
+  const { data, error, isLoading, mutate } = useSWR<{
+    data: PassageGetResponse[];
+    pagination: CommonPaginationResponseProperties;
+  }>(key, fetcher);
+
+  return { data, error, isLoading, mutate };
+};
+
+export const useGetReadingExamCached = (params?: {
+  page?: number;
+  size?: number;
+  ieltsType?: string[];
+  partNumber?: string[];
+  questionCategory?: string;
+  title?: string;
+  sortBy?: string;
+  sortDirection?: string;
+}) => {
+  const endpoint = 'reading/reading-exams/active-exams';
+  const key = buildSWRKey(endpoint, params);
+
+  const { data, error, isLoading, mutate } = useSWR<{
+    data: ReadingExamResponse['data'][];
+    pagination: CommonPaginationResponseProperties;
+  }>(key, fetcher);
+
+  return { data, error, isLoading, mutate };
+};

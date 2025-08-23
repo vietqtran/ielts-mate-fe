@@ -129,7 +129,7 @@ export function ProfileForm({ user }: Readonly<ProfileFormProps>) {
               </Label>
               <Input
                 id='email'
-                value={user?.email}
+                value={user?.email ?? ''}
                 disabled
                 className='bg-[#bfd7ed]/30 rounded-xl border-[#60a3d9]/40 text-[#0074b7]'
               />

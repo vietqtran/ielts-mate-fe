@@ -215,7 +215,11 @@ export default function PreviewListeningTaskPage() {
                                     ))}
                                 </ul>
                                 <div className='mt-2 text-sm text-gray-500'>
-                                  Explanation: {q.explanation}
+                                  <span className='font-medium'>Explanation:</span>
+                                  <div
+                                    className='mt-1'
+                                    dangerouslySetInnerHTML={{ __html: q.explanation || '' }}
+                                  />
                                 </div>
                               </div>
                             );
@@ -227,7 +231,11 @@ export default function PreviewListeningTaskPage() {
                                   {q.correct_answer}
                                 </div>
                                 <div className='mt-2 text-sm text-gray-500'>
-                                  Explanation: {q.explanation}
+                                  <span className='font-medium'>Explanation:</span>
+                                  <div
+                                    className='mt-1'
+                                    dangerouslySetInnerHTML={{ __html: q.explanation || '' }}
+                                  />
                                 </div>
                               </div>
                             );
@@ -242,7 +250,11 @@ export default function PreviewListeningTaskPage() {
                                   {q.correct_answer_for_matching}
                                 </div>
                                 <div className='mt-2 text-sm text-gray-500'>
-                                  Explanation: {q.explanation}
+                                  <span className='font-medium'>Explanation:</span>
+                                  <div
+                                    className='mt-1'
+                                    dangerouslySetInnerHTML={{ __html: q.explanation || '' }}
+                                  />
                                 </div>
                               </div>
                             );
@@ -254,7 +266,11 @@ export default function PreviewListeningTaskPage() {
                                   {q.drag_item_id}
                                 </div>
                                 <div className='mt-2 text-sm text-gray-500'>
-                                  Explanation: {q.explanation}
+                                  <span className='font-medium'>Explanation:</span>
+                                  <div
+                                    className='mt-1'
+                                    dangerouslySetInnerHTML={{ __html: q.explanation || '' }}
+                                  />
                                 </div>
                               </div>
                             );

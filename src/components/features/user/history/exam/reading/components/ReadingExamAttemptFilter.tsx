@@ -12,13 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { ReadingAttemptFilters } from '@/store/slices/reading-attempt-filter-slice';
+import { ReadingExamAttemptFilters } from '@/store/slices/reading-exam-attempt-filter-slice';
 import { useDebounce } from '@uidotdev/usehooks';
 import React, { useState, useCallback, useMemo, memo, useEffect } from 'react';
 
 interface ReadingExamSearchFilterProps {
   searchText?: string;
-  sortDirection?: 'asc' | 'desc';
+  sortDirection?: 'asc' | 'desc' | '';
   sortBy?: string;
 }
 
@@ -46,7 +46,7 @@ export const ReadingExamAttemptHistoryFilter = memo(function ReadingAttemptFilte
   const debouncedSearchTerm = useDebounce(searchTerm, 800);
 
   const updateFilter = useCallback(
-    (key: keyof ReadingAttemptFilters, value: any) => {
+    (key: keyof ReadingExamAttemptFilters['filters'], value: any) => {
       onFiltersChange({
         ...filters,
         [key]: value === '' || (Array.isArray(value) && value.length === 0) ? undefined : value,
@@ -68,7 +68,6 @@ export const ReadingExamAttemptHistoryFilter = memo(function ReadingAttemptFilte
     });
   }, [filters]);
 
-  // Memoized input handlers
   const handleSearchTextChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setSearchTerm(e.target.value);
@@ -92,7 +91,7 @@ export const ReadingExamAttemptHistoryFilter = memo(function ReadingAttemptFilte
             <div className='flex-1 flex gap-2 items-center min-w-0'>
               <div className='flex-1 min-w-0'>
                 <Input
-                  placeholder='Search by passage title...'
+                  placeholder='Search by exam name...'
                   value={searchTerm}
                   onChange={handleSearchTextChange}
                 />

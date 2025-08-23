@@ -25,7 +25,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { QuestionType } from '@/types/reading/reading.types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { DragDropForm } from './questions/DragDropForm';
 import { FillInBlankForm } from './questions/FillInBlankForm';
@@ -62,6 +62,11 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
     },
   });
 
+  // Update section_order when groups change
+  useEffect(() => {
+    form.setValue('section_order', groups.length + 1);
+  }, [groups.length, form]);
+
   const handleCreateGroup = (data: GroupFormData) => {
     const newGroup = {
       ...data,
@@ -72,7 +77,7 @@ export function GroupQuestionForm({ onSaveGroup, onFinish }: Readonly<GroupQuest
     setGroups((prev) => [...prev, newGroup]);
     setCurrentGroupIndex(groups.length);
     form.reset({
-      section_order: groups.length + 2,
+      section_order: groups.length + 1,
       section_label: '',
       instruction: '',
       question_type: QuestionType.MULTIPLE_CHOICE,

@@ -1,6 +1,5 @@
 import { BaseResponse } from '@/types/reading/reading.types';
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
-import { toast } from 'sonner';
 
 interface CustomAxiosRequestConfig extends InternalAxiosRequestConfig {
   notify?: boolean; // Custom property to control notification behavior
@@ -33,17 +32,25 @@ instance.interceptors.response.use(
     return res;
   },
   (err) => {
+    // Suppress toasts for aborted/canceled requests
+    if (
+      (axios.isAxiosError(err) && err.code === 'ERR_CANCELED') ||
+      (err as any)?.name === 'AbortError'
+    ) {
+      return Promise.reject(err);
+    }
+
+    // Show API errors by default but keep server errors generic.
     const notify = (err.config as CustomAxiosRequestConfig)?.notify ?? true;
     const notifyError = (err.config as CustomAxiosRequestConfig)?.notifyError ?? true;
-    if (!notify || !notifyError) return Promise.reject(err);
-
-    if (axios.isAxiosError(err)) {
-      const errorMessage = err.response?.data?.message || 'An error occurred';
-      if (notifyError) {
-        toast.error(errorMessage);
+    if (notify && notifyError) {
+      let message = 'Something went wrong. Please try again.';
+      if (axios.isAxiosError(err)) {
+        const status = err.response?.status ?? 0;
+        if (status >= 400 && status < 500) {
+          message = (err.response?.data as any)?.message || 'Request failed. Please try again.';
+        }
       }
-    } else {
-      toast.error('An unexpected error occurred');
     }
     return Promise.reject(err);
   }

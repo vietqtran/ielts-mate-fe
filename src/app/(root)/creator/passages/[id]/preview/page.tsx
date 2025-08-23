@@ -18,20 +18,6 @@ interface PassagePreviewData {
   ielts_type: number;
   part_number: number;
   passage_status: number;
-  created_by: {
-    user_id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
-  updated_by: {
-    user_id: string;
-    first_name: string;
-    last_name: string;
-    email: string;
-  };
-  created_at: string;
-  updated_at: string;
   question_groups: QuestionGroup[];
 }
 
@@ -40,6 +26,7 @@ interface QuestionGroup {
   section_label: string;
   section_order: number;
   instruction: string;
+  question_type: number;
   drag_items: DragItem[];
   questions: Question[];
 }
@@ -48,7 +35,9 @@ interface Question {
   question_id: string;
   question_order: number;
   question_type: number;
-  question_categories: number;
+  point: number;
+  explanation: string;
+  number_of_correct_answers: number;
   instruction_for_choice?: string;
   choices?: Choice[];
   blank_index?: number;
@@ -61,13 +50,13 @@ interface Question {
 
 interface Choice {
   choice_id: string;
-  choice_content: string;
+  content: string;
   choice_order: number;
 }
 
 interface DragItem {
-  item_id: string;
-  item_content: string;
+  drag_item_id: string;
+  content: string;
 }
 
 export default function PassagePreviewPage() {
@@ -93,26 +82,14 @@ export default function PassagePreviewPage() {
             ielts_type: backendData.ielts_type,
             part_number: backendData.part_number,
             passage_status: backendData.passage_status,
-            created_by: {
-              user_id: backendData.created_by.id || backendData.created_by.user_id,
-              first_name: backendData.created_by.first_name,
-              last_name: backendData.created_by.last_name,
-              email: backendData.created_by.email,
-            },
-            updated_by: {
-              user_id: backendData.updated_by.id || backendData.updated_by.user_id,
-              first_name: backendData.updated_by.first_name,
-              last_name: backendData.updated_by.last_name,
-              email: backendData.updated_by.email,
-            },
-            created_at: backendData.created_at,
-            updated_at: backendData.updated_at,
             question_groups: backendData.question_groups || [],
           };
           setPassageData(mappedData);
         }
       } catch (error) {
-        console.log(error);
+        console.error('Error loading passage data:', error);
+        // Still set passage data to null to show "Passage not found"
+        setPassageData(null);
       }
     };
 
@@ -130,12 +107,8 @@ export default function PassagePreviewPage() {
   };
 
   const renderQuestion = (question: Question, groupIndex: number, questionIndex: number) => {
-    // Calculate continuous question numbering across all groups
-    let totalQuestionsBefore = 0;
-    for (let i = 0; i < groupIndex; i++) {
-      totalQuestionsBefore += passageData!.question_groups[i].questions.length;
-    }
-    const questionNumber = totalQuestionsBefore + questionIndex + 1;
+    // Use the actual question order from the API response
+    const questionNumber = question.question_order;
 
     switch (question.question_type) {
       case 0: // Multiple Choice
@@ -160,10 +133,19 @@ export default function PassagePreviewPage() {
                     className='h-4 w-4 text-blue-600'
                     disabled
                   />
-                  <label className='text-sm'>{choice.choice_content}</label>
+                  <label className='text-sm'>{choice.content}</label>
                 </div>
               ))}
             </div>
+            {question.explanation && (
+              <div className='mt-4 p-3 bg-yellow-50 rounded-md'>
+                <p className='text-sm font-medium text-yellow-800 mb-2'>Explanation:</p>
+                <div
+                  className='text-sm prose prose-sm max-w-none'
+                  dangerouslySetInnerHTML={{ __html: question.explanation }}
+                />
+              </div>
+            )}
           </div>
         );
 
@@ -183,6 +165,15 @@ export default function PassagePreviewPage() {
                 disabled
               />
             </div>
+            {question.explanation && (
+              <div className='mt-4 p-3 bg-yellow-50 rounded-md'>
+                <p className='text-sm font-medium text-yellow-800 mb-2'>Explanation:</p>
+                <div
+                  className='text-sm prose prose-sm max-w-none'
+                  dangerouslySetInnerHTML={{ __html: question.explanation }}
+                />
+              </div>
+            )}
           </div>
         );
 
@@ -208,6 +199,15 @@ export default function PassagePreviewPage() {
                 disabled
               />
             </div>
+            {question.explanation && (
+              <div className='mt-4 p-3 bg-yellow-50 rounded-md'>
+                <p className='text-sm font-medium text-yellow-800 mb-2'>Explanation:</p>
+                <div
+                  className='text-sm prose prose-sm max-w-none'
+                  dangerouslySetInnerHTML={{ __html: question.explanation }}
+                />
+              </div>
+            )}
           </div>
         );
 
@@ -224,6 +224,15 @@ export default function PassagePreviewPage() {
                 <span className='text-gray-400 text-sm'>Drop here</span>
               </div>
             </div>
+            {question.explanation && (
+              <div className='mt-4 p-3 bg-yellow-50 rounded-md'>
+                <p className='text-sm font-medium text-yellow-800 mb-2'>Explanation:</p>
+                <div
+                  className='text-sm prose prose-sm max-w-none'
+                  dangerouslySetInnerHTML={{ __html: question.explanation }}
+                />
+              </div>
+            )}
           </div>
         );
 
@@ -295,7 +304,7 @@ export default function PassagePreviewPage() {
             </CardTitle>
             <div className='flex items-center gap-2 text-sm text-muted-foreground'>
               <User className='h-4 w-4' />
-              {passageData.created_by.first_name} {passageData.created_by.last_name}
+              Creator
             </div>
           </div>
         </CardHeader>
@@ -340,10 +349,10 @@ export default function PassagePreviewPage() {
                     .flatMap((group) => group.drag_items)
                     .map((item) => (
                       <div
-                        key={item.item_id}
+                        key={item.drag_item_id}
                         className='px-3 py-2 bg-blue-100 text-blue-800 rounded-md cursor-pointer hover:bg-blue-200 transition-colors'
                       >
-                        {item.item_content}
+                        {item.content}
                       </div>
                     ))}
                 </div>

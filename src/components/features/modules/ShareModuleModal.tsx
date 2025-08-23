@@ -14,7 +14,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useModules } from '@/hooks/apis/modules/useModules';
 import { ShareModuleRequest } from '@/lib/api/modules';
-import { Plus, Share2, Users, X } from 'lucide-react';
+import { Mail, Plus, Share2, X } from 'lucide-react';
 import React, { useState } from 'react';
 import { toast } from 'sonner';
 
@@ -33,50 +33,71 @@ export default function ShareModuleModal({
   moduleName,
   onSuccess,
 }: ShareModuleModalProps) {
-  const [userIds, setUserIds] = useState<string[]>([]);
-  const [currentUserId, setCurrentUserId] = useState('');
-  const { shareModule, isLoading } = useModules();
+  const [emails, setEmails] = useState<string[]>([]);
+  const [currentEmail, setCurrentEmail] = useState('');
+  const { shareModule, getUserInfoByEmail, isLoading } = useModules();
 
-  const handleAddUserId = () => {
-    if (currentUserId.trim() && !userIds.includes(currentUserId.trim())) {
-      setUserIds([...userIds, currentUserId.trim()]);
-      setCurrentUserId('');
-    }
+  const isValidEmail = (value: string) => {
+    const emailRegex =
+      /^(?:[a-zA-Z0-9_'^&\/+-])+(?:\.(?:[a-zA-Z0-9_'^&\/+-])+)*@(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}$/;
+    return emailRegex.test(value);
   };
 
-  const handleRemoveUserId = (userId: string) => {
-    setUserIds(userIds.filter((id) => id !== userId));
+  const handleAddEmail = async () => {
+    const trimmed = currentEmail.trim().toLowerCase();
+    if (!trimmed) return;
+    if (!isValidEmail(trimmed)) {
+      toast.error('Please enter a valid email address');
+      return;
+    }
+    if (emails.includes(trimmed)) {
+      setCurrentEmail('');
+      return;
+    }
+
+    const user = await getUserInfoByEmail(trimmed);
+    if (!user) {
+      // error toast already shown in hook
+      return;
+    }
+
+    setEmails([...emails, trimmed]);
+    setCurrentEmail('');
+  };
+
+  const handleRemoveEmail = (email: string) => {
+    setEmails(emails.filter((e) => e !== email));
   };
 
   const handleShare = async () => {
-    if (userIds.length === 0) {
-      toast.error('Please add at least one user ID');
+    if (emails.length === 0) {
+      toast.error('Please add at least one email');
       return;
     }
 
     const shareData: ShareModuleRequest = {
-      user_ids: userIds,
+      users: emails,
     };
 
     const result = await shareModule(moduleId, shareData);
     if (result) {
-      setUserIds([]);
-      setCurrentUserId('');
+      setEmails([]);
+      setCurrentEmail('');
       onSuccess?.();
       onClose();
     }
   };
 
   const handleClose = () => {
-    setUserIds([]);
-    setCurrentUserId('');
+    setEmails([]);
+    setCurrentEmail('');
     onClose();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      handleAddUserId();
+      handleAddEmail();
     }
   };
 
@@ -89,55 +110,59 @@ export default function ShareModuleModal({
             <span>Share Module</span>
           </DialogTitle>
           <DialogDescription className='text-medium-slate-blue-500'>
-            Share "{moduleName}" with other users. Enter their user IDs to grant access.
+            Share "{moduleName}" with other users. Enter their emails to grant access.
           </DialogDescription>
         </DialogHeader>
 
         <div className='space-y-4 py-4'>
           {/* Add User ID Input */}
           <div className='space-y-2'>
-            <Label htmlFor='userId' className='text-medium-slate-blue-600 font-medium'>
-              User ID
+            <Label htmlFor='email' className='text-medium-slate-blue-600 font-medium'>
+              Email
             </Label>
             <div className='flex space-x-2'>
               <Input
-                id='userId'
-                placeholder='Enter user ID...'
-                value={currentUserId}
-                onChange={(e) => setCurrentUserId(e.target.value)}
+                id='email'
+                placeholder='Enter email...'
+                value={currentEmail}
+                onChange={(e) => setCurrentEmail(e.target.value)}
                 onKeyPress={handleKeyPress}
                 className='flex-1 bg-white/80 border-tekhelet-200 focus:border-tekhelet-400'
               />
               <Button
                 type='button'
-                onClick={handleAddUserId}
+                onClick={handleAddEmail}
                 variant='outline'
                 size='icon'
                 className='border-tekhelet-200 text-tekhelet-400 hover:bg-tekhelet-50'
-                disabled={!currentUserId.trim()}
+                disabled={!currentEmail.trim() || !!isLoading.getUserInfoByEmail}
               >
-                <Plus className='h-4 w-4' />
+                {isLoading.getUserInfoByEmail ? (
+                  <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-current' />
+                ) : (
+                  <Plus className='h-4 w-4' />
+                )}
               </Button>
             </div>
           </div>
 
           {/* User IDs List */}
-          {userIds.length > 0 && (
+          {emails.length > 0 && (
             <div className='space-y-2'>
               <Label className='text-medium-slate-blue-600 font-medium'>
-                Users to share with ({userIds.length})
+                Emails to share with ({emails.length})
               </Label>
               <div className='flex flex-wrap gap-2 p-3 bg-tekhelet-50 rounded-lg border border-tekhelet-200'>
-                {userIds.map((userId) => (
+                {emails.map((email) => (
                   <Badge
-                    key={userId}
+                    key={email}
                     variant='secondary'
                     className='flex items-center space-x-1 bg-white border border-tekhelet-200 text-tekhelet-600'
                   >
-                    <Users className='h-3 w-3' />
-                    <span>{userId}</span>
+                    <Mail className='h-3 w-3' />
+                    <span>{email}</span>
                     <button
-                      onClick={() => handleRemoveUserId(userId)}
+                      onClick={() => handleRemoveEmail(email)}
                       className='ml-1 hover:text-red-600 transition-colors'
                     >
                       <X className='h-3 w-3' />
@@ -169,7 +194,7 @@ export default function ShareModuleModal({
           </Button>
           <Button
             onClick={handleShare}
-            disabled={userIds.length === 0 || isLoading.shareModule}
+            disabled={emails.length === 0 || isLoading.shareModule}
             className='bg-tekhelet-400 hover:bg-tekhelet-500 text-white'
           >
             {isLoading.shareModule ? (

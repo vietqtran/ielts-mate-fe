@@ -17,6 +17,7 @@ export interface FlashCard {
     created_by: string;
     created_at: string;
   };
+  is_highlighted?: boolean;
 }
 
 export interface ModuleResponse {
@@ -56,13 +57,14 @@ export interface ModuleListResponse {
 
 // Sharing related interfaces
 export interface ShareModuleRequest {
-  user_ids: string[];
+  users: string[];
 }
 
 export interface ModuleUserResponse {
   module_id: string;
   module_name: string;
   description: string;
+  share_to: string;
   is_public: boolean;
   status: number; // 0: pending, 1: accepted, 2: denied
   is_deleted?: boolean;
@@ -93,6 +95,11 @@ export interface ModuleProgressRequest {
   flashcard_id: string;
   is_correct: boolean;
   time_spent: number;
+  is_highlighted?: boolean;
+}
+
+export interface ModuleSessionTimeRequest {
+  time_spent: number;
 }
 
 export interface ModuleProgressResponse {
@@ -106,6 +113,33 @@ export interface ModuleProgressResponse {
   streak_count: number;
   created_at: string;
   updated_at: string;
+}
+
+// Extended progress response including flashcard details for study sessions
+export interface ModuleProgressDetailResponse extends ModuleProgressResponse {
+  id?: string;
+  module_name: string;
+  status?: number;
+  learning_status?: string;
+  last_index_read?: number;
+  progress?: number; // Progress as percentage (0 to 100)
+  attempts?: number; // Number of study attempts
+  flashcard_progresses: Array<{
+    flashcard_id: string;
+    status: number;
+    is_highlighted?: boolean;
+    flashcard_detail: {
+      flashcard_id: string;
+      vocab: {
+        vocabulary_id: string;
+        word: string;
+        context: string;
+        meaning: string;
+        created_by: string;
+        created_at: string;
+      };
+    };
+  }>;
 }
 
 export interface BaseResponse<T> {
@@ -122,6 +156,30 @@ export interface BaseResponse<T> {
   };
 }
 
+export interface ModuleRefreshRequest {
+  learning_status: string;
+}
+
+// Identity user info (looked up by email)
+export interface IdentityUserInfoResponse {
+  id: string;
+  username: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  emailVerified: boolean;
+  createdTimestamp: number;
+  enabled: boolean;
+  totp: boolean;
+  access: {
+    manageGroupMembership: boolean;
+    view: boolean;
+    mapRoles: boolean;
+    impersonate: boolean;
+    manage: boolean;
+  };
+}
+
 /**
  * Create a new module
  * @param data Module data
@@ -132,6 +190,19 @@ export const createModule = async (data: ModuleCreateRequest): Promise<ModuleCre
   return response.data;
 };
 
+/**
+ * Refresh module progress for the current user
+ */
+export const refreshModuleProgress = async (
+  moduleId: string,
+  data?: ModuleRefreshRequest
+): Promise<BaseResponse<ModuleProgressDetailResponse>> => {
+  const response = await axios.put<BaseResponse<ModuleProgressDetailResponse>>(
+    `/personal/module-share/refresh-progress/${moduleId}`,
+    data ?? { learning_status: 'NEW' }
+  );
+  return response.data;
+};
 /**
  * Get user's modules/flashcards
  * @returns Promise with the modules list
@@ -162,6 +233,16 @@ export const updateModule = async (
   data: ModuleCreateRequest
 ): Promise<ModuleCreateResponse> => {
   const response = await axios.put<ModuleCreateResponse>(`/personal/module/${id}`, data);
+  return response.data;
+};
+
+/**
+ * Delete a module by id
+ * @param id Module id
+ * @returns Promise with the delete response
+ */
+export const deleteModule = async (id: string): Promise<BaseResponse<void>> => {
+  const response = await axios.delete<BaseResponse<void>>(`/personal/module/${id}`);
   return response.data;
 };
 
@@ -306,8 +387,8 @@ export const getMyRequestedModules = async (
  */
 export const getModuleProgress = async (
   moduleId: string
-): Promise<BaseResponse<ModuleProgressResponse>> => {
-  const response = await axios.get<BaseResponse<ModuleProgressResponse>>(
+): Promise<BaseResponse<ModuleProgressDetailResponse>> => {
+  const response = await axios.get<BaseResponse<ModuleProgressDetailResponse>>(
     `/personal/module-share/progress/${moduleId}`
   );
   return response.data;
@@ -326,6 +407,32 @@ export const updateModuleProgress = async (
   const response = await axios.put<BaseResponse<string>>(
     `/personal/module-share/progress/${moduleId}/flashcard`,
     data
+  );
+  return response.data;
+};
+
+/**
+ * Update module session time (e.g., on exit/close)
+ */
+export const updateModuleSessionTime = async (
+  moduleId: string,
+  data: ModuleSessionTimeRequest
+): Promise<BaseResponse<string>> => {
+  const response = await axios.put<BaseResponse<string>>(
+    `/personal/module-share/progress/${moduleId}`,
+    data
+  );
+  return response.data;
+};
+
+/**
+ * Get user info by email (identity service)
+ * @param email email address to lookup
+ */
+export const getUserInfoByEmail = async (email: string): Promise<IdentityUserInfoResponse> => {
+  const response = await axios.get<IdentityUserInfoResponse>(
+    `/identity/auth/get-user-info-by-email`,
+    { params: { email }, notifyError: false } as any
   );
   return response.data;
 };

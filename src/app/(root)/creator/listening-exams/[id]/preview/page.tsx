@@ -128,7 +128,7 @@ export default function ListeningExamPreviewPage() {
                     <b>Instruction:</b> {part.instruction}
                   </div>
                   <div className='mb-2'>
-                    <b>Transcript:</b> {part.transcript}
+                    <b>Transcript:</b> {part.transcription ?? '-'}
                   </div>
                   {audioUrls[partKey] && (
                     <div className='mb-2'>

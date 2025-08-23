@@ -36,8 +36,11 @@ const CreatorSSEListener = () => {
 
       const base = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
       const url = `${base}/${SSE_PATH}/${encodeURIComponent(user.id)}`;
+      console.log('SSE: Attempting to connect to:', url);
       const es = new EventSource(url, { withCredentials: true });
       eventSourceRef.current = es;
+
+      console.log('SSE: EventSource created, readyState:', es.readyState);
 
       es.addEventListener('open', () => {
         console.log('SSE connection opened');
@@ -75,15 +78,23 @@ const CreatorSSEListener = () => {
       es.addEventListener('notification', handleSSEEvent);
       es.addEventListener('update', handleSSEEvent);
 
-      es.addEventListener('error', () => {
+      es.addEventListener('error', (event) => {
+        console.log('SSE error event:', event, 'readyState:', es.readyState);
         // Close and attempt reconnect with exponential backoff
         es.close();
         const delay = backoffMsRef.current;
         backoffMsRef.current = Math.min(backoffMsRef.current * 2, maxBackoffMs);
+        console.log(`SSE: Reconnecting in ${delay}ms`);
         reconnectTimeoutRef.current = window.setTimeout(() => {
           connect();
         }, delay);
       });
+
+      // Add a generic event listener to catch ALL events
+      es.onmessage = (event) => {
+        console.log('SSE: Raw onmessage event:', event);
+        handleSSEEvent(event);
+      };
     };
 
     if (user?.id) {

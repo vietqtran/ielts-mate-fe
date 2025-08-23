@@ -43,7 +43,7 @@ const navigationGroups = [
     icon: History,
   },
   {
-    name: 'Personalized',
+    name: 'Vocabulary',
     href: '/personalized',
     icon: User,
   },

@@ -5,14 +5,14 @@ export interface ReadingExamAttemptFilters
   extends CommonReduxFilterStates<{
     searchText?: string;
     sortBy?: string;
-    sortDirection?: 'asc' | 'desc';
+    sortDirection?: 'asc' | 'desc' | '';
   }> {}
 
 const initialState: ReadingExamAttemptFilters = {
   filters: {
     searchText: '',
-    sortBy: 'createdAt',
-    sortDirection: 'desc',
+    sortBy: '',
+    sortDirection: '',
   },
   isLoading: false,
   pagination: {
@@ -54,9 +54,7 @@ const readingExamAttemptSlice = createSlice({
       state.pagination = initialState.pagination;
     },
     clearFilters: (state) => {
-      state.filters.searchText = '';
-      state.filters.sortBy = 'createdAt';
-      state.filters.sortDirection = 'desc';
+      state.filters = initialState.filters;
     },
   },
 });

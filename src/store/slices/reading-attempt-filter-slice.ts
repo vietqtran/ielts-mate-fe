@@ -6,7 +6,9 @@ export interface ReadingAttemptFilters {
   partNumber?: number[];
   status?: number[];
   sortBy?: string;
-  sortDirection?: 'asc' | 'desc';
+  sortDirection?: 'asc' | 'desc' | '';
+  questionCategory?: string;
+  passageId?: string;
 }
 
 export interface ReadingAttemptState {
@@ -28,8 +30,10 @@ const initialState: ReadingAttemptState = {
     ieltsType: [],
     partNumber: [],
     status: [],
-    sortBy: 'updatedAt',
-    sortDirection: 'desc',
+    sortBy: '',
+    sortDirection: '',
+    questionCategory: '',
+    passageId: '',
   },
   isLoading: false,
   pagination: {
@@ -46,22 +50,22 @@ const readingAttemptSlice = createSlice({
   name: 'readingAttempt',
   initialState,
   reducers: {
-    setReadingAttemptFilters: (state, action: PayloadAction<ReadingAttemptFilters>) => {
+    setFilters: (state, action: PayloadAction<ReadingAttemptFilters>) => {
       state.filters = action.payload;
     },
-    clearReadingAttemptFilters: (state) => {
+    clearFilters: (state) => {
       state.filters = initialState.filters;
     },
 
-    clearReadingAttemptState: (state) => {
+    clearState: (state) => {
       state.filters = initialState.filters;
       state.pagination = initialState.pagination;
     },
 
-    setReadingAttemptLoading: (state, action: PayloadAction<boolean>) => {
+    setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-    setReadingAttemptPagination: (
+    setPagination: (
       state,
       action: PayloadAction<{
         totalPages: number;
@@ -77,11 +81,6 @@ const readingAttemptSlice = createSlice({
   },
 });
 
-export const {
-  setReadingAttemptFilters,
-  clearReadingAttemptFilters,
-  setReadingAttemptLoading,
-  setReadingAttemptPagination,
-} = readingAttemptSlice.actions;
+export const { setFilters, clearFilters, setLoading, setPagination } = readingAttemptSlice.actions;
 
 export default readingAttemptSlice.reducer;

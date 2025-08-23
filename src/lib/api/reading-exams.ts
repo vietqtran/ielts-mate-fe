@@ -1,3 +1,4 @@
+import { CommonPaginationParams } from '@/types/filter.types';
 import {
   ReadingExamCreateRequest,
   ReadingExamResponse,
@@ -55,15 +56,35 @@ export const getReadingExam = async (id: string): Promise<ReadingExamResponse> =
  * Get a list of all reading exams
  * @returns Promise with the list of reading exams
  */
-export const getReadingExams = async (): Promise<{
+export const getReadingExams = async (
+  params?: Partial<CommonPaginationParams> & { keyword?: string }
+): Promise<{
   status: string;
   message: string;
   data: ReadingExamResponse['data'][];
+  pagination?: {
+    totalPages: number;
+    pageSize: number;
+    totalItems: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+    currentPage: number;
+  };
 }> => {
   const response = await axios.get<{
     status: string;
     message: string;
     data: ReadingExamResponse['data'][];
-  }>('/reading/reading-exams');
+    pagination?: {
+      totalPages: number;
+      pageSize: number;
+      totalItems: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+      currentPage: number;
+    };
+  }>('/reading/reading-exams', {
+    params,
+  });
   return response.data;
 };

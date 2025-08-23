@@ -5,13 +5,14 @@ export interface ListeningAttemptFilters {
   ieltsType?: number[];
   partNumber?: number[];
   status?: number[];
+  sortDirection?: 'asc' | 'desc' | '';
+  listeningTaskId?: string;
+  sortBy?: string;
+  questionCategory?: string;
 }
 
 export interface ListeningAttemptState {
   filters: ListeningAttemptFilters;
-  currentPage: number;
-  sortBy: string;
-  sortDirection: 'asc' | 'desc';
   isLoading: boolean;
   pagination: {
     totalPages: number;
@@ -19,21 +20,29 @@ export interface ListeningAttemptState {
     totalItems: number;
     hasNextPage: boolean;
     hasPreviousPage: boolean;
+    currentPage: number;
   };
 }
 
 const initialState: ListeningAttemptState = {
-  filters: {},
-  currentPage: 1,
-  sortBy: 'createdAt',
-  sortDirection: 'desc',
+  filters: {
+    title: '',
+    ieltsType: [],
+    partNumber: [],
+    status: [],
+    sortDirection: '',
+    listeningTaskId: '',
+    sortBy: '',
+    questionCategory: '',
+  },
   isLoading: false,
   pagination: {
     totalPages: 1,
-    pageSize: 12,
+    pageSize: 10,
     totalItems: 0,
     hasNextPage: false,
     hasPreviousPage: false,
+    currentPage: 1,
   },
 };
 
@@ -41,25 +50,22 @@ const listeningAttemptSlice = createSlice({
   name: 'listeningAttempt',
   initialState,
   reducers: {
-    setListeningAttemptFilters: (state, action: PayloadAction<ListeningAttemptFilters>) => {
+    setFilters: (state, action: PayloadAction<ListeningAttemptFilters>) => {
       state.filters = action.payload;
     },
-    clearListeningAttemptFilters: (state) => {
-      state.filters = {};
+    clearFilters: (state) => {
+      state.filters = initialState.filters;
     },
-    setListeningAttemptCurrentPage: (state, action: PayloadAction<number>) => {
-      state.currentPage = action.payload;
+
+    clearState: (state) => {
+      state.filters = initialState.filters;
+      state.pagination = initialState.pagination;
     },
-    setListeningAttemptSortBy: (state, action: PayloadAction<string>) => {
-      state.sortBy = action.payload;
-    },
-    setListeningAttemptSortDirection: (state, action: PayloadAction<'asc' | 'desc'>) => {
-      state.sortDirection = action.payload;
-    },
-    setListeningAttemptLoading: (state, action: PayloadAction<boolean>) => {
+
+    setLoading: (state, action: PayloadAction<boolean>) => {
       state.isLoading = action.payload;
     },
-    setListeningAttemptPagination: (
+    setPagination: (
       state,
       action: PayloadAction<{
         totalPages: number;
@@ -67,6 +73,7 @@ const listeningAttemptSlice = createSlice({
         totalItems: number;
         hasNextPage: boolean;
         hasPreviousPage: boolean;
+        currentPage: number;
       }>
     ) => {
       state.pagination = action.payload;
@@ -74,14 +81,7 @@ const listeningAttemptSlice = createSlice({
   },
 });
 
-export const {
-  setListeningAttemptFilters,
-  clearListeningAttemptFilters,
-  setListeningAttemptCurrentPage,
-  setListeningAttemptSortBy,
-  setListeningAttemptSortDirection,
-  setListeningAttemptLoading,
-  setListeningAttemptPagination,
-} = listeningAttemptSlice.actions;
+export const { setFilters, clearFilters, setLoading, setPagination, clearState } =
+  listeningAttemptSlice.actions;
 
 export default listeningAttemptSlice.reducer;

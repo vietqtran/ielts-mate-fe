@@ -115,6 +115,7 @@ export interface ListActiveListeningExamsResponse {
   display_version: number;
   is_original: boolean;
   is_deleted: boolean;
+  is_marked_up: boolean;
 }
 
 /**
@@ -182,4 +183,12 @@ export interface ListeningChoice {
   content: string;
   choice_order: number;
   is_correct?: boolean;
+}
+
+export interface GetListeningExamParams {
+  page: number;
+  size: number;
+  sort_by?: string;
+  sort_direction?: string;
+  keywords?: string;
 }
