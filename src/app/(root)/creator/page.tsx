@@ -167,11 +167,21 @@ const Page = () => {
     return d;
   }, []);
   const defaultTo = useMemo(() => new Date(), []);
-  const [readingDateRange, setReadingDateRange] = useState<DateRange | undefined>({
+  const [readingCorrectDateRange, setReadingCorrectDateRange] = useState<DateRange | undefined>({
     from: defaultFrom,
     to: defaultTo,
   });
-  const [listeningDateRange, setListeningDateRange] = useState<DateRange | undefined>({
+  const [readingWrongDateRange, setReadingWrongDateRange] = useState<DateRange | undefined>({
+    from: defaultFrom,
+    to: defaultTo,
+  });
+  const [listeningCorrectDateRange, setListeningCorrectDateRange] = useState<DateRange | undefined>(
+    {
+      from: defaultFrom,
+      to: defaultTo,
+    }
+  );
+  const [listeningWrongDateRange, setListeningWrongDateRange] = useState<DateRange | undefined>({
     from: defaultFrom,
     to: defaultTo,
   });
@@ -181,67 +191,105 @@ const Page = () => {
   const [readingWrong, setReadingWrong] = useState<QuestionTypeWrongItem[]>([]);
   const [listeningCorrect, setListeningCorrect] = useState<QuestionTypeCorrectItem[]>([]);
   const [listeningWrong, setListeningWrong] = useState<QuestionTypeWrongItem[]>([]);
-  const [readingStatsLoading, setReadingStatsLoading] = useState<boolean>(false);
-  const [listeningStatsLoading, setListeningStatsLoading] = useState<boolean>(false);
+  const [readingCorrectLoading, setReadingCorrectLoading] = useState<boolean>(false);
+  const [readingWrongLoading, setReadingWrongLoading] = useState<boolean>(false);
+  const [listeningCorrectLoading, setListeningCorrectLoading] = useState<boolean>(false);
+  const [listeningWrongLoading, setListeningWrongLoading] = useState<boolean>(false);
 
   const formatDateParam = (d: Date) => format(d, 'yyyy-MM-dd');
-  const formatQuestionTypeLabel = (t: number) => `Type ${t}`;
+  const formatQuestionTypeLabel = (t: number) => {
+    const typeMap: { [key: number]: string } = {
+      0: 'Multiple choice',
+      1: 'Fill in blank',
+      2: 'Matching',
+      3: 'Drag and drop',
+    };
+    return typeMap[t] || `Type ${t}`;
+  };
   const hasData = (arr: Array<{ [k: string]: number }>, key: string) =>
     (arr || []).some((i) => (i?.[key] || 0) > 0);
 
-  const fetchReadingQuestionTypeStats = async () => {
-    if (!readingDateRange?.from || !readingDateRange?.to) return;
-    setReadingStatsLoading(true);
+  const fetchReadingCorrectStats = async () => {
+    if (!readingCorrectDateRange?.from || !readingCorrectDateRange?.to) return;
+    setReadingCorrectLoading(true);
     setError(null);
     try {
       const params = {
-        from_date: formatDateParam(readingDateRange.from),
-        to_date: formatDateParam(readingDateRange.to),
+        from_date: formatDateParam(readingCorrectDateRange.from),
+        to_date: formatDateParam(readingCorrectDateRange.to),
       } as const;
-      const [rc, rw] = await Promise.all([
-        instance.get<ApiResponse<QuestionTypeCorrectItem[]>>(
-          '/personal/creator-dashboard/reading/question-type-stats',
-          { params, notify: false }
-        ),
-        instance.get<ApiResponse<QuestionTypeWrongItem[]>>(
-          '/personal/creator-dashboard/reading/question-type-stats/wrong',
-          { params, notify: false }
-        ),
-      ]);
-      setReadingCorrect(rc.data.data || []);
-      setReadingWrong(rw.data.data || []);
+      const response = await instance.get<ApiResponse<QuestionTypeCorrectItem[]>>(
+        '/personal/creator-dashboard/reading/question-type-stats',
+        { params, notify: false }
+      );
+      setReadingCorrect(response.data.data || []);
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to load reading question-type stats');
+      setError(err?.response?.data?.message || 'Failed to load reading correct stats');
     } finally {
-      setReadingStatsLoading(false);
+      setReadingCorrectLoading(false);
     }
   };
 
-  const fetchListeningQuestionTypeStats = async () => {
-    if (!listeningDateRange?.from || !listeningDateRange?.to) return;
-    setListeningStatsLoading(true);
+  const fetchReadingWrongStats = async () => {
+    if (!readingWrongDateRange?.from || !readingWrongDateRange?.to) return;
+    setReadingWrongLoading(true);
     setError(null);
     try {
       const params = {
-        from_date: formatDateParam(listeningDateRange.from),
-        to_date: formatDateParam(listeningDateRange.to),
+        from_date: formatDateParam(readingWrongDateRange.from),
+        to_date: formatDateParam(readingWrongDateRange.to),
       } as const;
-      const [lc, lw] = await Promise.all([
-        instance.get<ApiResponse<QuestionTypeCorrectItem[]>>(
-          '/personal/creator-dashboard/listening/question-type-stats',
-          { params, notify: false }
-        ),
-        instance.get<ApiResponse<QuestionTypeWrongItem[]>>(
-          '/personal/creator-dashboard/listening/question-type-stats/wrong',
-          { params, notify: false }
-        ),
-      ]);
-      setListeningCorrect(lc.data.data || []);
-      setListeningWrong(lw.data.data || []);
+      const response = await instance.get<ApiResponse<QuestionTypeWrongItem[]>>(
+        '/personal/creator-dashboard/reading/question-type-stats/wrong',
+        { params, notify: false }
+      );
+      setReadingWrong(response.data.data || []);
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Failed to load listening question-type stats');
+      setError(err?.response?.data?.message || 'Failed to load reading wrong stats');
     } finally {
-      setListeningStatsLoading(false);
+      setReadingWrongLoading(false);
+    }
+  };
+
+  const fetchListeningCorrectStats = async () => {
+    if (!listeningCorrectDateRange?.from || !listeningCorrectDateRange?.to) return;
+    setListeningCorrectLoading(true);
+    setError(null);
+    try {
+      const params = {
+        from_date: formatDateParam(listeningCorrectDateRange.from),
+        to_date: formatDateParam(listeningCorrectDateRange.to),
+      } as const;
+      const response = await instance.get<ApiResponse<QuestionTypeCorrectItem[]>>(
+        '/personal/creator-dashboard/listening/question-type-stats',
+        { params, notify: false }
+      );
+      setListeningCorrect(response.data.data || []);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Failed to load listening correct stats');
+    } finally {
+      setListeningCorrectLoading(false);
+    }
+  };
+
+  const fetchListeningWrongStats = async () => {
+    if (!listeningWrongDateRange?.from || !listeningWrongDateRange?.to) return;
+    setListeningWrongLoading(true);
+    setError(null);
+    try {
+      const params = {
+        from_date: formatDateParam(listeningWrongDateRange.from),
+        to_date: formatDateParam(listeningWrongDateRange.to),
+      } as const;
+      const response = await instance.get<ApiResponse<QuestionTypeWrongItem[]>>(
+        '/personal/creator-dashboard/listening/question-type-stats/wrong',
+        { params, notify: false }
+      );
+      setListeningWrong(response.data.data || []);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Failed to load listening wrong stats');
+    } finally {
+      setListeningWrongLoading(false);
     }
   };
 
@@ -379,26 +427,30 @@ const Page = () => {
             <div className='flex items-center gap-3'>
               <div className='flex-1'>
                 <DatePickerWithRange
-                  dateRange={readingDateRange}
-                  onDateRangeChange={setReadingDateRange}
+                  dateRange={readingCorrectDateRange}
+                  onDateRangeChange={setReadingCorrectDateRange}
                   placeholder='Select date range for Reading Correct'
                 />
               </div>
               <Button
-                onClick={fetchReadingQuestionTypeStats}
-                disabled={readingStatsLoading || !readingDateRange?.from || !readingDateRange?.to}
+                onClick={fetchReadingCorrectStats}
+                disabled={
+                  readingCorrectLoading ||
+                  !readingCorrectDateRange?.from ||
+                  !readingCorrectDateRange?.to
+                }
                 className='bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white border-0'
                 size='sm'
               >
                 <RefreshCw
-                  className={`h-4 w-4 mr-2 ${readingStatsLoading ? 'animate-spin' : ''}`}
+                  className={`h-4 w-4 mr-2 ${readingCorrectLoading ? 'animate-spin' : ''}`}
                 />
                 Apply
               </Button>
             </div>
 
             <div className='h-64 px-2 pb-2'>
-              {readingStatsLoading ? (
+              {readingCorrectLoading ? (
                 <div className='h-full w-full flex items-center justify-center text-tekhelet-500 text-sm'>
                   Loading...
                 </div>
@@ -442,28 +494,30 @@ const Page = () => {
             <div className='flex items-center gap-3'>
               <div className='flex-1'>
                 <DatePickerWithRange
-                  dateRange={listeningDateRange}
-                  onDateRangeChange={setListeningDateRange}
+                  dateRange={listeningCorrectDateRange}
+                  onDateRangeChange={setListeningCorrectDateRange}
                   placeholder='Select date range for Listening Correct'
                 />
               </div>
               <Button
-                onClick={fetchListeningQuestionTypeStats}
+                onClick={fetchListeningCorrectStats}
                 disabled={
-                  listeningStatsLoading || !listeningDateRange?.from || !listeningDateRange?.to
+                  listeningCorrectLoading ||
+                  !listeningCorrectDateRange?.from ||
+                  !listeningCorrectDateRange?.to
                 }
                 className='bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white border-0'
                 size='sm'
               >
                 <RefreshCw
-                  className={`h-4 w-4 mr-2 ${listeningStatsLoading ? 'animate-spin' : ''}`}
+                  className={`h-4 w-4 mr-2 ${listeningCorrectLoading ? 'animate-spin' : ''}`}
                 />
                 Apply
               </Button>
             </div>
 
             <div className='h-64 px-2 pb-2'>
-              {listeningStatsLoading ? (
+              {listeningCorrectLoading ? (
                 <div className='h-full w-full flex items-center justify-center text-tekhelet-500 text-sm'>
                   Loading...
                 </div>
@@ -504,26 +558,28 @@ const Page = () => {
             <div className='flex items-center gap-3'>
               <div className='flex-1'>
                 <DatePickerWithRange
-                  dateRange={readingDateRange}
-                  onDateRangeChange={setReadingDateRange}
+                  dateRange={readingWrongDateRange}
+                  onDateRangeChange={setReadingWrongDateRange}
                   placeholder='Select date range for Reading Wrong'
                 />
               </div>
               <Button
-                onClick={fetchReadingQuestionTypeStats}
-                disabled={readingStatsLoading || !readingDateRange?.from || !readingDateRange?.to}
+                onClick={fetchReadingWrongStats}
+                disabled={
+                  readingWrongLoading || !readingWrongDateRange?.from || !readingWrongDateRange?.to
+                }
                 className='bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white border-0'
                 size='sm'
               >
                 <RefreshCw
-                  className={`h-4 w-4 mr-2 ${readingStatsLoading ? 'animate-spin' : ''}`}
+                  className={`h-4 w-4 mr-2 ${readingWrongLoading ? 'animate-spin' : ''}`}
                 />
                 Apply
               </Button>
             </div>
 
             <div className='h-64 px-2 pb-2'>
-              {readingStatsLoading ? (
+              {readingWrongLoading ? (
                 <div className='h-full w-full flex items-center justify-center text-tekhelet-500 text-sm'>
                   Loading...
                 </div>
@@ -562,28 +618,30 @@ const Page = () => {
             <div className='flex items-center gap-3'>
               <div className='flex-1'>
                 <DatePickerWithRange
-                  dateRange={listeningDateRange}
-                  onDateRangeChange={setListeningDateRange}
+                  dateRange={listeningWrongDateRange}
+                  onDateRangeChange={setListeningWrongDateRange}
                   placeholder='Select date range for Listening Wrong'
                 />
               </div>
               <Button
-                onClick={fetchListeningQuestionTypeStats}
+                onClick={fetchListeningWrongStats}
                 disabled={
-                  listeningStatsLoading || !listeningDateRange?.from || !listeningDateRange?.to
+                  listeningWrongLoading ||
+                  !listeningWrongDateRange?.from ||
+                  !listeningWrongDateRange?.to
                 }
                 className='bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white border-0'
                 size='sm'
               >
                 <RefreshCw
-                  className={`h-4 w-4 mr-2 ${listeningStatsLoading ? 'animate-spin' : ''}`}
+                  className={`h-4 w-4 mr-2 ${listeningWrongLoading ? 'animate-spin' : ''}`}
                 />
                 Apply
               </Button>
             </div>
 
             <div className='h-64 px-2 pb-2'>
-              {listeningStatsLoading ? (
+              {listeningWrongLoading ? (
                 <div className='h-full w-full flex items-center justify-center text-tekhelet-500 text-sm'>
                   Loading...
                 </div>
