@@ -27,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { SlugInput } from '@/components/ui/slug-input';
 import { Textarea } from '@/components/ui/textarea';
 import { useReadingExam } from '@/hooks/apis/admin/useReadingExam';
 import { Status } from '@/types/reading/reading-exam.types';
@@ -34,7 +35,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import * as z from 'zod';
@@ -60,13 +61,21 @@ export default function EditReadingExamPage() {
   const params = useParams();
   const examId = params.id as string;
 
-  const { getExamById, updateExam, isLoading } = useReadingExam();
+  const { getExamById, updateExam, generateSlug, checkSlug, isLoading } = useReadingExam();
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [selectedPassages, setSelectedPassages] = useState({
     part1: '',
     part2: '',
     part3: '',
   });
+
+  // Memoize the checkSlug function to prevent infinite re-renders
+  const memoizedCheckSlug = useCallback(
+    async (slug: string) => {
+      return await checkSlug(slug);
+    },
+    [checkSlug]
+  );
 
   const [passageTitles, setPassageTitles] = useState({
     part1: '',
@@ -233,24 +242,17 @@ export default function EditReadingExamPage() {
                   control={form.control}
                   name='url_slug'
                   render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>URL Slug</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder='example-exam-title'
-                          {...field}
-                          onChange={(e) => {
-                            // Convert to lowercase and replace spaces with hyphens
-                            const value = e.target.value
-                              .toLowerCase()
-                              .replace(/\s+/g, '-')
-                              .replace(/[^a-z0-9-]/g, '');
-                            field.onChange(value);
-                          }}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
+                    <SlugInput
+                      value={field.value}
+                      onChange={field.onChange}
+                      onGenerateSlug={async () => {
+                        const examName = form.getValues('reading_exam_name');
+                        return await generateSlug(examName);
+                      }}
+                      onCheckSlug={memoizedCheckSlug}
+                      examName={form.watch('reading_exam_name')}
+                      skipValidation={true}
+                    />
                   )}
                 />
 
