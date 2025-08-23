@@ -1,9 +1,11 @@
 'use client';
 
 import {
+  checkListeningExamSlug,
   createListeningExam,
   deleteListeningExam,
   fetchListeningExams,
+  generateListeningExamSlug,
   getListeningExamById,
   updateListeningExam,
 } from '@/lib/api/listening-exams';
@@ -96,12 +98,52 @@ export function useListeningExam() {
     }
   };
 
+  /**
+   * Generate a slug from exam name
+   * @param examName The exam name to generate slug from
+   */
+  const generateSlug = async (examName: string) => {
+    setLoadingState('generateSlug', true);
+    setErrorState('generateSlug', null);
+
+    try {
+      const response = await generateListeningExamSlug(examName);
+      return response;
+    } catch (error) {
+      setErrorState('generateSlug', error as Error);
+      throw error;
+    } finally {
+      setLoadingState('generateSlug', false);
+    }
+  };
+
+  /**
+   * Check if a slug is available
+   * @param slug The slug to check
+   */
+  const checkSlug = async (slug: string) => {
+    setLoadingState('checkSlug', true);
+    setErrorState('checkSlug', null);
+
+    try {
+      const response = await checkListeningExamSlug(slug);
+      return response;
+    } catch (error) {
+      setErrorState('checkSlug', error as Error);
+      throw error;
+    } finally {
+      setLoadingState('checkSlug', false);
+    }
+  };
+
   return {
     createExam,
     updateExam,
     deleteExam,
     getExamById,
     getAllExams,
+    generateSlug,
+    checkSlug,
     isLoading,
     error,
   };

@@ -88,3 +88,29 @@ export const getReadingExams = async (
   });
   return response.data;
 };
+
+/**
+ * Generate a slug from exam name
+ * @param examName The exam name to generate slug from
+ * @returns Promise with the generated slug
+ */
+export const generateReadingExamSlug = async (examName: string): Promise<string> => {
+  const response = await axios.get<{
+    status: string;
+    message: string;
+    data: { url_slug: string };
+  }>(`/reading/reading-exams/gen/slug/${encodeURIComponent(examName)}`);
+  return response.data.data.url_slug;
+};
+
+/**
+ * Check if a slug is available
+ * @param slug The slug to check
+ * @returns Promise with boolean indicating if slug is available
+ */
+export const checkReadingExamSlug = async (slug: string): Promise<boolean> => {
+  const response = await axios.get<{ data: boolean }>('/reading/reading-exams/check/slug', {
+    params: { slug },
+  });
+  return response.data.data;
+};

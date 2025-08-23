@@ -89,3 +89,27 @@ export const getListeningExamById = async (examId: string) => {
 export const activateListeningExam = async (examId: string, isActive: boolean) => {
   await axios.patch(`/listening/exams/${examId}/activate`, { isActive });
 };
+
+/**
+ * Generate a slug from exam name
+ * @param examName The exam name to generate slug from
+ * @returns Promise with the generated slug
+ */
+export const generateListeningExamSlug = async (examName: string): Promise<string> => {
+  const response = await axios.get<{
+    status: string;
+    message: string;
+    data: { url_slug: string };
+  }>(`/listening/exams/slug/${encodeURIComponent(examName)}`);
+  return response.data.data.url_slug;
+};
+
+/**
+ * Check if a slug is available
+ * @param slug The slug to check
+ * @returns Promise with boolean indicating if slug is available
+ */
+export const checkListeningExamSlug = async (slug: string): Promise<boolean> => {
+  const response = await axios.get<{ data: boolean }>(`/listening/exams/check/${slug}`);
+  return response.data.data;
+};

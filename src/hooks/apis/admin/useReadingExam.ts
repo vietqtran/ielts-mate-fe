@@ -1,8 +1,10 @@
 'use client';
 
 import {
+  checkReadingExamSlug,
   createReadingExam,
   deleteReadingExam,
+  generateReadingExamSlug,
   getReadingExam,
   getReadingExams,
   updateReadingExam,
@@ -171,6 +173,44 @@ export function useReadingExam() {
     }
   };
 
+  /**
+   * Generate a slug from exam name
+   * @param examName The exam name to generate slug from
+   */
+  const generateSlug = async (examName: string) => {
+    setLoadingState('generateSlug', true);
+    setErrorState('generateSlug', null);
+
+    try {
+      const response = await generateReadingExamSlug(examName);
+      return response;
+    } catch (error) {
+      setErrorState('generateSlug', error as Error);
+      throw error;
+    } finally {
+      setLoadingState('generateSlug', false);
+    }
+  };
+
+  /**
+   * Check if a slug is available
+   * @param slug The slug to check
+   */
+  const checkSlug = async (slug: string) => {
+    setLoadingState('checkSlug', true);
+    setErrorState('checkSlug', null);
+
+    try {
+      const response = await checkReadingExamSlug(slug);
+      return response;
+    } catch (error) {
+      setErrorState('checkSlug', error as Error);
+      throw error;
+    } finally {
+      setLoadingState('checkSlug', false);
+    }
+  };
+
   return {
     createExam,
     updateExam,
@@ -178,6 +218,8 @@ export function useReadingExam() {
     getExamById,
     getAllExams,
     getTestStatusPassages,
+    generateSlug,
+    checkSlug,
     isLoading,
     error,
   };

@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { SlugInput } from '@/components/ui/slug-input';
 import {
   Table,
   TableBody,
@@ -25,7 +26,7 @@ import { useListeningTask } from '@/hooks/apis/listening/useListeningTask';
 import { ListeningTaskFilterParams } from '@/types/listening/listening.types';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
 type PartKey = 'part1_id' | 'part2_id' | 'part3_id' | 'part4_id';
@@ -37,7 +38,21 @@ export default function EditListeningExamPage() {
   const params = useParams();
   const examId = params.id as string;
   const { getListeningTasksByCreator, isLoading: isLoadingTask } = useListeningTask();
-  const { getExamById, updateExam, isLoading: isLoadingExam } = useListeningExam();
+  const {
+    getExamById,
+    updateExam,
+    generateSlug,
+    checkSlug,
+    isLoading: isLoadingExam,
+  } = useListeningExam();
+
+  // Memoize the checkSlug function to prevent infinite re-renders
+  const memoizedCheckSlug = useCallback(
+    async (slug: string) => {
+      return await checkSlug(slug);
+    },
+    [checkSlug]
+  );
 
   const [tasks, setTasks] = useState<any[]>([]);
   const [pagination, setPagination] = useState({
@@ -218,19 +233,15 @@ export default function EditListeningExamPage() {
                 />
               </div>
               <div>
-                <label className='block font-medium mb-1'>URL Slug</label>
-                <Input
-                  name='url_slug'
+                <SlugInput
                   value={form.url_slug}
-                  onChange={(e) => {
-                    const value = e.target.value
-                      .toLowerCase()
-                      .replace(/\s+/g, '-')
-                      .replace(/[^a-z0-9-]/g, '');
-                    setForm((prev) => ({ ...prev, url_slug: value }));
+                  onChange={(value) => setForm((prev) => ({ ...prev, url_slug: value }))}
+                  onGenerateSlug={async () => {
+                    return await generateSlug(form.exam_name);
                   }}
-                  required
-                  placeholder='example-exam-title'
+                  onCheckSlug={memoizedCheckSlug}
+                  examName={form.exam_name}
+                  skipValidation={true}
                 />
               </div>
             </div>
