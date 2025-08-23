@@ -51,10 +51,10 @@ export default function RootLayout({
               keepPreviousData: true,
             }}
           >
+            <Toaster theme='light' richColors />
             <Suspense fallback={null}>
               {children}
               <FullPageLoading />
-              <Toaster theme='light' richColors />
             </Suspense>
           </SWRConfig>
         </StoreProvider>
