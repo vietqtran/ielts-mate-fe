@@ -1,9 +1,11 @@
 import {
   VocabularyCreateRequest,
   VocabularyCreateResponse,
+  VocabularyDeleteResponse,
   VocabularyListParams,
   VocabularyListResponse,
   createVocabulary,
+  deleteVocabulary,
   getMyVocabulary,
 } from '@/lib/api/vocabulary';
 import { useState } from 'react';
@@ -13,9 +15,11 @@ export const useVocabulary = () => {
   const [isLoading, setIsLoading] = useState<{
     createVocabulary: boolean;
     getMyVocabulary: boolean;
+    deleteVocabulary: boolean;
   }>({
     createVocabulary: false,
     getMyVocabulary: false,
+    deleteVocabulary: false,
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -59,9 +63,30 @@ export const useVocabulary = () => {
     }
   };
 
+  const deleteVocabularyFn = async (
+    vocabularyId: string
+  ): Promise<VocabularyDeleteResponse | null> => {
+    setIsLoading((prev) => ({ ...prev, deleteVocabulary: true }));
+    setError(null);
+
+    try {
+      const response = await deleteVocabulary(vocabularyId);
+      toast.success('Vocabulary deleted successfully');
+      return response;
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Failed to delete vocabulary';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return null;
+    } finally {
+      setIsLoading((prev) => ({ ...prev, deleteVocabulary: false }));
+    }
+  };
+
   return {
     createVocabulary: createVocabularyFn,
     getMyVocabulary: getMyVocabularyFn,
+    deleteVocabulary: deleteVocabularyFn,
     isLoading,
     error,
   };

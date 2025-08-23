@@ -3,10 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useListeningTask } from '@/hooks';
-import {
-  ListeningTaskDetailResponse,
-  ListeningTaskStatus,
-} from '@/types/listening/listening.types';
+import { ListeningTaskDetailResponse } from '@/types/listening/listening.types';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -44,7 +41,8 @@ export default function PreviewListeningTaskPage() {
               } else {
                 setAudioUrl(null);
               }
-            } catch (e) {
+            } catch (error) {
+              console.log(error);
               setAudioUrl(null);
             }
           } else {
@@ -101,21 +99,6 @@ export default function PreviewListeningTaskPage() {
   if (!task) {
     return null;
   }
-
-  const getStatusBadge = (status: number) => {
-    switch (status) {
-      case ListeningTaskStatus.DRAFT:
-        return <span className='px-2 py-1 rounded-full bg-gray-200 text-gray-700'>Draft</span>;
-      case ListeningTaskStatus.PUBLISHED:
-        return (
-          <span className='px-2 py-1 rounded-full bg-green-200 text-green-700'>Published</span>
-        );
-      case ListeningTaskStatus.DEACTIVATED:
-        return <span className='px-2 py-1 rounded-full bg-red-200 text-red-700'>Deactivated</span>;
-      default:
-        return <span className='px-2 py-1 rounded-full bg-gray-200 text-gray-700'>Unknown</span>;
-    }
-  };
 
   return (
     <div className='container mx-auto p-4 space-y-6'>
@@ -232,7 +215,11 @@ export default function PreviewListeningTaskPage() {
                                     ))}
                                 </ul>
                                 <div className='mt-2 text-sm text-gray-500'>
-                                  Explanation: {q.explanation}
+                                  <span className='font-medium'>Explanation:</span>
+                                  <div
+                                    className='mt-1'
+                                    dangerouslySetInnerHTML={{ __html: q.explanation || '' }}
+                                  />
                                 </div>
                               </div>
                             );
@@ -244,7 +231,11 @@ export default function PreviewListeningTaskPage() {
                                   {q.correct_answer}
                                 </div>
                                 <div className='mt-2 text-sm text-gray-500'>
-                                  Explanation: {q.explanation}
+                                  <span className='font-medium'>Explanation:</span>
+                                  <div
+                                    className='mt-1'
+                                    dangerouslySetInnerHTML={{ __html: q.explanation || '' }}
+                                  />
                                 </div>
                               </div>
                             );
@@ -259,7 +250,11 @@ export default function PreviewListeningTaskPage() {
                                   {q.correct_answer_for_matching}
                                 </div>
                                 <div className='mt-2 text-sm text-gray-500'>
-                                  Explanation: {q.explanation}
+                                  <span className='font-medium'>Explanation:</span>
+                                  <div
+                                    className='mt-1'
+                                    dangerouslySetInnerHTML={{ __html: q.explanation || '' }}
+                                  />
                                 </div>
                               </div>
                             );
@@ -271,7 +266,11 @@ export default function PreviewListeningTaskPage() {
                                   {q.drag_item_id}
                                 </div>
                                 <div className='mt-2 text-sm text-gray-500'>
-                                  Explanation: {q.explanation}
+                                  <span className='font-medium'>Explanation:</span>
+                                  <div
+                                    className='mt-1'
+                                    dangerouslySetInnerHTML={{ __html: q.explanation || '' }}
+                                  />
                                 </div>
                               </div>
                             );

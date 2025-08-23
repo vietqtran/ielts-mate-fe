@@ -3,7 +3,7 @@ const PassageBox = ({ content }: { content: string }) => {
     <div
       style={{ fontSize: '18px', lineHeight: '1.6' }}
       dangerouslySetInnerHTML={{ __html: content }}
-      className='p-4 text-gray-700'
+      className='p-6 backdrop-blur-xl border rounded-2xl shadow-sm'
     />
   );
 };

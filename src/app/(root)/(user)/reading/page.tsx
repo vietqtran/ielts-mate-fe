@@ -1,34 +1,25 @@
 'use client';
 
+import PaginationCommon from '@/components/features/user/common/PaginationCommon';
 import { UserPassageFilterToolbar } from '@/components/features/user/reading/UserPassageFilterToolbar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from '@/components/ui/pagination';
 import { Separator } from '@/components/ui/separator';
 import { usePassage } from '@/hooks/apis/reading/usePassage';
 import {
   UserPassageFilters,
-  clearUserFilters,
-  setUserCurrentPage,
-  setUserFilters,
-  setUserLoading,
-  setUserPagination,
-  setUserSortBy,
-  setUserSortDirection,
+  clearFilters,
+  setFilters,
+  setLoading,
+  setPagination,
 } from '@/store/slices/reading-filter-slices';
 import { BaseResponse, PassageGetResponse } from '@/types/reading/reading.types';
 import { RootState } from '@/types/store.types';
+import { buildCreatedByList } from '@/utils/filter';
 import { BookOpen, Calendar, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 const Reading = () => {
@@ -37,14 +28,18 @@ const Reading = () => {
   const { getActivePassages, isLoading, error } = usePassage();
   const [passages, setPassages] = useState<PassageGetResponse[]>([]);
 
+  const createdByArray = useMemo(() => {
+    return passages.map((p) => p.created_by);
+  }, [passages]);
+
+  const createdByOptions = useMemo(() => {
+    return buildCreatedByList(createdByArray);
+  }, [createdByArray]);
+
   // Get state from Redux - using separate selectors to prevent unnecessary re-renders
   const filters = useSelector((state: RootState) => state.userPassage.filters);
-  const currentPage = useSelector((state: RootState) => state.userPassage.currentPage);
-  const sortBy = useSelector((state: RootState) => state.userPassage.sortBy);
-  const sortDirection = useSelector((state: RootState) => state.userPassage.sortDirection);
   const reduxIsLoading = useSelector((state: RootState) => state.userPassage.isLoading);
   const pagination = useSelector((state: RootState) => state.userPassage.pagination);
-
   // Pagination states
   const isGridLoading = reduxIsLoading || isLoading.getActivePassages;
 
@@ -52,52 +47,55 @@ const Reading = () => {
   useEffect(() => {
     const loadPassages = async () => {
       try {
-        dispatch(setUserLoading(true));
+        dispatch(setLoading(true));
         const response: BaseResponse<PassageGetResponse[]> = await getActivePassages({
-          page: currentPage,
-          size: pagination?.pageSize || 12,
+          page: pagination?.currentPage || 1,
+          size: pagination?.pageSize || 10,
           ieltsType: filters.ieltsType,
           partNumber: filters.partNumber,
           title: filters.title,
-          sortBy,
-          sortDirection,
+          sortBy: filters.sortBy,
+          sortDirection: filters.sortDirection,
+          questionCategory: filters.questionCategory,
         });
         setPassages(response.data || []);
 
         // Update pagination state from response
         if (response.pagination) {
           dispatch(
-            setUserPagination({
+            setPagination({
               totalPages: response.pagination.totalPages,
               pageSize: response.pagination.pageSize,
               totalItems: response.pagination.totalItems,
               hasNextPage: response.pagination.hasNextPage,
               hasPreviousPage: response.pagination.hasPreviousPage,
+              currentPage: response.pagination.currentPage,
             })
           );
         }
       } catch (err) {
         console.error('Failed to load passages:', err);
       } finally {
-        dispatch(setUserLoading(false));
+        dispatch(setLoading(false));
       }
     };
 
     loadPassages();
   }, [
-    currentPage,
+    pagination?.currentPage,
     JSON.stringify(filters.ieltsType),
     JSON.stringify(filters.partNumber),
     filters.title,
-    sortBy,
-    sortDirection,
+    filters.sortBy,
+    filters.sortDirection,
     pagination?.pageSize,
+    filters.questionCategory,
   ]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
-    if (currentPage !== 1) {
-      dispatch(setUserCurrentPage(1));
+    if (pagination?.currentPage !== 1) {
+      dispatch(setPagination({ ...pagination, currentPage: 1 }));
     }
   }, [JSON.stringify(filters.ieltsType), JSON.stringify(filters.partNumber), filters.title]);
 
@@ -138,29 +136,21 @@ const Reading = () => {
     }
   };
 
-  const clearFilters = () => {
-    dispatch(clearUserFilters());
-  };
-
   const handleFiltersChange = (newFilters: UserPassageFilters) => {
-    dispatch(setUserFilters(newFilters));
-    dispatch(setUserCurrentPage(1));
+    dispatch(setFilters(newFilters));
+    dispatch(setPagination({ ...pagination, currentPage: 1 }));
   };
 
   const handleClearFilters = () => {
-    clearFilters();
-  };
-
-  const handleSortByChange = (field: string) => {
-    dispatch(setUserSortBy(field));
-  };
-
-  const handleSortDirectionChange = (direction: 'asc' | 'desc') => {
-    dispatch(setUserSortDirection(direction));
+    dispatch(clearFilters());
   };
 
   const handlePageChange = (page: number) => {
-    dispatch(setUserCurrentPage(page));
+    dispatch(setPagination({ ...pagination, currentPage: page }));
+  };
+
+  const handlePageSizeChange = (size: string) => {
+    dispatch(setPagination({ ...pagination, pageSize: Number(size), currentPage: 1 }));
   };
 
   // Check if there are active filters
@@ -205,7 +195,7 @@ const Reading = () => {
             </p>
           </div>
           <div className='flex items-center gap-2'>
-            <Badge variant='outline' className='text-tekhelet-600 backdrop-blur-md'>
+            <Badge variant={'outline'} className='text-tekhelet-600 backdrop-blur-md'>
               {pagination?.totalItems || 0} passage
               {(pagination?.totalItems || 0) !== 1 ? 's' : ''}
             </Badge>
@@ -216,11 +206,8 @@ const Reading = () => {
           filters={filters}
           onFiltersChange={handleFiltersChange}
           onClearFilters={handleClearFilters}
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          onSortByChange={handleSortByChange}
-          onSortDirectionChange={handleSortDirectionChange}
           isLoading={reduxIsLoading || isLoading.getActivePassages}
+          createdByOptions={createdByOptions}
         />
 
         {/* Passages Grid */}
@@ -261,7 +248,7 @@ const Reading = () => {
                     : 'There are no active passages available at the moment'}
                 </p>
                 {hasActiveFilters() && (
-                  <Button variant='outline' onClick={clearFilters}>
+                  <Button variant='outline' onClick={handleClearFilters}>
                     Clear all filters
                   </Button>
                 )}
@@ -271,23 +258,19 @@ const Reading = () => {
         ) : (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             {passages.map((passage) => (
-              <Card key={passage.passage_id} className='hover:shadow-md transition-shadow'>
-                <CardHeader>
-                  <div className='flex items-start justify-between'>
-                    <div className='flex-1'>
-                      <CardTitle className='text-lg leading-tight mb-2 text-tekhelet-600'>
-                        {passage.title}
-                      </CardTitle>
-                      <div className='flex items-center gap-2 mb-2'>
-                        <Badge
-                          className={getIeltsTypeBadgeColor(passage.ielts_type)}
-                          variant='outline'
-                        >
-                          {getIeltsTypeLabel(passage.ielts_type)}
-                        </Badge>
-                        <Badge variant='outline'>{getPartNumberLabel(passage.part_number)}</Badge>
-                      </div>
-                    </div>
+              <Card key={passage.passage_id} className='hover:shadow-md transition-shadow w-full'>
+                <CardHeader className='min-w-0'>
+                  <CardTitle
+                    className='text-lg mb-2 text-tekhelet-600 w-full truncate'
+                    title={passage.title}
+                  >
+                    {passage.title}
+                  </CardTitle>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <Badge className={getIeltsTypeBadgeColor(passage.ielts_type)} variant='outline'>
+                      {getIeltsTypeLabel(passage.ielts_type)}
+                    </Badge>
+                    <Badge variant='outline'>{getPartNumberLabel(passage.part_number)}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -328,63 +311,11 @@ const Reading = () => {
             ))}
           </div>
         )}
-
-        {/* Pagination */}
-        {!isGridLoading && passages.length > 0 && (pagination?.totalPages || 0) > 1 && (
-          <div className='flex items-center justify-between mt-8'>
-            <div className='text-sm text-muted-foreground'>
-              Showing {(currentPage - 1) * (pagination?.pageSize || 12) + 1} to{' '}
-              {Math.min(currentPage * (pagination?.pageSize || 12), pagination?.totalItems || 0)} of{' '}
-              {pagination?.totalItems || 0} entries
-            </div>
-            <Pagination>
-              <PaginationContent>
-                <PaginationItem>
-                  <PaginationPrevious
-                    href='#'
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (pagination?.hasPreviousPage) {
-                        handlePageChange(currentPage - 1);
-                      }
-                    }}
-                    className={!pagination?.hasPreviousPage ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-
-                {Array.from({ length: pagination?.totalPages || 0 }, (_, i) => i + 1).map(
-                  (page) => (
-                    <PaginationItem key={page}>
-                      <PaginationLink
-                        href='#'
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handlePageChange(page);
-                        }}
-                        isActive={page === currentPage}
-                      >
-                        {page}
-                      </PaginationLink>
-                    </PaginationItem>
-                  )
-                )}
-
-                <PaginationItem>
-                  <PaginationNext
-                    href='#'
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (pagination?.hasNextPage) {
-                        handlePageChange(currentPage + 1);
-                      }
-                    }}
-                    className={!pagination?.hasNextPage ? 'pointer-events-none opacity-50' : ''}
-                  />
-                </PaginationItem>
-              </PaginationContent>
-            </Pagination>
-          </div>
-        )}
+        <PaginationCommon
+          pagination={pagination}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+        />
       </div>
     </div>
   );

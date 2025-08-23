@@ -60,7 +60,7 @@ export function useQuestion() {
   const updateQuestionOrder = async (
     group_id: string,
     question_id: string,
-    orderRequest: { question_order: number },
+    orderRequest: { order: number },
     isListening = false
   ) => {
     setLoadingState('updateQuestionOrder', true);

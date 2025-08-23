@@ -1,6 +1,6 @@
 'use client';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -22,6 +22,7 @@ import { useAppSelector, useAuth } from '@/hooks';
 import { cn } from '@/lib/utils';
 import {
   Album,
+  BellRing,
   BookOpen,
   Headphones,
   History,
@@ -29,6 +30,9 @@ import {
   LayoutDashboard,
   LogOut,
   Settings,
+  SquareCheck,
+  Target,
+  Trophy,
   User,
   User2,
 } from 'lucide-react';
@@ -80,7 +84,7 @@ const navigationGroups = [
     ],
   },
   {
-    name: 'Personalized',
+    name: 'Vocabulary',
     href: '/personalized',
     icon: User,
   },
@@ -130,8 +134,8 @@ export function UserNavigation() {
                           className={cn(
                             'flex items-center gap-2 text-sm font-medium',
                             hasActiveChild
-                              ? 'text-[var(--color-medium-slate-blue-300)]'
-                              : 'text-[var(--color-tekhelet-400)] hover:text-[var(--color-medium-slate-blue-300)]'
+                              ? 'text-[#60a3d9]'
+                              : 'text-[#003b73] hover:text-[#60a3d9]'
                           )}
                         >
                           {group.icon && <group.icon className='h-4 w-4' />}
@@ -150,8 +154,8 @@ export function UserNavigation() {
                                     className={cn(
                                       'flex flex-row items-center gap-2 rounded-md p-2 text-sm font-medium hover:bg-accent',
                                       isActive
-                                        ? 'text-selective-yellow-300'
-                                        : 'text-[var(--color-tekhelet-400)] hover:text-[var(--color-medium-slate-blue-300)]'
+                                        ? 'text-[#0074b7] font-semibold'
+                                        : 'text-[#003b73] hover:text-[#60a3d9]'
                                     )}
                                   >
                                     <Icon className='h-4 w-4' />
@@ -176,8 +180,8 @@ export function UserNavigation() {
                           className={cn(
                             'flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors hover:bg-gray-100',
                             isActive
-                              ? 'text-selective-yellow-300'
-                              : 'text-[var(--color-tekhelet-400)] hover:text-[var(--color-medium-slate-blue-300)]'
+                              ? 'text-[#0074b7] font-semibold'
+                              : 'text-[#003b73] hover:text-[#60a3d9]'
                           )}
                         >
                           <Icon className='h-4 w-4' />
@@ -192,12 +196,15 @@ export function UserNavigation() {
           </div>
 
           {/* User Menu */}
-          <div className='flex items-center'>
+          <div className='flex items-center' data-cy='user-menu'>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
+                <Button
+                  variant='ghost'
+                  className='relative h-8 w-8 rounded-full'
+                  data-cy='avatar-button'
+                >
                   <Avatar className='h-8 w-8'>
-                    <AvatarImage src='/image.png?height=32&width=32' />
                     <AvatarFallback>
                       {user?.firstName?.charAt(0)}
                       {user?.lastName?.charAt(0)}
@@ -232,12 +239,38 @@ export function UserNavigation() {
                     </Link>
                   </DropdownMenuItem>
                 )}
-                <DropdownMenuItem>
-                  <Settings className='mr-2 h-4 w-4' />
-                  <span>Settings</span>
+                <DropdownMenuItem asChild>
+                  <Link href='/settings' className='flex items-center w-full cursor-pointer'>
+                    <Settings className='mr-2 h-4 w-4' />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href='/reminder' className='flex items-center w-full cursor-pointer'>
+                    <BellRing className='mr-2 h-4 w-4' />
+                    <span>Reminder</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href='/streak' className='flex items-center w-full cursor-pointer'>
+                    <Trophy className='mr-2 h-4 w-4' />
+                    <span>Streak</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href='/target' className='flex items-center w-full cursor-pointer'>
+                    <Target className='mr-2 h-4 w-4' />
+                    <span>Target</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link href='/markup' className='flex items-center w-full cursor-pointer'>
+                    <SquareCheck className='mr-2 h-4 w-4' />
+                    <span>Markup</span>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleLogout}>
+                <DropdownMenuItem onClick={handleLogout} data-cy='logout-button'>
                   <LogOut className='mr-2 h-4 w-4' />
                   <span>Log out</span>
                 </DropdownMenuItem>

@@ -91,6 +91,7 @@ export default function ResetPasswordForm() {
     setErrors({});
     const token = searchParams.get('token') ?? '';
     const email = (searchParams.get('email') ?? '').replace(/ /g, '+');
+    console.log(token, email);
     if (!token || !email) {
       router.replace('/sign-in');
     }

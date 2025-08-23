@@ -7,6 +7,7 @@ import { MatchingForm, MatchingFormData } from './MatchingForm';
 
 import { Button } from '@/components/ui/button';
 import { useListeningQuestion, useQuestion } from '@/hooks';
+import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 
 interface QuestionGroup {
   id?: string;
@@ -42,24 +43,34 @@ export function MatchingManager({
   }, [group.questions, group.id]);
 
   const questionApi = isListening ? useListeningQuestion() : useQuestion();
-  const { createQuestions, updateQuestionInfo, deleteQuestion, isLoading } = questionApi;
+  const { createQuestions, updateQuestionInfo, updateQuestionOrder, deleteQuestion, isLoading } =
+    questionApi;
 
   const handleFormSubmit = async (data: MatchingFormData) => {
     if (!group.id) {
       return;
     }
 
-    const questionRequest = {
-      ...data,
-      question_type: 2, // MATCHING
-      question_group_id: group.id,
-      question_categories: [],
-      number_of_correct_answers: 0, // Not applicable
-    };
-
     try {
       if (editingQuestion) {
-        // Update existing question
+        // Update question order separately if it changed
+        if (data.question_order !== editingQuestion.question_order) {
+          await updateQuestionOrder(
+            group.id,
+            editingQuestion.question_id,
+            { order: data.question_order },
+            isListening
+          );
+        }
+
+        // Update existing question info (excluding question_order)
+        const questionRequest = {
+          ...data,
+          question_type: 2, // MATCHING
+          question_group_id: group.id,
+          question_categories: [],
+          number_of_correct_answers: 0, // Not applicable
+        };
         const response = await updateQuestionInfo(
           group.id,
           editingQuestion.question_id,
@@ -89,6 +100,13 @@ export function MatchingManager({
         }
       } else {
         // Create new question
+        const questionRequest = {
+          ...data,
+          question_type: 2, // MATCHING
+          question_group_id: group.id,
+          question_categories: [],
+          number_of_correct_answers: 0, // Not applicable
+        };
         const response = await createQuestions(group.id, [questionRequest], isListening);
         if (response.data && Array.isArray(response.data)) {
           // Ensure consistent structure with question_id field
@@ -143,7 +161,10 @@ export function MatchingManager({
   };
 
   const defaultInitialData = {
-    question_order: localQuestions.length + 1,
+    question_order:
+      localQuestions.length > 0
+        ? Math.max(...localQuestions.map((q: any) => q.question_order)) + 1
+        : 1,
     point: 1,
     explanation: '',
     instruction_for_matching: '',
@@ -166,6 +187,7 @@ export function MatchingManager({
           onSubmit={handleFormSubmit}
           onCancel={handleCancel}
           isSubmitting={isLoading.createQuestions || isLoading.updateQuestionInfo}
+          isEditing={!!editingQuestion}
         />
       )}
 
@@ -199,7 +221,11 @@ export function MatchingManager({
                       </div>
                       {question.explanation && (
                         <p className='text-muted-foreground'>
-                          <strong>Explanation:</strong> {question.explanation}
+                          <strong>Explanation:</strong>
+                          <SafeHtmlRenderer
+                            htmlContent={question.explanation || ''}
+                            className='mt-1'
+                          />
                         </p>
                       )}
                     </div>

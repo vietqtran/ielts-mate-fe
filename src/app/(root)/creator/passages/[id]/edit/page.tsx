@@ -12,7 +12,7 @@ import {
   QuestionCreationRequest,
   QuestionTypeEnumIndex,
 } from '@/types/reading/reading.types';
-import { ArrowLeft, Eye, Save } from 'lucide-react';
+import { ArrowLeft, Eye } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/apis/reading/usePassage';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
+import { toast } from 'sonner';
 
 const passageSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -55,6 +56,8 @@ export default function EditPassagePage() {
   const [questionGroups, setQuestionGroups] = useState<LocalQuestionGroup[]>([]);
   const [activeTab, setActiveTab] = useState('passage');
   const [isDataLoaded, setIsDataLoaded] = useState(false);
+  const [originalFormData, setOriginalFormData] = useState<PassageFormData | null>(null);
+  const [isPassageCompleted, setIsPassageCompleted] = useState(false);
 
   const form = useForm<PassageFormData>({
     resolver: zodResolver(passageSchema),
@@ -106,14 +109,17 @@ export default function EditPassagePage() {
           }
         };
 
-        form.reset({
+        const formData = {
           title: passageResponse.data.title,
           instruction: passageResponse.data.instruction,
           content: passageResponse.data.content,
           ielts_type: getielts_typeEnum(passageResponse.data.ielts_type),
           part_number: getpart_numberEnum(passageResponse.data.part_number),
           passage_status: getpassage_statusEnum(passageResponse.data.passage_status),
-        });
+        };
+
+        form.reset(formData);
+        setOriginalFormData(formData);
 
         const passageDetail = passageResponse.data as any;
         if (passageDetail.question_groups) {
@@ -122,16 +128,13 @@ export default function EditPassagePage() {
             section_order: group.section_order,
             section_label: group.section_label,
             instruction: group.instruction,
+            // Prefer group's question_type from API; fallback to first question's type; default to MULTIPLE_CHOICE
             question_type:
-              group.questions[0]?.question_type === 0
-                ? QuestionTypeEnumIndex.MULTIPLE_CHOICE
-                : group.questions[0]?.question_type === 1
-                  ? QuestionTypeEnumIndex.FILL_IN_THE_BLANKS
-                  : group.questions[0]?.question_type === 2
-                    ? QuestionTypeEnumIndex.MATCHING
-                    : group.questions[0]?.question_type === 3
-                      ? QuestionTypeEnumIndex.DRAG_AND_DROP
-                      : QuestionTypeEnumIndex.MULTIPLE_CHOICE,
+              typeof group?.question_type === 'number'
+                ? group.question_type
+                : typeof group?.questions?.[0]?.question_type === 'number'
+                  ? group.questions[0].question_type
+                  : QuestionTypeEnumIndex.MULTIPLE_CHOICE,
             questions: group.questions ?? [],
             drag_items: group.drag_items ?? [],
           }));
@@ -153,6 +156,36 @@ export default function EditPassagePage() {
 
   const handleBasicInfoSubmit = async (data: PassageFormData) => {
     try {
+      console.log('Edit page handleBasicInfoSubmit called with passage_id:', passage_id);
+      console.log('Form data:', data);
+
+      // Check if the original status was TEST and prevent status change
+      if (originalFormData && originalFormData.passage_status === PassageStatus.TEST) {
+        if (data.passage_status !== PassageStatus.TEST) {
+          // Status is being changed from TEST, which is not allowed
+          toast.error('Status cannot be changed when passage is in Test mode');
+          return;
+        }
+      }
+
+      // Check if form data has changed
+      if (originalFormData) {
+        const hasChanged =
+          data.title !== originalFormData.title ||
+          data.instruction !== originalFormData.instruction ||
+          data.content !== originalFormData.content ||
+          data.ielts_type !== originalFormData.ielts_type ||
+          data.part_number !== originalFormData.part_number ||
+          data.passage_status !== originalFormData.passage_status;
+
+        if (!hasChanged) {
+          // No changes made, just proceed to questions tab
+          setCurrentStep('questions');
+          setActiveTab('questions');
+          return;
+        }
+      }
+
       // Map frontend enums to backend ordinal values
       const getielts_typeOrdinal = (ielts_type: IeltsType) => {
         switch (ielts_type) {
@@ -197,10 +230,33 @@ export default function EditPassagePage() {
         passage_status: getpassage_statusOrdinal(data.passage_status),
       };
 
+      console.log('Calling updatePassage with request:', request);
       await updatePassage(passage_id, request);
+      console.log('updatePassage completed successfully');
+
+      // Update the original form data after successful update
+      setOriginalFormData(data);
+
+      // Set passage as completed after successful save
+      setIsPassageCompleted(true);
+
       setCurrentStep('questions');
       setActiveTab('questions');
     } catch (error) {}
+  };
+
+  const checkFormChanges = (): boolean => {
+    if (!originalFormData) return false;
+
+    const currentData = form.getValues();
+    return (
+      currentData.title !== originalFormData.title ||
+      currentData.instruction !== originalFormData.instruction ||
+      currentData.content !== originalFormData.content ||
+      currentData.ielts_type !== originalFormData.ielts_type ||
+      currentData.part_number !== originalFormData.part_number ||
+      currentData.passage_status !== originalFormData.passage_status
+    );
   };
 
   const handleAddQuestionGroup = (group: LocalQuestionGroup) => {
@@ -210,14 +266,20 @@ export default function EditPassagePage() {
     setQuestionGroups((prev) => [...prev, group]);
   };
 
-  const handleUpdateQuestionGroup = async (index: number, group: LocalQuestionGroup) => {
+  const handleUpdateQuestionGroup = async (
+    index: number,
+    group: LocalQuestionGroup,
+    skipApiCall: boolean = false
+  ) => {
     // Check if this contains newly created questions that shouldn't be updated again
     // @ts-ignore - These properties aren't in the type definition but were added to prevent redundant updates
     const hasJustCreatedQuestions = group._justCreatedQuestions === true;
     // @ts-ignore
     const createdQuestionIds = group._createdQuestionIds || [];
+    // @ts-ignore - Check if this is just a state sync after individual question update
+    const isStateSyncOnly = group._isStateSyncOnly === true;
 
-    if (hasJustCreatedQuestions) {
+    if (hasJustCreatedQuestions || skipApiCall || isStateSyncOnly) {
       // Just update the local state without making an API call
       setQuestionGroups((prev) => prev.map((g, i) => (i === index ? group : g)));
       return;
@@ -290,6 +352,16 @@ export default function EditPassagePage() {
     try {
       setIsSaving(true);
       const formData = form.getValues();
+
+      // Check if the original status was TEST and prevent status change
+      if (originalFormData && originalFormData.passage_status === PassageStatus.TEST) {
+        if (formData.passage_status !== PassageStatus.TEST) {
+          // Status is being changed from TEST, which is not allowed
+          toast.error('Status cannot be changed when passage is in Test mode');
+          setIsSaving(false);
+          return;
+        }
+      }
 
       // First save all unsaved question groups
       const unsavedGroups = questionGroups.filter((group) => !group.id);
@@ -390,7 +462,7 @@ export default function EditPassagePage() {
             <Eye className='h-4 w-4 mr-2' />
             Preview
           </Button>
-          <Button
+          {/* <Button
             onClick={handleFinish}
             disabled={
               !canPreview || isLoading.updatePassage || isLoading.addGroupQuestion || isSaving
@@ -398,7 +470,7 @@ export default function EditPassagePage() {
           >
             <Save className='h-4 w-4 mr-2' />
             Finish & Save
-          </Button>
+          </Button> */}
         </div>
       </div>
 
@@ -509,11 +581,16 @@ export default function EditPassagePage() {
           {isDataLoaded && (
             <PassageBasicInfoForm
               isEdit={true}
-              key={`passage-form-${isDataLoaded}`}
+              key={`passage-form-${isDataLoaded}-${isPassageCompleted}`}
               form={form}
               onSubmit={handleBasicInfoSubmit}
               isLoading={isLoading.updatePassage}
-              isCompleted={false}
+              isCompleted={isPassageCompleted}
+              hasChanges={checkFormChanges()}
+              onEdit={() => {
+                setIsPassageCompleted(false);
+              }}
+              originalStatus={originalFormData?.passage_status}
             />
           )}
           {!isDataLoaded && (

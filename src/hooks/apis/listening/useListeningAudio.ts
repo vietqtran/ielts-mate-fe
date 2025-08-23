@@ -1,79 +1,36 @@
 import instance from '@/lib/axios';
-import { useRef, useState } from 'react';
+import { useEffect } from 'react';
+import useSWR from 'swr';
 
-const useListeningAudio = () => {
-  const [isLoading, setIsLoading] = useState<Record<string, boolean>>({});
-  const [error, setError] = useState<Record<string, Error | null>>({});
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
-
-  const setLoadingState = (key: string, value: boolean) => {
-    setIsLoading((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const setErrorState = (key: string, value: Error | null) => {
-    setError((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const getAudio = async (audio_file_id: string) => {
-    // Huỷ các request cũ
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-    abortControllerRef.current = new AbortController();
-    const currentController = abortControllerRef.current;
-
-    setLoadingState('getAudio', true);
-    setErrorState('getAudio', null);
-
-    // cleanup url if it exists
-    setAudioUrl((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return null;
-    });
-
-    try {
-      const res = await instance.get(`/resource/files/download/${audio_file_id}`, {
+const useListeningAudio = (audioId: string | null) => {
+  const {
+    data: objectUrl,
+    error,
+    isLoading,
+    mutate,
+  } = useSWR(
+    audioId ? ['audio', audioId] : null,
+    async () => {
+      const res = await instance.get(`/resource/files/download/${audioId}`, {
         responseType: 'blob',
-        signal: abortControllerRef.current.signal,
         notify: false,
       });
-      // tạo object url
-      const url = URL.createObjectURL(res.data);
-      if (abortControllerRef.current === currentController) {
-        setAudioUrl(url);
-        return url;
-      }
-    } catch (error: any) {
-      if (abortControllerRef.current === currentController) {
-        if (error.name !== 'AbortError') {
-          setErrorState('getAudio', error as Error);
-          throw error;
-        }
-      }
-    } finally {
-      if (abortControllerRef.current === currentController) {
-        setLoadingState('getAudio', false);
-      }
-      abortControllerRef.current = null;
+      return URL.createObjectURL(res.data as Blob);
+    },
+    {
+      revalidateOnFocus: false,
+      keepPreviousData: true,
     }
-    return null;
-  };
+  );
 
-  // Cleanup url khi unmount
-  const cleanup = () => {
-    if (audioUrl) {
-      URL.revokeObjectURL(audioUrl);
-    }
-  };
+  // Clean up when the cached url changes or SWR key is cleared
+  useEffect(() => {
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
+  }, [objectUrl]);
 
-  return {
-    getAudio,
-    audioUrl,
-    isLoading,
-    error,
-    cleanup,
-  };
+  return { objectUrl, error, isLoading, mutate };
 };
 
 export default useListeningAudio;

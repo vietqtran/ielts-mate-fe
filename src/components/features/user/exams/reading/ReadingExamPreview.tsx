@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ReadingExamResponse } from '@/types/reading/reading-exam.types';
 import { ArrowLeft, ArrowRight, BookOpen, Clock, FileText } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 
 interface ExamPreviewProps {
   examData: ReadingExamResponse['data'];
@@ -15,8 +14,6 @@ interface ExamPreviewProps {
 }
 
 const ReadingExamPreview = ({ examData, onStartExam, onBack }: ExamPreviewProps) => {
-  const router = useRouter();
-
   const passages = [
     {
       part: 'Part 1',
@@ -36,26 +33,30 @@ const ReadingExamPreview = ({ examData, onStartExam, onBack }: ExamPreviewProps)
   ];
 
   return (
-    <div className='min-h-screen bg-medium-slate-blue-900 py-8 px-4'>
+    <div className='min-h-screen py-8 px-4'>
       <div className='max-w-4xl mx-auto'>
         {/* Header */}
-        <div className='bg-white rounded-lg shadow-lg p-6 mb-6'>
+        <div className='rounded-lg border bg-white p-6 mb-6'>
           <div className='flex items-center justify-between mb-4'>
             <Button
               variant='outline'
               onClick={onBack}
-              className='border-tekhelet-300 text-tekhelet-600 hover:bg-tekhelet-50'
+              className='text-tekhelet-600 hover:text-tekhelet-600'
             >
-              <ArrowLeft className='w-4 h-4 mr-2' />
+              <ArrowLeft className='w-4 h-4' />
               Back to Exams
             </Button>
-            <Badge variant='outline' className='border-tekhelet-300 text-tekhelet-600'>
-              {examData.url_slug}
-            </Badge>
+            <Button
+              onClick={onStartExam}
+              className='bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white'
+            >
+              Start Exam
+              <ArrowRight className='w-5 h-5' />
+            </Button>
           </div>
 
           <div className='text-center'>
-            <h1 className='text-3xl font-bold text-tekhelet-700 mb-2'>
+            <h1 className='text-3xl font-bold text-tekhelet-500 mb-2'>
               {examData.reading_exam_name}
             </h1>
             <p className='text-medium-slate-blue-400 text-lg max-w-2xl mx-auto'>
@@ -67,9 +68,9 @@ const ReadingExamPreview = ({ examData, onStartExam, onBack }: ExamPreviewProps)
         {/* Exam Details */}
         <div className='grid md:grid-cols-2 gap-6 mb-8'>
           {/* Duration and Info */}
-          <Card className='border-tekhelet-200'>
-            <CardHeader className='bg-tekhelet-50'>
-              <CardTitle className='flex items-center gap-2 text-tekhelet-700'>
+          <Card>
+            <CardHeader>
+              <CardTitle className='flex items-center gap-2 text-tekhelet-600'>
                 <Clock className='w-5 h-5' />
                 Exam Information
               </CardTitle>
@@ -89,17 +90,19 @@ const ReadingExamPreview = ({ examData, onStartExam, onBack }: ExamPreviewProps)
               </div>
               <Separator />
               <div className='text-sm text-medium-slate-blue-400'>
-                <p>• You will have 60 minutes to complete all three parts</p>
-                <p>• You can navigate between parts during the exam</p>
-                <p>• Submit your answers before time runs out</p>
+                <ul className='list-disc pl-5 space-y-2'>
+                  <li>You will have 60 minutes to complete all three parts</li>
+                  <li>You can navigate between parts during the exam</li>
+                  <li>Submit your answers before time runs out</li>
+                </ul>
               </div>
             </CardContent>
           </Card>
 
           {/* Passages Overview */}
-          <Card className='border-medium-slate-blue-200'>
-            <CardHeader className='bg-medium-slate-blue-50'>
-              <CardTitle className='flex items-center gap-2 text-tekhelet-700'>
+          <Card>
+            <CardHeader>
+              <CardTitle className='flex items-center gap-2 text-tekhelet-600'>
                 <BookOpen className='w-5 h-5' />
                 Reading Passages
               </CardTitle>
@@ -109,7 +112,7 @@ const ReadingExamPreview = ({ examData, onStartExam, onBack }: ExamPreviewProps)
                 <div key={passage.id} className='space-y-2'>
                   <div className='flex items-center gap-3'>
                     <Badge
-                      variant='secondary'
+                      variant='outline'
                       className='bg-selective-yellow-100 text-selective-yellow-700'
                     >
                       {passage.part}
@@ -124,8 +127,8 @@ const ReadingExamPreview = ({ examData, onStartExam, onBack }: ExamPreviewProps)
         </div>
 
         {/* Instructions */}
-        <Card className='border-tangerine-200 mb-8'>
-          <CardHeader className='bg-tangerine-50'>
+        <Card className='mb-8'>
+          <CardHeader>
             <CardTitle className='flex items-center gap-2 text-tangerine-400'>
               <FileText className='w-5 h-5' />
               Important Instructions
@@ -170,30 +173,6 @@ const ReadingExamPreview = ({ examData, onStartExam, onBack }: ExamPreviewProps)
             </div>
           </CardContent>
         </Card>
-
-        {/* Start Exam Button */}
-        <div className='text-center'>
-          <Card className='border-tekhelet-300 bg-tekhelet-50 inline-block'>
-            <CardContent className='p-6'>
-              <div className='space-y-4'>
-                <div className='text-center'>
-                  <h3 className='text-lg font-semibold text-tekhelet-700 mb-2'>Ready to Begin?</h3>
-                  <p className='text-medium-slate-blue-400 text-sm mb-4'>
-                    Once you start, the 60-minute timer will begin immediately.
-                  </p>
-                </div>
-                <Button
-                  onClick={onStartExam}
-                  size='lg'
-                  className='bg-tekhelet-600 hover:bg-tekhelet-700 text-white px-8 py-3 text-lg'
-                >
-                  Start Exam
-                  <ArrowRight className='w-5 h-5 ml-2' />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   );

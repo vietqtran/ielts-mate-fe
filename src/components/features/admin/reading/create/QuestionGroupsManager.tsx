@@ -144,7 +144,11 @@ export function QuestionGroupsManager({
     const commonProps = {
       group: group, // Pass group directly since types now match
       groupIndex,
-      onUpdateGroup: (updatedGroup: any) => {
+      onUpdateGroup: (updatedGroup: any, isStateSyncOnly: boolean = true) => {
+        console.log('QuestionGroupsManager onUpdateGroup called with:', {
+          updatedGroup,
+          isStateSyncOnly,
+        });
         // Check if this contains newly created questions that shouldn't be updated again
         const hasJustCreatedQuestions = updatedGroup._justCreatedQuestions === true;
         const createdQuestionIds = updatedGroup._createdQuestionIds || [];
@@ -177,6 +181,13 @@ export function QuestionGroupsManager({
           localGroup._createdQuestionIds = createdQuestionIds;
         }
 
+        // Mark as state sync only if this comes from individual question updates
+        if (isStateSyncOnly) {
+          // @ts-ignore - Flag to prevent API call when just syncing state after individual question update
+          localGroup._isStateSyncOnly = true;
+        }
+
+        console.log('Calling parent onUpdateGroup with:', localGroup);
         onUpdateGroup(groupIndex, localGroup);
       },
       refetchPassageData: refetchPassageData,
@@ -253,6 +264,7 @@ export function QuestionGroupsManager({
                 onSubmit={handleCreateGroup}
                 onCancel={() => setIsCreatingGroup(false)}
                 isLoading={isLoading.addGroupQuestion}
+                existingGroupsCount={questionGroups.length}
               />
             </div>
           )}
@@ -292,7 +304,7 @@ export function QuestionGroupsManager({
                           </div>
                           {group.instruction && (
                             <div
-                              className='text-xs text-muted-foreground mt-1 max-w-md truncate prose prose-xs'
+                              className='text-xs text-muted-foreground mt-1 max-w-md'
                               dangerouslySetInnerHTML={{ __html: group.instruction }}
                             />
                           )}

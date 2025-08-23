@@ -34,7 +34,6 @@ function Input({
           type === 'password' && '!pr-8',
           !!props.value && 'bg-[#f7fbff]',
           isError && '!bg-red-50',
-
           className
         )}
         {...props}

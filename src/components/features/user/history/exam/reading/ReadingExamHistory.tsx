@@ -1,21 +1,18 @@
 'use client';
 
 import { PaginationCommon } from '@/components/features/user/common';
-import ReadingAttemptFilterToolbar from '@/components/features/user/history/practice/reading/ReadingAttemptFilterToolbar';
+import ReadingExamAttemptHistoryFilter from '@/components/features/user/history/exam/reading/components/ReadingExamAttemptFilter';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import useReadingExamAttempt from '@/hooks/apis/reading/useReadingExamAttempt';
-import { ReadingAttemptFilters } from '@/store/slices/reading-attempt-filter-slice';
 import {
-  clearReadingExamAttemptFilters,
-  setReadingExamAttemptCurrentPage,
-  setReadingExamAttemptFilters,
-  setReadingExamAttemptLoading,
-  setReadingExamAttemptPagination,
-  setReadingExamAttemptSortBy,
-  setReadingExamAttemptSortDirection,
+  ReadingExamAttemptFilters,
+  clearFilters,
+  setFilters,
+  setLoading,
+  setPagination,
 } from '@/store/slices/reading-exam-attempt-filter-slice';
 import { ReadingExamAttempt } from '@/types/reading/reading-exam-attempt.types';
 import { RootState } from '@/types/store.types';
@@ -33,24 +30,20 @@ const ReadingExamHistory = () => {
 
   // Get state from Redux
   const filters = useSelector((state: RootState) => state.readingExamAttempt.filters);
-  const sortBy = useSelector((state: RootState) => state.readingExamAttempt.sortBy);
-  const sortDirection = useSelector((state: RootState) => state.readingExamAttempt.sortDirection);
   const reduxIsLoading = useSelector((state: RootState) => state.readingExamAttempt.isLoading);
   const pagination = useSelector((state: RootState) => state.readingExamAttempt.pagination);
-
-  console.log(pagination);
 
   // Load attempts when dependencies change
   useEffect(() => {
     const loadAttempts = async () => {
       try {
-        dispatch(setReadingExamAttemptLoading(true));
+        dispatch(setLoading(true));
         const response = await getExamAttemptHistory({
-          size: pagination?.pageSize || 12,
-          readingExamName: filters.title || '',
-          page: pagination?.currentPage || 1,
-          sortBy,
-          sortDirection,
+          size: pagination?.pageSize,
+          readingExamName: filters.searchText,
+          page: pagination?.currentPage,
+          sortBy: filters.sortBy,
+          sortDirection: filters.sortDirection,
         });
 
         if (response) {
@@ -58,9 +51,9 @@ const ReadingExamHistory = () => {
 
           // Update pagination state from response length (since API doesn't provide pagination)
           dispatch(
-            setReadingExamAttemptPagination({
+            setPagination({
               totalPages: response?.pagination?.totalPages || 1,
-              pageSize: response?.pagination?.pageSize || 12,
+              pageSize: response?.pagination?.pageSize || 10,
               totalItems: response?.pagination?.totalItems || 0,
               hasNextPage: response?.pagination?.hasNextPage || false,
               hasPreviousPage: response?.pagination?.hasPreviousPage || false,
@@ -71,45 +64,34 @@ const ReadingExamHistory = () => {
       } catch (err) {
         console.error('Failed to load reading exam attempt history:', err);
       } finally {
-        dispatch(setReadingExamAttemptLoading(false));
+        dispatch(setLoading(false));
       }
     };
 
     loadAttempts();
   }, [
-    filters.ieltsType,
-    filters.partNumber,
-    filters.status,
-    filters.title,
-    sortBy,
-    sortDirection,
+    filters.searchText,
+    filters.sortBy,
+    filters.sortDirection,
     pagination?.pageSize,
     pagination?.currentPage,
   ]);
 
-  const handleFiltersChange = (newFilters: ReadingAttemptFilters) => {
-    dispatch(setReadingExamAttemptFilters(newFilters));
-    dispatch(setReadingExamAttemptCurrentPage(1));
+  const handleFiltersChange = (newFilters: ReadingExamAttemptFilters['filters']) => {
+    dispatch(setFilters(newFilters));
+    dispatch(setPagination({ ...pagination, currentPage: 1 }));
   };
 
   const handleClearFilters = () => {
-    dispatch(clearReadingExamAttemptFilters());
-  };
-
-  const handleSortByChange = (field: string) => {
-    dispatch(setReadingExamAttemptSortBy(field));
-  };
-
-  const handleSortDirectionChange = (direction: 'asc' | 'desc') => {
-    dispatch(setReadingExamAttemptSortDirection(direction));
+    dispatch(clearFilters());
   };
 
   const handlePageChange = (page: number) => {
-    dispatch(setReadingExamAttemptPagination({ ...pagination, currentPage: page }));
+    dispatch(setPagination({ ...pagination, currentPage: page }));
   };
 
   const handlePageSizeChange = (size: string) => {
-    dispatch(setReadingExamAttemptPagination({ ...pagination, pageSize: Number(size) }));
+    dispatch(setPagination({ ...pagination, pageSize: Number(size), currentPage: 1 }));
   };
 
   // Check if there are active filters
@@ -132,27 +114,26 @@ const ReadingExamHistory = () => {
         {/* Header */}
         <div className='flex items-center justify-between'>
           <div>
-            <h1 className='text-2xl font-bold tracking-tight text-tekhelet-500'>
+            <h1 className='text-2xl font-bold tracking-tight text-[#003b73]'>
               Reading Exam History
             </h1>
-            <p className='text-tekhelet-600'>View and manage your reading exam attempts</p>
+            <p className='text-[#0074b7]'>View and manage your reading exam attempts</p>
           </div>
           <div className='flex items-center gap-2'>
-            <Badge variant='secondary' className='backdrop-blur-lg text-tekhelet-500'>
+            <Badge
+              variant='secondary'
+              className='backdrop-blur-lg text-[#003b73] bg-[#bfd7ed]/50 border-[#60a3d9]/30'
+            >
               {attemptHistoryData.length} attempt
               {attemptHistoryData.length !== 1 ? 's' : ''}
             </Badge>
           </div>
         </div>
 
-        <ReadingAttemptFilterToolbar
+        <ReadingExamAttemptHistoryFilter
           filters={filters}
           onFiltersChange={handleFiltersChange}
           onClearFilters={handleClearFilters}
-          sortBy={sortBy}
-          sortDirection={sortDirection}
-          onSortByChange={handleSortByChange}
-          onSortDirectionChange={handleSortDirectionChange}
           isLoading={reduxIsLoading}
         />
 
@@ -160,23 +141,26 @@ const ReadingExamHistory = () => {
         {reduxIsLoading ? (
           <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
             {Array.from({ length: 6 }).map((_, i) => (
-              <Card key={i} className='bg-white backdrop-blur-lg border rounded-2xl shadow-xl'>
+              <Card
+                key={i}
+                className='bg-white/90 backdrop-blur-xl border border-[#60a3d9]/30 rounded-3xl shadow-2xl ring-1 ring-[#60a3d9]/20'
+              >
                 <CardHeader>
                   <div className='flex items-start justify-between'>
                     <div className='flex-1'>
-                      <div className='h-6 w-3/4 bg-tekhelet-700 rounded animate-pulse mb-2' />
+                      <div className='h-6 w-3/4 bg-[#bfd7ed]/60 rounded-xl animate-pulse mb-2' />
                       <div className='flex items-center gap-2 mb-2'>
-                        <div className='h-4 w-20 bg-tekhelet-700 rounded animate-pulse' />
-                        <div className='h-4 w-16 bg-tekhelet-700 rounded animate-pulse' />
+                        <div className='h-4 w-20 bg-[#bfd7ed]/60 rounded-xl animate-pulse' />
+                        <div className='h-4 w-16 bg-[#bfd7ed]/60 rounded-xl animate-pulse' />
                       </div>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className='space-y-3'>
-                    <div className='h-4 w-full bg-tekhelet-700 rounded animate-pulse' />
-                    <div className='h-4 w-full bg-tekhelet-700 rounded animate-pulse' />
-                    <div className='h-4 w-2/3 bg-tekhelet-700 rounded animate-pulse' />
+                    <div className='h-4 w-full bg-[#bfd7ed]/60 rounded-xl animate-pulse' />
+                    <div className='h-4 w-full bg-[#bfd7ed]/60 rounded-xl animate-pulse' />
+                    <div className='h-4 w-2/3 bg-[#bfd7ed]/60 rounded-xl animate-pulse' />
                   </div>
                 </CardContent>
               </Card>
@@ -221,18 +205,17 @@ const ReadingExamHistory = () => {
                 key={attempt.exam_attempt_id}
                 className='bg-white backdrop-blur-lg rounded-2xl shadow-xl hover:shadow-2xl transition-shadow'
               >
-                <CardHeader>
-                  <div className='flex items-start justify-between'>
-                    <div className='flex-1'>
-                      <CardTitle className='text-lg mb-2 line-clamp-2 text-tekhelet-700'>
-                        {attempt.reading_exam.reading_exam_name || 'Untitled Exam'}
-                      </CardTitle>
-                      <div className='flex items-center gap-2 mb-2'>
-                        <Badge variant={'outline'} className='bg-emerald-100 !text-emerald-800'>
-                          Completed
-                        </Badge>
-                      </div>
-                    </div>
+                <CardHeader className='min-w-0'>
+                  <CardTitle
+                    className='text-lg mb-2 line-clamp-2 text-tekhelet-700 w-full truncate'
+                    title={attempt.reading_exam.reading_exam_name || 'Untitled Exam'}
+                  >
+                    {attempt.reading_exam.reading_exam_name || 'Untitled Exam'}
+                  </CardTitle>
+                  <div className='flex items-center gap-2 mb-2'>
+                    <Badge variant={'outline'} className='bg-emerald-100 !text-emerald-800'>
+                      Completed
+                    </Badge>
                   </div>
                 </CardHeader>
                 <CardContent>

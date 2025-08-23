@@ -1,8 +1,9 @@
 'use client';
 
+import { PaginationCommon } from '@/components/features/user/common';
+import ExamsListFilter from '@/components/features/user/exams/common/ExamsListFilter';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import LoadingSpinner from '@/components/ui/loading-spinner';
 import {
   Table,
   TableBody,
@@ -12,10 +13,19 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import useReadingExamAttempt from '@/hooks/apis/reading/useReadingExamAttempt';
+import {
+  ReadingExamFilters,
+  clearFilters,
+  setFilters,
+  setLoading,
+  setPagination,
+} from '@/store/slices/reading-exam-filter-slice';
+import { RootState } from '@/types';
 import { ReadingExamResponse } from '@/types/reading/reading-exam.types';
-import { Play } from 'lucide-react';
+import { Loader2, Play } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
 
 interface ReadingExamsTableProps {
@@ -25,33 +35,85 @@ interface ReadingExamsTableProps {
 export default function ReadingExamsTable({ className }: ReadingExamsTableProps) {
   const { getAllAvailableExams, isLoading } = useReadingExamAttempt();
   const [exams, setExams] = useState<ReadingExamResponse['data'][]>([]);
+  const dispatch = useDispatch();
+
+  const filters = useSelector((state: RootState) => state.readingExam.filters);
+  const reduxIsLoading = useSelector((state: RootState) => state.readingExam.isLoading);
+  const pagination = useSelector((state: RootState) => state.readingExam.pagination);
 
   const fetchExams = async () => {
     try {
-      const response = await getAllAvailableExams();
+      dispatch(setLoading(true));
+      const response = await getAllAvailableExams({
+        page: pagination.currentPage,
+        size: pagination.pageSize,
+        keyword: filters.searchText,
+        sortBy: filters.sortBy,
+        sortDirection: filters.sortDirection,
+      });
       if (response) {
         setExams(response.data);
+
+        dispatch(
+          setPagination({
+            totalPages: response.pagination.totalPages || 1,
+            pageSize: response.pagination.pageSize || 10,
+            totalItems: response.pagination.totalItems || 0,
+            hasNextPage: response.pagination.hasNextPage || false,
+            hasPreviousPage: response.pagination.hasPreviousPage || false,
+            currentPage: response.pagination.currentPage || 1,
+          })
+        );
       }
     } catch (error) {
       toast.error('Failed to fetch reading exams');
+    } finally {
+      dispatch(setLoading(false));
     }
+  };
+
+  const handleFiltersChange = (newFilters: ReadingExamFilters['filters']) => {
+    dispatch(setFilters(newFilters));
+    dispatch(setPagination({ ...pagination, currentPage: 1 }));
+  };
+
+  const handleClearFilters = () => {
+    dispatch(clearFilters());
+  };
+
+  const handlePageChange = (page: number) => {
+    dispatch(setPagination({ ...pagination, currentPage: page }));
+  };
+
+  const handlePageSizeChange = (size: string) => {
+    dispatch(setPagination({ ...pagination, pageSize: Number(size), currentPage: 1 }));
   };
 
   useEffect(() => {
     fetchExams();
-  }, []);
+  }, [
+    filters.searchText,
+    filters.sortBy,
+    filters.sortDirection,
+    pagination.currentPage,
+    pagination.pageSize,
+  ]);
 
-  if (isLoading['getAllExams']) {
-    return (
-      <div className='flex justify-center py-8'>
-        <LoadingSpinner />
-      </div>
-    );
-  }
+  const sortOptions = [
+    { value: 'createdAt', label: 'Created At' },
+    { value: 'updatedAt', label: 'Updated At' },
+  ];
 
   return (
     <div className={className}>
-      <Table>
+      <ExamsListFilter
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
+        onClearFilters={handleClearFilters}
+        isLoading={reduxIsLoading}
+        sortOptions={sortOptions}
+      />
+      <Table className='mt-4'>
         <TableHeader>
           <TableRow>
             <TableHead>Exam Name</TableHead>
@@ -61,13 +123,13 @@ export default function ReadingExamsTable({ className }: ReadingExamsTableProps)
           </TableRow>
         </TableHeader>
         <TableBody>
-          {exams.length === 0 ? (
+          {exams.length === 0 && !reduxIsLoading ? (
             <TableRow>
               <TableCell colSpan={4} className='text-center py-6'>
                 No reading exams found at the moment.
               </TableCell>
             </TableRow>
-          ) : (
+          ) : !reduxIsLoading ? (
             exams.map((exam) => (
               <TableRow key={exam.reading_exam_id}>
                 <TableCell className='font-medium'>{exam.reading_exam_name}</TableCell>
@@ -102,9 +164,23 @@ export default function ReadingExamsTable({ className }: ReadingExamsTableProps)
                 </TableCell>
               </TableRow>
             ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={4} className='py-6'>
+                <div className='flex items-center justify-center gap-2'>
+                  <Loader2 className='h-4 w-4 animate-spin text-muted-foreground' />
+                  <span className='text-sm text-muted-foreground'>Loading...</span>
+                </div>
+              </TableCell>
+            </TableRow>
           )}
         </TableBody>
       </Table>
+      <PaginationCommon
+        pagination={pagination}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+      />
     </div>
   );
 }

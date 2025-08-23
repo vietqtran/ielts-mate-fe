@@ -22,6 +22,7 @@ export interface ListeningTaskResponse {
   updated_by: UserInformation;
   created_at: string;
   updated_at: string;
+  is_marked_up: boolean;
 }
 
 export interface ListeningTaskDetailResponse {
@@ -57,8 +58,8 @@ export interface ListeningTaskUpdateRequest {
 }
 
 export interface ListeningTaskFilterParams {
-  page?: number;
-  size?: number;
+  page: number;
+  size: number;
   ielts_type?: string[];
   part_number?: string[];
   status?: string[];

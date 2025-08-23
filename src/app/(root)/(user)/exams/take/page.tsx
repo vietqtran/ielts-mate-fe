@@ -8,14 +8,14 @@ import useReadingExamAttempt from '@/hooks/apis/reading/useReadingExamAttempt';
 import { StartListeningExamResponse } from '@/types/listening/listening-exam.types';
 import { ReadingExamData } from '@/types/reading/reading-exam-attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
-import { useSearchParams } from 'next/navigation';
+import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 const TakeExamPage = () => {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const examUrl = searchParams.get('examUrl');
-  const examType = searchParams.get('examType'); // 'reading' or 'listening'
-
+  const examType = searchParams.get('examType');
   const [readingExamData, setReadingExamData] = useState<ReadingExamData | null>(null);
   const [listeningExamData, setListeningExamData] = useState<StartListeningExamResponse | null>(
     null
@@ -52,6 +52,7 @@ const TakeExamPage = () => {
   >({});
 
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
 
   const { createExamAttempt } = useReadingExamAttempt();
   const { startNewListeningExamAttempt } = useListeningExam();
@@ -145,10 +146,28 @@ const TakeExamPage = () => {
   };
 
   const startExamAttempt = async () => {
-    if (!examUrl || !examType) return;
+    // Guard: missing params
+    if (!examUrl || !examType) {
+      setError(
+        !examUrl && !examType
+          ? 'Missing exam URL and type.'
+          : !examUrl
+            ? 'Missing exam URL.'
+            : 'Missing exam type.'
+      );
+      setIsLoading(false);
+      return notFound();
+    }
+
+    // Guard: invalid exam type value
+    if (!['reading', 'listening'].includes(examType)) {
+      setIsLoading(false);
+      return notFound();
+    }
 
     try {
       setIsLoading(true);
+      setError(null);
 
       if (examType === 'reading') {
         const res = await createExamAttempt({ urlSlug: examUrl });
@@ -156,6 +175,8 @@ const TakeExamPage = () => {
           setReadingExamData(res);
           const answers = initializeReadingAnswerState(res);
           setReadingInitialAnswers(answers);
+        } else {
+          setError('Could not start reading exam. The provided URL may be incorrect.');
         }
       } else if (examType === 'listening') {
         const response = await startNewListeningExamAttempt({
@@ -165,39 +186,72 @@ const TakeExamPage = () => {
           setListeningExamData(response.data);
           const answers = initializeListeningAnswerState(response.data);
           setListeningInitialAnswers(answers);
+        } else {
+          setError('Could not start listening exam. The provided URL may be incorrect.');
         }
       }
-    } catch (error) {
-      console.error('Error starting exam attempt:', error);
+    } catch (err) {
+      console.error('Error starting exam attempt:', err);
+      setError(
+        `Failed to start exam: ${err instanceof Error ? err.message : 'Unexpected error occurred.'}`
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (examUrl && examType) {
-      startExamAttempt();
-    }
+    // Always attempt start (function itself handles validation & sets error/loading)
+    startExamAttempt();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [examUrl, examType]);
 
   if (isLoading) {
     return (
-      <div className='h-screen flex items-center justify-center bg-medium-slate-blue-900'>
+      <div className='h-screen flex items-center justify-center'>
         <div className='text-center'>
           <div className='animate-spin rounded-full h-32 w-32 border-b-2 border-tekhelet-600 mx-auto'></div>
-          <p className='mt-4 text-white font-medium'>Starting your {examType || ''} exam...</p>
+          <p className='mt-4 font-medium'>Starting your {examType || ''} exam...</p>
         </div>
       </div>
     );
   }
 
+  // Generic / validation / fetch errors
+  if (error) {
+    return (
+      <div className='h-screen flex items-center justify-center'>
+        <div className='text-center p-6 bg-white/80 backdrop-blur-lg border rounded-2xl max-w-md'>
+          <p className='text-lg font-medium mb-4'>{error}</p>
+          <div className='flex flex-col gap-3'>
+            <Button
+              onClick={() => {
+                setIsLoading(true);
+                startExamAttempt();
+              }}
+              className='bg-tekhelet-600 hover:bg-tekhelet-700'
+            >
+              Retry
+            </Button>
+            <Button
+              variant='outline'
+              onClick={() => router.push('/exams/reading')}
+              className='border-tekhelet-600 text-tekhelet-600 hover:bg-tekhelet-50'
+            >
+              Back to Exams List
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // If no data but also no explicit error (unlikely) show fallback
   if (!readingExamData && !listeningExamData) {
     return (
-      <div className='h-screen flex items-center justify-center bg-medium-slate-blue-900'>
-        <div className='text-center p-6 bg-white/80 backdrop-blur-lg border border-persimmon-300 rounded-2xl shadow-xl max-w-md'>
-          <p className='text-persimmon-600 text-lg font-medium mb-4'>
-            Failed to load exam. Please try again.
-          </p>
+      <div className='h-screen flex items-center justify-center'>
+        <div className='text-center p-6 border rounded-2xl max-w-md'>
+          <p className='text-lg font-medium mb-4'>Failed to load exam. Please try again.</p>
           <Button
             onClick={() => window.location.reload()}
             className='bg-tekhelet-600 hover:bg-tekhelet-700'
@@ -220,22 +274,8 @@ const TakeExamPage = () => {
     );
   }
 
-  // Invalid exam type
-  return (
-    <div className='h-screen flex items-center justify-center bg-medium-slate-blue-900'>
-      <div className='text-center p-6 bg-white/80 backdrop-blur-lg border border-persimmon-300 rounded-2xl shadow-xl max-w-md'>
-        <p className='text-persimmon-600 text-lg font-medium mb-4'>
-          Invalid exam type. Please specify either 'reading' or 'listening'.
-        </p>
-        <Button
-          onClick={() => window.history.back()}
-          className='bg-tekhelet-600 hover:bg-tekhelet-700'
-        >
-          Go Back
-        </Button>
-      </div>
-    </div>
-  );
+  // Should never reach here (examType invalid handled earlier)
+  return null;
 };
 
 export default TakeExamPage;

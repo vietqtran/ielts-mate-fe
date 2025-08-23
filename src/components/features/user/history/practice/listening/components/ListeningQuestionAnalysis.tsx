@@ -39,26 +39,27 @@ export const ListeningQuestionAnalysis = ({
   });
 
   return (
-    <Card className='bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl'>
+    <Card className='bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-[#60a3d9]/30 ring-1 ring-[#60a3d9]/20'>
       <CardHeader>
-        <CardTitle className='flex items-center gap-2 text-tekhelet-400'>
+        <CardTitle className='flex items-center gap-2 text-[#003b73] font-semibold'>
           <Volume2 className='w-5 h-5' />
           Question Analysis
         </CardTitle>
-        <p className='text-tekhelet-500'>
-          Detailed breakdown of your answers for each question group
-        </p>
+        <p className='text-[#0074b7]'>Detailed breakdown of your answers for each question group</p>
       </CardHeader>
       <CardContent className='space-y-4'>
         {attemptDetails.task_data.question_groups.map((group, groupIndex) => (
-          <Card key={group.group_id} className='backdrop-blur-sm'>
+          <Card
+            key={group.group_id}
+            className='backdrop-blur-sm bg-gradient-to-br from-[#bfd7ed]/30 to-[#60a3d9]/10 border border-[#60a3d9]/20 rounded-2xl'
+          >
             <CardHeader className='pb-3'>
-              <CardTitle className='text-lg text-tekhelet-400'>
+              <CardTitle className='text-lg text-[#003b73] font-semibold'>
                 Part {groupIndex + 1}: {group.section_label}
               </CardTitle>
               {group.instruction && (
                 <div
-                  className='text-sm text-tekhelet-500'
+                  className='text-sm text-[#0074b7]'
                   dangerouslySetInnerHTML={{ __html: group.instruction }}
                 />
               )}
@@ -80,7 +81,7 @@ export const ListeningQuestionAnalysis = ({
                   // Check if the answer is correct by comparing with the correct_answer
                   const isCorrect =
                     answer.filled_text_answer === question.correct_answer ||
-                    (answer.choice_ids && answer.choice_ids.includes(question.correct_answer));
+                    (answer.choice_ids && answer.choice_ids.includes(question.correct_answer!));
 
                   return (
                     <Collapsible
@@ -97,7 +98,7 @@ export const ListeningQuestionAnalysis = ({
                             ) : (
                               <XCircle className='w-5 h-5 text-red-600' />
                             )}
-                            <span className='text-sm font-medium text-tekhelet-400'>
+                            <span className='text-sm font-medium text-[#003b73]'>
                               Question {questionIndex + 1}
                             </span>
                             <Badge
@@ -108,9 +109,9 @@ export const ListeningQuestionAnalysis = ({
                             </Badge>
                           </div>
                           {isOpen ? (
-                            <ChevronDown className='w-4 h-4 text-tekhelet-400' />
+                            <ChevronDown className='w-4 h-4 text-[#0074b7]' />
                           ) : (
-                            <ChevronRight className='w-4 h-4 text-tekhelet-400' />
+                            <ChevronRight className='w-4 h-4 text-[#0074b7]' />
                           )}
                         </div>
                       </CollapsibleTrigger>
@@ -118,27 +119,27 @@ export const ListeningQuestionAnalysis = ({
                         <div className='p-4 bg-white/60 rounded-lg space-y-4'>
                           {/* User's Answer Section */}
                           <div>
-                            <h4 className='text-sm font-medium text-tekhelet-400 mb-2'>
+                            <h4 className='text-sm font-semibold text-[#003b73] mb-2'>
                               Your Answer:
                             </h4>
                             <div className='space-y-1'>
                               {answer.choice_ids && answer.choice_ids.length > 0 && (
-                                <p className='text-sm text-tekhelet-500'>
+                                <p className='text-sm text-[#0074b7]'>
                                   <strong>Choices:</strong> {answer.choice_ids.join(', ')}
                                 </p>
                               )}
                               {answer.filled_text_answer && (
-                                <p className='text-sm text-tekhelet-500'>
+                                <p className='text-sm text-[#0074b7]'>
                                   <strong>Text Answer:</strong> {answer.filled_text_answer}
                                 </p>
                               )}
                               {answer.matched_text_answer && (
-                                <p className='text-sm text-tekhelet-500'>
+                                <p className='text-sm text-[#0074b7]'>
                                   <strong>Matched Answer:</strong> {answer.matched_text_answer}
                                 </p>
                               )}
                               {answer.drag_item_id && (
-                                <p className='text-sm text-tekhelet-500'>
+                                <p className='text-sm text-[#0074b7]'>
                                   <strong>Drag Item:</strong> {answer.drag_item_id}
                                 </p>
                               )}
@@ -149,8 +150,8 @@ export const ListeningQuestionAnalysis = ({
                           </div>
 
                           {/* Correct Answer Section */}
-                          <div className='border-t border-tekhelet-200 pt-3'>
-                            <h4 className='text-sm font-medium text-tekhelet-400 mb-2'>
+                          <div className='border-t border-[#bfd7ed] pt-3'>
+                            <h4 className='text-sm font-semibold text-[#003b73] mb-2'>
                               Correct Answer:
                             </h4>
                             <div
@@ -165,17 +166,21 @@ export const ListeningQuestionAnalysis = ({
                                   isCorrect ? 'text-green-700' : 'text-red-700'
                                 }`}
                               >
-                                {question.correct_answer}
+                                {
+                                  question.choices.find(
+                                    (choice) => choice.choice_id === question.correct_answer
+                                  )?.content
+                                }
                               </p>
                             </div>
                           </div>
 
                           {/* Question Details
-                          <div className="border-t border-tekhelet-200 pt-3">
+                          <div className="border-t border-[#bfd7ed] pt-3">
                             <h4 className="text-sm font-medium text-tekhelet-400 mb-2">
                               Question Details:
                             </h4>
-                            <div className="space-y-1 text-xs text-tekhelet-500">
+                            <div className="space-y-1 text-xs text-[#0074b7]">
                               <p><strong>Points:</strong> {question.point}</p>
                               <p><strong>Question Type:</strong> {question.question_type}</p>
                               <p><strong>Expected Answers:</strong> {question.number_of_correct_answers}</p>
@@ -190,8 +195,8 @@ export const ListeningQuestionAnalysis = ({
 
               {/* Show drag items if available */}
               {group.drag_items && group.drag_items.length > 0 && (
-                <div className='mt-4 pt-4 border-t border-tekhelet-200'>
-                  <h4 className='text-sm font-medium text-tekhelet-400 mb-2'>
+                <div className='mt-4 pt-4 border-t border-[#bfd7ed]'>
+                  <h4 className='text-sm font-semibold text-[#003b73] mb-2'>
                     Available Drag Items for this section:
                   </h4>
                   <div className='flex flex-wrap gap-2'>
@@ -213,13 +218,15 @@ export const ListeningQuestionAnalysis = ({
 
         {/* Audio Transcript Section */}
         {attemptDetails.task_data.transcript && (
-          <Card className='bg-tekhelet-100/50 backdrop-blur-sm'>
+          <Card className='bg-[#bfd7ed]/50 backdrop-blur-sm rounded-2xl border border-[#60a3d9]/30'>
             <CardHeader>
-              <CardTitle className='text-lg text-tekhelet-400'>Audio Transcript</CardTitle>
+              <CardTitle className='text-lg text-[#003b73] font-semibold'>
+                Audio Transcript
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className='p-4 bg-white/60 rounded-lg'>
-                <p className='text-sm text-tekhelet-500 whitespace-pre-line'>
+                <p className='text-sm text-[#0074b7] whitespace-pre-line'>
                   {attemptDetails.task_data.transcript}
                 </p>
               </div>

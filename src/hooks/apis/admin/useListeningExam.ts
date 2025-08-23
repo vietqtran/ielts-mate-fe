@@ -28,9 +28,6 @@ export function useListeningExam() {
     try {
       const response = await createListeningExam(request);
       return response;
-    } catch (error) {
-      setErrorState('createExam', error as Error);
-      throw error;
     } finally {
       setLoadingState('createExam', false);
     }
@@ -42,9 +39,6 @@ export function useListeningExam() {
     try {
       const response = await updateListeningExam(examId, request);
       return response;
-    } catch (error) {
-      setErrorState('updateExam', error as Error);
-      throw error;
     } finally {
       setLoadingState('updateExam', false);
     }

@@ -1,7 +1,7 @@
 import instance from '@/lib/axios';
-import { ReadingExamAttemptFiltersParams } from '@/types/pagination.types';
 import {
   ReadingExamAttemptDetailsResponse,
+  ReadingExamAttemptFiltersRequestParams,
   ReadingExamAttemptList,
   ReadingExamData,
   SubmitExamAttemptAnswersRequest,
@@ -26,7 +26,13 @@ const useReadingExamAttempt = () => {
   /**
    * Get all available reading exams for users
    */
-  const getAllAvailableExams = async () => {
+  const getAllAvailableExams = async (params: {
+    page: number;
+    size: number;
+    keyword?: string;
+    sortBy?: string;
+    sortDirection?: 'asc' | 'desc' | '';
+  }) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -38,7 +44,12 @@ const useReadingExamAttempt = () => {
     setErrorState('getAllAvailableExams', null);
 
     try {
-      const response = await instance.get('reading/reading-exams/active-exams');
+      const response = await instance.get('reading/reading-exams/active-exams', {
+        params: {
+          ...params,
+        },
+        signal: currentController.signal,
+      });
 
       // Only return data if this is still the current request
       if (abortControllerRef.current === currentController) {
@@ -94,7 +105,7 @@ const useReadingExamAttempt = () => {
     }
   };
 
-  const getExamAttemptHistory = async (params: ReadingExamAttemptFiltersParams) => {
+  const getExamAttemptHistory = async (params: ReadingExamAttemptFiltersRequestParams) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -218,7 +229,7 @@ const useReadingExamAttempt = () => {
     setErrorState('submitExamAttempt', null);
 
     try {
-      const response = await instance.put(
+      const response = await instance.post(
         `reading/exam/attempts/save/${params.attemptId}`,
         params.payload
       );

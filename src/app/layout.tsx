@@ -7,6 +7,7 @@ import FullPageLoading from '@/components/common/loader/FullPageLoading';
 import { Toaster } from '@/components/ui/sonner';
 import StoreProvider from '@/providers/StoreProvider';
 import type { Metadata } from 'next';
+import { SWRConfig } from 'swr';
 
 export const metadata: Metadata = {
   title: {
@@ -44,11 +45,18 @@ export default function RootLayout({
     <html lang='en'>
       <body className='antialiased bg-background text-foreground relative'>
         <StoreProvider>
-          <Suspense fallback={null}>
-            {children}
-            <FullPageLoading />
+          <SWRConfig
+            value={{
+              dedupingInterval: 2000, // 2 seconds
+              keepPreviousData: true,
+            }}
+          >
             <Toaster theme='light' richColors />
-          </Suspense>
+            <Suspense fallback={null}>
+              {children}
+              <FullPageLoading />
+            </Suspense>
+          </SWRConfig>
         </StoreProvider>
       </body>
     </html>

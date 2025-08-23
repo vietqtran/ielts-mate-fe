@@ -46,6 +46,7 @@ export function MultipleChoiceManager({
   const {
     createQuestions,
     updateQuestionInfo,
+    updateQuestionOrder,
     deleteQuestion,
     createChoice,
     updateChoice,
@@ -63,9 +64,18 @@ export function MultipleChoiceManager({
       if (editingQuestion) {
         const questionId = editingQuestion.question_id;
 
-        // 1. Update main question info (number_of_correct_answers, etc.) FIRST
+        // 1. Update question order separately using the dedicated order endpoint
+        if (data.question_order !== editingQuestion.question_order) {
+          await updateQuestionOrder(
+            group.id,
+            questionId,
+            { order: data.question_order },
+            isListening
+          );
+        }
+
+        // 2. Update main question info (excluding question_order)
         const questionInfoRequest = {
-          question_order: data.question_order,
           point: data.point,
           explanation: data.explanation,
           number_of_correct_answers: data.number_of_correct_answers,
@@ -230,7 +240,10 @@ export function MultipleChoiceManager({
   };
 
   const defaultInitialData = {
-    question_order: localQuestions.length + 1,
+    question_order:
+      localQuestions.length > 0
+        ? Math.max(...localQuestions.map((q: any) => q.question_order)) + 1
+        : 1,
     point: 1,
     explanation: '',
     instruction_for_choice: '',
@@ -271,6 +284,7 @@ export function MultipleChoiceManager({
             isLoading.updateChoice ||
             isLoading.deleteChoice
           }
+          isEditing={!!editingQuestion}
         />
       )}
 

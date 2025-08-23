@@ -81,6 +81,7 @@ export function PassagePreview({
   questionGroups,
   onFinish,
 }: Readonly<PassagePreviewProps>) {
+  console.log('PassagePreview received questionGroups:', questionGroups);
   const totalQuestions = questionGroups.reduce((total, group) => total + group.questions.length, 0);
   const estimatedTime = Math.max(15, Math.ceil(totalQuestions * 1.5)); // Rough estimate: 1.5 min per question, min 15 min
 
@@ -249,7 +250,7 @@ export function PassagePreview({
 
                   {Number(group.question_type) === QuestionTypeEnumIndex.DRAG_AND_DROP && (
                     <div className='space-y-4'>
-                      {group.drag_items && group.drag_items.length > 0 && (
+                      {group.drag_items && group.drag_items.length > 0 ? (
                         <div>
                           <p className='font-medium text-sm mb-2'>Drag Items:</p>
                           <div className='flex flex-wrap gap-2'>
@@ -258,27 +259,60 @@ export function PassagePreview({
                                 key={itemIndex}
                                 className='px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm'
                               >
-                                {item.content}
+                                {typeof item === 'string'
+                                  ? item
+                                  : item.content || item.item_content || ''}
                               </span>
                             ))}
                           </div>
                         </div>
+                      ) : (
+                        <div className='text-sm text-muted-foreground italic'>
+                          No drag items available
+                        </div>
                       )}
 
                       <div className='space-y-3'>
-                        {group.questions.map((question, qIndex) => (
-                          <div key={qIndex} className='space-y-2'>
-                            <div
-                              className='font-medium'
-                              dangerouslySetInnerHTML={{
-                                __html: `${question.question_order}. ${question.instruction_for_choice}`,
-                              }}
-                            />
-                            <div className='pl-4 text-sm text-green-600'>
-                              <strong>Zone {question.zone_index}:</strong> {question.drag_item_id}
-                            </div>
+                        {group.questions && group.questions.length > 0 ? (
+                          group.questions.map((question, qIndex) => {
+                            // Find the drag item content for this question
+                            let dragItemContent = '';
+                            if (question.drag_item_id && group.drag_items) {
+                              const dragItem = group.drag_items.find((item) => {
+                                if (typeof item === 'string') {
+                                  return false; // Skip string items
+                                }
+                                return (
+                                  item.drag_item_id === question.drag_item_id ||
+                                  item.item_id === question.drag_item_id ||
+                                  item.id === question.drag_item_id
+                                );
+                              });
+                              dragItemContent = dragItem
+                                ? dragItem.content || dragItem.item_content || ''
+                                : '';
+                            }
+
+                            return (
+                              <div key={qIndex} className='space-y-2'>
+                                <div
+                                  className='font-medium'
+                                  dangerouslySetInnerHTML={{
+                                    __html: `${question.question_order}. ${question.instruction_for_choice || question.explanation || ''}`,
+                                  }}
+                                />
+                                <div className='pl-4 text-sm text-green-600'>
+                                  <strong>Zone {question.zone_index}:</strong>{' '}
+                                  {dragItemContent || question.drag_item_id || 'No item assigned'}
+                                </div>
+                              </div>
+                            );
+                          })
+                        ) : (
+                          <div className='text-sm text-muted-foreground italic'>
+                            No questions available
                           </div>
-                        ))}
+                        )}
                       </div>
                     </div>
                   )}

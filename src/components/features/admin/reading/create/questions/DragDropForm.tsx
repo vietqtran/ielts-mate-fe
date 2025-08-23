@@ -17,7 +17,6 @@ import { useFieldArray, useForm } from 'react-hook-form';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from 'react';
@@ -318,9 +317,10 @@ export function DragDropForm({
                             <FormItem>
                               <FormLabel>Explanation</FormLabel>
                               <FormControl>
-                                <Textarea
+                                <TiptapEditor
+                                  content={field.value}
+                                  onChange={field.onChange}
                                   placeholder='Explain why this drag item is correct for this drop zone'
-                                  {...field}
                                 />
                               </FormControl>
                               <FormMessage />

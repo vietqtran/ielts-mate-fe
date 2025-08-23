@@ -100,13 +100,19 @@ interface ListeningTaskFormProps {
     audio_file_id?: string;
   };
   mode: 'create' | 'edit';
+  originalStatus?: number;
 }
 
 type CreateFormType = z.infer<typeof createSchema>;
 type EditFormType = z.infer<typeof editSchema>;
 type FormType = CreateFormType | EditFormType;
 
-export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFormProps) {
+export function ListeningTaskForm({
+  taskId,
+  initialData,
+  mode,
+  originalStatus,
+}: ListeningTaskFormProps) {
   const router = useRouter();
   const { toast } = useToast();
   const { createListeningTask, updateListeningTask, isLoading, deleteGroupQuestion } =
@@ -117,6 +123,9 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
   const [useAutomaticTranscription, setUseAutomaticTranscription] = useState(true);
   const [createdTaskId, setCreatedTaskId] = useState<string | undefined>(taskId);
   const [questionGroups, setQuestionGroups] = useState<LocalListeningQuestionGroup[]>([]);
+  const [currentOriginalStatus, setCurrentOriginalStatus] = useState<number | undefined>(
+    originalStatus
+  );
 
   const schema = mode === 'create' ? createSchema : editSchema;
   const form = useForm<FormType>({
@@ -189,14 +198,29 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
       }));
       setQuestionGroups(groups);
       setCreatedTaskId(initialData.task_id || taskId);
+      setCurrentOriginalStatus(initialData.status); // Set original status from initial data
     } else if (mode === 'create') {
       setQuestionGroups([]);
       setCreatedTaskId(undefined);
+      setCurrentOriginalStatus(undefined); // Reset original status in create mode
     }
   }, [mode, initialData, taskId]);
 
   const onSubmit = async (values: FormType) => {
     try {
+      // Check if the original status was TEST and prevent status change
+      if (currentOriginalStatus === ListeningTaskStatus.TEST) {
+        if (values.status !== ListeningTaskStatus.TEST) {
+          // Status is being changed from TEST, which is not allowed
+          toast({
+            title: 'Error',
+            description: 'Status cannot be changed when task is in Test mode',
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
       if (mode === 'create') {
         // In create mode, audio_file is required
         if (!values.audio_file) {
@@ -226,6 +250,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
         // Lưu lại taskId để hiển thị phần tạo group/question
         if (response?.data?.task_id) {
           setCreatedTaskId(response.data.task_id);
+          setCurrentOriginalStatus(values.status); // Store the original status after successful creation
         }
         toast({
           title: 'Success',
@@ -245,6 +270,7 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
 
         await updateListeningTask(taskId, request);
         setCreatedTaskId(taskId);
+        setCurrentOriginalStatus(values.status); // Update original status after successful update
         toast({
           title: 'Success',
           description: 'Listening task updated successfully',
@@ -391,29 +417,45 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
               <FormField
                 control={form.control}
                 name='status'
-                render={({ field }: any) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select
-                      onValueChange={(value) => field.onChange(parseInt(value))}
-                      defaultValue={field.value.toString()}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder='Select status' />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value={ListeningTaskStatus.DRAFT.toString()}>Draft</SelectItem>
-                        <SelectItem value={ListeningTaskStatus.PUBLISHED.toString()}>
-                          Published
-                        </SelectItem>
-                        <SelectItem value={ListeningTaskStatus.TEST.toString()}>Test</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }: any) => {
+                  const currentStatus = field.value;
+                  // Check if the original status from database was TEST
+                  const isOriginalTestStatus = currentOriginalStatus === ListeningTaskStatus.TEST;
+
+                  return (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(parseInt(value))}
+                        defaultValue={field.value.toString()}
+                        disabled={isOriginalTestStatus}
+                      >
+                        <FormControl>
+                          <SelectTrigger
+                            className={isOriginalTestStatus ? 'opacity-50 cursor-not-allowed' : ''}
+                          >
+                            <SelectValue placeholder='Select status' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value={ListeningTaskStatus.DRAFT.toString()}>
+                            Draft
+                          </SelectItem>
+                          <SelectItem value={ListeningTaskStatus.PUBLISHED.toString()}>
+                            Published
+                          </SelectItem>
+                          <SelectItem value={ListeningTaskStatus.TEST.toString()}>Test</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      {isOriginalTestStatus && (
+                        <p className='text-xs text-muted-foreground'>
+                          Status cannot be changed when task is in Test mode
+                        </p>
+                      )}
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
             </div>
 
@@ -591,7 +633,11 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
                                           ))}
                                       </ul>
                                       <div className='mt-2 text-sm text-gray-500'>
-                                        Explanation: {q.explanation}
+                                        <span className='font-medium'>Explanation:</span>
+                                        <SafeHtmlRenderer
+                                          htmlContent={q.explanation || ''}
+                                          className='mt-1'
+                                        />
                                       </div>
                                     </div>
                                   );
@@ -605,7 +651,11 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
                                         {q.correct_answer}
                                       </div>
                                       <div className='mt-2 text-sm text-gray-500'>
-                                        Explanation: {q.explanation}
+                                        <span className='font-medium'>Explanation:</span>
+                                        <SafeHtmlRenderer
+                                          htmlContent={q.explanation || ''}
+                                          className='mt-1'
+                                        />
                                       </div>
                                     </div>
                                   );
@@ -622,7 +672,11 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
                                         {q.correct_answer_for_matching}
                                       </div>
                                       <div className='mt-2 text-sm text-gray-500'>
-                                        Explanation: {q.explanation}
+                                        <span className='font-medium'>Explanation:</span>
+                                        <SafeHtmlRenderer
+                                          htmlContent={q.explanation || ''}
+                                          className='mt-1'
+                                        />
                                       </div>
                                     </div>
                                   );
@@ -634,7 +688,11 @@ export function ListeningTaskForm({ taskId, initialData, mode }: ListeningTaskFo
                                         {q.drag_item_id}
                                       </div>
                                       <div className='mt-2 text-sm text-gray-500'>
-                                        Explanation: {q.explanation}
+                                        <span className='font-medium'>Explanation:</span>
+                                        <SafeHtmlRenderer
+                                          htmlContent={q.explanation || ''}
+                                          className='mt-1'
+                                        />
                                       </div>
                                     </div>
                                   );

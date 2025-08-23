@@ -98,7 +98,7 @@ export default function UpdateModulePage() {
         router.push('/personalized');
       }
     } catch (error) {
-      // error handled in hook
+      console.log(error);
     }
   };
 

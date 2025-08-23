@@ -1,18 +1,22 @@
 'use client';
 
+import {
+  PracticeContentRenderer,
+  PracticeHeader,
+  PracticeShell,
+} from '@/components/features/user/common/take';
 import ConfirmSubmitModal from '@/components/features/user/reading/finish/ConfirmSubmitModal';
 import { QuestionRenderer } from '@/components/features/user/reading/questions';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
+import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import useListeningAttempt from '@/hooks/apis/listening/useListeningAttempt';
 import useListeningAudio from '@/hooks/apis/listening/useListeningAudio';
-import { formatTime, useIncrementalTimer } from '@/hooks/utils/useTimer';
+import { useIncrementalTimer } from '@/hooks/utils/useTimer';
 import { Answer } from '@/types/attempt.types';
 import { StartListeningAttemptResponse } from '@/types/listening/listening-attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
-import { AlertTriangle, Clock, Headphones, Pause, Play, Volume2 } from 'lucide-react';
-import { useParams, useRouter } from 'next/navigation';
+import { AlertTriangle, Volume2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -43,13 +47,12 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
   initialAnswers,
   initialDuration,
 }) => {
-  const params = useParams();
   const router = useRouter();
-  const taskId = params.id as string;
+  const [audioId, setAudioId] = useState<string | null>(null);
 
-  const { startNewAttempt, submitAttempt, isLoading, error, saveAttemptProgress } =
-    useListeningAttempt();
-  const { getAudio, audioUrl, isLoading: audioLoading, cleanup } = useListeningAudio();
+  const { submitAttempt, isLoading, saveAttemptProgress } = useListeningAttempt();
+
+  const { objectUrl, error, isLoading: audioLoading } = useListeningAudio(audioId);
 
   const [answers, setAnswers] =
     useState<
@@ -66,25 +69,15 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<boolean>(false);
-  const [showResult, setShowResult] = useState<boolean>(false);
-
-  // Audio controls
   const audioRef = useRef<HTMLAudioElement>(null);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [currentTime, setCurrentTime] = useState<number>(0);
-  const [duration, setDuration] = useState<number>(0);
-  const [volume, setVolume] = useState<number>(1);
-
   const time = useIncrementalTimer(initialDuration, startTime);
 
   useEffect(() => {
     const initializeAudio = async () => {
       try {
         setStartTime(true);
-
-        // Load audio if available
         if (propAttemptData.audio_file_id) {
-          await getAudio(propAttemptData.audio_file_id);
+          setAudioId(propAttemptData.audio_file_id);
         }
       } catch (error) {
         console.error('Failed to load audio:', error);
@@ -95,72 +88,7 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
     if (propAttemptData) {
       initializeAudio();
     }
-
-    // Cleanup on unmount
-    return () => {
-      cleanup();
-    };
   }, [propAttemptData]);
-
-  // Audio event handlers
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const updateTime = () => setCurrentTime(audio.currentTime);
-    const updateDuration = () => setDuration(audio.duration);
-    const handleEnded = () => setIsPlaying(false);
-    const handleError = () => {
-      console.error('Audio playback error');
-      setIsPlaying(false);
-    };
-
-    audio.addEventListener('timeupdate', updateTime);
-    audio.addEventListener('loadedmetadata', updateDuration);
-    audio.addEventListener('ended', handleEnded);
-    audio.addEventListener('error', handleError);
-
-    return () => {
-      audio.removeEventListener('timeupdate', updateTime);
-      audio.removeEventListener('loadedmetadata', updateDuration);
-      audio.removeEventListener('ended', handleEnded);
-      audio.removeEventListener('error', handleError);
-    };
-  }, [audioUrl]);
-
-  const togglePlayPause = () => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play().catch((error) => {
-        console.error('Error playing audio:', error);
-        toast.error('Failed to play audio');
-        setIsPlaying(false);
-      });
-    }
-    setIsPlaying(!isPlaying);
-  };
-
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    const newTime = (parseFloat(e.target.value) / 100) * duration;
-    audio.currentTime = newTime;
-    setCurrentTime(newTime);
-  };
-
-  const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const audio = audioRef.current;
-    const newVolume = parseFloat(e.target.value) / 100;
-    setVolume(newVolume);
-    if (audio) {
-      audio.volume = newVolume;
-    }
-  };
 
   const getTotalQuestions = () => {
     if (!propAttemptData) return 0;
@@ -289,13 +217,13 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
 
   if (!propAttemptData) {
     return (
-      <div className='h-screen w-full flex items-center justify-center bg-medium-slate-blue-900'>
-        <Card className='bg-white/80 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl p-6'>
-          <CardContent className='text-center'>
-            <div className='animate-spin rounded-full h-12 w-12 border-b-2 border-tekhelet-600 mx-auto mb-4'></div>
-            <p className='text-tekhelet-600'>Loading listening practice...</p>
-          </CardContent>
-        </Card>
+      <div className='h-screen w-full flex items-center justify-center'>
+        <div className='backdrop-blur-xl border rounded-3xl p-8'>
+          <div className='text-center'>
+            <div className='animate-spin rounded-full h-12 w-12 mx-auto mb-4'></div>
+            <p className='font-medium'>Loading listening practice...</p>
+          </div>
+        </div>
       </div>
     );
   }
@@ -303,7 +231,6 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
   const totalQuestions = getTotalQuestions();
   const answeredQuestions = getAnsweredQuestions();
   const notAnsweredQuestions = getNotAnsweredQuestions();
-  const progressPercentage = totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0;
 
   return (
     <>
@@ -330,69 +257,34 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
         cancelText={isLoading.submitAttempt ? 'Please wait...' : 'Cancel'}
       />
 
-      <div className='h-screen w-full grid grid-rows-[auto_1fr] bg-medium-slate-blue-900'>
-        {/* Header with timer and task info */}
-        <div className='bg-white/80 backdrop-blur-lg border-b border-tekhelet-200 shadow-sm'>
-          <div className='grid grid-cols-1 md:grid-cols-3 items-center p-4 gap-4'>
-            <div className='col-span-1'>
-              <h1 className='text-xl font-bold text-tekhelet-600'>{propAttemptData.title}</h1>
-              <p className='text-sm text-medium-slate-blue-400 mt-1'>
-                Part {propAttemptData.part_number + 1} - IELTS Listening Practice
-              </p>
-            </div>
-
-            <div className='col-span-1 flex items-center gap-4 justify-center'>
-              {/* Progress indicator */}
-              <div className='flex items-center gap-2'>
-                <Headphones className='w-4 h-4 text-medium-slate-blue-400' />
-                <span className='text-sm font-medium text-tekhelet-600'>
-                  {answeredQuestions}/{totalQuestions} questions
-                </span>
-              </div>
-
-              {/* Timer */}
-              <div
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg border text-tekhelet-400 backdrop-blur-md`}
-              >
-                <Clock className={`w-5 h-5`} />
-                <span className={`text-lg font-bold`}>{formatTime(time)}</span>
-              </div>
-            </div>
-
-            <div className='col-span-1 flex justify-end gap-2'>
-              <Button
-                onClick={() => handleSubmit({ type: 'save' })}
-                className='bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white'
-                size='lg'
-                disabled={isLoading.saveAttemptProgress}
-              >
-                {isLoading.saveAttemptProgress ? 'Saving...' : 'Save'}
-              </Button>
-
-              <Button
-                onClick={() => setIsModalOpen(true)}
-                className='bg-tekhelet-600 hover:bg-tekhelet-700 text-white'
-                size='lg'
-                disabled={isLoading.submitAttempt}
-              >
-                {isLoading.submitAttempt ? 'Submitting...' : 'Submit'}
-              </Button>
-            </div>
-          </div>
-
-          {/* Progress bar */}
-          <div className='px-4 pb-4'>
-            <Progress value={progressPercentage} className='h-2' />
-          </div>
-        </div>
-
-        {/* Main content */}
-        <div className='flex-1 overflow-hidden p-6'>
-          <div className='grid grid-cols-12 gap-6 h-full'>
-            {/* Audio Player Column */}
-            <Card className='bg-white/80 backdrop-blur-lg border rounded-2xl shadow-xl overflow-hidden flex flex-col col-span-4 h-full'>
-              <CardHeader className='flex-shrink-0 backdrop-blur-md'>
-                <CardTitle className='text-center text-lg text-tekhelet-400 flex items-center justify-center gap-2'>
+      <PracticeShell
+        header={
+          <PracticeHeader
+            title={propAttemptData.title}
+            description={`Part ${propAttemptData.part_number + 1} - IELTS Listening Practice`}
+            answered={answeredQuestions}
+            total={totalQuestions}
+            timeLeftSec={time}
+            onSubmit={() => setIsModalOpen(true)}
+            submitting={isLoading.submitAttempt}
+            showUnansweredWarning={notAnsweredQuestions.length > 0}
+            unansweredCount={notAnsweredQuestions.length}
+            submitText='Submit'
+            glass={false}
+            onSave={() => handleSubmit({ type: 'save' })}
+            saving={isLoading.saveAttemptProgress}
+          />
+        }
+      >
+        <PracticeContentRenderer
+          glass
+          leftColClassName='col-span-5'
+          centerColClassName='col-span-5'
+          rightColClassName='col-span-2'
+          renderLeftColumn={
+            <>
+              <CardHeader className='flex-shrink-0 bg-medium-slate-blue-50'>
+                <CardTitle className='text-center text-lg text-medium-slate-blue-400 flex items-center justify-center gap-2'>
                   <Volume2 className='w-5 h-5' />
                   Audio Player
                 </CardTitle>
@@ -400,83 +292,52 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
               <CardContent className='flex-1 p-6 space-y-4'>
                 {/* Instructions */}
                 <div className='space-y-4'>
-                  <h3 className='font-medium text-tekhelet-600'>Instructions:</h3>
-                  <p className='text-sm text-medium-slate-blue-500 leading-relaxed'>
-                    {propAttemptData.instruction}
-                  </p>
+                  <h3 className='font-semibold text-tekhelet-600'>Instructions:</h3>
+                  <p
+                    className='text-sm text-medium-slate-blue-500 leading-relaxed'
+                    dangerouslySetInnerHTML={{
+                      __html: propAttemptData.instruction,
+                    }}
+                  />
                 </div>
 
                 {/* Audio Controls */}
-                {audioUrl ? (
+                {objectUrl ? (
                   <div className='space-y-4'>
-                    <audio ref={audioRef} src={audioUrl} preload='metadata' />
-
-                    {/* Play/Pause Button */}
-                    <div className='flex justify-center'>
-                      <Button
-                        onClick={togglePlayPause}
-                        size='lg'
-                        className='bg-tekhelet-600 hover:bg-tekhelet-700 text-white rounded-full w-16 h-16'
-                        disabled={audioLoading.getAudio}
-                      >
-                        {isPlaying ? (
-                          <Pause className='w-6 h-6' />
-                        ) : (
-                          <Play className='w-6 h-6 ml-1' />
-                        )}
-                      </Button>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className='space-y-2'>
-                      <input
-                        type='range'
-                        min='0'
-                        max='100'
-                        value={duration > 0 ? (currentTime / duration) * 100 : 0}
-                        onChange={handleSeek}
-                        className='w-full h-2 bg-tekhelet-200 rounded-lg appearance-none cursor-pointer slider'
-                      />
-                      <div className='flex justify-between text-xs text-medium-slate-blue-500'>
-                        <span>{formatTime(Math.floor(currentTime))}</span>
-                        <span>{formatTime(Math.floor(duration))}</span>
-                      </div>
-                    </div>
-
-                    {/* Volume Control */}
-                    <div className='space-y-2'>
-                      <label className='text-xs font-medium text-tekhelet-600'>Volume</label>
-                      <input
-                        type='range'
-                        min='0'
-                        max='100'
-                        value={volume * 100}
-                        onChange={handleVolumeChange}
-                        className='w-full h-2 bg-tekhelet-200 rounded-lg appearance-none cursor-pointer slider'
-                      />
-                    </div>
+                    <audio
+                      ref={audioRef}
+                      src={objectUrl}
+                      preload='metadata'
+                      controls
+                      controlsList='nodownload'
+                      className='w-full'
+                    />
                   </div>
                 ) : (
                   <div className='text-center py-8'>
-                    {audioLoading.getAudio ? (
+                    {audioLoading ? (
                       <div className='space-y-2'>
-                        <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-tekhelet-600 mx-auto'></div>
-                        <p className='text-sm text-medium-slate-blue-500'>Loading audio...</p>
+                        <div className='animate-spin rounded-full h-8 w-8 border-4 border-medium-slate-blue-200 border-t-tekhelet-500 mx-auto'></div>
+                        <p className='text-sm text-medium-slate-blue-500 font-medium'>
+                          Loading audio...
+                        </p>
                       </div>
                     ) : (
                       <div className='space-y-2'>
-                        <AlertTriangle className='w-8 h-8 text-tangerine-500 mx-auto' />
-                        <p className='text-sm text-medium-slate-blue-500'>Audio not available</p>
+                        <AlertTriangle className='w-8 h-8 text-tangerine-600 mx-auto' />
+                        <p className='text-sm text-medium-slate-blue-500 font-medium'>
+                          Audio not available
+                        </p>
                       </div>
                     )}
                   </div>
                 )}
               </CardContent>
-            </Card>
-
-            {/* Questions Column */}
-            <Card className='bg-white/80 backdrop-blur-lg border rounded-2xl shadow-xl overflow-hidden flex flex-col col-span-6 h-full'>
-              <CardHeader className='flex-shrink-0 backdrop-blur-md'>
+            </>
+          }
+          renderCenterColumn={
+            <>
+              <CardHeader className='bg-medium-slate-blue-50 flex-shrink-0'>
                 <CardTitle className='text-center text-lg text-medium-slate-blue-400'>
                   Questions
                 </CardTitle>
@@ -488,19 +349,17 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
                   answers={answers}
                 />
               </CardContent>
-            </Card>
-
-            {/* Status Column */}
-            <Card className='col-span-2 flex flex-col border-selective-yellow-300 bg-selective-yellow-50/60 backdrop-blur-lg rounded-2xl shadow-xl h-fit'>
-              <CardHeader className='flex-shrink-0 backdrop-blur-md rounded-t-2xl'>
-                <CardTitle className='text-center text-xl text-selective-yellow-400'>
-                  Progress
-                </CardTitle>
+            </>
+          }
+          renderRightColumn={
+            <>
+              <CardHeader className='flex-shrink-0 bg-medium-slate-blue-50'>
+                <CardTitle className='text-center text-lg text-tekhelet-600'>Progress</CardTitle>
               </CardHeader>
               <CardContent className='flex-1 space-y-4 overflow-y-auto p-4 min-h-0'>
                 {/* Progress Summary */}
                 <div className='space-y-2'>
-                  <h4 className='font-medium text-sm text-tekhelet-600'>Progress</h4>
+                  <h4 className='font-semibold text-sm text-tekhelet-600'>Summary</h4>
                   <div className='space-y-1 text-xs'>
                     <div className='flex justify-between'>
                       <span className='text-medium-slate-blue-500'>Answered:</span>
@@ -518,44 +377,24 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
                     </div>
                   </div>
                 </div>
-                {/* Tips */}
-                <div className='space-y-2'>
-                  <h4 className='font-medium text-sm text-tekhelet-600'>Tips</h4>
-                  <div className='text-xs text-medium-slate-blue-500 space-y-1'>
-                    <p>• Listen carefully to the audio</p>
-                    <p>• You can replay the audio anytime</p>
-                    <p>• Review your answers before submitting</p>
-                  </div>
+
+                <div className='pt-2'>
+                  <Button
+                    onClick={() => handleSubmit({ type: 'save' })}
+                    className='w-full bg-tekhelet-500 hover:bg-tekhelet-600 text-white'
+                    size='sm'
+                    disabled={isLoading.saveAttemptProgress}
+                  >
+                    {isLoading.saveAttemptProgress ? 'Saving...' : 'Save Progress'}
+                  </Button>
                 </div>
               </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
+            </>
+          }
+        />
+      </PracticeShell>
 
       {/* Custom slider styles */}
-      <style jsx>{`
-        .slider::-webkit-slider-thumb {
-          appearance: none;
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background: var(--color-tekhelet-600);
-          cursor: pointer;
-          border: 2px solid white;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        .slider::-moz-range-thumb {
-          width: 16px;
-          height: 16px;
-          border-radius: 50%;
-          background: var(--color-tekhelet-600);
-          cursor: pointer;
-          border: 2px solid white;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-      `}</style>
     </>
   );
 };

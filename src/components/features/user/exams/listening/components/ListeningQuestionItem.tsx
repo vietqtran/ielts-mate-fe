@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 import { DragItem } from '@/types/attempt.types';
 import { ListeningChoice, ListeningQuestion } from '@/types/listening/listening-exam.types';
 import { Check, ChevronDown, ChevronUp, X } from 'lucide-react';
@@ -122,11 +123,9 @@ export const ListeningQuestionItem = ({
                 </Badge>
               </div>
               {question.instruction_for_choice && (
-                <div
+                <SafeHtmlRenderer
+                  htmlContent={question.instruction_for_choice}
                   className='text-sm text-tekhelet-500 mt-2'
-                  dangerouslySetInnerHTML={{
-                    __html: question.instruction_for_choice,
-                  }}
                 />
               )}
             </div>
@@ -193,7 +192,10 @@ export const ListeningQuestionItem = ({
               <div className='space-y-2'>
                 <h4 className='font-medium text-tekhelet-600'>Explanation</h4>
                 <div className='p-3 rounded-lg border '>
-                  <p className='text-sm text-tekhelet-400'>{question.explanation}</p>
+                  <SafeHtmlRenderer
+                    htmlContent={question.explanation}
+                    className='text-sm text-tekhelet-400'
+                  />
                 </div>
               </div>
             )}

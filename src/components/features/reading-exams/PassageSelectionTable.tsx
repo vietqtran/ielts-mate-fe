@@ -107,6 +107,23 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
     filters.sortDirection,
   ]);
 
+  // Clear incompatible selection when chosen part changes
+  useEffect(() => {
+    if (!selectedPassageId) return;
+    const current = passages.find((p) => p.passage_id === selectedPassageId);
+    if (current && current.part_number + 1 !== selectedPart) {
+      setSelectedPassageId('');
+    }
+  }, [selectedPart, passages, selectedPassageId]);
+
+  // Auto-filter passages by selected part
+  useEffect(() => {
+    setFilters((prev) => ({
+      ...prev,
+      partNumber: selectedPart - 1, // Convert to 0-based index for API
+    }));
+  }, [selectedPart]);
+
   const handlePageChange = (page: number) => {
     setPagination((prev) => ({ ...prev, currentPage: page }));
   };
@@ -196,7 +213,8 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
       <CardHeader>
         <CardTitle>Select Reading Passages</CardTitle>
         <CardDescription>
-          Choose passages with "Test" status to include in this exam
+          Choose passages with "Test" status to include in this exam. The table automatically shows
+          only passages for the selected part.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -228,18 +246,12 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
               </select>
             </div>
             <div className='flex-1'>
-              <Label htmlFor='partNumber'>Part Number</Label>
+              <Label htmlFor='partNumber'>Part Number (Auto-filtered)</Label>
               <select
-                className='w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm'
-                value={filters.partNumber === undefined ? '' : filters.partNumber}
-                onChange={(e) =>
-                  setFilters((prev) => ({
-                    ...prev,
-                    partNumber: e.target.value ? Number(e.target.value) : undefined,
-                  }))
-                }
+                className='w-full h-10 rounded-md border border-input bg-background px-3 py-2 text-sm bg-gray-50'
+                value={selectedPart - 1}
+                disabled
               >
-                <option value=''>All Parts</option>
                 {partNumberOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
@@ -251,7 +263,9 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
 
           <div className='flex items-center space-x-4'>
             <div>
-              <Label htmlFor='part-select'>Add selected passage to:</Label>
+              <Label htmlFor='part-select'>
+                Select Part (Table will show only passages for this part):
+              </Label>
               <div className='flex items-center space-x-4 mt-2'>
                 <div className='flex items-center space-x-2'>
                   <input
@@ -259,7 +273,9 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
                     id='part-1'
                     name='part-select'
                     checked={selectedPart === 1}
-                    onChange={() => setSelectedPart(1)}
+                    onChange={() => {
+                      setSelectedPart(1);
+                    }}
                     className='h-4 w-4'
                   />
                   <Label htmlFor='part-1' className='cursor-pointer'>
@@ -272,7 +288,9 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
                     id='part-2'
                     name='part-select'
                     checked={selectedPart === 2}
-                    onChange={() => setSelectedPart(2)}
+                    onChange={() => {
+                      setSelectedPart(2);
+                    }}
                     className='h-4 w-4'
                   />
                   <Label htmlFor='part-2' className='cursor-pointer'>
@@ -285,7 +303,9 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
                     id='part-3'
                     name='part-select'
                     checked={selectedPart === 3}
-                    onChange={() => setSelectedPart(3)}
+                    onChange={() => {
+                      setSelectedPart(3);
+                    }}
                     className='h-4 w-4'
                   />
                   <Label htmlFor='part-3' className='cursor-pointer'>
@@ -386,19 +406,41 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
                         className='h-4 w-4'
                       />
                     </TableCell>
-                    <TableCell className='font-medium'>{passage.title}</TableCell>
-                    <TableCell>
-                      <Badge variant='outline'>{getielts_typeLabel(passage.ielts_type)}</Badge>
+                    <TableCell className='font-medium max-w-[200px]'>
+                      <div className='truncate' title={passage.title}>
+                        {passage.title}
+                      </div>
                     </TableCell>
-                    <TableCell>Part {passage.part_number + 1}</TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(passage.passage_status)}>
+                    <TableCell className='max-w-[120px]'>
+                      <Badge
+                        variant='outline'
+                        title={`IELTS Type: ${getielts_typeLabel(passage.ielts_type)}`}
+                      >
+                        {getielts_typeLabel(passage.ielts_type)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className='max-w-[80px]'>
+                      <div title={`Part: ${passage.part_number + 1}`}>
+                        Part {passage.part_number + 1}
+                      </div>
+                    </TableCell>
+                    <TableCell className='max-w-[120px]'>
+                      <Badge
+                        variant={'outline'}
+                        className={getStatusColor(passage.passage_status)}
+                        title={`Status: ${getStatusLabel(passage.passage_status)}`}
+                      >
                         {getStatusLabel(passage.passage_status)}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className='max-w-[120px]'>
                       {isPassageSelected(passage.passage_id) && (
-                        <Badge variant='secondary'>{getAssignedPart(passage.passage_id)}</Badge>
+                        <Badge
+                          variant='secondary'
+                          title={`Assigned to: ${getAssignedPart(passage.passage_id)}`}
+                        >
+                          {getAssignedPart(passage.passage_id)}
+                        </Badge>
                       )}
                     </TableCell>
                   </TableRow>

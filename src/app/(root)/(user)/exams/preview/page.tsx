@@ -20,9 +20,10 @@ const ExamPreviewPage = () => {
   const [listeningExamData, setListeningExamData] =
     useState<ListActiveListeningExamsResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [listeningExams, setListeningExams] = useState<ListActiveListeningExamsResponse[]>([]);
 
   const { getAllAvailableExams } = useReadingExamAttempt();
-  const { fetchListeningExamsList, exams: listeningExams } = useListeningExam();
+  const { fetchListeningExamsList } = useListeningExam();
 
   const fetchExamData = async () => {
     if (!examUrl || !examType) return;
@@ -31,7 +32,10 @@ const ExamPreviewPage = () => {
       setIsLoading(true);
 
       if (examType === 'reading') {
-        const response = await getAllAvailableExams();
+        const response = await getAllAvailableExams({
+          page: 1,
+          size: 1000,
+        });
         if (response && response.data) {
           // Find the exam with matching url_slug
           const exam = response.data.find(
@@ -45,9 +49,14 @@ const ExamPreviewPage = () => {
           }
         }
       } else if (examType === 'listening') {
-        await fetchListeningExamsList();
+        const res = await fetchListeningExamsList({
+          page: 1,
+          size: 1000,
+        });
+
+        setListeningExams(res?.data || []);
         // Find the listening exam with matching url_slug from the exams state
-        const exam = listeningExams.find(
+        const exam = res?.data.find(
           (exam: ListActiveListeningExamsResponse) => exam.url_slug === examUrl
         );
 
@@ -97,7 +106,7 @@ const ExamPreviewPage = () => {
 
   // Additional useEffect to handle listening exams data when it's available
   useEffect(() => {
-    if (examType === 'listening' && listeningExams.length > 0 && examUrl) {
+    if (examType === 'listening' && listeningExams && listeningExams.length > 0 && examUrl) {
       const exam = listeningExams.find(
         (exam: ListActiveListeningExamsResponse) => exam.url_slug === examUrl
       );

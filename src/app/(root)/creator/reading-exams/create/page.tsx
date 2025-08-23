@@ -20,8 +20,16 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import LoadingSpinner from '@/components/ui/loading-spinner';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useReadingExam } from '@/hooks/apis/admin/useReadingExam';
+import { Status } from '@/types/reading/reading-exam.types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -42,6 +50,7 @@ const formSchema = z.object({
   reading_passage_id_part1: z.string().min(1, 'Reading passage for part 1 is required'),
   reading_passage_id_part2: z.string().min(1, 'Reading passage for part 2 is required'),
   reading_passage_id_part3: z.string().min(1, 'Reading passage for part 3 is required'),
+  status: z.number().min(0).max(1),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -65,6 +74,7 @@ export default function CreateReadingExamPage() {
       reading_passage_id_part1: '',
       reading_passage_id_part2: '',
       reading_passage_id_part3: '',
+      status: Status.ACTIVE,
     },
   });
 
@@ -75,7 +85,7 @@ export default function CreateReadingExamPage() {
     form.setValue('reading_passage_id_part3', selectedPassages.part3);
   }, [selectedPassages, form]);
 
-  const handlePassageSelect = (passageId: string, passageTitle: string, partNumber: number) => {
+  const handlePassageSelect = (passageId: string, _passageTitle: string, partNumber: number) => {
     switch (partNumber) {
       case 1:
         setSelectedPassages((prev) => ({ ...prev, part1: passageId }));
@@ -99,7 +109,7 @@ export default function CreateReadingExamPage() {
       router.push('/creator/reading-exams');
     } catch (error) {
       setIsSubmitted(false);
-      toast.error('Failed to create reading exam');
+      console.log(error);
     }
   };
 
@@ -178,6 +188,31 @@ export default function CreateReadingExamPage() {
                           }}
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name='status'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select
+                        onValueChange={(value) => field.onChange(Number(value))}
+                        defaultValue={field.value?.toString()}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder='Select status' />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value={Status.ACTIVE.toString()}>Active</SelectItem>
+                          <SelectItem value={Status.INACTIVE.toString()}>Inactive</SelectItem>
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

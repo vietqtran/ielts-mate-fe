@@ -201,11 +201,43 @@ const useReadingAttempt = () => {
     }
   };
 
+  const getAttemptResultById = async (params: { attempt_id: string }) => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    abortControllerRef.current = new AbortController();
+    const currentController = abortControllerRef.current;
+
+    setLoadingState('getAttemptResultById', true);
+    setErrorState('getAttemptResultById', null);
+
+    try {
+      const { data } = await instance.get(`reading/attempts/result/${params.attempt_id}`, {
+        notify: false,
+        signal: currentController.signal,
+      });
+      return data as BaseResponse<LoadAttemptResponse>;
+    } catch (error) {
+      if (abortControllerRef.current === currentController) {
+        if ((error as any).name !== 'AbortError') {
+          setErrorState('getAttemptResultById', error as Error);
+          throw error;
+        }
+      }
+    } finally {
+      if (abortControllerRef.current === currentController) {
+        setLoadingState('getAttemptResultById', false);
+      }
+      abortControllerRef.current = null;
+    }
+  };
+
   return {
     startNewAttempt,
     submitAttempt,
     saveAttemptProgress,
     getAllReadingAttemptHistory,
+    getAttemptResultById,
     loadAttemptById,
     isLoading,
     error,

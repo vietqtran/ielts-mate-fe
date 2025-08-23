@@ -6,7 +6,7 @@ import { UserNavigation } from './UserNavigation';
 
 export function UserHeader() {
   return (
-    <header className='bg-white border-b'>
+    <header className='bg-white/90 backdrop-blur-xl border-b border-[#60a3d9]/30 shadow-lg sticky top-0 z-50'>
       {/* Desktop Navigation */}
       <div className='hidden md:block'>
         <UserNavigation />
@@ -18,8 +18,14 @@ export function UserHeader() {
           <div className='flex justify-between items-center h-16'>
             {/* Logo - visible on mobile */}
             <div className='flex items-center gap-2'>
-              <Image src='/logo.svg' height={32} width={32} alt='IELTS Mate' />
-              <span className='font-bold text-lg'>IELTS Mate</span>
+              <Image
+                src='/logo.svg'
+                height={32}
+                width={32}
+                alt='IELTS Mate'
+                className='rounded-lg'
+              />
+              <span className='font-bold text-lg text-[#003b73]'>IELTS Mate</span>
             </div>
 
             {/* Mobile Menu Button */}
