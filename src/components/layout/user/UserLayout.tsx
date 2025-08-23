@@ -1,5 +1,6 @@
 'use client';
 
+import { AIChatbot } from '@/components/common';
 import { ReactNode } from 'react';
 import { UserHeader } from './UserHeader';
 
@@ -12,6 +13,7 @@ export function UserLayout({ children }: UserLayoutProps) {
     <div className='min-h-screen bg-gray-50'>
       <UserHeader />
       <main className='mx-auto '>{children}</main>
+      <AIChatbot />
     </div>
   );
 }
