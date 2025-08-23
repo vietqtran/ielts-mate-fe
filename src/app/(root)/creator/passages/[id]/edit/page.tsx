@@ -336,8 +336,9 @@ export default function EditPassagePage() {
       await deleteGroupQuestion(passage_id, groupToDelete.id);
       // On successful deletion, update the local state.
       setQuestionGroups((prev) => prev.filter((_, i) => i !== index));
+      toast.success('Question group deleted successfully');
     } catch (error) {
-      // TODO: Show a toast notification to the user.
+      toast.error('Failed to delete question group');
     }
   };
 
