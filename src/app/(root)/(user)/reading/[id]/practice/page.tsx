@@ -150,6 +150,10 @@ const ReadingPracticePage = () => {
           question_groups: res.data.task_data.question_groups.map((group) => ({
             ...group,
             question_group_id: group.group_id,
+            questions: group.questions.map((question) => ({
+              ...question,
+              number_of_correct_answers: question.number_of_correct_answers ?? 1,
+            })),
           })),
         };
 

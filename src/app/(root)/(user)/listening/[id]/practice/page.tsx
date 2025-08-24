@@ -49,7 +49,7 @@ const ListeningPractice = () => {
     const initialAnswers: Record<
       string, // question_id
       {
-        answer_id: string | string[]; // for multiple choices mode or single choice, no effect on fill-in-the-blank or drag-and-drop or matching
+        answer_id: string | string[];
         questionType: QuestionTypeEnumIndex;
         questionOrder: number;
         content: string;
@@ -155,8 +155,7 @@ const ListeningPractice = () => {
             question_group_id: group.group_id,
             questions: group.questions.map((question) => ({
               ...question,
-              zone_index: 0, // These are optional properties in StartListeningAttemptQuestion
-              blank_index: 0,
+              number_of_correct_answers: question.number_of_correct_answers ?? 1,
             })),
           })),
         };
