@@ -4,7 +4,7 @@ import { HandleAnswerChangeParams } from '@/components/features/user/reading/pra
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DragItem } from '@/types/attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import React from 'react';
 
 interface Question {
@@ -116,6 +116,15 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
     onAnswerChange(params);
   };
 
+  // Compute IDs of drag items that are currently used in any drop zone
+  const usedDragItemIds = useMemo(() => {
+    return new Set(
+      Object.values(dropZoneAnswers)
+        .map((v) => v?.answer_id)
+        .filter((id): id is string => Boolean(id && id.length > 0))
+    );
+  }, [dropZoneAnswers]);
+
   // Parse instruction to create drop zones
   const renderInstructionWithDropZones = (instruction: string) => {
     if (!questionGroup.questions[0]?.instruction_for_choice) return null;
@@ -151,16 +160,18 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
         <div className='space-y-2'>
           <h4 className='font-medium text-sm'>Drag the items below to the correct zones:</h4>
           <div className='flex flex-wrap gap-2 p-4 bg-blue-50 rounded-lg'>
-            {questionGroup.drag_items.map((item, index) => (
-              <div
-                key={index}
-                draggable
-                onDragStart={() => handleDragStart(item.drag_item_id)}
-                className='px-3 py-2 bg-white border rounded cursor-move hover:shadow-md transition-shadow select-none'
-              >
-                {item.content}
-              </div>
-            ))}
+            {questionGroup.drag_items
+              .filter((item) => !usedDragItemIds.has(item.drag_item_id))
+              .map((item, index) => (
+                <div
+                  key={index}
+                  draggable
+                  onDragStart={() => handleDragStart(item.drag_item_id)}
+                  className='px-3 py-2 bg-white border rounded cursor-move hover:shadow-md transition-shadow select-none'
+                >
+                  {item.content}
+                </div>
+              ))}
           </div>
         </div>
 
@@ -180,10 +191,16 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
             // Fallback: Individual drop zones
             <div className='space-y-3'>
               {questionGroup.questions
-                .sort((a, b) => a.zone_index - b.zone_index)
+                .sort(
+                  (a, b) =>
+                    (a.zone_index ? a.zone_index : a.question_order) -
+                    (b.zone_index ? b.zone_index : b.question_order)
+                )
                 .map((question) => (
                   <div key={question.question_id} className='flex items-center gap-4'>
-                    <span className='text-sm font-medium'>Zone {question.zone_index}:</span>
+                    <span className='text-sm font-medium'>
+                      Zone {question.zone_index ? question.zone_index : question.question_order}:
+                    </span>
                     <div
                       onDragOver={handleDragOver}
                       onDrop={(e) => handleDrop(e, question.question_id, question.question_order)}
@@ -191,12 +208,14 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
                     >
                       <span
                         className={
-                          dropZoneAnswers[question.question_id] ? 'text-black' : 'text-gray-500'
+                          dropZoneAnswers[question.question_id]?.content
+                            ? 'text-black'
+                            : 'text-gray-500'
                         }
                       >
                         {dropZoneAnswers[question.question_id]?.content || 'Drop item here'}
                       </span>
-                      {dropZoneAnswers[question.question_id] && (
+                      {dropZoneAnswers[question.question_id]?.answer_id && (
                         <button
                           onClick={() =>
                             handleRemoveItem(question.question_id, question.question_order)

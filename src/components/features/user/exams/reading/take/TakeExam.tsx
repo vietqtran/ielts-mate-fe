@@ -205,37 +205,30 @@ const TakeExam = ({ examData, initialAnswers }: TakeExamProps) => {
           group.questions.forEach((question) => {
             const answer = partAnswers[question.question_id];
 
-            // Only include answers that have actual data
-            if (answer) {
-              let hasValidAnswer = false;
-              let selectedAnswers: string[] = [];
+            let selectedAnswers: string[] | null = null;
 
+            if (answer) {
               if (Array.isArray(answer.answer_id)) {
-                selectedAnswers = answer.answer_id.filter((id) => id && id.trim() !== '');
-                hasValidAnswer = selectedAnswers.length > 0;
+                const filtered = answer.answer_id.filter((id) => id && id.trim() !== '');
+                selectedAnswers = filtered.length > 0 ? filtered : null;
               } else {
                 const answerStr = answer.answer_id.toString().trim();
-                if (answerStr !== '') {
-                  selectedAnswers = [answerStr];
-                  hasValidAnswer = true;
-                }
-              }
-
-              // Only add to payload if there's a valid answer
-              if (hasValidAnswer) {
-                // Get all choice IDs for multiple choice questions
-                const choiceIds: string[] = [];
-                if (question.choices && question.choices.length > 0) {
-                  choiceIds.push(...question.choices.map((choice) => choice.choice_id));
-                }
-
-                transformedAnswers.push({
-                  question_id: question.question_id,
-                  selected_answers: selectedAnswers,
-                  choice_ids: choiceIds,
-                });
+                selectedAnswers = answerStr !== '' ? [answerStr] : null;
               }
             }
+
+            // Get all choice IDs for multiple choice questions
+            const choiceIds: string[] = [];
+            if (question.choices && question.choices.length > 0) {
+              choiceIds.push(...question.choices.map((choice) => choice.choice_id));
+            }
+
+            // Always push the question with either answers or null
+            transformedAnswers.push({
+              question_id: question.question_id,
+              selected_answers: selectedAnswers,
+              choice_ids: choiceIds,
+            });
           });
         });
       });
@@ -262,7 +255,6 @@ const TakeExam = ({ examData, initialAnswers }: TakeExamProps) => {
       if (result) {
         router.push(`/history/exams/details?mode=reading&examId=${examData.exam_attempt_id}`);
       } else {
-        // Fallback if no result is returned
         alert('Exam submitted successfully!');
         router.push('/exams');
       }
@@ -273,7 +265,6 @@ const TakeExam = ({ examData, initialAnswers }: TakeExamProps) => {
       const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
       alert(`Failed to submit exam: ${errorMessage}`);
 
-      // Close modal to allow user to retry
       setIsModalOpen(false);
     }
   };

@@ -223,37 +223,29 @@ const TakeListeningExam = ({ examData, initialAnswers }: TakeListeningExamProps)
           group.questions!.forEach((question) => {
             const answer = partAnswers[question.question_id];
 
-            // Only include answers that have actual data
+            let selectedAnswers: string[] | null = null;
             if (answer) {
-              let hasValidAnswer = false;
-              let selectedAnswers: string[] = [];
-
               if (Array.isArray(answer.answer_id)) {
-                selectedAnswers = answer.answer_id.filter((id) => id && id.trim() !== '');
-                hasValidAnswer = selectedAnswers.length > 0;
+                const filtered = answer.answer_id.filter((id) => id && id.trim() !== '');
+                selectedAnswers = filtered.length > 0 ? filtered : null;
               } else {
                 const answerStr = answer.answer_id.toString().trim();
-                if (answerStr !== '') {
-                  selectedAnswers = [answerStr];
-                  hasValidAnswer = true;
-                }
-              }
-
-              // Only add to payload if there's a valid answer
-              if (hasValidAnswer) {
-                // Get all choice IDs for multiple choice questions
-                const choiceIds: string[] = [];
-                if (question.choices && question.choices.length > 0) {
-                  choiceIds.push(...question.choices.map((choice) => choice.choice_id));
-                }
-
-                transformedAnswers.push({
-                  question_id: question.question_id,
-                  selected_answers: selectedAnswers,
-                  choice_ids: choiceIds,
-                });
+                selectedAnswers = answerStr !== '' ? [answerStr] : null;
               }
             }
+
+            // Get all choice IDs for multiple choice questions
+            const choiceIds: string[] = [];
+            if (question.choices && question.choices.length > 0) {
+              choiceIds.push(...question.choices.map((choice) => choice.choice_id));
+            }
+
+            // Always include the question in payload
+            transformedAnswers.push({
+              question_id: question.question_id,
+              selected_answers: selectedAnswers,
+              choice_ids: choiceIds,
+            });
           });
         });
       });

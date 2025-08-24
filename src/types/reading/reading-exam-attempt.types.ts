@@ -50,8 +50,8 @@ export interface SubmitExamAttemptAnswersRequest {
   item_ids: string[];
 
   /**
-   * Array of answers for each question the user has answered.
-   * Each item corresponds to one question answered by the user.
+   * Array of entries for every question in the exam.
+   * If a question was not answered, its `selected_answers` will be `null`.
    */
   answers: SubmitExamAnswerRequest[];
 
@@ -69,17 +69,17 @@ export interface SubmitExamAnswerRequest {
   question_id: string;
 
   /**
-   * List of selected answers for the question:
+   * List of selected answers for the question, or null if not answered:
    *  - For multiple choice: array of selected choice ids (as strings).
    *  - For fill in the blank: array of user filled answers, e.g. ["user answer"].
    *  - For matching: array of pairs as string, e.g. ["4-A"].
    *  - For drag and drop: array of item ids selected by the user, e.g. ["item id"].
    */
-  selected_answers: string[];
+  selected_answers: string[] | null;
 
   /**
    * For multiple choice questions: Pass a list of **all choice ids** (not just selected ones) for this question.
-   * For other question types: pass an empty array or omit this field by passing `null`.
+   * For other question types: pass an empty array.
    */
   choice_ids: string[];
 }
