@@ -14,6 +14,7 @@ import {
 import { Plus, Save, Trash2 } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 
+import { ListeningExplanationForm } from '@/components/features/admin/listening/create/ListeningExplanationForm';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
@@ -49,6 +50,7 @@ interface MultipleChoiceFormProps {
   onCancel: () => void;
   isSubmitting: boolean;
   isEditing?: boolean;
+  isListening?: boolean;
 }
 
 export function MultipleChoiceForm({
@@ -57,6 +59,7 @@ export function MultipleChoiceForm({
   onCancel,
   isSubmitting,
   isEditing = false,
+  isListening = false,
 }: Readonly<MultipleChoiceFormProps>) {
   const form = useForm<QuestionFormData>({
     resolver: zodResolver(questionSchema),
@@ -146,6 +149,10 @@ export function MultipleChoiceForm({
     } else {
       form.setValue(`choices.${choiceIndex}.is_correct`, isChecked);
     }
+  };
+
+  const handleExplanationChange = (value: string) => {
+    form.setValue('explanation', value);
   };
 
   return (
@@ -310,23 +317,35 @@ export function MultipleChoiceForm({
               </div>
             </div>
 
-            <FormField
-              control={form.control}
-              name='explanation'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Explanation</FormLabel>
-                  <FormControl>
-                    <TiptapEditor
-                      content={field.value}
-                      onChange={field.onChange}
-                      placeholder='Explain why the correct answer(s) are correct and why others are wrong'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+            {/* Explanation Section */}
+            <div className='space-y-4'>
+              {isListening ? (
+                <ListeningExplanationForm
+                  value={form.watch('explanation')}
+                  onChange={handleExplanationChange}
+                  onCancel={() => {}}
+                  isEditing={!!form.watch('explanation')}
+                />
+              ) : (
+                <FormField
+                  control={form.control}
+                  name='explanation'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Explanation</FormLabel>
+                      <FormControl>
+                        <TiptapEditor
+                          content={field.value}
+                          onChange={field.onChange}
+                          placeholder='Explain why the correct answer(s) are correct and why others are wrong'
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
-            />
+            </div>
 
             <div className='flex justify-end gap-2'>
               <Button type='button' variant='outline' onClick={onCancel}>

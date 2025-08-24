@@ -15,6 +15,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Move, Plus, Save, Trash2 } from 'lucide-react';
 import { useFieldArray, useForm } from 'react-hook-form';
 
+import { ListeningExplanationForm } from '@/components/features/admin/listening/create/ListeningExplanationForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
@@ -49,6 +50,7 @@ interface DragDropFormProps {
   onSubmit: (data: DragDropFormData) => void;
   onCancel: () => void;
   isSubmitting: boolean;
+  isListening?: boolean;
 }
 
 export function DragDropForm({
@@ -56,6 +58,7 @@ export function DragDropForm({
   onSubmit,
   onCancel,
   isSubmitting,
+  isListening = false,
 }: Readonly<DragDropFormProps>) {
   const [activeTab, setActiveTab] = useState('drag_items');
 
@@ -310,23 +313,37 @@ export function DragDropForm({
                           )}
                         />
 
-                        <FormField
-                          control={form.control}
-                          name={`questions.${index}.explanation`}
-                          render={({ field }) => (
-                            <FormItem>
-                              <FormLabel>Explanation</FormLabel>
-                              <FormControl>
-                                <TiptapEditor
-                                  content={field.value}
-                                  onChange={field.onChange}
-                                  placeholder='Explain why this drag item is correct for this drop zone'
-                                />
-                              </FormControl>
-                              <FormMessage />
-                            </FormItem>
+                        {/* Explanation Section */}
+                        <div className='space-y-4'>
+                          {isListening ? (
+                            <ListeningExplanationForm
+                              value={form.watch(`questions.${index}.explanation`)}
+                              onChange={(value) => {
+                                form.setValue(`questions.${index}.explanation`, value);
+                              }}
+                              onCancel={() => {}}
+                              isEditing={!!form.watch(`questions.${index}.explanation`)}
+                            />
+                          ) : (
+                            <FormField
+                              control={form.control}
+                              name={`questions.${index}.explanation`}
+                              render={({ field }) => (
+                                <FormItem>
+                                  <FormLabel>Explanation</FormLabel>
+                                  <FormControl>
+                                    <TiptapEditor
+                                      content={field.value}
+                                      onChange={field.onChange}
+                                      placeholder='Explain why this drag item is correct for this drop zone'
+                                    />
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                              )}
+                            />
                           )}
-                        />
+                        </div>
                       </CardContent>
                     </Card>
                   ))}

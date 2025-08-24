@@ -3,6 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ListeningExplanationDisplay } from '@/components/ui/listening-explanation-display';
 import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 import { DragItem } from '@/types/attempt.types';
 import { ListeningChoice, ListeningQuestion } from '@/types/listening/listening-exam.types';
@@ -191,12 +192,10 @@ export const ListeningQuestionItem = ({
             {question.explanation && (
               <div className='space-y-2'>
                 <h4 className='font-medium text-tekhelet-600'>Explanation</h4>
-                <div className='p-3 rounded-lg border '>
-                  <SafeHtmlRenderer
-                    htmlContent={question.explanation}
-                    className='text-sm text-tekhelet-400'
-                  />
-                </div>
+                <ListeningExplanationDisplay
+                  explanation={question.explanation}
+                  className='p-3 rounded-lg border'
+                />
               </div>
             )}
           </CardContent>

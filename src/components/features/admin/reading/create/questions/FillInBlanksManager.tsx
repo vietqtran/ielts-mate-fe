@@ -191,6 +191,7 @@ export function FillInBlanksManager({
           onCancel={handleCancel}
           isSubmitting={isLoading.createQuestions || isLoading.updateQuestionInfo}
           isEditing={!!editingQuestion}
+          isListening={isListening}
         />
       )}
 

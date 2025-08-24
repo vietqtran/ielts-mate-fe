@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ListeningExplanationDisplay } from '@/components/ui/listening-explanation-display';
 import { useListeningTask } from '@/hooks';
 import { ListeningTaskDetailResponse } from '@/types/listening/listening.types';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
@@ -216,9 +217,9 @@ export default function PreviewListeningTaskPage() {
                                 </ul>
                                 <div className='mt-2 text-sm text-gray-500'>
                                   <span className='font-medium'>Explanation:</span>
-                                  <div
+                                  <ListeningExplanationDisplay
+                                    explanation={q.explanation || ''}
                                     className='mt-1'
-                                    dangerouslySetInnerHTML={{ __html: q.explanation || '' }}
                                   />
                                 </div>
                               </div>
@@ -232,9 +233,9 @@ export default function PreviewListeningTaskPage() {
                                 </div>
                                 <div className='mt-2 text-sm text-gray-500'>
                                   <span className='font-medium'>Explanation:</span>
-                                  <div
+                                  <ListeningExplanationDisplay
+                                    explanation={q.explanation || ''}
                                     className='mt-1'
-                                    dangerouslySetInnerHTML={{ __html: q.explanation || '' }}
                                   />
                                 </div>
                               </div>
@@ -251,9 +252,9 @@ export default function PreviewListeningTaskPage() {
                                 </div>
                                 <div className='mt-2 text-sm text-gray-500'>
                                   <span className='font-medium'>Explanation:</span>
-                                  <div
+                                  <ListeningExplanationDisplay
+                                    explanation={q.explanation || ''}
                                     className='mt-1'
-                                    dangerouslySetInnerHTML={{ __html: q.explanation || '' }}
                                   />
                                 </div>
                               </div>
@@ -267,9 +268,9 @@ export default function PreviewListeningTaskPage() {
                                 </div>
                                 <div className='mt-2 text-sm text-gray-500'>
                                   <span className='font-medium'>Explanation:</span>
-                                  <div
+                                  <ListeningExplanationDisplay
+                                    explanation={q.explanation || ''}
                                     className='mt-1'
-                                    dangerouslySetInnerHTML={{ __html: q.explanation || '' }}
                                   />
                                 </div>
                               </div>

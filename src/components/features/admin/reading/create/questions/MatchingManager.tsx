@@ -188,6 +188,7 @@ export function MatchingManager({
           onCancel={handleCancel}
           isSubmitting={isLoading.createQuestions || isLoading.updateQuestionInfo}
           isEditing={!!editingQuestion}
+          isListening={isListening}
         />
       )}
 

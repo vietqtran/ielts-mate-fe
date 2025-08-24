@@ -285,6 +285,7 @@ export function MultipleChoiceManager({
             isLoading.deleteChoice
           }
           isEditing={!!editingQuestion}
+          isListening={isListening}
         />
       )}
 

@@ -1,5 +1,6 @@
 'use client';
 
+import { ListeningExplanationForm } from '@/components/features/admin/listening/create/ListeningExplanationForm';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -295,23 +296,37 @@ export function QuestionForm({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name='explanation'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Explanation</FormLabel>
-                  <FormControl>
-                    <TiptapEditor
-                      content={field.value}
-                      onChange={field.onChange}
-                      placeholder='Explain why this drag item is correct for this drop zone'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+            {/* Explanation Section */}
+            <div className='space-y-4'>
+              {isListening ? (
+                <ListeningExplanationForm
+                  value={form.watch('explanation')}
+                  onChange={(value) => {
+                    form.setValue('explanation', value);
+                  }}
+                  onCancel={() => {}}
+                  isEditing={!!form.watch('explanation')}
+                />
+              ) : (
+                <FormField
+                  control={form.control}
+                  name='explanation'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Explanation</FormLabel>
+                      <FormControl>
+                        <TiptapEditor
+                          content={field.value}
+                          onChange={field.onChange}
+                          placeholder='Explain why this drag item is correct for this drop zone'
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
-            />
+            </div>
 
             <div className='flex justify-end gap-2'>
               <Button type='button' variant='outline' onClick={onCancel} disabled={isSubmitting}>

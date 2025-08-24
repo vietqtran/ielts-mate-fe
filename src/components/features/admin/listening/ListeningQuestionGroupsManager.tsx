@@ -8,9 +8,8 @@ import { MultipleChoiceManager } from '@/components/features/admin/reading/creat
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ListeningExplanationDisplay } from '@/components/ui/listening-explanation-display';
 import { useListeningQuestion, useListeningTask } from '@/hooks';
-
-import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { Edit3, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
@@ -326,8 +325,8 @@ export function ListeningQuestionGroupsManager({
                                   </ul>
                                   <div className='mt-2 text-sm text-gray-500'>
                                     <span className='font-medium'>Explanation:</span>
-                                    <SafeHtmlRenderer
-                                      htmlContent={q.explanation || ''}
+                                    <ListeningExplanationDisplay
+                                      explanation={q.explanation || ''}
                                       className='mt-1'
                                     />
                                   </div>
@@ -342,8 +341,8 @@ export function ListeningQuestionGroupsManager({
                                   </div>
                                   <div className='mt-2 text-sm text-gray-500'>
                                     <span className='font-medium'>Explanation:</span>
-                                    <SafeHtmlRenderer
-                                      htmlContent={q.explanation || ''}
+                                    <ListeningExplanationDisplay
+                                      explanation={q.explanation || ''}
                                       className='mt-1'
                                     />
                                   </div>
@@ -361,8 +360,8 @@ export function ListeningQuestionGroupsManager({
                                   </div>
                                   <div className='mt-2 text-sm text-gray-500'>
                                     <span className='font-medium'>Explanation:</span>
-                                    <SafeHtmlRenderer
-                                      htmlContent={q.explanation || ''}
+                                    <ListeningExplanationDisplay
+                                      explanation={q.explanation || ''}
                                       className='mt-1'
                                     />
                                   </div>
@@ -377,8 +376,8 @@ export function ListeningQuestionGroupsManager({
                                   </div>
                                   <div className='mt-2 text-sm text-gray-500'>
                                     <span className='font-medium'>Explanation:</span>
-                                    <SafeHtmlRenderer
-                                      htmlContent={q.explanation || ''}
+                                    <ListeningExplanationDisplay
+                                      explanation={q.explanation || ''}
                                       className='mt-1'
                                     />
                                   </div>
