@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ReadingExamAttemptDetailsResponse } from '@/types/reading/reading-exam-attempt.types';
-import { Calendar, Clock, FileText, Trophy, User } from 'lucide-react';
+import { Calendar, Clock, FileText, Trophy } from 'lucide-react';
 
 interface ExamInfoCardProps {
   examDetails: ReadingExamAttemptDetailsResponse;
@@ -13,7 +13,7 @@ interface ExamInfoCardProps {
 
 export const ExamInfoCard = ({ examDetails, formatDate, formatDuration }: ExamInfoCardProps) => {
   return (
-    <Card className='bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl'>
+    <Card>
       <CardHeader>
         <CardTitle className='flex items-center gap-2 text-tekhelet-400'>
           <FileText className='w-5 h-5' />
@@ -66,7 +66,7 @@ export const ExamInfoCard = ({ examDetails, formatDate, formatDuration }: ExamIn
             </div>
           </div>
         </div>
-        <div className='mt-4 pt-4 border-t border-tekhelet-200'>
+        {/* <div className='mt-4 pt-4 border-t border-tekhelet-200'>
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
             <div className='flex items-center gap-2'>
               <User className='w-4 h-4 text-tekhelet-400' />
@@ -92,7 +92,7 @@ export const ExamInfoCard = ({ examDetails, formatDate, formatDuration }: ExamIn
                 </div>
               )}
           </div>
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );

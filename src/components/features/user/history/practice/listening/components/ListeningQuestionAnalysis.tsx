@@ -3,7 +3,6 @@
 import { AttemptQuestionResultRenderer } from '@/components/features/user/common/attempt/AttemptQuestionResultRenderer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadListeningAttemptResultResponse } from '@/types/listening/listening-attempt.types';
-import { Volume2 } from 'lucide-react';
 
 interface ListeningQuestionAnalysisProps {
   attemptDetails: LoadListeningAttemptResultResponse;
@@ -34,27 +33,23 @@ export const ListeningQuestionAnalysis = ({ attemptDetails }: ListeningQuestionA
   });
 
   return (
-    <Card className='rounded-3xl border'>
+    <Card>
       <CardHeader>
-        <CardTitle className='flex items-center gap-2 text-[#003b73] font-semibold'>
-          <Volume2 className='w-5 h-5' />
-          Question Analysis
-        </CardTitle>
-        <p className='text-[#0074b7]'>Detailed breakdown of your answers for each question group</p>
+        <CardTitle className='font-semibold text-xl text-tekhelet-500'>Question Analysis</CardTitle>
+        <p className='text-sm text-tekhelet-500'>
+          Detailed breakdown of your answers for each question group
+        </p>
       </CardHeader>
       <CardContent className='space-y-4'>
         {attemptDetails.task_data.question_groups.map((group, groupIndex) => (
-          <Card
-            key={group.group_id}
-            className='backdrop-blur-sm bg-gradient-to-br from-[#bfd7ed]/30 to-[#60a3d9]/10 border border-[#60a3d9]/20 rounded-2xl'
-          >
+          <Card key={group.group_id}>
             <CardHeader className='pb-3'>
-              <CardTitle className='text-lg text-[#003b73] font-semibold'>
+              <CardTitle className='text-lg text-tekhelet-500 font-semibold'>
                 Part {groupIndex + 1}: {group.section_label}
               </CardTitle>
               {group.instruction && (
                 <div
-                  className='text-sm text-[#0074b7]'
+                  className='text-sm text-tekhelet-500'
                   dangerouslySetInnerHTML={{ __html: group.instruction }}
                 />
               )}
@@ -81,15 +76,15 @@ export const ListeningQuestionAnalysis = ({ attemptDetails }: ListeningQuestionA
 
         {/* Audio Transcript Section */}
         {attemptDetails.task_data.transcript && (
-          <Card className='bg-[#bfd7ed]/50 backdrop-blur-sm rounded-2xl border border-[#60a3d9]/30'>
+          <Card>
             <CardHeader>
-              <CardTitle className='text-lg text-[#003b73] font-semibold'>
+              <CardTitle className='text-lg text-tekhelet-500 font-semibold'>
                 Audio Transcript
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className='p-4 bg-white/60 rounded-lg'>
-                <p className='text-sm text-[#0074b7] whitespace-pre-line'>
+              <div className='p-4 rounded-lg'>
+                <p className='text-sm text-tekhelet-500 whitespace-pre-line'>
                   {attemptDetails.task_data.transcript}
                 </p>
               </div>

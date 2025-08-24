@@ -92,7 +92,7 @@ const ReadingExamDetailsPage = ({ examId }: ReadingExamDetailsPageProps) => {
     : { level: 'Unknown', color: 'bg-gray-500 text-white' };
 
   return (
-    <div className='min-h-screen bg-medium-slate-blue-900 p-4'>
+    <div className='min-h-screen  p-4'>
       <div className='max-w-6xl mx-auto space-y-6'>
         {/* Header */}
         <ExamResultHeader />

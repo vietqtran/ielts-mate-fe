@@ -5,7 +5,6 @@ import {
   ExamLoadingState,
   ExamResultHeader,
   OverallScoreCard,
-  PerformanceByPartsCard,
   StatisticsCard,
 } from '@/components/features/user/exams/reading/components';
 import {
@@ -74,7 +73,7 @@ const ReadingAttemptResult = ({ attemptId }: ReadingAttemptResultProps) => {
     : { level: 'Unknown', color: 'bg-gray-500 text-white' };
 
   return (
-    <div className='min-h-screen bg-medium-slate-blue-900 p-4'>
+    <div className='min-h-screen p-4'>
       <div className='max-w-6xl mx-auto space-y-6'>
         <ExamResultHeader
           title='Reading Practice Results'
@@ -84,7 +83,7 @@ const ReadingAttemptResult = ({ attemptId }: ReadingAttemptResultProps) => {
 
         <ReadingAttemptInfoCard attemptDetails={attemptDetails} formatDuration={formatDuration} />
 
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           <OverallScoreCard
             scorePercentage={stats?.scorePercentage || 0}
             correctAnswers={stats?.correctAnswers || 0}
@@ -99,8 +98,6 @@ const ReadingAttemptResult = ({ attemptId }: ReadingAttemptResultProps) => {
             incorrectAnswers={stats?.incorrectAnswers || 0}
           />
         </div>
-
-        {stats && <PerformanceByPartsCard partStats={stats.partStats} />}
 
         <ReadingQuestionAnalysis
           attemptDetails={attemptDetails}
