@@ -6,6 +6,6 @@ export { IELTSBandScoreCard } from './IELTSBandScoreCard';
 export { StatisticsCard } from './StatisticsCard';
 export { PerformanceByPartsCard } from './PerformanceByPartsCard';
 export { QuestionAnalysis } from './QuestionAnalysis';
-export { QuestionItem } from './QuestionItem';
+export { QuestionResultRenderer } from './QuestionResultRenderer';
 export { ExamErrorState } from './ExamErrorState';
 export { ExamLoadingState } from './ExamLoadingState';

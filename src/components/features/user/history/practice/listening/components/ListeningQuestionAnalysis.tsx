@@ -1,24 +1,19 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
+import { AttemptQuestionResultRenderer } from '@/components/features/user/common/attempt/AttemptQuestionResultRenderer';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { LoadListeningAttemptResultResponse } from '@/types/listening/listening-attempt.types';
-import { CheckCircle, ChevronDown, ChevronRight, Volume2, XCircle } from 'lucide-react';
+import { Volume2 } from 'lucide-react';
 
 interface ListeningQuestionAnalysisProps {
   attemptDetails: LoadListeningAttemptResultResponse;
-  openQuestions: Set<string>;
-  onToggleQuestion: (questionId: string) => void;
 }
 
-export const ListeningQuestionAnalysis = ({
-  attemptDetails,
-  openQuestions,
-  onToggleQuestion,
-}: ListeningQuestionAnalysisProps) => {
+export const ListeningQuestionAnalysis = ({ attemptDetails }: ListeningQuestionAnalysisProps) => {
   // Create a map of user answers for quick lookup
   const userAnswersMap = new Map<string, string[]>();
+  const dragAndDropItems =
+    attemptDetails.task_data.question_groups.flatMap((group) => group.drag_items) || [];
   attemptDetails.answers.forEach((answer) => {
     const answerValues: string[] = [];
 
@@ -39,7 +34,7 @@ export const ListeningQuestionAnalysis = ({
   });
 
   return (
-    <Card className='bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-[#60a3d9]/30 ring-1 ring-[#60a3d9]/20'>
+    <Card className='rounded-3xl border'>
       <CardHeader>
         <CardTitle className='flex items-center gap-2 text-[#003b73] font-semibold'>
           <Volume2 className='w-5 h-5' />
@@ -65,153 +60,21 @@ export const ListeningQuestionAnalysis = ({
               )}
             </CardHeader>
             <CardContent>
-              {/* Show answered questions for this group */}
-              <div className='space-y-3'>
+              <div className='space-y-5'>
                 {group.questions.map((question, questionIndex) => {
-                  // Find the answer for this specific question
-                  const answer = attemptDetails.answers.find(
-                    (a) => a.question_id === question.question_id
+                  const userAnswers = attemptDetails.answers.filter(
+                    (answer) => answer.question_id === question.question_id
                   );
-
-                  if (!answer) return null; // Skip if no answer found
-
-                  const userAnswers = userAnswersMap.get(answer.question_id) || [];
-                  const isOpen = openQuestions.has(answer.question_id);
-
-                  // Check if the answer is correct by comparing with the correct_answer
-                  const isCorrect =
-                    answer.filled_text_answer === question.correct_answer ||
-                    (answer.choice_ids && answer.choice_ids.includes(question.correct_answer!));
-
                   return (
-                    <Collapsible
-                      key={answer.question_id}
-                      open={isOpen}
-                      onOpenChange={() => onToggleQuestion(answer.question_id)}
-                      className='border rounded-lg bg-white/80 hover:bg-white/90 transition-colors'
-                    >
-                      <CollapsibleTrigger className='w-full'>
-                        <div className='flex items-center justify-between w-full p-3 rounded-lg bg-white/80 hover:bg-white/90 transition-colors'>
-                          <div className='flex items-center gap-3'>
-                            {isCorrect ? (
-                              <CheckCircle className='w-5 h-5 text-green-600' />
-                            ) : (
-                              <XCircle className='w-5 h-5 text-red-600' />
-                            )}
-                            <span className='text-sm font-medium text-[#003b73]'>
-                              Question {questionIndex + 1}
-                            </span>
-                            <Badge
-                              variant={isCorrect ? 'default' : 'destructive'}
-                              className='text-xs'
-                            >
-                              {isCorrect ? 'Correct' : 'Incorrect'}
-                            </Badge>
-                          </div>
-                          {isOpen ? (
-                            <ChevronDown className='w-4 h-4 text-[#0074b7]' />
-                          ) : (
-                            <ChevronRight className='w-4 h-4 text-[#0074b7]' />
-                          )}
-                        </div>
-                      </CollapsibleTrigger>
-                      <CollapsibleContent className='mt-2'>
-                        <div className='p-4 bg-white/60 rounded-lg space-y-4'>
-                          {/* User's Answer Section */}
-                          <div>
-                            <h4 className='text-sm font-semibold text-[#003b73] mb-2'>
-                              Your Answer:
-                            </h4>
-                            <div className='space-y-1'>
-                              {answer.choice_ids && answer.choice_ids.length > 0 && (
-                                <p className='text-sm text-[#0074b7]'>
-                                  <strong>Choices:</strong> {answer.choice_ids.join(', ')}
-                                </p>
-                              )}
-                              {answer.filled_text_answer && (
-                                <p className='text-sm text-[#0074b7]'>
-                                  <strong>Text Answer:</strong> {answer.filled_text_answer}
-                                </p>
-                              )}
-                              {answer.matched_text_answer && (
-                                <p className='text-sm text-[#0074b7]'>
-                                  <strong>Matched Answer:</strong> {answer.matched_text_answer}
-                                </p>
-                              )}
-                              {answer.drag_item_id && (
-                                <p className='text-sm text-[#0074b7]'>
-                                  <strong>Drag Item:</strong> {answer.drag_item_id}
-                                </p>
-                              )}
-                              {userAnswers.length === 0 && (
-                                <p className='text-sm text-red-600 italic'>No answer provided</p>
-                              )}
-                            </div>
-                          </div>
-
-                          {/* Correct Answer Section */}
-                          <div className='border-t border-[#bfd7ed] pt-3'>
-                            <h4 className='text-sm font-semibold text-[#003b73] mb-2'>
-                              Correct Answer:
-                            </h4>
-                            <div
-                              className={`p-2 rounded ${
-                                isCorrect
-                                  ? 'bg-green-50 border border-green-200'
-                                  : 'bg-red-50 border border-red-200'
-                              }`}
-                            >
-                              <p
-                                className={`text-sm font-medium ${
-                                  isCorrect ? 'text-green-700' : 'text-red-700'
-                                }`}
-                              >
-                                {
-                                  question.choices.find(
-                                    (choice) => choice.choice_id === question.correct_answer
-                                  )?.content
-                                }
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Question Details
-                          <div className="border-t border-[#bfd7ed] pt-3">
-                            <h4 className="text-sm font-medium text-tekhelet-400 mb-2">
-                              Question Details:
-                            </h4>
-                            <div className="space-y-1 text-xs text-[#0074b7]">
-                              <p><strong>Points:</strong> {question.point}</p>
-                              <p><strong>Question Type:</strong> {question.question_type}</p>
-                              <p><strong>Expected Answers:</strong> {question.number_of_correct_answers}</p>
-                            </div>
-                          </div> */}
-                        </div>
-                      </CollapsibleContent>
-                    </Collapsible>
+                    <AttemptQuestionResultRenderer
+                      key={question.question_id}
+                      question={question}
+                      userAnswers={userAnswers}
+                      dragAndDropItems={dragAndDropItems}
+                    />
                   );
                 })}
               </div>
-
-              {/* Show drag items if available */}
-              {group.drag_items && group.drag_items.length > 0 && (
-                <div className='mt-4 pt-4 border-t border-[#bfd7ed]'>
-                  <h4 className='text-sm font-semibold text-[#003b73] mb-2'>
-                    Available Drag Items for this section:
-                  </h4>
-                  <div className='flex flex-wrap gap-2'>
-                    {group.drag_items.map((item) => (
-                      <Badge
-                        key={item.drag_item_id}
-                        variant='outline'
-                        className='text-xs bg-white/80'
-                      >
-                        {item.content}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-              )}
             </CardContent>
           </Card>
         ))}

@@ -2,7 +2,7 @@ import {
   Answer,
   AnswersPayload,
   AttemptAnswer,
-  Choice,
+  AttemptResponseQuestion,
   DataResponse,
   DragItem,
   Question,
@@ -87,15 +87,7 @@ export interface ListeningTaskQuestionGroup {
   questions: ListeningTaskQuestion[];
 }
 
-export interface ListeningTaskQuestion {
-  question_id: string;
-  question_order: number;
-  question_type: number;
-  point: number;
-  number_of_correct_answers: number;
-  choices: Choice[];
-  correct_answer?: string;
-}
+export interface ListeningTaskQuestion extends AttemptResponseQuestion {}
 
 export interface ListeningAttemptAnswer extends AttemptAnswer {}
 

@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ReadingExamAttemptDetailsResponse } from '@/types/reading/reading-exam-attempt.types';
 import { BookOpen } from 'lucide-react';
-import { QuestionItem } from './QuestionItem';
+import { QuestionResultRenderer } from './QuestionResultRenderer';
 
 interface QuestionAnalysisProps {
   examDetails: ReadingExamAttemptDetailsResponse;
@@ -23,6 +23,17 @@ export const QuestionAnalysis = ({
     examDetails.reading_exam.reading_passage_id_part3,
   ];
 
+  const dragAndDropItems = [
+    ...examDetails.reading_exam.reading_passage_id_part1.question_groups.flatMap(
+      (g) => g.drag_items || []
+    ),
+    ...examDetails.reading_exam.reading_passage_id_part2.question_groups.flatMap(
+      (g) => g.drag_items || []
+    ),
+    ...examDetails.reading_exam.reading_passage_id_part3.question_groups.flatMap(
+      (g) => g.drag_items || []
+    ),
+  ];
   return (
     <Card className='bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl'>
       <CardHeader>
@@ -84,16 +95,15 @@ export const QuestionAnalysis = ({
                         <div className='space-y-3'>
                           {group.questions && group.questions.length > 0 ? (
                             group.questions.map((question) => {
+                              // Get user answers from the main exam details answers map
                               const userAnswers = examDetails.answers[question.question_id] || [];
-                              const isOpen = openQuestions.has(question.question_id);
 
                               return (
-                                <QuestionItem
+                                <QuestionResultRenderer
                                   key={question.question_id}
                                   question={question}
                                   userAnswers={userAnswers}
-                                  isOpen={isOpen}
-                                  onToggle={() => onToggleQuestion(question.question_id)}
+                                  dragAndDropItems={dragAndDropItems}
                                 />
                               );
                             })

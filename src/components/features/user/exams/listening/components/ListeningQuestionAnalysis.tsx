@@ -1,12 +1,12 @@
 'use client';
 
+import { QuestionResultRenderer } from '@/components/features/user/exams/reading/components';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { ListeningExamAttemptDetailsResponse } from '@/types/listening/listening-exam.types';
 import { ChevronDown, ChevronUp, Eye, EyeOff, Headphones } from 'lucide-react';
 import { useState } from 'react';
-import { ListeningQuestionItem } from '.';
 import AudioPlayer from './AudioPlayer';
 
 interface ListeningQuestionAnalysisProps {
@@ -28,6 +28,21 @@ export const ListeningQuestionAnalysis = ({
     examDetails.listening_exam.listening_task_id_part2,
     examDetails.listening_exam.listening_task_id_part3,
     examDetails.listening_exam.listening_task_id_part4,
+  ];
+
+  const dragAndDropsList = [
+    ...examDetails.listening_exam.listening_task_id_part1.question_groups.flatMap(
+      (g) => g.drag_items || []
+    ),
+    ...examDetails.listening_exam.listening_task_id_part2.question_groups.flatMap(
+      (g) => g.drag_items || []
+    ),
+    ...examDetails.listening_exam.listening_task_id_part3.question_groups.flatMap(
+      (g) => g.drag_items || []
+    ),
+    ...examDetails.listening_exam.listening_task_id_part4.question_groups.flatMap(
+      (g) => g.drag_items || []
+    ),
   ];
 
   const togglePart = (partNumber: number) => {
@@ -174,17 +189,18 @@ export const ListeningQuestionAnalysis = ({
 
                       {/* Questions */}
                       {group.questions &&
-                        group.questions.map((question) => (
-                          <ListeningQuestionItem
-                            key={question.question_id}
-                            question={question}
-                            userAnswers={examDetails.answers[question.question_id] || []}
-                            isOpen={openQuestions.has(question.question_id)}
-                            onToggle={() => onToggleQuestion(question.question_id)}
-                            choices={question.choices}
-                            dragItems={group.drag_items || []}
-                          />
-                        ))}
+                        group.questions.map((question) => {
+                          // Get user answers from the main exam details answers map
+                          const userAnswers = examDetails.answers[question.question_id] || [];
+                          return (
+                            <QuestionResultRenderer
+                              userAnswers={userAnswers}
+                              dragAndDropItems={dragAndDropsList}
+                              question={question}
+                              key={question.question_id}
+                            />
+                          );
+                        })}
                     </div>
                   ))}
                 </CardContent>

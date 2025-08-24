@@ -140,17 +140,20 @@ interface ReadingExamAttemptDetailsChoice extends Choice {
   is_correct: boolean;
 }
 
-type ReadingExamAttemptDetailsQuestion = {
+export type ReadingExamAttemptDetailsQuestion = {
   question_id: string;
   question_order: number;
   question_type: number;
   number_of_correct_answers: number;
   instruction_for_choice?: string;
+  instruction_for_matching?: string;
+  correct_answer_for_matching?: string;
   choices?: ReadingExamAttemptDetailsChoice[];
   correct_answer?: string;
   explanation?: string;
   point?: number;
   blank_index?: number;
+  zone_index?: number;
 };
 
 export interface QuestionGroup {

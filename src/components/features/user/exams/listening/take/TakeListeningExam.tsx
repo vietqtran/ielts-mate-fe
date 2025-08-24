@@ -276,7 +276,7 @@ const TakeListeningExam = ({ examData, initialAnswers }: TakeListeningExamProps)
       setIsModalOpen(false);
 
       if (result) {
-        router.push(`/exams/listening/details?mode=listening&examId=${examData.exam_attempt_id}`);
+        router.push(`/history/exams/details?mode=listening&examId=${examData.exam_attempt_id}`);
       }
     } catch (error) {
       console.error('Error submitting listening exam:', error);
@@ -352,7 +352,7 @@ const TakeListeningExam = ({ examData, initialAnswers }: TakeListeningExamProps)
           // Listening layout: 4-6-2 columns
           gridClassName='gap-6 p-6'
           leftColClassName='col-span-4'
-          centerColClassName='col-span-6'
+          centerColClassName='col-span-5'
           rightColClassName='col-span-2'
           glass
           renderLeftColumn={(part) => (

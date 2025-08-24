@@ -4,7 +4,6 @@ import {
   ExamErrorState,
   ExamLoadingState,
   ExamResultHeader,
-  IELTSBandScoreCard,
   OverallScoreCard,
   PerformanceByPartsCard,
   StatisticsCard,
@@ -33,7 +32,6 @@ const ListeningAttemptResult = ({ attemptId }: ListeningAttemptResultProps) => {
   );
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [openQuestions, setOpenQuestions] = useState<Set<string>>(new Set());
 
   // Load attempt details
   useEffect(() => {
@@ -63,26 +61,12 @@ const ListeningAttemptResult = ({ attemptId }: ListeningAttemptResultProps) => {
     }
   }, [attemptId]);
 
-  // Calculate statistics using custom hook
   const stats = useListeningExamStatistics(attemptDetails);
 
-  // Toggle question details
-  const toggleQuestion = (questionId: string) => {
-    const newOpen = new Set(openQuestions);
-    if (newOpen.has(questionId)) {
-      newOpen.delete(questionId);
-    } else {
-      newOpen.add(questionId);
-    }
-    setOpenQuestions(newOpen);
-  };
-
-  // Loading state
   if (isLoading) {
     return <ExamLoadingState />;
   }
 
-  // Error state
   if (error || !attemptDetails) {
     return <ExamErrorState error={error || 'Listening attempt details not found'} />;
   }
@@ -93,7 +77,7 @@ const ListeningAttemptResult = ({ attemptId }: ListeningAttemptResultProps) => {
     : { level: 'Unknown', color: 'bg-gray-500 text-white' };
 
   return (
-    <div className='min-h-screen bg-medium-slate-blue-900 p-4'>
+    <div className='min-h-screen p-4'>
       <div className='max-w-6xl mx-auto space-y-6'>
         {/* Header */}
         <ExamResultHeader
@@ -119,9 +103,6 @@ const ListeningAttemptResult = ({ attemptId }: ListeningAttemptResultProps) => {
             performance={performance}
           />
 
-          {/* IELTS Band Score */}
-          <IELTSBandScoreCard bandScore={bandScore} />
-
           {/* Statistics */}
           <StatisticsCard
             totalPoints={stats?.totalPoints || 0}
@@ -135,11 +116,7 @@ const ListeningAttemptResult = ({ attemptId }: ListeningAttemptResultProps) => {
         {stats && <PerformanceByPartsCard partStats={stats.partStats} />}
 
         {/* Detailed Question Analysis */}
-        <ListeningQuestionAnalysis
-          attemptDetails={attemptDetails}
-          openQuestions={openQuestions}
-          onToggleQuestion={toggleQuestion}
-        />
+        <ListeningQuestionAnalysis attemptDetails={attemptDetails} />
       </div>
     </div>
   );
