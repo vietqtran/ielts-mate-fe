@@ -260,7 +260,7 @@ const TakeExam = ({ examData, initialAnswers }: TakeExamProps) => {
 
       setIsModalOpen(false);
       if (result) {
-        router.push(`history/exams/details?mode=reading&examId=${examData.exam_attempt_id}`);
+        router.push(`/history/exams/details?mode=reading&examId=${examData.exam_attempt_id}`);
       } else {
         // Fallback if no result is returned
         alert('Exam submitted successfully!');
