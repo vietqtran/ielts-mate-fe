@@ -8,8 +8,8 @@ import {
 } from '@/components/features/user/exams/common/take';
 import ConfirmSubmitModal from '@/components/features/user/reading/finish/ConfirmSubmitModal';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import useListeningAudio from '@/hooks/apis/listening/useListeningAudio';
 import { useListeningExam } from '@/hooks/apis/listening/useListeningExam';
+import useListeningExamAudioPreloader from '@/hooks/apis/listening/useListeningExamAudioPreloader';
 import { useDecrementTimer } from '@/hooks/utils/useTimer';
 import {
   StartListeningExamResponse,
@@ -66,7 +66,6 @@ const TakeListeningExam = ({ examData, initialAnswers }: TakeListeningExamProps)
   const [activeTab, setActiveTab] = useState<string>('part1');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<boolean>(false);
-  const [audioId, setAudioId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // 30 minutes = 1800 seconds for listening exam
@@ -74,29 +73,24 @@ const TakeListeningExam = ({ examData, initialAnswers }: TakeListeningExamProps)
   const timeLeft = useDecrementTimer(EXAM_DURATION, startTime);
   const router = useRouter();
   const { submitListeningExamAnswers, isLoading } = useListeningExam();
-  const { error, isLoading: audioLoading, mutate, objectUrl } = useListeningAudio(audioId);
+
+  // Extract audio file IDs from all parts
+  const audioFileIds = {
+    part1: examData.listening_exam.listening_task_id_part1.audio_file_id || null,
+    part2: examData.listening_exam.listening_task_id_part2.audio_file_id || null,
+    part3: examData.listening_exam.listening_task_id_part3.audio_file_id || null,
+    part4: examData.listening_exam.listening_task_id_part4.audio_file_id || null,
+  };
+
+  // Preload all audio files
+  const { audioUrls, isFirstAudioLoading, backgroundLoadingProgress, allAudioLoaded, errors } =
+    useListeningExamAudioPreloader(audioFileIds);
 
   // Initialize answers and start timer when component mounts
   useEffect(() => {
     setAnswers(initialAnswers);
     setStartTime(true);
   }, [initialAnswers]);
-
-  // Load audio for current part
-  useEffect(() => {
-    const loadCurrentPartAudio = async () => {
-      const currentPart = parts.find((part) => part.key === activeTab);
-      if (currentPart?.data.audio_file_id) {
-        try {
-          setAudioId(currentPart.data.audio_file_id);
-        } catch (error) {
-          console.error('Failed to load audio:', error);
-        }
-      }
-    };
-
-    loadCurrentPartAudio();
-  }, [activeTab]);
 
   // Auto-submit when time runs out
   useEffect(() => {
@@ -362,19 +356,48 @@ const TakeListeningExam = ({ examData, initialAnswers }: TakeListeningExamProps)
                   <p className='text-sm text-medium-slate-blue-500'>{part.data.instruction}</p>
                 </div>
 
-                {objectUrl ? (
-                  <>
-                    <audio
-                      ref={audioRef}
-                      src={objectUrl}
-                      preload='metadata'
-                      controls
-                      controlsList='nodownload'
-                    />
-                  </>
+                {/* Audio Loading Progress (only show for first part while loading) */}
+                {activeTab === 'part1' && isFirstAudioLoading && (
+                  <div className='text-center text-medium-slate-blue-500 py-4'>
+                    <div className='animate-pulse'>Loading audio...</div>
+                  </div>
+                )}
+
+                {/* Background Loading Progress Indicator */}
+                {!allAudioLoaded && !isFirstAudioLoading && (
+                  <div className='text-center text-xs text-medium-slate-blue-400 py-2'>
+                    <div className='flex justify-center items-center gap-1'>
+                      <span>Preloading:</span>
+                      {Object.entries(backgroundLoadingProgress).map(([partKey, loaded]) => (
+                        <span
+                          key={partKey}
+                          className={`w-2 h-2 rounded-full ${
+                            loaded ? 'bg-green-400' : 'bg-gray-300 animate-pulse'
+                          }`}
+                          title={`${partKey.toUpperCase()}: ${loaded ? 'Ready' : 'Loading'}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Audio Player */}
+                {audioUrls[part.key as keyof typeof audioUrls] ? (
+                  <audio
+                    ref={activeTab === part.key ? audioRef : undefined}
+                    src={audioUrls[part.key as keyof typeof audioUrls]!}
+                    preload='metadata'
+                    controls
+                    controlsList='nodownload'
+                    className='w-full'
+                  />
                 ) : (
                   <div className='text-center text-medium-slate-blue-500'>
-                    {audioLoading ? 'Loading audio...' : 'No audio available'}
+                    {errors[part.key as keyof typeof errors]
+                      ? 'Failed to load audio'
+                      : audioFileIds[part.key as keyof typeof audioFileIds]
+                        ? 'Loading audio...'
+                        : 'No audio available'}
                   </div>
                 )}
               </CardContent>
