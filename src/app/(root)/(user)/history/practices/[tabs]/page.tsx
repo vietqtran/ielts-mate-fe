@@ -1,6 +1,5 @@
 import ListeningHistory from '@/components/features/user/history/practice/listening/ListeningHistory';
 import ReadingHistory from '@/components/features/user/history/practice/reading/ReadingHistory';
-import { notFound } from 'next/navigation';
 
 interface AttemptPracticeProps {
   params: Promise<{ tabs: string }>;
@@ -15,7 +14,7 @@ const AttemptPractice = async ({ params }: AttemptPracticeProps) => {
     case 'listening':
       return <ListeningHistory />; // listening exams component
     default:
-      return notFound();
+      return null;
   }
 };
 

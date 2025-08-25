@@ -4,7 +4,6 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Filter, Loader2, X } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Combobox } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { MultiSelect } from '@/components/ui/multi-select';
@@ -16,7 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { UserPassageFilters } from '@/store/slices/reading-filter-slices';
-import { ieltsTypeOptions, partNumberOptions, questionCategoryOptions } from '@/utils/filter';
+import { ieltsTypeOptions, partNumberOptions } from '@/utils/filter';
 import { useDebounce } from '@uidotdev/usehooks';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
@@ -154,7 +153,7 @@ export const UserPassageFilterToolbar = memo(function UserPassageFilterToolbar({
         </div>
 
         {isExpanded && (
-          <div className='grid mt-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
+          <div className='grid mt-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
             <div className='col-span-full flex gap-2 justify-between items-end'>
               <div className='space-y-2 flex-1'>
                 <Label htmlFor='title'>Search</Label>
@@ -259,7 +258,7 @@ export const UserPassageFilterToolbar = memo(function UserPassageFilterToolbar({
                 </Button>
               )}
             </div>
-            <div className='flex gap-2 items-end justify-between'>
+            {/* <div className='flex gap-2 items-end justify-between'>
               <div className='space-y-2 flex-1'>
                 <Label htmlFor='createdBy'>Created By</Label>
                 <Combobox
@@ -275,8 +274,8 @@ export const UserPassageFilterToolbar = memo(function UserPassageFilterToolbar({
                   <X className='h-4 w-4' />
                 </Button>
               )}
-            </div>
-            <div className='flex gap-2 items-end justify-between'>
+            </div> */}
+            {/* <div className='flex gap-2 items-end justify-between'>
               <div className='space-y-2 flex-1'>
                 <Label htmlFor='questionCategory'>Question Category</Label>
                 <Combobox
@@ -296,7 +295,7 @@ export const UserPassageFilterToolbar = memo(function UserPassageFilterToolbar({
                   <X className='h-4 w-4' />
                 </Button>
               )}
-            </div>
+            </div> */}
           </div>
         )}
       </CardContent>

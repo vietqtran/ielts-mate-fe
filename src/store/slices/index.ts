@@ -3,7 +3,7 @@ import authFormReducer from './auth-form-slice';
 import authReducer from './auth-slice';
 import commonReducer from './common-slice';
 import listeningAttemptReducer from './listening-attempt-filter-slice';
-import listeningExamAttemptReducer from './listening-exam-filter-slice';
+import listeningExamAttemptReducer from './listening-exam-attempt-filter-slice';
 import listeningExamReducer from './listening-exam-filter-slice';
 import listeningTasksReducer from './listening-filter-slice';
 import markupSliceReducer from './markup-slice';

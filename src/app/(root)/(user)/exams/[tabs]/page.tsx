@@ -1,5 +1,4 @@
 import { ListeningExamsTable, ReadingExamsTable } from '@/components/features/user/exams';
-import { notFound } from 'next/navigation';
 interface ExamHomepageProps {
   params: Promise<{ tabs: string }>;
 }
@@ -11,7 +10,7 @@ const ExamHomepage = async ({ params }: ExamHomepageProps) => {
     case 'listening':
       return <ListeningExamsTable />;
     default:
-      return notFound();
+      return null;
   }
 };
 

@@ -193,7 +193,11 @@ const ReadingPracticePage = () => {
   if (!passages) {
     return (
       <div className='h-screen flex items-center justify-center'>
-        <p className='text-red-600'>Failed to load reading passage. Please try again.</p>
+        <p className='text-persimmon-200'>
+          {attemptId
+            ? 'Failed to load your saved attempt. Please try again.'
+            : 'Failed to start new attempt. Please try again.'}
+        </p>
       </div>
     );
   }
