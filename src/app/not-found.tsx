@@ -3,20 +3,22 @@ import Link from 'next/link';
 
 const NotFound = () => {
   return (
-    <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-[#bfd7ed] via-[#60a3d9] to-[#0074b7]'>
-      <div className='text-center px-6 py-12 max-w-lg mx-auto bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-[#60a3d9]/30 ring-1 ring-[#60a3d9]/20'>
+    <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-tekhelet-500 via-persimmon-400 to-tekhelet-500'>
+      <div className='text-center px-6 py-12 max-w-lg max-h-1/2 mx-auto border bg-white rounded-4xl'>
         {/* 404 Number with gradient */}
         <div className='mb-8'>
-          <h1 className='text-8xl md:text-9xl font-bold mb-4 bg-gradient-to-r from-[#0074b7] to-[#60a3d9] bg-clip-text text-transparent'>
+          <h1 className='text-8xl md:text-9xl font-bold mb-4 bg-gradient-to-r from-tekhelet-500 to-persimmon-500 bg-clip-text text-transparent'>
             404
           </h1>
         </div>
 
         {/* Main heading */}
-        <h2 className='text-2xl md:text-3xl font-bold mb-4 text-[#003b73]'>Oops! Page Not Found</h2>
+        <h2 className='text-2xl md:text-3xl font-bold mb-4 text-tekhelet-500'>
+          Where are you going?
+        </h2>
 
         {/* Description */}
-        <p className='text-lg mb-8 leading-relaxed text-[#0074b7]'>
+        <p className='text-lg mb-8 leading-relaxed text-tekhelet-600'>
           The page you're looking for seems to have wandered off. Don't worry, even the best IELTS
           students sometimes take a wrong turn!
         </p>
@@ -26,7 +28,7 @@ const NotFound = () => {
           <Link href='/'>
             <Button
               size='lg'
-              className='w-full sm:w-auto font-semibold text-white bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] transition-all duration-300 hover:scale-105 hover:shadow-xl rounded-xl px-6 py-3'
+              className='w-full sm:w-auto font-semibold text-white bg-selective-yellow-200 hover:bg-selective-yellow-300'
             >
               Back to Home
             </Button>
@@ -34,9 +36,8 @@ const NotFound = () => {
 
           <Link href='/reading'>
             <Button
-              variant='outline'
               size='lg'
-              className='w-full sm:w-auto font-semibold border-[#60a3d9] text-[#0074b7] bg-transparent transition-all duration-300 hover:scale-105 hover:shadow-xl hover:bg-[#60a3d9] hover:text-white rounded-xl px-6 py-3'
+              className='w-full sm:w-auto font-semibold text-white bg-tekhelet-500 hover:bg-tekhelet-600'
             >
               Start Practicing
             </Button>
@@ -45,20 +46,20 @@ const NotFound = () => {
 
         {/* Decorative elements */}
         <div className='mt-12 flex justify-center space-x-4'>
-          <div className='w-3 h-3 rounded-full bg-[#0074b7] animate-bounce [animation-delay:0ms]'></div>
-          <div className='w-3 h-3 rounded-full bg-[#60a3d9] animate-bounce [animation-delay:150ms]'></div>
-          <div className='w-3 h-3 rounded-full bg-[#bfd7ed] animate-bounce [animation-delay:300ms]'></div>
+          <div className='w-3 h-3 rounded-full bg-tekhelet-500 animate-bounce [animation-delay:0ms]'></div>
+          <div className='w-3 h-3 rounded-full bg-selective-yellow-200 animate-bounce [animation-delay:150ms]'></div>
+          <div className='w-3 h-3 rounded-full bg-persimmon-400 animate-bounce [animation-delay:300ms]'></div>
         </div>
 
         {/* IELTS tip */}
-        <div className='mt-8 p-4 rounded-xl border-l-4 border-l-[#0074b7] bg-gradient-to-r from-[#bfd7ed]/50 to-[#60a3d9]/20 text-left backdrop-blur-md'>
+        <div className='mt-8 p-4 rounded-xl text-left border'>
           <div className='flex items-start space-x-3'>
-            <div className='flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-[#0074b7] text-white'>
+            <div className='flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold bg-selective-yellow-200 text-white'>
               💡
             </div>
             <div>
-              <h3 className='font-semibold mb-1 text-[#003b73]'>IELTS Tip:</h3>
-              <p className='text-sm text-[#0074b7]'>
+              <h3 className='font-semibold mb-1 text-selective-yellow-200'>IELTS Tip:</h3>
+              <p className='text-sm text-tekhelet-400'>
                 When you encounter unfamiliar content in IELTS, don't panic. Use context clues and
                 your existing knowledge to navigate through!
               </p>

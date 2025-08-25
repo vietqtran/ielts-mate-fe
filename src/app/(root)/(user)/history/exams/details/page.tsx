@@ -1,6 +1,6 @@
+import NotFound from '@/app/not-found';
 import ListeningExamDetailsPage from '@/components/features/user/exams/listening/ListeningExamDetailsPage';
 import ReadingExamDetailsPage from '@/components/features/user/exams/reading/ReadingExamDetailsPage';
-import { notFound } from 'next/navigation';
 
 interface ExamDetailsProps {
   searchParams: Promise<{
@@ -10,28 +10,23 @@ interface ExamDetailsProps {
 }
 
 const ExamDetails = async ({ searchParams }: ExamDetailsProps) => {
-  const { mode = 'reading', examId } = await searchParams;
+  const { mode, examId } = await searchParams;
 
-  // If no examId is provided, redirect or show error
-  if (!examId) {
-    return (
-      <div className='min-h-screen flex items-center justify-center'>
-        <div className='backdrop-blur-lg border rounded-2xl p-6 text-center'>
-          <h1 className='text-2xl font-bold text-tekhelet-400 mb-2'>Missing Exam ID</h1>
-          <p className='text-tekhelet-500'>Please provide a valid exam ID to view details.</p>
-        </div>
-      </div>
-    );
+  const lowercaseMode = mode?.toLowerCase();
+  const lowercaseExamId = examId?.toLowerCase();
+
+  if (lowercaseMode !== 'reading' && lowercaseMode !== 'listening' && !lowercaseExamId) {
+    return <NotFound />;
   }
 
   // Dispatch to appropriate component based on mode
-  switch (mode.toLowerCase()) {
+  switch (lowercaseMode) {
     case 'reading':
-      return <ReadingExamDetailsPage examId={examId} />;
+      return <ReadingExamDetailsPage examId={lowercaseExamId!} />;
     case 'listening':
-      return <ListeningExamDetailsPage examId={examId} />;
+      return <ListeningExamDetailsPage examId={lowercaseExamId!} />;
     default:
-      return notFound();
+      return <NotFound />;
   }
 };
 

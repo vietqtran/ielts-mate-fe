@@ -1,4 +1,5 @@
 'use client';
+import NotFound from '@/app/not-found';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useParams, useRouter } from 'next/navigation';
 import { ReactNode } from 'react';
@@ -7,6 +8,10 @@ export default function ExamsLayout({ children }: { children: ReactNode }) {
   const params = useParams();
   const router = useRouter();
   const tab = params.tabs as string;
+
+  if (tab !== 'reading' && tab !== 'listening') {
+    return <NotFound />;
+  }
 
   const handleTabChange = (value: string) => {
     if (value !== tab) {
