@@ -81,7 +81,7 @@ export const ListeningQuestionAnalysis = ({
   return (
     <div className='space-y-6'>
       {/* Header with controls */}
-      <Card className='bg-white/70 backdrop-blur-lg border rounded-2xl shadow-lg'>
+      <Card>
         <CardHeader>
           <div className='flex items-center justify-between'>
             <CardTitle className='flex items-center gap-2 text-tekhelet-400'>
@@ -121,10 +121,7 @@ export const ListeningQuestionAnalysis = ({
         const isPartOpen = openParts.has(partNumber);
 
         return (
-          <Card
-            key={part.task_id}
-            className='bg-white/70 backdrop-blur-lg border rounded-2xl shadow-lg'
-          >
+          <Card key={part.task_id}>
             <Collapsible open={isPartOpen} onOpenChange={() => togglePart(partNumber)}>
               <CollapsibleTrigger asChild>
                 <CardHeader className='cursor-pointer hover:bg-white/50 transition-colors rounded-t-2xl'>
@@ -146,7 +143,7 @@ export const ListeningQuestionAnalysis = ({
               <CollapsibleContent>
                 <CardContent className='space-y-6'>
                   {/* Audio Player */}
-                  <div className='mt-4'>
+                  <div className='mt-4 w-full'>
                     <AudioPlayer
                       audioFileId={part.audio_file_id}
                       title={part.title}

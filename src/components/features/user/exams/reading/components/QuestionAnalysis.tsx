@@ -35,16 +35,31 @@ export const QuestionAnalysis = ({
     ),
   ];
   return (
-    <Card className='bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl'>
+    <Card>
       <CardHeader>
         <CardTitle className='text-tekhelet-400'>Detailed Question Analysis</CardTitle>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue='part1' className='w-full'>
-          <TabsList className='grid w-full grid-cols-3 bg-tekhelet-900/50'>
-            <TabsTrigger value='part1'>Part 1</TabsTrigger>
-            <TabsTrigger value='part2'>Part 2</TabsTrigger>
-            <TabsTrigger value='part3'>Part 3</TabsTrigger>
+          <TabsList className='grid w-full grid-cols-3 '>
+            <TabsTrigger
+              value='part1'
+              className='data-[state=active]:bg-tekhelet-300 data-[state=active]:text-selective-yellow-500'
+            >
+              Part 1
+            </TabsTrigger>
+            <TabsTrigger
+              value='part2'
+              className='data-[state=active]:bg-tekhelet-300 data-[state=active]:text-selective-yellow-500'
+            >
+              Part 2
+            </TabsTrigger>
+            <TabsTrigger
+              value='part3'
+              className='data-[state=active]:bg-tekhelet-300 data-[state=active]:text-selective-yellow-500'
+            >
+              Part 3
+            </TabsTrigger>
           </TabsList>
 
           {['part1', 'part2', 'part3'].map((partKey, partIndex) => {
@@ -54,7 +69,7 @@ export const QuestionAnalysis = ({
               <TabsContent key={partKey} value={partKey} className='mt-4'>
                 <div className='space-y-6'>
                   {/* Passage Content */}
-                  <div className='bg-white/50 rounded-lg p-4'>
+                  <div className='rounded-lg p-4'>
                     <h3 className='text-lg font-semibold text-tekhelet-400 mb-2 flex items-center gap-2'>
                       <BookOpen className='w-5 h-5' />
                       {part.title}

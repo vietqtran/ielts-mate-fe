@@ -22,9 +22,9 @@ export const OverallScoreCard = ({
   performance,
 }: OverallScoreCardProps) => {
   return (
-    <Card className='bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl'>
+    <Card className='rounded-2xl'>
       <CardHeader className='text-center'>
-        <Award className='w-12 h-12 mx-auto text-selective-yellow-500 mb-2' />
+        <Award className='w-12 h-12 mx-auto text-persimmon-400 mb-2' />
         <CardTitle className='text-tekhelet-400'>Overall Score</CardTitle>
       </CardHeader>
       <CardContent className='text-center'>

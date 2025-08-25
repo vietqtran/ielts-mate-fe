@@ -5,13 +5,11 @@ import {
   ExamLoadingState,
   ExamResultHeader,
   OverallScoreCard,
-  PerformanceByPartsCard,
   StatisticsCard,
 } from '@/components/features/user/exams/reading/components';
 import {
   formatDate,
   formatDuration,
-  getIELTSBandScore,
   getPerformanceLevel,
 } from '@/components/features/user/exams/reading/utils/examUtils';
 import { useListeningExamStatistics } from '@/components/features/user/history/practice/listening/hooks/useListeningExamStatistics';
@@ -71,7 +69,6 @@ const ListeningAttemptResult = ({ attemptId }: ListeningAttemptResultProps) => {
     return <ExamErrorState error={error || 'Listening attempt details not found'} />;
   }
 
-  const bandScore = stats ? getIELTSBandScore(stats.scorePercentage) : 0;
   const performance = stats
     ? getPerformanceLevel(stats.scorePercentage)
     : { level: 'Unknown', color: 'bg-gray-500 text-white' };
@@ -94,7 +91,7 @@ const ListeningAttemptResult = ({ attemptId }: ListeningAttemptResultProps) => {
         />
 
         {/* Main Results Section */}
-        <div className='grid grid-cols-1 lg:grid-cols-3 gap-6'>
+        <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           {/* Overall Score */}
           <OverallScoreCard
             scorePercentage={stats?.scorePercentage || 0}
@@ -111,9 +108,6 @@ const ListeningAttemptResult = ({ attemptId }: ListeningAttemptResultProps) => {
             incorrectAnswers={stats?.incorrectAnswers || 0}
           />
         </div>
-
-        {/* Parts Performance */}
-        {stats && <PerformanceByPartsCard partStats={stats.partStats} />}
 
         {/* Detailed Question Analysis */}
         <ListeningQuestionAnalysis attemptDetails={attemptDetails} />

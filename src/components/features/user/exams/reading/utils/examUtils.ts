@@ -48,11 +48,11 @@ export const getPerformanceLevel = (score: number) => {
   if (score >= 85)
     return {
       level: 'Excellent',
-      color: 'bg-selective-yellow-500 text-tekhelet-900',
+      color: 'bg-tekhelet-500 text-tekhelet-900',
     };
-  if (score >= 70) return { level: 'Good', color: 'bg-medium-slate-blue-500 text-white' };
-  if (score >= 55) return { level: 'Fair', color: 'bg-tangerine-500 text-white' };
-  return { level: 'Needs Improvement', color: 'bg-persimmon-500 text-white' };
+  if (score >= 70) return { level: 'Good', color: 'bg-green-600 text-white' };
+  if (score >= 55) return { level: 'Fair', color: 'bg-tangerine-400 text-white' };
+  return { level: 'Needs Improvement', color: 'bg-persimmon-300 text-white' };
 };
 
 // Types for statistics

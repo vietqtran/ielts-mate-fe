@@ -25,7 +25,7 @@ const AudioPlayer = ({ audioFileId, title, partNumber }: AudioPlayerProps) => {
   }, [audioFileId]);
 
   return (
-    <Card className='backdrop-blur-lg border rounded-2xl'>
+    <Card>
       <CardHeader>
         <CardTitle className='flex items-center gap-2 text-tekhelet-400'>
           <Volume2 className='w-5 h-5' />
@@ -57,6 +57,7 @@ const AudioPlayer = ({ audioFileId, title, partNumber }: AudioPlayerProps) => {
               preload='metadata'
               controls
               controlsList='nodownload'
+              className='w-full'
             />
           </>
         )}

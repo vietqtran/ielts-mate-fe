@@ -9,7 +9,7 @@ interface IELTSBandScoreCardProps {
 
 export const IELTSBandScoreCard = ({ bandScore }: IELTSBandScoreCardProps) => {
   return (
-    <Card className='bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl'>
+    <Card>
       <CardHeader className='text-center'>
         <Target className='w-12 h-12 mx-auto text-medium-slate-blue-500 mb-2' />
         <CardTitle className='text-tekhelet-400'>IELTS Band Score</CardTitle>

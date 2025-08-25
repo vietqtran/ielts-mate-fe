@@ -17,12 +17,12 @@ interface PerformanceByPartsCardProps {
 
 export const PerformanceByPartsCard = ({ partStats }: PerformanceByPartsCardProps) => {
   return (
-    <Card className='bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl'>
+    <Card>
       <CardHeader>
         <CardTitle className='text-tekhelet-400'>Performance by Parts</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
+        <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
           {partStats.map((part, index) => (
             <div key={index} className='bg-white/50 rounded-lg p-4'>
               <h3 className='font-semibold text-tekhelet-400 mb-2'>{part.title}</h3>
