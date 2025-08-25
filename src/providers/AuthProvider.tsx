@@ -32,8 +32,10 @@ const AuthProvider = ({ children, isAuthPage = false }: Props) => {
     const init = async () => {
       dispatch(setFullPageLoading(true));
       try {
-        // Skip refetchUser for reset password page to avoid unnecessary API calls
-        if (pathname === '/reset') {
+        // Skip refetchUser for auth pages when user is not authenticated to avoid unnecessary API calls
+        // This prevents automatic redirect to sign-in when accessing auth pages
+        // Also skip for reset page regardless of authentication status
+        if ((isAuthPage && !user) || pathname === '/reset') {
           dispatch(setFullPageLoading(false));
           return;
         }
