@@ -271,7 +271,10 @@ export function MultipleChoiceManager({
               ? {
                   ...editingQuestion,
                   id: editingQuestion.question_id,
-                  choices: editingQuestion.choices.map((c: any) => ({ ...c, id: c.choice_id })),
+                  choices: (editingQuestion.choices || []).map((c: any) => ({
+                    ...c,
+                    id: c.choice_id,
+                  })),
                 }
               : defaultInitialData
           }
