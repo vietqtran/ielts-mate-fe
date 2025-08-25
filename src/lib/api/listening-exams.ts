@@ -100,7 +100,7 @@ export const generateListeningExamSlug = async (examName: string): Promise<strin
     status: string;
     message: string;
     data: { url_slug: string };
-  }>(`/listening/exams/slug/${encodeURIComponent(examName)}`);
+  }>(`/listening/exams/gen/slug/${encodeURIComponent(examName)}`);
   return response.data.data.url_slug;
 };
 
