@@ -17,12 +17,14 @@ interface QuestionResultRendererProps {
     drag_item_id: string;
     content: string;
   }[];
+  isListening?: boolean;
 }
 
 export const QuestionResultRenderer = ({
   question,
   userAnswers,
   dragAndDropItems,
+  isListening = false,
 }: QuestionResultRendererProps) => {
   // Cast to ComponentType<any> so we can pass props even if the leaf component hasn't defined them yet
   const MCComponent = MultipleChoicesResult as unknown as React.ComponentType<any>;
@@ -32,17 +34,28 @@ export const QuestionResultRenderer = ({
 
   switch (question.question_type) {
     case QuestionTypeEnumIndex.MULTIPLE_CHOICE:
-      return <MCComponent question={question} userAnswers={userAnswers} />;
+      return (
+        <MCComponent question={question} userAnswers={userAnswers} isListening={isListening} />
+      );
     case QuestionTypeEnumIndex.FILL_IN_THE_BLANKS:
-      return <FITBComponent question={question} userAnswers={userAnswers} />;
+      return (
+        <FITBComponent question={question} userAnswers={userAnswers} isListening={isListening} />
+      );
     case QuestionTypeEnumIndex.MATCHING:
-      return <MatchingComponent question={question} userAnswers={userAnswers} />;
+      return (
+        <MatchingComponent
+          question={question}
+          userAnswers={userAnswers}
+          isListening={isListening}
+        />
+      );
     case QuestionTypeEnumIndex.DRAG_AND_DROP:
       return (
         <DnDComponent
           question={question}
           userAnswers={userAnswers}
           dragAndDropItems={dragAndDropItems}
+          isListening={isListening}
         />
       );
     default:

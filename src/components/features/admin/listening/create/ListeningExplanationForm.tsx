@@ -1,6 +1,5 @@
 'use client';
 
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -126,55 +125,47 @@ export function ListeningExplanationForm({
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className='text-base'>
-          {isEditing ? 'Edit Time Range' : 'Set Audio Time Range'}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <div className='space-y-4'>
-            <div className='grid grid-cols-2 gap-4'>
-              <FormField
-                control={form.control}
-                name='start_time'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Start Time</FormLabel>
-                    <FormControl>
-                      <TimeInput
-                        value={field.value}
-                        onChange={(value) => handleTimeChange('start_time', value)}
-                        placeholder='00:00:00'
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+    <div className='space-y-3'>
+      <h4 className='text-sm font-medium text-muted-foreground'>Audio Time Range</h4>
+      <Form {...form}>
+        <div className='grid grid-cols-2 gap-3'>
+          <FormField
+            control={form.control}
+            name='start_time'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className='text-xs'>Start Time</FormLabel>
+                <FormControl>
+                  <TimeInput
+                    value={field.value}
+                    onChange={(value) => handleTimeChange('start_time', value)}
+                    placeholder='00:00:00'
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-              <FormField
-                control={form.control}
-                name='end_time'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>End Time</FormLabel>
-                    <FormControl>
-                      <TimeInput
-                        value={field.value}
-                        onChange={(value) => handleTimeChange('end_time', value)}
-                        placeholder='00:00:00'
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-          </div>
-        </Form>
-      </CardContent>
-    </Card>
+          <FormField
+            control={form.control}
+            name='end_time'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className='text-xs'>End Time</FormLabel>
+                <FormControl>
+                  <TimeInput
+                    value={field.value}
+                    onChange={(value) => handleTimeChange('end_time', value)}
+                    placeholder='00:00:00'
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+      </Form>
+    </div>
   );
 }

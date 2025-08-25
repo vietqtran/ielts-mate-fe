@@ -5,15 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import useListeningAudio from '@/hooks/apis/listening/useListeningAudio';
 import { Volume2 } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface AudioPlayerProps {
   audioFileId: string;
   title: string;
   partNumber: number;
+  onAudioRefReady?: (ref: React.RefObject<HTMLAudioElement | null>) => void;
 }
 
-const AudioPlayer = ({ audioFileId, title, partNumber }: AudioPlayerProps) => {
+const AudioPlayer = ({ audioFileId, title, partNumber, onAudioRefReady }: AudioPlayerProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const { mutate, objectUrl, isLoading, error } = useListeningAudio(audioFileId);
 
@@ -23,6 +24,13 @@ const AudioPlayer = ({ audioFileId, title, partNumber }: AudioPlayerProps) => {
       mutate(audioFileId);
     }
   }, [audioFileId]);
+
+  // Pass audioRef to parent when audio is ready
+  useEffect(() => {
+    if (objectUrl && onAudioRefReady) {
+      onAudioRefReady(audioRef);
+    }
+  }, [objectUrl, onAudioRefReady]);
 
   return (
     <Card>

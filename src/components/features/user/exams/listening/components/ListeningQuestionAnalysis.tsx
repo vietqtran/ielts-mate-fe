@@ -4,9 +4,10 @@ import { QuestionResultRenderer } from '@/components/features/user/exams/reading
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { AudioProvider } from '@/contexts/AudioContext';
 import { ListeningExamAttemptDetailsResponse } from '@/types/listening/listening-exam.types';
 import { ChevronDown, ChevronUp, Eye, EyeOff, Headphones } from 'lucide-react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import AudioPlayer from './AudioPlayer';
 
 interface ListeningQuestionAnalysisProps {
@@ -22,6 +23,9 @@ export const ListeningQuestionAnalysis = ({
 }: ListeningQuestionAnalysisProps) => {
   const [showTranscripts, setShowTranscripts] = useState(false);
   const [openParts, setOpenParts] = useState<Set<number>>(new Set([1, 2, 3, 4]));
+  const [activeAudioRef, setActiveAudioRef] = useState<
+    React.RefObject<HTMLAudioElement | null> | undefined
+  >(undefined);
 
   const parts = [
     examDetails.listening_exam.listening_task_id_part1,
@@ -148,6 +152,7 @@ export const ListeningQuestionAnalysis = ({
                       audioFileId={part.audio_file_id}
                       title={part.title}
                       partNumber={partNumber}
+                      onAudioRefReady={(ref) => setActiveAudioRef(ref)}
                     />
                   </div>
 
@@ -185,19 +190,22 @@ export const ListeningQuestionAnalysis = ({
                       )}
 
                       {/* Questions */}
-                      {group.questions &&
-                        group.questions.map((question) => {
-                          // Get user answers from the main exam details answers map
-                          const userAnswers = examDetails.answers[question.question_id] || [];
-                          return (
-                            <QuestionResultRenderer
-                              userAnswers={userAnswers}
-                              dragAndDropItems={dragAndDropsList}
-                              question={question}
-                              key={question.question_id}
-                            />
-                          );
-                        })}
+                      <AudioProvider audioRef={activeAudioRef}>
+                        {group.questions &&
+                          group.questions.map((question) => {
+                            // Get user answers from the main exam details answers map
+                            const userAnswers = examDetails.answers[question.question_id] || [];
+                            return (
+                              <QuestionResultRenderer
+                                userAnswers={userAnswers}
+                                dragAndDropItems={dragAndDropsList}
+                                question={question}
+                                key={question.question_id}
+                                isListening={true}
+                              />
+                            );
+                          })}
+                      </AudioProvider>
                     </div>
                   ))}
                 </CardContent>

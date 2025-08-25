@@ -1,8 +1,13 @@
 import { QuestionResultProps } from '@/components/features/user/exams/reading/components/question_result/DragAndDrop';
 import { Badge } from '@/components/ui/badge';
+import { ListeningExplanationDisplay } from '@/components/ui/listening-explanation-display';
 import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 
-const MatchingResult = ({ question, userAnswers }: QuestionResultProps) => {
+const MatchingResult = ({
+  question,
+  userAnswers,
+  isListening,
+}: QuestionResultProps & { isListening?: boolean }) => {
   const hasAnswer = userAnswers.length > 0;
   const userAnswer = hasAnswer ? userAnswers[0] : 'No answer provided';
   const isAnswerCorrect = userAnswer === question.correct_answer_for_matching;
@@ -57,10 +62,17 @@ const MatchingResult = ({ question, userAnswers }: QuestionResultProps) => {
       {question.explanation && (
         <div>
           <p className='text-sm font-medium text-tekhelet-400 mb-1'>Explanation</p>
-          <SafeHtmlRenderer
-            htmlContent={question.explanation}
-            className='text-tekhelet-500 text-sm prose prose-sm max-w-none'
-          />
+          {isListening ? (
+            <ListeningExplanationDisplay
+              explanation={question.explanation}
+              className='text-tekhelet-500 text-sm'
+            />
+          ) : (
+            <SafeHtmlRenderer
+              htmlContent={question.explanation}
+              className='text-tekhelet-500 text-sm prose prose-sm max-w-none'
+            />
+          )}
         </div>
       )}
     </div>

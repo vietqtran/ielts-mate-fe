@@ -1,9 +1,9 @@
 'use client';
 
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { useAudio } from '@/contexts/AudioContext';
 import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
-import { Clock, Play, Square } from 'lucide-react';
+import { Play } from 'lucide-react';
 
 interface ListeningExplanationDisplayProps {
   explanation: string;
@@ -14,6 +14,17 @@ export function ListeningExplanationDisplay({
   explanation,
   className = '',
 }: ListeningExplanationDisplayProps) {
+  // Try to use audio context, but don't require it (for create/edit modes)
+  let audioRef = null;
+  let playAtTime = (_startTime: string, _endTime?: string) => {};
+
+  try {
+    const audioContext = useAudio();
+    audioRef = audioContext.audioRef;
+    playAtTime = audioContext.playAtTime;
+  } catch (e) {
+    // AudioContext not available (in create/edit mode)
+  }
   // Check if explanation is a JSON string with time data
   const isTimeRangeExplanation = (): boolean => {
     if (!explanation) return false;
@@ -65,47 +76,38 @@ export function ListeningExplanationDisplay({
       const endSeconds = timeToSeconds(timeRange.end_time);
       const duration = endSeconds - startSeconds;
 
+      const handlePlayAudio = () => {
+        playAtTime(timeRange.start_time, timeRange.end_time);
+      };
+
       return (
-        <Card className={`border-tekhelet-200 ${className}`}>
-          <CardContent className='p-4'>
-            <div className='flex items-center gap-2 mb-3'>
-              <Clock className='w-4 h-4 text-tekhelet-600' />
-              <span className='font-medium text-tekhelet-600'>Audio Time Range</span>
+        <div className={`text-sm ${className}`}>
+          <div className='flex items-center justify-between mb-2'>
+            <span className='font-medium'>Audio Time Range:</span>
+            {audioRef?.current && (
+              <Button
+                variant='outline'
+                size='sm'
+                onClick={handlePlayAudio}
+                className='gap-1 h-6 px-2 text-xs'
+              >
+                <Play className='h-3 w-3' />
+                Play
+              </Button>
+            )}
+          </div>
+          <div className='space-y-1'>
+            <div>
+              Start: <span className='font-mono'>{timeRange.start_time}</span>
             </div>
-
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-3'>
-              <div className='flex items-center gap-2'>
-                <Play className='w-4 h-4 text-green-600' />
-                <div>
-                  <p className='text-xs text-tekhelet-500'>Start Time</p>
-                  <p className='font-mono text-sm font-medium'>{timeRange.start_time}</p>
-                </div>
-              </div>
-
-              <div className='flex items-center gap-2'>
-                <Square className='w-4 h-4 text-red-600' />
-                <div>
-                  <p className='text-xs text-tekhelet-500'>End Time</p>
-                  <p className='font-mono text-sm font-medium'>{timeRange.end_time}</p>
-                </div>
-              </div>
-
-              <div className='flex items-center gap-2'>
-                <Clock className='w-4 h-4 text-tekhelet-600' />
-                <div>
-                  <p className='text-xs text-tekhelet-500'>Duration</p>
-                  <p className='font-mono text-sm font-medium'>{formatTime(duration)}</p>
-                </div>
-              </div>
+            <div>
+              End: <span className='font-mono'>{timeRange.end_time}</span>
             </div>
-
-            <div className='mt-3 pt-3 border-t border-tekhelet-100'>
-              <Badge variant='outline' className='text-xs'>
-                Listen to this time range for the answer
-              </Badge>
+            <div>
+              Duration: <span className='font-mono'>{formatTime(duration)}</span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       );
     }
   }
@@ -113,7 +115,7 @@ export function ListeningExplanationDisplay({
   // Fallback to original HTML rendering for non-JSON explanations
   return (
     <div className={className}>
-      <SafeHtmlRenderer htmlContent={explanation} className='text-sm text-tekhelet-400' />
+      <SafeHtmlRenderer htmlContent={explanation} className='text-sm' />
     </div>
   );
 }
