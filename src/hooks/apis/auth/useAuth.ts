@@ -80,13 +80,16 @@ export function useAuth() {
       if (shouldClearUser) {
         dispatch(setUser(null));
         // Only redirect if we're not already on an auth page
-        if (
-          !window.location.pathname.startsWith('/sign-in') &&
-          !window.location.pathname.startsWith('/sign-up') &&
-          !window.location.pathname.startsWith('/forgot') &&
-          !window.location.pathname.startsWith('/reset') &&
-          !window.location.pathname.startsWith('/otp')
-        ) {
+        const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+        const isAuthOrPublicPath =
+          currentPath === '/' ||
+          currentPath.startsWith('/sign-in') ||
+          currentPath.startsWith('/sign-up') ||
+          currentPath.startsWith('/forgot') ||
+          currentPath.startsWith('/reset') ||
+          currentPath.startsWith('/otp');
+
+        if (!isAuthOrPublicPath) {
           replace('/sign-in');
         }
       }
