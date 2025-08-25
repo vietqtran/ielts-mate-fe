@@ -88,6 +88,11 @@ const navigationGroups = [
     href: '/personalized',
     icon: User,
   },
+  {
+    name: 'AI Suggestions',
+    href: '/suggestion',
+    icon: Target,
+  },
 ];
 
 export function UserNavigation() {
