@@ -1,6 +1,11 @@
 'use client';
 
 import { PaginationCommon } from '@/components/features/user/common';
+import {
+  getStatusColor,
+  getStatusIcon,
+  getStatusLabel,
+} from '@/components/features/user/history/practice/common/cardUtils';
 import { ListeningAttemptFilterToolbar } from '@/components/features/user/history/practice/listening/ListeningAttemptFilterToolbar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -15,10 +20,9 @@ import {
   setPagination,
 } from '@/store/slices/listening-attempt-filter-slice';
 import { AttemptStatusEnumIndex, ListeningAttemptHistoryResponse } from '@/types/attempt.types';
-import { IeltsTypeEnumIndex, PartNumberEnumIndex } from '@/types/reading/reading.types';
 import { RootState } from '@/types/store.types';
 import { formatDate, formatDuration } from '@/utils/time';
-import { BookOpen, Calendar, CheckCircle, Clock, Eye, PlayCircle, XCircle } from 'lucide-react';
+import { BookOpen, Calendar, CheckCircle, Clock, Eye, PlayCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -92,72 +96,6 @@ const ListeningHistory = () => {
     filters.sortBy,
     filters.sortDirection,
   ]);
-
-  const getIeltsTypeLabel = (type: number): string => {
-    switch (type) {
-      case IeltsTypeEnumIndex.ACADEMIC:
-        return 'Academic';
-      case IeltsTypeEnumIndex.GENERAL_TRAINING:
-        return 'General Training';
-      default:
-        return 'Unknown';
-    }
-  };
-
-  const getPartNumberLabel = (partNumber: number): string => {
-    switch (partNumber) {
-      case PartNumberEnumIndex.PART_1:
-        return 'Part 1';
-      case PartNumberEnumIndex.PART_2:
-        return 'Part 2';
-      case PartNumberEnumIndex.PART_3:
-        return 'Part 3';
-      default:
-        return `Part ${partNumber + 1}`;
-    }
-  };
-
-  const getStatusLabel = (status: number | null): string => {
-    if (status === null) return 'Unknown';
-    switch (status) {
-      case AttemptStatusEnumIndex.IN_PROGRESS:
-        return 'In Progress';
-      case AttemptStatusEnumIndex.COMPLETED:
-        return 'Completed';
-      case AttemptStatusEnumIndex.ABANDONED:
-        return 'Abandoned';
-      default:
-        return 'Unknown';
-    }
-  };
-
-  const getStatusColor = (status: number | null): string => {
-    if (status === null) return 'bg-gray-100 text-gray-800';
-    switch (status) {
-      case AttemptStatusEnumIndex.IN_PROGRESS:
-        return 'bg-amber-100 text-amber-800';
-      case AttemptStatusEnumIndex.COMPLETED:
-        return 'bg-emerald-100 text-emerald-800';
-      case AttemptStatusEnumIndex.ABANDONED:
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusIcon = (status: number | null) => {
-    if (status === null) return <XCircle className='h-4 w-4' />;
-    switch (status) {
-      case AttemptStatusEnumIndex.IN_PROGRESS:
-        return <PlayCircle className='h-4 w-4' />;
-      case AttemptStatusEnumIndex.COMPLETED:
-        return <CheckCircle className='h-4 w-4' />;
-      case AttemptStatusEnumIndex.ABANDONED:
-        return <XCircle className='h-4 w-4' />;
-      default:
-        return <XCircle className='h-4 w-4' />;
-    }
-  };
 
   const handleFiltersChange = (newFilters: ListeningAttemptFilters) => {
     dispatch(setFilters(newFilters));

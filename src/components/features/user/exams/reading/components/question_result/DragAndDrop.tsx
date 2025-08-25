@@ -21,7 +21,7 @@ const DragAndDropResult = ({
   isListening,
 }: DragAndDropProps & { isListening?: boolean }) => {
   const hasAnswer = userAnswers.length > 0;
-  const userAnswer = hasAnswer ? userAnswers[0] : 'No answer provided';
+  const userAnswer = hasAnswer ? userAnswers[0] : null;
   const userAnswerContent = dragAndDropItems.find(
     (item) => item.drag_item_id === userAnswer
   )?.content;
@@ -68,7 +68,9 @@ const DragAndDropResult = ({
       {/* User Answer */}
       <div>
         <p className='text-sm font-medium text-tekhelet-400 mb-1'>Your Answer</p>
-        <div className='text-tekhelet-500'>{userAnswerContent}</div>
+        <div className='text-tekhelet-500 font-semibold'>
+          {userAnswerContent || 'No answer provided'}
+        </div>
       </div>
 
       {/* Correct Answer */}

@@ -29,10 +29,8 @@ import {
   Home,
   LayoutDashboard,
   LogOut,
-  Settings,
   SquareCheck,
   Target,
-  Trophy,
   User,
   User2,
 } from 'lucide-react';
@@ -240,21 +238,9 @@ export function UserNavigation() {
                   </DropdownMenuItem>
                 )}
                 <DropdownMenuItem asChild>
-                  <Link href='/settings' className='flex items-center w-full cursor-pointer'>
-                    <Settings className='mr-2 h-4 w-4' />
-                    <span>Settings</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
                   <Link href='/reminder' className='flex items-center w-full cursor-pointer'>
                     <BellRing className='mr-2 h-4 w-4' />
                     <span>Reminder</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link href='/streak' className='flex items-center w-full cursor-pointer'>
-                    <Trophy className='mr-2 h-4 w-4' />
-                    <span>Streak</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>

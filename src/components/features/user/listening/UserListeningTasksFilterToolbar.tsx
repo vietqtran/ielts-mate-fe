@@ -28,12 +28,11 @@ interface UserListeningTasksFilterToolbarProps {
 }
 
 const sortOptions = [
-  { value: 'createdAt', label: 'Created Date' },
+  { value: 'createdAt', label: 'Created At' },
+  { value: 'updatedAt', label: 'Updated At' },
   { value: 'title', label: 'Title' },
-  { value: 'ieltsType', label: 'IELTS Type' },
   { value: 'partNumber', label: 'Part Number' },
 ];
-
 export const UserListeningTasksFilterToolbar = memo(function UserListeningTasksFilterToolbar({
   filters,
   onFiltersChange,
@@ -229,7 +228,11 @@ export const UserListeningTasksFilterToolbar = memo(function UserListeningTasksF
                 </Select>
               </div>
               {filters.sortBy && (
-                <Button variant='ghost' size='icon' onClick={() => updateFilter('sortBy', '')}>
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  onClick={() => updateFilter('sortBy', undefined)}
+                >
                   <X className='h-4 w-4' />
                 </Button>
               )}
@@ -252,7 +255,7 @@ export const UserListeningTasksFilterToolbar = memo(function UserListeningTasksF
                 <Button
                   variant='ghost'
                   size='icon'
-                  onClick={() => updateFilter('sortDirection', '')}
+                  onClick={() => updateFilter('sortDirection', undefined)}
                 >
                   <X className='h-4 w-4' />
                 </Button>
