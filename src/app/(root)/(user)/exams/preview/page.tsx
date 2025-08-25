@@ -1,12 +1,12 @@
 import NotFound from '@/app/not-found';
 import ExamPreviewPage from '@/components/features/preview/ExamPreviewPage';
 
-const ExamPreview = ({
+const ExamPreview = async ({
   searchParams,
 }: {
-  searchParams: { examUrl: string; examType: string };
+  searchParams: Promise<{ examUrl: string; examType: string }>;
 }) => {
-  const { examUrl, examType } = searchParams;
+  const { examUrl, examType } = await searchParams;
 
   const lowercaseExamUrl = examUrl?.toLowerCase();
   const lowercaseExamType = examType?.toLowerCase();
