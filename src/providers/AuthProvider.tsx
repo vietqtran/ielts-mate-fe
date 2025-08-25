@@ -18,6 +18,13 @@ const AuthProvider = ({ children, isAuthPage = false }: Props) => {
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const fetchedRef = useRef(false);
+
+  // Reset fetchedRef when user becomes null (logout)
+  useEffect(() => {
+    if (!user) {
+      fetchedRef.current = false;
+    }
+  }, [user]);
   const isCreator = user?.roles?.some((role) => role.toLowerCase() === 'creator');
 
   // Decide where an authenticated user should land based on their roles
@@ -40,7 +47,14 @@ const AuthProvider = ({ children, isAuthPage = false }: Props) => {
           return;
         }
 
-        // Always ensure we have the freshest user when mounting an auth boundary.
+        // Skip refetchUser if we already have a user (from sign-in or previous fetch)
+        // This prevents double API calls after successful authentication
+        if (user && fetchedRef.current) {
+          dispatch(setFullPageLoading(false));
+          return;
+        }
+
+        // Only fetch user when we don't have one or haven't fetched yet
         if (!user || !fetchedRef.current) {
           fetchedRef.current = true;
           await refetchUser();
