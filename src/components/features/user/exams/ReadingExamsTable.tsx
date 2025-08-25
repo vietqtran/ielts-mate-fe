@@ -102,6 +102,7 @@ export default function ReadingExamsTable({ className }: ReadingExamsTableProps)
   const sortOptions = [
     { value: 'createdAt', label: 'Created At' },
     { value: 'updatedAt', label: 'Updated At' },
+    { value: 'examName', label: 'Exam Name' },
   ];
 
   return (

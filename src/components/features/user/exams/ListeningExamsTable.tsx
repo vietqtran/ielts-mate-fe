@@ -102,12 +102,19 @@ export default function ListeningExamsTable({ className }: ListeningExamsTablePr
     dispatch(setPagination({ ...pagination, pageSize: Number(size), currentPage: 1 }));
   };
 
+  const sortOptions = [
+    { value: 'createdAt', label: 'Created At' },
+    { value: 'updatedAt', label: 'Updated At' },
+    { value: 'examName', label: 'Exam Name' },
+  ];
+
   return (
     <div className={className}>
       <ExamsListFilter
         filters={filters}
         onFiltersChange={handleFiltersChange}
         onClearFilters={handleClearFilters}
+        sortOptions={sortOptions}
       />
       <Table className='mt-4'>
         <TableHeader>

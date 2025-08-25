@@ -4,7 +4,7 @@ import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 
 const AttemptMatchingResult = ({ question, userAnswers }: AttemptQuestionResultProps) => {
   const hasAnswer = userAnswers.length > 0;
-  const userAnswer = hasAnswer ? userAnswers[0].matched_text_answer : 'No answer provided';
+  const userAnswer = hasAnswer ? userAnswers[0].matched_text_answer : null;
   const isAnswerCorrect = userAnswer === question.correct_answer_for_matching;
 
   return (
@@ -44,7 +44,7 @@ const AttemptMatchingResult = ({ question, userAnswers }: AttemptQuestionResultP
       {/* User Answer */}
       <div>
         <p className='text-sm font-medium text-tekhelet-400 mb-1'>Your Answer</p>
-        <div className='text-tekhelet-500 font-semibold'>{userAnswer}</div>
+        <div className='text-tekhelet-500 font-semibold'>{userAnswer || 'No answer provided'}</div>
       </div>
 
       {/* Correct Answer */}

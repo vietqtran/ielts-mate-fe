@@ -6,9 +6,7 @@ const AttemptFillInTheBlanksResult = ({ question, userAnswers }: AttemptQuestion
   console.log('question', question);
   console.log('userAnswers', userAnswers);
   const hasAnswer = userAnswers.length > 0;
-  const userAnswer = hasAnswer
-    ? userAnswers[0]?.filled_text_answer.toString()
-    : 'No answer provided';
+  const userAnswer = hasAnswer ? userAnswers[0]?.filled_text_answer.toString() : 'null';
   const isAnswerCorrect = userAnswer === question.correct_answer;
 
   return (
@@ -48,7 +46,7 @@ const AttemptFillInTheBlanksResult = ({ question, userAnswers }: AttemptQuestion
       {/* User Answer */}
       <div>
         <p className='text-sm font-medium text-tekhelet-400 mb-1'>Your Answer</p>
-        <div className='text-tekhelet-500 font-semibold'>{userAnswer}</div>
+        <div className='text-tekhelet-500 font-semibold'>{userAnswer || 'No answer provided'}</div>
       </div>
 
       {/* Correct Answer */}

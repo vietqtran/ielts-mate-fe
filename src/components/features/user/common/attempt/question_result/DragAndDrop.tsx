@@ -23,12 +23,9 @@ const AttemptDragAndDropResult = ({
   console.log('dragAndDropItems', dragAndDropItems);
 
   const hasAnswer = userAnswers.length > 0;
-  const userAnswer = hasAnswer
-    ? userAnswers.map((ans) => ans.drag_item_id).flat()[0]
-    : 'No answer provided';
-
+  const userAnswer = hasAnswer ? (userAnswers[0]?.drag_item_id ?? null) : null;
   const userAnswerContent = dragAndDropItems.map((item) =>
-    userAnswer.includes(item.drag_item_id) ? item.content : null
+    userAnswer === item.drag_item_id ? item.content : null
   );
 
   const isAnswerCorrect = userAnswer === question.drag_item_id;
@@ -73,7 +70,9 @@ const AttemptDragAndDropResult = ({
       {/* User Answer */}
       <div>
         <p className='text-sm font-medium text-tekhelet-400 mb-1'>Your Answer</p>
-        <div className='text-tekhelet-500 font-semibold'>{userAnswerContent}</div>
+        <div className='text-tekhelet-500 font-semibold'>
+          {userAnswerContent || 'No answer provided'}
+        </div>
       </div>
 
       {/* Correct Answer */}

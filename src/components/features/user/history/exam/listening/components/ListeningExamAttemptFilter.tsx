@@ -31,9 +31,8 @@ interface ListeningAttemptFilterToolbarProps {
 
 const sortOptions = [
   { value: 'updatedAt', label: 'Finished At' },
-  { value: 'totalPoints', label: 'Score' },
-  { value: 'duration', label: 'Duration' },
   { value: 'createdAt', label: 'Created At' },
+  { value: 'duration', label: 'Duration' },
 ];
 
 export const ListeningExamAttemptHistoryFilter = memo(function ListeningAttemptFilterToolbar({

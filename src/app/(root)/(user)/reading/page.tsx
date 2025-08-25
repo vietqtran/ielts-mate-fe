@@ -42,7 +42,6 @@ const Reading = () => {
   const pagination = useSelector((state: RootState) => state.userPassage.pagination);
   // Pagination states
   const isGridLoading = reduxIsLoading || isLoading.getActivePassages;
-
   // Load passages when dependencies change
   useEffect(() => {
     const loadPassages = async () => {
