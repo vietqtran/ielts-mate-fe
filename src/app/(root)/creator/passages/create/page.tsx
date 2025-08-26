@@ -503,6 +503,7 @@ export default function CreatePassagePage() {
             originalStatus={originalStatus || undefined}
             hasQuestionGroups={questionGroups.length > 0}
             hasChanges={form.formState.isDirty}
+            questionGroups={questionGroups}
           />
         </TabsContent>
 

@@ -33,6 +33,7 @@ interface PassageBasicInfoFormProps {
   onEdit?: () => void;
   originalStatus?: string;
   hasQuestionGroups?: boolean;
+  questionGroups?: any[];
 }
 
 const getielts_typeLabel = (type: IeltsType): string => {
@@ -73,6 +74,7 @@ export function PassageBasicInfoForm({
   onEdit,
   originalStatus,
   hasQuestionGroups = false,
+  questionGroups = [],
 }: Readonly<PassageBasicInfoFormProps>) {
   const handleSubmit = (data: any) => {
     onSubmit(data);
@@ -167,10 +169,25 @@ export function PassageBasicInfoForm({
                 name='passage_status'
                 render={({ field }: any) => {
                   const currentStatus = field.value;
+                  const formData = form.getValues();
+
                   // Check if the original status from database was TEST
                   const isOriginalTestStatus = originalStatus === PassageStatus.TEST;
                   // Only enable status if we have question groups or this is edit mode with existing status
                   const shouldDisable = isOriginalTestStatus || (!isEdit && !hasQuestionGroups);
+
+                  // Calculate total points
+                  const totalPoints = questionGroups.reduce((total, group) => {
+                    return (
+                      total +
+                      group.questions.reduce((groupTotal: number, question: any) => {
+                        return groupTotal + (question.point || 1);
+                      }, 0)
+                    );
+                  }, 0);
+
+                  const requiredPoints = formData.part_number === 1 ? 14 : 13;
+                  const hasEnoughPoints = totalPoints >= requiredPoints;
 
                   return (
                     <FormItem>
@@ -189,8 +206,18 @@ export function PassageBasicInfoForm({
                         </FormControl>
                         <SelectContent>
                           <SelectItem value={PassageStatus.DRAFT}>Draft</SelectItem>
-                          <SelectItem value={PassageStatus.PUBLISHED}>Published</SelectItem>
-                          <SelectItem value={PassageStatus.TEST}>Test</SelectItem>
+                          <SelectItem value={PassageStatus.PUBLISHED} disabled={!hasEnoughPoints}>
+                            Published{' '}
+                            {!hasEnoughPoints
+                              ? `(Need ${requiredPoints} points, have ${totalPoints})`
+                              : ''}
+                          </SelectItem>
+                          <SelectItem value={PassageStatus.TEST} disabled={!hasEnoughPoints}>
+                            Test{' '}
+                            {!hasEnoughPoints
+                              ? `(Need ${requiredPoints} points, have ${totalPoints})`
+                              : ''}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       {shouldDisable && (

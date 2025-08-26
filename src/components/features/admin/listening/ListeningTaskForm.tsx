@@ -467,6 +467,18 @@ export function ListeningTaskForm({
                   // Check if the original status from database was TEST
                   const isOriginalTestStatus = currentOriginalStatus === ListeningTaskStatus.TEST;
 
+                  // Calculate total points
+                  const totalPoints = questionGroups.reduce((total, group) => {
+                    return (
+                      total +
+                      group.questions.reduce((groupTotal: number, question: any) => {
+                        return groupTotal + (question.point || 1);
+                      }, 0)
+                    );
+                  }, 0);
+
+                  const hasEnoughPoints = totalPoints >= 10;
+
                   return (
                     <FormItem>
                       <FormLabel>Status</FormLabel>
@@ -490,10 +502,19 @@ export function ListeningTaskForm({
                           <SelectItem value={ListeningTaskStatus.DRAFT.toString()}>
                             Draft
                           </SelectItem>
-                          <SelectItem value={ListeningTaskStatus.PUBLISHED.toString()}>
-                            Published
+                          <SelectItem
+                            value={ListeningTaskStatus.PUBLISHED.toString()}
+                            disabled={!hasEnoughPoints}
+                          >
+                            Published{' '}
+                            {!hasEnoughPoints ? `(Need 10 points, have ${totalPoints})` : ''}
                           </SelectItem>
-                          <SelectItem value={ListeningTaskStatus.TEST.toString()}>Test</SelectItem>
+                          <SelectItem
+                            value={ListeningTaskStatus.TEST.toString()}
+                            disabled={!hasEnoughPoints}
+                          >
+                            Test {!hasEnoughPoints ? `(Need 10 points, have ${totalPoints})` : ''}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                       {(isOriginalTestStatus || mode === 'create') && (

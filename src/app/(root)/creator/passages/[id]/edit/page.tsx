@@ -660,6 +660,7 @@ export default function EditPassagePage() {
               }}
               originalStatus={originalFormData?.passage_status}
               hasQuestionGroups={questionGroups.length > 0}
+              questionGroups={questionGroups}
             />
           )}
           {!isDataLoaded && (
