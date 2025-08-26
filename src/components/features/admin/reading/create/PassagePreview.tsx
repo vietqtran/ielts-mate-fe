@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { IeltsType, PassageStatus, QuestionTypeEnumIndex } from '@/types/reading/reading.types';
-import { BookOpen, CheckCircle, Clock, Users } from 'lucide-react';
+import { BookOpen, CheckCircle, Clock, FileQuestion, Users } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -99,10 +99,25 @@ export function PassagePreview({
                 <Badge variant='outline'>{getStatusLabel(passageData.passage_status)}</Badge>
               </div>
             </div>
-            <Button onClick={() => onFinish(PassageStatus.PUBLISHED)} className='gap-2'>
-              <CheckCircle className='h-4 w-4' />
-              Publish Passage
-            </Button>
+            <div className='flex gap-2'>
+              <Button
+                onClick={() => onFinish(PassageStatus.TEST)}
+                variant='outline'
+                className='gap-2'
+                disabled={passageData.passage_status === PassageStatus.TEST}
+              >
+                <FileQuestion className='h-4 w-4' />
+                Test Mode
+              </Button>
+              <Button
+                onClick={() => onFinish(PassageStatus.PUBLISHED)}
+                className='gap-2'
+                disabled={passageData.passage_status === PassageStatus.TEST}
+              >
+                <CheckCircle className='h-4 w-4' />
+                Publish Passage
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -390,10 +405,27 @@ export function PassagePreview({
               <div className='text-sm text-muted-foreground'>
                 Ready to publish this passage for student use
               </div>
-              <Button onClick={() => onFinish(PassageStatus.PUBLISHED)} size='lg' className='gap-2'>
-                <CheckCircle className='h-5 w-5' />
-                Complete & Publish Passage
-              </Button>
+              <div className='flex gap-2'>
+                <Button
+                  onClick={() => onFinish(PassageStatus.TEST)}
+                  variant='outline'
+                  size='lg'
+                  className='gap-2'
+                  disabled={passageData.passage_status === PassageStatus.TEST}
+                >
+                  <FileQuestion className='h-5 w-5' />
+                  Test Mode
+                </Button>
+                <Button
+                  onClick={() => onFinish(PassageStatus.PUBLISHED)}
+                  size='lg'
+                  className='gap-2'
+                  disabled={passageData.passage_status === PassageStatus.TEST}
+                >
+                  <CheckCircle className='h-5 w-5' />
+                  Publish Passage
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>

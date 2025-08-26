@@ -463,6 +463,7 @@ export default function CreatePassagePage() {
             isLoading={isLoading.createPassage || isLoading.updatePassage}
             isCompleted={!!createdpassage_id}
             originalStatus={originalStatus || undefined}
+            hasQuestionGroups={questionGroups.length > 0}
           />
         </TabsContent>
 

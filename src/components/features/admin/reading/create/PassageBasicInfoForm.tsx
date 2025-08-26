@@ -73,6 +73,7 @@ export function PassageBasicInfoForm({
   hasChanges = true,
   onEdit,
   originalStatus,
+  hasQuestionGroups = false,
 }: Readonly<PassageBasicInfoFormProps>) {
   const formData = form.getValues();
 
@@ -180,6 +181,8 @@ export function PassageBasicInfoForm({
                   const currentStatus = field.value;
                   // Check if the original status from database was TEST
                   const isOriginalTestStatus = originalStatus === PassageStatus.TEST;
+                  // Only enable status if we have question groups or this is edit mode with existing status
+                  const shouldDisable = isOriginalTestStatus || (!isEdit && !hasQuestionGroups);
 
                   return (
                     <FormItem>
@@ -187,11 +190,11 @@ export function PassageBasicInfoForm({
                       <Select
                         onValueChange={field.onChange}
                         value={field.value ?? ''}
-                        disabled={isOriginalTestStatus}
+                        disabled={shouldDisable}
                       >
                         <FormControl>
                           <SelectTrigger
-                            className={isOriginalTestStatus ? 'opacity-50 cursor-not-allowed' : ''}
+                            className={shouldDisable ? 'opacity-50 cursor-not-allowed' : ''}
                           >
                             <SelectValue placeholder='Select status' />
                           </SelectTrigger>
@@ -202,9 +205,11 @@ export function PassageBasicInfoForm({
                           <SelectItem value={PassageStatus.TEST}>Test</SelectItem>
                         </SelectContent>
                       </Select>
-                      {isOriginalTestStatus && (
+                      {shouldDisable && (
                         <p className='text-xs text-muted-foreground'>
-                          Status cannot be changed when passage is in Test mode
+                          {isOriginalTestStatus
+                            ? 'Status cannot be changed when passage is in Test mode'
+                            : 'Create question groups first to enable status selection'}
                         </p>
                       )}
                       <FormMessage />

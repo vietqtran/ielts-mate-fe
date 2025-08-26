@@ -429,11 +429,15 @@ export function ListeningTaskForm({
                       <Select
                         onValueChange={(value) => field.onChange(parseInt(value))}
                         defaultValue={field.value.toString()}
-                        disabled={isOriginalTestStatus}
+                        disabled={isOriginalTestStatus || mode === 'create'}
                       >
                         <FormControl>
                           <SelectTrigger
-                            className={isOriginalTestStatus ? 'opacity-50 cursor-not-allowed' : ''}
+                            className={
+                              isOriginalTestStatus || mode === 'create'
+                                ? 'opacity-50 cursor-not-allowed'
+                                : ''
+                            }
                           >
                             <SelectValue placeholder='Select status' />
                           </SelectTrigger>
@@ -448,9 +452,11 @@ export function ListeningTaskForm({
                           <SelectItem value={ListeningTaskStatus.TEST.toString()}>Test</SelectItem>
                         </SelectContent>
                       </Select>
-                      {isOriginalTestStatus && (
+                      {(isOriginalTestStatus || mode === 'create') && (
                         <p className='text-xs text-muted-foreground'>
-                          Status cannot be changed when task is in Test mode
+                          {isOriginalTestStatus
+                            ? 'Status cannot be changed when task is in Test mode'
+                            : 'Status is set to Draft for new tasks'}
                         </p>
                       )}
                       <FormMessage />

@@ -72,6 +72,8 @@ export function MultipleChoiceManager({
             { order: data.question_order },
             isListening
           );
+          // Refetch passage data to get updated question order
+          refetchPassageData();
         }
 
         // 2. Sequentially process updates according to required logic:
@@ -239,6 +241,9 @@ export function MultipleChoiceManager({
           ...group,
           questions: updatedQuestions,
         });
+
+        // Refetch passage data to ensure all data is in sync after complex update
+        refetchPassageData();
       } else {
         // Create new question with choices
         const questionRequest = {

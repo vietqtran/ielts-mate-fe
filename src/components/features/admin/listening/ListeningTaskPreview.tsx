@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { AudioProvider } from '@/contexts/AudioContext';
-import { BookOpen, CheckCircle, Clock, Users } from 'lucide-react';
+import { BookOpen, CheckCircle, Clock, FileQuestion, Users } from 'lucide-react';
 import { useRef } from 'react';
 
 // You may need to adjust these imports/types to match your listening types
@@ -13,7 +13,7 @@ import { QuestionType } from '@/types/reading/reading.types';
 export interface ListeningTaskPreviewProps {
   taskData: any;
   questionGroups: any[];
-  onFinish: () => void;
+  onFinish: (status?: ListeningTaskStatus) => void;
 }
 
 const getIeltsTypeLabel = (type: number): string => {
@@ -62,7 +62,20 @@ export function ListeningTaskPreview({
 }: ListeningTaskPreviewProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const totalQuestions = questionGroups.reduce((total, group) => total + group.questions.length, 0);
+  const totalPoints = questionGroups.reduce(
+    (total, group) =>
+      total +
+      group.questions.reduce(
+        (groupTotal: number, question: any) => groupTotal + (question.point || 1),
+        0
+      ),
+    0
+  );
   const estimatedTime = Math.max(10, Math.ceil(totalQuestions * 1.5)); // 1.5 min/question, min 10 min
+
+  // Check if this part has enough points (should be 10 for listening)
+  const hasEnoughPoints = totalPoints >= 10;
+  const isTestStatus = taskData.status === ListeningTaskStatus.TEST;
 
   return (
     <AudioProvider audioRef={audioRef}>
@@ -79,14 +92,31 @@ export function ListeningTaskPreview({
                   <Badge variant='outline'>{getStatusLabel(taskData.status)}</Badge>
                 </div>
               </div>
-              <Button onClick={onFinish} className='gap-2'>
-                <CheckCircle className='h-4 w-4' />
-                Publish Listening Task
-              </Button>
+              <div className='flex gap-2'>
+                <Button
+                  onClick={() => onFinish(ListeningTaskStatus.TEST)}
+                  variant='outline'
+                  className='gap-2'
+                  disabled={isTestStatus || !hasEnoughPoints}
+                  title={!hasEnoughPoints ? 'This part must have at least 10 points' : ''}
+                >
+                  <FileQuestion className='h-4 w-4' />
+                  Test Mode
+                </Button>
+                <Button
+                  onClick={() => onFinish(ListeningTaskStatus.PUBLISHED)}
+                  className='gap-2'
+                  disabled={isTestStatus || !hasEnoughPoints}
+                  title={!hasEnoughPoints ? 'This part must have at least 10 points' : ''}
+                >
+                  <CheckCircle className='h-4 w-4' />
+                  Publish Task
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
-            <div className='grid grid-cols-4 gap-4 text-center'>
+            <div className='grid grid-cols-5 gap-4 text-center'>
               <div className='flex flex-col items-center gap-2'>
                 <BookOpen className='h-8 w-8 text-blue-600' />
                 <div>
@@ -102,6 +132,21 @@ export function ListeningTaskPreview({
                 </div>
               </div>
               <div className='flex flex-col items-center gap-2'>
+                <CheckCircle
+                  className={`h-8 w-8 ${hasEnoughPoints ? 'text-green-600' : 'text-red-600'}`}
+                />
+                <div>
+                  <p
+                    className={`text-2xl font-bold ${hasEnoughPoints ? 'text-green-600' : 'text-red-600'}`}
+                  >
+                    {totalPoints}
+                  </p>
+                  <p className='text-sm text-muted-foreground'>
+                    Total Points {hasEnoughPoints ? '✓' : '(Need 10)'}
+                  </p>
+                </div>
+              </div>
+              <div className='flex flex-col items-center gap-2'>
                 <Clock className='h-8 w-8 text-orange-600' />
                 <div>
                   <p className='text-2xl font-bold'>{estimatedTime}</p>
@@ -109,9 +154,15 @@ export function ListeningTaskPreview({
                 </div>
               </div>
               <div className='flex flex-col items-center gap-2'>
-                <CheckCircle className='h-8 w-8 text-purple-600' />
+                <CheckCircle
+                  className={`h-8 w-8 ${hasEnoughPoints ? 'text-purple-600' : 'text-gray-400'}`}
+                />
                 <div>
-                  <p className='text-2xl font-bold'>Ready</p>
+                  <p
+                    className={`text-2xl font-bold ${hasEnoughPoints ? 'text-purple-600' : 'text-gray-400'}`}
+                  >
+                    {hasEnoughPoints ? 'Ready' : 'Not Ready'}
+                  </p>
                   <p className='text-sm text-muted-foreground'>Status</p>
                 </div>
               </div>

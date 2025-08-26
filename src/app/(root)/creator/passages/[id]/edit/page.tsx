@@ -597,6 +597,7 @@ export default function EditPassagePage() {
                 setIsPassageCompleted(false);
               }}
               originalStatus={originalFormData?.passage_status}
+              hasQuestionGroups={questionGroups.length > 0}
             />
           )}
           {!isDataLoaded && (
