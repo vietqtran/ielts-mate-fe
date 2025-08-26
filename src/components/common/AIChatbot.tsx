@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import instance from '@/lib/axios';
 import { cn } from '@/lib/utils';
 import { Bot, MessageCircle, Send, Sparkle, User, X } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
@@ -42,6 +43,36 @@ interface ChatRequest {
 }
 
 export function AIChatbot() {
+  const pathname = usePathname();
+
+  // Disable chatbot on exam taking and practice screens
+  const shouldDisableChatbot = () => {
+    if (!pathname) return false;
+
+    const disabledRoutes = [
+      '/exams/take', // Taking exams
+      '/reading/.*?/practice', // Reading practice
+      '/listening/.*?/practice', // Listening practice
+    ];
+
+    // Check for exact matches and pattern matches
+    return (
+      disabledRoutes.some((route) => {
+        if (route.includes('.*?')) {
+          // Use regex for dynamic routes
+          const regex = new RegExp('^' + route + '$');
+          return regex.test(pathname);
+        }
+        return pathname.startsWith(route);
+      }) || pathname.includes('/practice')
+    );
+  };
+
+  // Don't render chatbot on disabled routes
+  if (shouldDisableChatbot()) {
+    return null;
+  }
+
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
