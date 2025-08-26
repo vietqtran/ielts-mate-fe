@@ -229,6 +229,17 @@ export default function CreatePassagePage() {
       if (response.data?.passage_id) {
         setCreatedpassage_id(response.data.passage_id);
         setOriginalStatus(data.passage_status); // Store the original status
+
+        // Reset form with current values to clear dirty state
+        form.reset({
+          title: data.title,
+          instruction: data.instruction,
+          content: data.content,
+          ielts_type: data.ielts_type,
+          part_number: data.part_number,
+          passage_status: data.passage_status,
+        });
+
         setCurrentStep('questions');
         setActiveTab('questions');
         // Clear draft after successful creation
@@ -464,6 +475,7 @@ export default function CreatePassagePage() {
             isCompleted={!!createdpassage_id}
             originalStatus={originalStatus || undefined}
             hasQuestionGroups={questionGroups.length > 0}
+            hasChanges={form.formState.isDirty}
           />
         </TabsContent>
 

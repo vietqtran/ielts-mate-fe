@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
@@ -9,6 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -16,14 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { IeltsType, PassageStatus } from '@/types/reading/reading.types';
-import { ArrowRight } from 'lucide-react';
-
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
+import { IeltsType, PassageStatus } from '@/types/reading/reading.types';
+import { ArrowRight } from 'lucide-react';
 
 interface PassageBasicInfoFormProps {
   isEdit: boolean;
@@ -34,6 +32,7 @@ interface PassageBasicInfoFormProps {
   hasChanges?: boolean;
   onEdit?: () => void;
   originalStatus?: string;
+  hasQuestionGroups?: boolean;
 }
 
 const getielts_typeLabel = (type: IeltsType): string => {
@@ -75,13 +74,7 @@ export function PassageBasicInfoForm({
   originalStatus,
   hasQuestionGroups = false,
 }: Readonly<PassageBasicInfoFormProps>) {
-  const formData = form.getValues();
-
-  console.log('PassageBasicInfoForm render:', { isEdit, isCompleted, hasChanges });
-
   const handleSubmit = (data: any) => {
-    console.log('PassageBasicInfoForm handleSubmit called with isEdit:', isEdit);
-    console.log('Submit data:', data);
     onSubmit(data);
   };
 
@@ -95,11 +88,6 @@ export function PassageBasicInfoForm({
               Enter the basic information and content for your IELTS reading passage
             </p>
           </div>
-          {isEdit && hasChanges && (
-            <Badge variant='outline' className='bg-yellow-50 text-yellow-700 border-yellow-200'>
-              Unsaved Changes
-            </Badge>
-          )}
         </div>
       </CardHeader>
       <CardContent>

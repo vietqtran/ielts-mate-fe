@@ -58,6 +58,7 @@ export default function EditPassagePage() {
   const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [originalFormData, setOriginalFormData] = useState<PassageFormData | null>(null);
   const [isPassageCompleted, setIsPassageCompleted] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const form = useForm<PassageFormData>({
     resolver: zodResolver(passageSchema),
@@ -154,6 +155,24 @@ export default function EditPassagePage() {
     }
   }, [passage_id]);
 
+  // Watch for form changes to update unsaved changes state
+  useEffect(() => {
+    if (!originalFormData) return;
+
+    const subscription = form.watch((data) => {
+      const hasChanges =
+        data.title !== originalFormData.title ||
+        data.instruction !== originalFormData.instruction ||
+        data.content !== originalFormData.content ||
+        data.ielts_type !== originalFormData.ielts_type ||
+        data.part_number !== originalFormData.part_number ||
+        data.passage_status !== originalFormData.passage_status;
+      setHasUnsavedChanges(hasChanges);
+    });
+
+    return () => subscription.unsubscribe();
+  }, [form, originalFormData]);
+
   const handleBasicInfoSubmit = async (data: PassageFormData) => {
     try {
       console.log('Edit page handleBasicInfoSubmit called with passage_id:', passage_id);
@@ -234,8 +253,14 @@ export default function EditPassagePage() {
       await updatePassage(passage_id, request);
       console.log('updatePassage completed successfully');
 
-      // Update the original form data after successful update
+      // Reset form with updated data to make it the new default
+      form.reset(data);
+
+      // Update the original form data after successful update (this will clear hasUnsavedChanges)
       setOriginalFormData(data);
+
+      // Clear unsaved changes state
+      setHasUnsavedChanges(false);
 
       // Set passage as completed after successful save
       setIsPassageCompleted(true);
@@ -592,7 +617,7 @@ export default function EditPassagePage() {
               onSubmit={handleBasicInfoSubmit}
               isLoading={isLoading.updatePassage}
               isCompleted={isPassageCompleted}
-              hasChanges={checkFormChanges()}
+              hasChanges={hasUnsavedChanges}
               onEdit={() => {
                 setIsPassageCompleted(false);
               }}

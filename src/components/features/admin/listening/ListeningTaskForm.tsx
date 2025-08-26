@@ -1,5 +1,6 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -272,6 +273,18 @@ export function ListeningTaskForm({
         await updateListeningTask(taskId, request);
         setCreatedTaskId(taskId);
         setCurrentOriginalStatus(values.status); // Update original status after successful update
+
+        // Reset form with updated values to clear dirty state
+        form.reset({
+          title: values.title,
+          ielts_type: values.ielts_type,
+          part_number: values.part_number,
+          instruction: values.instruction,
+          status: values.status,
+          is_automatic_transcription: values.is_automatic_transcription,
+          transcript: values.transcript,
+        });
+
         toast({
           title: 'Success',
           description: 'Listening task updated successfully',
@@ -336,9 +349,16 @@ export function ListeningTaskForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>
-          {mode === 'create' ? 'Create New Listening Task' : 'Edit Listening Task'}
-        </CardTitle>
+        <div className='flex items-center justify-between'>
+          <CardTitle>
+            {mode === 'create' ? 'Create New Listening Task' : 'Edit Listening Task'}
+          </CardTitle>
+          {mode === 'edit' && form.formState.isDirty && (
+            <Badge variant='outline' className='bg-yellow-50 text-yellow-700 border-yellow-200'>
+              Unsaved Changes
+            </Badge>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>
