@@ -9,10 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useListeningQuestion, useListeningTask } from '@/hooks';
-
-import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
-import { Edit3, Plus, Trash2 } from 'lucide-react';
+import { Edit3, Eye, Plus, Settings, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 export interface DragItem {
@@ -267,6 +265,7 @@ export function ListeningQuestionGroupsManager({
               onSubmit={handleCreateGroup}
               onCancel={() => setIsCreatingGroup(false)}
               isLoading={isLoading.addGroupQuestion}
+              existingGroupsCount={questionGroups.length}
             />
           )}
           {questionGroups.length === 0 && !isCreatingGroup && (
@@ -276,126 +275,62 @@ export function ListeningQuestionGroupsManager({
           )}
           {questionGroups.map((group, index) => (
             <Card key={index} className='mt-4'>
-              <CardHeader className='flex flex-row items-center justify-between'>
-                <div>
-                  <CardTitle>{group.section_label}</CardTitle>
-                  <Badge variant='secondary' className='ml-2'>
-                    {getQuestionTypeInfo(Number(group.question_type))?.label}
-                  </Badge>
-                </div>
-                <div className='flex gap-2'>
-                  <Button variant='outline' size='icon' onClick={() => handleEditGroup(index)}>
-                    <Edit3 className='h-4 w-4' />
-                  </Button>
-                  <Button variant='outline' size='icon' onClick={() => handleDeleteGroup(index)}>
-                    <Trash2 className='h-4 w-4' />
-                  </Button>
+              <CardHeader>
+                <div className='flex items-center justify-between'>
+                  <div className='flex items-center gap-2'>
+                    <CardTitle>{group.section_label}</CardTitle>
+                    <Badge variant='secondary'>
+                      {getQuestionTypeInfo(Number(group.question_type))?.label}
+                    </Badge>
+                  </div>
+                  <div className='flex gap-2'>
+                    <Button
+                      type='button'
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => setActiveGroupIndex(activeGroupIndex === index ? null : index)}
+                    >
+                      {activeGroupIndex === index ? (
+                        <Eye className='h-4 w-4' />
+                      ) : (
+                        <Edit3 className='h-4 w-4' />
+                      )}
+                      {activeGroupIndex === index ? 'Hide' : 'Manage'}
+                    </Button>
+                    <Button variant='ghost' size='sm' onClick={() => handleEditGroup(index)}>
+                      <Settings className='h-4 w-4' />
+                    </Button>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => handleDeleteGroup(index)}
+                      className='text-red-600 hover:text-red-700'
+                    >
+                      <Trash2 className='h-4 w-4' />
+                    </Button>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent>
-                {activeGroupIndex === index ? (
-                  renderQuestionManager(group, index)
-                ) : (
-                  <div>
-                    <div className='text-muted-foreground mb-2'>
-                      {group.questions.length} question(s) in this group
-                    </div>
-                    {group.questions && group.questions.length > 0 && (
-                      <div className='space-y-4'>
-                        {group.questions.map((q: any) => {
-                          switch (Number(q.question_type)) {
-                            case QuestionTypeEnumIndex.MULTIPLE_CHOICE: // Multiple Choice
-                              return (
-                                <div key={q.question_id} className='p-4 border rounded'>
-                                  <div
-                                    dangerouslySetInnerHTML={{ __html: q.instruction_for_choice }}
-                                  />
-                                  <ul className='list-disc ml-6'>
-                                    {Array.isArray(q.choices) &&
-                                      q.choices.map((c: any) => (
-                                        <li key={c.choice_id}>
-                                          <span className='font-semibold'>{c.label}:</span>{' '}
-                                          {c.content}
-                                          {c.is_correct && (
-                                            <span className='ml-2 text-green-600 font-bold'>
-                                              (Correct)
-                                            </span>
-                                          )}
-                                        </li>
-                                      ))}
-                                  </ul>
-                                  <div className='mt-2 text-sm text-gray-500'>
-                                    <span className='font-medium'>Explanation:</span>
-                                    <SafeHtmlRenderer
-                                      htmlContent={q.explanation || ''}
-                                      className='mt-1'
-                                    />
-                                  </div>
-                                </div>
-                              );
-                            case QuestionTypeEnumIndex.FILL_IN_THE_BLANKS: // Fill in the Blanks
-                              return (
-                                <div key={q.question_id} className='p-4 border rounded'>
-                                  <div>
-                                    <span className='font-semibold'>Blank {q.blank_index}:</span>{' '}
-                                    {q.correct_answer}
-                                  </div>
-                                  <div className='mt-2 text-sm text-gray-500'>
-                                    <span className='font-medium'>Explanation:</span>
-                                    <SafeHtmlRenderer
-                                      htmlContent={q.explanation || ''}
-                                      className='mt-1'
-                                    />
-                                  </div>
-                                </div>
-                              );
-                            case QuestionTypeEnumIndex.MATCHING: // Matching
-                              return (
-                                <div key={q.question_id} className='p-4 border rounded'>
-                                  <div
-                                    dangerouslySetInnerHTML={{ __html: q.instruction_for_matching }}
-                                  />
-                                  <div>
-                                    <span className='font-semibold'>Answer:</span>{' '}
-                                    {q.correct_answer_for_matching}
-                                  </div>
-                                  <div className='mt-2 text-sm text-gray-500'>
-                                    <span className='font-medium'>Explanation:</span>
-                                    <SafeHtmlRenderer
-                                      htmlContent={q.explanation || ''}
-                                      className='mt-1'
-                                    />
-                                  </div>
-                                </div>
-                              );
-                            case QuestionTypeEnumIndex.DRAG_AND_DROP: // Drag & Drop
-                              return (
-                                <div key={q.question_id} className='p-4 border rounded'>
-                                  <div>
-                                    <span className='font-semibold'>Zone {q.zone_index}:</span>{' '}
-                                    {q.drag_item_id}
-                                  </div>
-                                  <div className='mt-2 text-sm text-gray-500'>
-                                    <span className='font-medium'>Explanation:</span>
-                                    <SafeHtmlRenderer
-                                      htmlContent={q.explanation || ''}
-                                      className='mt-1'
-                                    />
-                                  </div>
-                                </div>
-                              );
-                            default:
-                              return (
-                                <div key={q.question_id} className='p-4 border rounded'>
-                                  Unknown question type
-                                </div>
-                              );
-                          }
-                        })}
+                <div>
+                  <div className='flex items-center justify-between mb-4'>
+                    <div>
+                      <div className='text-sm text-muted-foreground mb-2'>
+                        {group.questions?.length || 0} questions
                       </div>
-                    )}
+                      {group.instruction && (
+                        <div
+                          className='prose prose-sm max-w-none text-muted-foreground'
+                          dangerouslySetInnerHTML={{ __html: group.instruction }}
+                        />
+                      )}
+                    </div>
                   </div>
-                )}
+
+                  {activeGroupIndex === index && (
+                    <div className='mt-6 pt-4 border-t'>{renderQuestionManager(group, index)}</div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           ))}

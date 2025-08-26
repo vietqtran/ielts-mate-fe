@@ -349,10 +349,15 @@ export default function EditPassagePage() {
 
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleFinish = async () => {
+  const handleFinish = async (status?: PassageStatus) => {
     try {
       setIsSaving(true);
       const formData = form.getValues();
+
+      // If status is provided, use it instead of the form data
+      if (status) {
+        formData.passage_status = status;
+      }
 
       // Check if the original status was TEST and prevent status change
       if (originalFormData && originalFormData.passage_status === PassageStatus.TEST) {

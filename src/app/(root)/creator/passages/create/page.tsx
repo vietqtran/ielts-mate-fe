@@ -284,7 +284,29 @@ export default function CreatePassagePage() {
     setActiveTab('preview');
   };
 
-  const handleFinish = () => {
+  const handleFinish = async (status?: PassageStatus) => {
+    if (status === PassageStatus.PUBLISHED && createdpassage_id) {
+      try {
+        // Update the passage status to PUBLISHED
+        const formData = form.getValues();
+        const passageRequest = {
+          title: formData.title,
+          instruction: formData.instruction,
+          content: formData.content,
+          content_with_highlight_keywords: formData.content,
+          ielts_type: Object.values(IeltsType).indexOf(formData.ielts_type),
+          part_number: formData.part_number - 1,
+          passage_status: Object.values(PassageStatus).indexOf(PassageStatus.PUBLISHED), // 1 for PUBLISHED
+        };
+
+        await updatePassage(createdpassage_id, passageRequest);
+        toast.success('Passage published successfully!');
+      } catch (error) {
+        toast.error('Failed to publish passage');
+        return;
+      }
+    }
+
     // Clear the form fields
     form.reset({
       title: '',

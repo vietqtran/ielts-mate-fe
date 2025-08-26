@@ -30,7 +30,7 @@ interface QuestionGroup {
 interface PassagePreviewProps {
   passageData: PassageData;
   questionGroups: LocalQuestionGroup[];
-  onFinish: () => void;
+  onFinish: (status?: PassageStatus) => void;
 }
 
 const getIeltsTypeLabel = (type: IeltsType): string => {
@@ -99,7 +99,7 @@ export function PassagePreview({
                 <Badge variant='outline'>{getStatusLabel(passageData.passage_status)}</Badge>
               </div>
             </div>
-            <Button onClick={onFinish} className='gap-2'>
+            <Button onClick={() => onFinish(PassageStatus.PUBLISHED)} className='gap-2'>
               <CheckCircle className='h-4 w-4' />
               Publish Passage
             </Button>
@@ -390,7 +390,7 @@ export function PassagePreview({
               <div className='text-sm text-muted-foreground'>
                 Ready to publish this passage for student use
               </div>
-              <Button onClick={onFinish} size='lg' className='gap-2'>
+              <Button onClick={() => onFinish(PassageStatus.PUBLISHED)} size='lg' className='gap-2'>
                 <CheckCircle className='h-5 w-5' />
                 Complete & Publish Passage
               </Button>

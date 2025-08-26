@@ -28,6 +28,7 @@ export function ProfileForm({ user }: Readonly<ProfileFormProps>) {
 
   const form = useForm<z.infer<typeof updateProfileDataSchema>>({
     resolver: zodResolver(updateProfileDataSchema),
+    mode: 'onChange',
     defaultValues: {
       first_name: '',
       last_name: '',
@@ -35,15 +36,27 @@ export function ProfileForm({ user }: Readonly<ProfileFormProps>) {
   });
 
   useEffect(() => {
-    form.setValue('first_name', user?.firstName ?? '');
-    form.setValue('last_name', user?.lastName ?? '');
-  }, []);
+    if (user) {
+      form.setValue('first_name', user.firstName ?? '');
+      form.setValue('last_name', user.lastName ?? '');
+    }
+  }, [user, form]);
+
+  // Check if form values have changed from original user data
+  const hasChanges =
+    form.watch('first_name') !== user?.firstName || form.watch('last_name') !== user?.lastName;
 
   const handleSubmit = async (values: z.infer<typeof updateProfileDataSchema>) => {
+    // Check if values have actually changed
+    if (values.first_name === user?.firstName && values.last_name === user?.lastName) {
+      toast.error('No changes detected');
+      return;
+    }
+
     startTransition(async () => {
       const result = await updateProfile(values);
       if (result) {
-        toast.success('Update successfull');
+        toast.success('Update successful');
         await refetchUser();
       } else {
         toast.error('Update failed');
@@ -138,7 +151,7 @@ export function ProfileForm({ user }: Readonly<ProfileFormProps>) {
 
             <Button
               type='submit'
-              disabled={isPending}
+              disabled={isPending || !form.formState.isValid || !hasChanges}
               className='bg-gradient-to-r from-[#0074b7] to-[#60a3d9] hover:from-[#003b73] hover:to-[#0074b7] text-white rounded-xl px-6 py-3 font-medium shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50'
             >
               {isPending && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}

@@ -12,6 +12,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
+import { ListeningExplanationForm } from '@/components/features/admin/listening/create/ListeningExplanationForm';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -37,6 +38,7 @@ interface MatchingFormProps {
   onCancel: () => void;
   isSubmitting: boolean;
   isEditing?: boolean;
+  isListening?: boolean;
 }
 
 export function MatchingForm({
@@ -45,6 +47,7 @@ export function MatchingForm({
   onCancel,
   isSubmitting,
   isEditing = false,
+  isListening = false,
 }: Readonly<MatchingFormProps>) {
   const form = useForm<MatchingFormData>({
     resolver: zodResolver(questionSchema),
@@ -138,23 +141,37 @@ export function MatchingForm({
               )}
             />
 
-            <FormField
-              control={form.control}
-              name='explanation'
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Explanation</FormLabel>
-                  <FormControl>
-                    <TiptapEditor
-                      content={field.value}
-                      onChange={field.onChange}
-                      placeholder='Explain the correct answers and key clues...'
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+            {/* Explanation Section */}
+            <div className='space-y-4'>
+              {isListening ? (
+                <ListeningExplanationForm
+                  value={form.watch('explanation')}
+                  onChange={(value) => {
+                    form.setValue('explanation', value);
+                  }}
+                  onCancel={() => {}}
+                  isEditing={!!form.watch('explanation')}
+                />
+              ) : (
+                <FormField
+                  control={form.control}
+                  name='explanation'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Explanation</FormLabel>
+                      <FormControl>
+                        <TiptapEditor
+                          content={field.value}
+                          onChange={field.onChange}
+                          placeholder='Explain the correct answers and key clues...'
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               )}
-            />
+            </div>
 
             <div className='flex justify-end gap-2'>
               <Button type='button' variant='outline' onClick={onCancel}>

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import instance from '@/lib/axios';
 import { setUser } from '@/store/slices/auth-slice';
+import { extractAxiosErrorData } from '@/utils/error';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch } from '../../redux/useStore';
 
@@ -66,8 +67,30 @@ export function useAuth() {
       return data;
     } catch (error) {
       setErrorState('fetchUser', error as Error);
-      dispatch(setUser(null));
-      replace('/sign-in');
+
+      // Only clear user state and redirect for authentication-related errors
+      // Don't clear state for network errors or temporary server issues
+      const isAxiosError = error && typeof error === 'object' && 'response' in error;
+      const status = isAxiosError ? (error as any).response?.status : null;
+      const { error_code } = extractAxiosErrorData(error);
+
+      // Clear user state only for authentication failures (401, 403) or specific auth errors
+      const shouldClearUser = status === 401 || status === 403 || error_code === 'ACCESS_DENIED';
+
+      if (shouldClearUser) {
+        dispatch(setUser(null));
+        // Only redirect if we're not already on an auth page
+        if (
+          !window.location.pathname.startsWith('/sign-in') &&
+          !window.location.pathname.startsWith('/sign-up') &&
+          !window.location.pathname.startsWith('/forgot') &&
+          !window.location.pathname.startsWith('/reset') &&
+          !window.location.pathname.startsWith('/otp')
+        ) {
+          replace('/sign-in');
+        }
+      }
+
       return null;
     } finally {
       setLoading('fetchUser', false);

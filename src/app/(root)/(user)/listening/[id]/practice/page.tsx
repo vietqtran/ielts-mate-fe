@@ -49,7 +49,7 @@ const ListeningPractice = () => {
     const initialAnswers: Record<
       string, // question_id
       {
-        answer_id: string | string[]; // for multiple choices mode or single choice, no effect on fill-in-the-blank or drag-and-drop or matching
+        answer_id: string | string[];
         questionType: QuestionTypeEnumIndex;
         questionOrder: number;
         content: string;
@@ -155,8 +155,7 @@ const ListeningPractice = () => {
             question_group_id: group.group_id,
             questions: group.questions.map((question) => ({
               ...question,
-              zone_index: 0, // These are optional properties in StartListeningAttemptQuestion
-              blank_index: 0,
+              number_of_correct_answers: question.number_of_correct_answers ?? 1,
             })),
           })),
         };
@@ -183,8 +182,8 @@ const ListeningPractice = () => {
 
   if (isLoading) {
     return (
-      <div className='h-screen flex items-center justify-center bg-white/60 backdrop-blur-lg'>
-        <div className='text-center bg-white/70 backdrop-blur-md border border-tekhelet-200 rounded-2xl shadow-xl p-8'>
+      <div className='h-screen flex items-center justify-center'>
+        <div className='text-center'>
           <div className='animate-spin rounded-full h-32 w-32 border-b-2 border-tekhelet-400 mx-auto'></div>
           <p className='mt-4' style={{ color: 'var(--color-tekhelet-400)' }}>
             {attemptId ? 'Loading your saved attempt...' : 'Starting new attempt...'}
@@ -196,10 +195,12 @@ const ListeningPractice = () => {
 
   if (!attemptData) {
     return (
-      <div className='h-screen flex items-center justify-center bg-white/60 backdrop-blur-lg'>
-        <div className='text-center bg-white/70 backdrop-blur-md border border-tekhelet-200 rounded-2xl shadow-xl p-8'>
-          <p style={{ color: 'var(--color-persimmon-400)' }}>
-            Failed to load listening task. Please try again.
+      <div className='h-screen flex items-center justify-center'>
+        <div className='text-center border rounded-2xl p-8'>
+          <p className='text-persimmon-200'>
+            {attemptId
+              ? 'Failed to load your saved attempt. Please try again.'
+              : 'Failed to start new attempt. Please try again.'}
           </p>
         </div>
       </div>

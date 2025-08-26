@@ -2,6 +2,14 @@
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import {
@@ -24,10 +32,37 @@ import { Textarea } from '@/components/ui/textarea';
 import { useListeningExam } from '@/hooks/apis/admin/useListeningExam';
 import { useListeningTask } from '@/hooks/apis/listening/useListeningTask';
 import { ListeningTaskFilterParams } from '@/types/listening/listening.types';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
+import * as z from 'zod';
+
+// Form validation schema
+const formSchema = z
+  .object({
+    exam_name: z.string().min(3, 'Exam name must be at least 3 characters'),
+    exam_description: z.string().min(10, 'Description must be at least 10 characters'),
+    url_slug: z.string().min(3, 'URL slug must be at least 3 characters'),
+    part1_id: z.string().min(1, 'Task for part 1 is required'),
+    part2_id: z.string().min(1, 'Task for part 2 is required'),
+    part3_id: z.string().min(1, 'Task for part 3 is required'),
+    part4_id: z.string().min(1, 'Task for part 4 is required'),
+  })
+  .refine(
+    (data) => {
+      const partIds = [data.part1_id, data.part2_id, data.part3_id, data.part4_id];
+      return new Set(partIds).size === 4;
+    },
+    {
+      message: 'Each part must be a different task',
+      path: ['part1_id'], // This will show the error on the first part field
+    }
+  );
+
+type FormValues = z.infer<typeof formSchema>;
 
 type PartKey = 'part1_id' | 'part2_id' | 'part3_id' | 'part4_id';
 const PARTS: PartKey[] = ['part1_id', 'part2_id', 'part3_id', 'part4_id'];
@@ -70,16 +105,19 @@ export default function EditListeningExamPage() {
     sort_direction: 'desc',
   });
 
-  const [form, setForm] = useState({
-    exam_name: '',
-    exam_description: '',
-    url_slug: '',
-    part1_id: '',
-    part2_id: '',
-    part3_id: '',
-    part4_id: '',
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      exam_name: '',
+      exam_description: '',
+      url_slug: '',
+      part1_id: '',
+      part2_id: '',
+      part3_id: '',
+      part4_id: '',
+    },
   });
-  const [submitting, setSubmitting] = useState(false);
+
   const [isPageLoading, setIsPageLoading] = useState(true);
 
   // Fetch exam and prefill form
@@ -88,7 +126,7 @@ export default function EditListeningExamPage() {
       try {
         const response = await getExamById(examId);
         if (response) {
-          setForm({
+          form.reset({
             exam_name: response.exam_name || '',
             exam_description: response.exam_description || '',
             url_slug: response.url_slug || '',
@@ -105,7 +143,7 @@ export default function EditListeningExamPage() {
       }
     };
     fetchExam();
-  }, [examId]);
+  }, [examId, form]);
 
   // Fetch tasks
   const fetchTasks = async () => {
@@ -124,11 +162,6 @@ export default function EditListeningExamPage() {
     fetchTasks();
     // eslint-disable-next-line
   }, [filters]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
-  };
 
   // Unified filter updates like in listings page
   const handleFilterChange = (newFilters: Partial<ListeningTaskFilterParams>) => {
@@ -149,16 +182,15 @@ export default function EditListeningExamPage() {
   // Radio selection logic: only one task per part, and a task can't be assigned to multiple parts
   const handleRadioSelect = async (part: PartKey, taskId: string) => {
     try {
-      setForm((prev) => {
-        const updated = { ...prev };
-        PARTS.forEach((p) => {
-          if (p !== part && updated[p] === taskId) {
-            updated[p] = '';
-          }
-        });
-        updated[part] = taskId;
-        return updated;
+      const currentValues = form.getValues();
+      const updatedValues = { ...currentValues };
+      PARTS.forEach((p) => {
+        if (p !== part && updatedValues[p] === taskId) {
+          updatedValues[p] = '';
+        }
       });
+      updatedValues[part] = taskId;
+      form.reset(updatedValues);
     } catch (error: any) {
       if (error?.response?.data?.error_code === '000002') {
         toast.error('Please check the correct parts with the list of Listening Task');
@@ -169,40 +201,39 @@ export default function EditListeningExamPage() {
   };
 
   const handleRemovePart = (part: PartKey) => {
-    setForm((prev) => ({ ...prev, [part]: '' }));
+    form.setValue(part, '');
   };
 
   const getTaskById = (taskId: string) => tasks.find((t) => t.task_id === taskId) || null;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!form.exam_name || !form.exam_description || !form.url_slug) {
-      toast.error('Please fill all exam info');
-      return;
-    }
-    const partIds = [form.part1_id, form.part2_id, form.part3_id, form.part4_id];
-    if (partIds.some((id) => !id)) {
-      toast.error('Please select a task for all 4 parts');
-      return;
-    }
-    if (new Set(partIds).size !== 4) {
-      toast.error('Each part must be a different task');
-      return;
-    }
-    setSubmitting(true);
+  const onSubmit = async (values: FormValues) => {
     try {
-      await updateExam(examId, form);
+      // Check if all parts are selected
+      const partIds = [values.part1_id, values.part2_id, values.part3_id, values.part4_id];
+      const missingParts = partIds.filter((id) => !id);
+
+      if (missingParts.length > 0) {
+        toast.error(`Vui lòng chọn đủ 4 parts. Còn thiếu ${missingParts.length} part(s).`);
+        return;
+      }
+
+      // Check if all parts are different
+      const uniqueParts = new Set(partIds);
+      if (uniqueParts.size !== 4) {
+        toast.error('Mỗi part phải là một task khác nhau. Vui lòng kiểm tra lại.');
+        return;
+      }
+
+      await updateExam(examId, values);
       toast.success('Listening exam updated successfully');
       router.push(`/creator/listening-exams/${examId}`);
     } catch (error: any) {
       console.log(error);
-      if (error.response.data.error_code === '000002') {
+      if (error.response?.data?.error_code === '000002') {
         toast.error('Please check the correct parts with the list of Listening Task');
       } else {
-        toast.error('Failed to update listening exam');
+        toast.error('Có lỗi xảy ra khi cập nhật listening exam. Vui lòng thử lại.');
       }
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -221,48 +252,61 @@ export default function EditListeningExamPage() {
           <CardTitle>Edit Listening Exam</CardTitle>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className='space-y-6'>
-            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-              <div>
-                <label className='block font-medium mb-1'>Exam Name</label>
-                <Input
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                <FormField
+                  control={form.control}
                   name='exam_name'
-                  value={form.exam_name}
-                  onChange={handleInputChange}
-                  required
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Exam Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder='Enter exam name' {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name='url_slug'
+                  render={({ field }) => (
+                    <SlugInput
+                      value={field.value}
+                      onChange={field.onChange}
+                      onGenerateSlug={async () => {
+                        return await generateSlug(form.getValues('exam_name'));
+                      }}
+                      onCheckSlug={memoizedCheckSlug}
+                      examName={form.getValues('exam_name')}
+                      skipValidation={true}
+                    />
+                  )}
                 />
               </div>
-              <div>
-                <SlugInput
-                  value={form.url_slug}
-                  onChange={(value) => setForm((prev) => ({ ...prev, url_slug: value }))}
-                  onGenerateSlug={async () => {
-                    return await generateSlug(form.exam_name);
-                  }}
-                  onCheckSlug={memoizedCheckSlug}
-                  examName={form.exam_name}
-                  skipValidation={true}
-                />
-              </div>
-            </div>
-            <div>
-              <label className='block font-medium mb-1'>Description</label>
-              <Textarea
+              <FormField
+                control={form.control}
                 name='exam_description'
-                value={form.exam_description}
-                onChange={handleInputChange}
-                required
-                rows={3}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder='Enter detailed description of the exam'
+                        {...field}
+                        rows={3}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
-            <Button type='submit' disabled={submitting || isLoadingExam.updateExam}>
-              {submitting || isLoadingExam.updateExam ? (
-                <LoadingSpinner color='white' />
-              ) : (
-                'Update Exam'
-              )}
-            </Button>
-          </form>
+              <Button type='submit' disabled={isLoadingExam.updateExam}>
+                {isLoadingExam.updateExam ? <LoadingSpinner color='white' /> : 'Update Exam'}
+              </Button>
+            </form>
+          </Form>
         </CardContent>
       </Card>
       {/* Selected Parts Table */}
@@ -283,7 +327,7 @@ export default function EditListeningExamPage() {
             </TableHeader>
             <TableBody>
               {PARTS.map((part, idx) => {
-                const taskId = form[part];
+                const taskId = form.watch(part);
                 const task = getTaskById(taskId);
                 return (
                   <TableRow key={part}>
@@ -296,9 +340,7 @@ export default function EditListeningExamPage() {
                       )}
                     </TableCell>
                     <TableCell>{task ? task.part_number + 1 : '-'}</TableCell>
-                    <TableCell>
-                      {task ? (task.status === 1 ? 'Published' : 'Draft') : '-'}
-                    </TableCell>
+                    <TableCell>{task ? 'Test' : '-'}</TableCell>
                     <TableCell>
                       {task && (
                         <Button size='sm' variant='outline' onClick={() => handleRemovePart(part)}>
@@ -316,7 +358,7 @@ export default function EditListeningExamPage() {
       {/* Main Task Table with filter/search and radio selection */}
       <Card>
         <CardHeader>
-          <CardTitle>Available Listening Tasks</CardTitle>
+          <CardTitle>Available Test Listening Tasks</CardTitle>
         </CardHeader>
         <CardContent>
           {/* Filter & Sort toolbar */}
@@ -350,24 +392,6 @@ export default function EditListeningExamPage() {
                   <SelectItem value='2'>Part 2</SelectItem>
                   <SelectItem value='3'>Part 3</SelectItem>
                   <SelectItem value='4'>Part 4</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select
-                value={
-                  Array.isArray(filters.status) && filters.status.length > 0
-                    ? String(filters.status[0])
-                    : ''
-                }
-                onValueChange={(v) => handleFilterChange({ status: v === 'all' ? undefined : [v] })}
-              >
-                <SelectTrigger className='w-[150px]'>
-                  <SelectValue placeholder='All Statuses' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='all'>All Statuses</SelectItem>
-                  <SelectItem value='1'>Published</SelectItem>
-                  <SelectItem value='0'>Draft</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -431,7 +455,12 @@ export default function EditListeningExamPage() {
               <Button
                 variant='ghost'
                 onClick={() =>
-                  setFilters({ page: 1, size: 10, sort_by: 'updatedAt', sort_direction: 'desc' })
+                  setFilters({
+                    page: 1,
+                    size: 10,
+                    sort_by: 'updatedAt',
+                    sort_direction: 'desc',
+                  })
                 }
               >
                 Clear
@@ -450,7 +479,6 @@ export default function EditListeningExamPage() {
                   <TableRow>
                     <TableHead>Title</TableHead>
                     <TableHead>Part</TableHead>
-                    <TableHead>Status</TableHead>
                     <TableHead>Created At</TableHead>
                     {PART_LABELS.map((label) => (
                       <TableHead key={label}>{label}</TableHead>
@@ -469,7 +497,6 @@ export default function EditListeningExamPage() {
                       <TableRow key={task.task_id}>
                         <TableCell>{task.title}</TableCell>
                         <TableCell>{task.part_number + 1}</TableCell>
-                        <TableCell>{task.status === 1 ? 'Published' : 'Draft'}</TableCell>
                         <TableCell>
                           {task.created_at ? new Date(task.created_at).toLocaleString() : ''}
                         </TableCell>
@@ -479,11 +506,11 @@ export default function EditListeningExamPage() {
                               type='radio'
                               name={part}
                               value={task.task_id}
-                              checked={form[part] === task.task_id}
+                              checked={form.watch(part) === task.task_id}
                               onChange={() => handleRadioSelect(part, task.task_id)}
                               disabled={
-                                Object.values(form).includes(task.task_id) &&
-                                form[part] !== task.task_id
+                                Object.values(form.getValues()).includes(task.task_id) &&
+                                form.watch(part) !== task.task_id
                               }
                             />
                           </TableCell>

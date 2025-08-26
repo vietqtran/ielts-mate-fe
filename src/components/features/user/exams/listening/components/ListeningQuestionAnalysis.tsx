@@ -1,12 +1,13 @@
 'use client';
 
+import { QuestionResultRenderer } from '@/components/features/user/exams/reading/components';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { AudioProvider } from '@/contexts/AudioContext';
 import { ListeningExamAttemptDetailsResponse } from '@/types/listening/listening-exam.types';
 import { ChevronDown, ChevronUp, Eye, EyeOff, Headphones } from 'lucide-react';
-import { useState } from 'react';
-import { ListeningQuestionItem } from '.';
+import React, { useState } from 'react';
 import AudioPlayer from './AudioPlayer';
 
 interface ListeningQuestionAnalysisProps {
@@ -22,12 +23,30 @@ export const ListeningQuestionAnalysis = ({
 }: ListeningQuestionAnalysisProps) => {
   const [showTranscripts, setShowTranscripts] = useState(false);
   const [openParts, setOpenParts] = useState<Set<number>>(new Set([1, 2, 3, 4]));
+  const [activeAudioRef, setActiveAudioRef] = useState<
+    React.RefObject<HTMLAudioElement | null> | undefined
+  >(undefined);
 
   const parts = [
     examDetails.listening_exam.listening_task_id_part1,
     examDetails.listening_exam.listening_task_id_part2,
     examDetails.listening_exam.listening_task_id_part3,
     examDetails.listening_exam.listening_task_id_part4,
+  ];
+
+  const dragAndDropsList = [
+    ...examDetails.listening_exam.listening_task_id_part1.question_groups.flatMap(
+      (g) => g.drag_items || []
+    ),
+    ...examDetails.listening_exam.listening_task_id_part2.question_groups.flatMap(
+      (g) => g.drag_items || []
+    ),
+    ...examDetails.listening_exam.listening_task_id_part3.question_groups.flatMap(
+      (g) => g.drag_items || []
+    ),
+    ...examDetails.listening_exam.listening_task_id_part4.question_groups.flatMap(
+      (g) => g.drag_items || []
+    ),
   ];
 
   const togglePart = (partNumber: number) => {
@@ -66,7 +85,7 @@ export const ListeningQuestionAnalysis = ({
   return (
     <div className='space-y-6'>
       {/* Header with controls */}
-      <Card className='bg-white/70 backdrop-blur-lg border rounded-2xl shadow-lg'>
+      <Card>
         <CardHeader>
           <div className='flex items-center justify-between'>
             <CardTitle className='flex items-center gap-2 text-tekhelet-400'>
@@ -106,10 +125,7 @@ export const ListeningQuestionAnalysis = ({
         const isPartOpen = openParts.has(partNumber);
 
         return (
-          <Card
-            key={part.task_id}
-            className='bg-white/70 backdrop-blur-lg border rounded-2xl shadow-lg'
-          >
+          <Card key={part.task_id}>
             <Collapsible open={isPartOpen} onOpenChange={() => togglePart(partNumber)}>
               <CollapsibleTrigger asChild>
                 <CardHeader className='cursor-pointer hover:bg-white/50 transition-colors rounded-t-2xl'>
@@ -131,11 +147,12 @@ export const ListeningQuestionAnalysis = ({
               <CollapsibleContent>
                 <CardContent className='space-y-6'>
                   {/* Audio Player */}
-                  <div className='mt-4'>
+                  <div className='mt-4 w-full'>
                     <AudioPlayer
                       audioFileId={part.audio_file_id}
                       title={part.title}
                       partNumber={partNumber}
+                      onAudioRefReady={(ref) => setActiveAudioRef(ref)}
                     />
                   </div>
 
@@ -173,18 +190,22 @@ export const ListeningQuestionAnalysis = ({
                       )}
 
                       {/* Questions */}
-                      {group.questions &&
-                        group.questions.map((question) => (
-                          <ListeningQuestionItem
-                            key={question.question_id}
-                            question={question}
-                            userAnswers={examDetails.answers[question.question_id] || []}
-                            isOpen={openQuestions.has(question.question_id)}
-                            onToggle={() => onToggleQuestion(question.question_id)}
-                            choices={question.choices}
-                            dragItems={group.drag_items || []}
-                          />
-                        ))}
+                      <AudioProvider audioRef={activeAudioRef}>
+                        {group.questions &&
+                          group.questions.map((question) => {
+                            // Get user answers from the main exam details answers map
+                            const userAnswers = examDetails.answers[question.question_id] || [];
+                            return (
+                              <QuestionResultRenderer
+                                userAnswers={userAnswers}
+                                dragAndDropItems={dragAndDropsList}
+                                question={question}
+                                key={question.question_id}
+                                isListening={true}
+                              />
+                            );
+                          })}
+                      </AudioProvider>
                     </div>
                   ))}
                 </CardContent>

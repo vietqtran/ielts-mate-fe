@@ -58,13 +58,7 @@ export const ExamTakeHeader: React.FC<ExamTakeHeaderProps> = ({
   };
 
   return (
-    <div
-      className={cn(
-        'w-full border-b',
-        glass ? 'bg-white/80 backdrop-blur-lg border-tekhelet-200 shadow-sm' : 'bg-white',
-        className
-      )}
-    >
+    <div className='w-full border-b bg-white'>
       <div className='grid grid-cols-2 md:grid-cols-3 items-center p-4 gap-4'>
         <div className='col-span-1 min-w-0'>
           <h1 className='text-xl font-bold text-tekhelet-600 truncate'>{title}</h1>

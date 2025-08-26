@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadAttemptResponse } from '@/types/attempt.types';
-import { BookOpen, Clock, FileText } from 'lucide-react';
+import { BookOpen, Clock } from 'lucide-react';
 
 interface ReadingAttemptInfoCardProps {
   attemptDetails: LoadAttemptResponse;
@@ -16,7 +16,7 @@ export const ReadingAttemptInfoCard = ({
 }: ReadingAttemptInfoCardProps) => {
   const passage = attemptDetails.task_data;
   return (
-    <Card className='bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl'>
+    <Card>
       <CardHeader>
         <CardTitle className='flex items-center gap-2 text-tekhelet-400'>
           <BookOpen className='w-5 h-5' />
@@ -49,13 +49,6 @@ export const ReadingAttemptInfoCard = ({
               <p className='font-medium text-tekhelet-400'>
                 {formatDuration(attemptDetails.duration)}
               </p>
-            </div>
-          </div>
-          <div className='flex items-center gap-2'>
-            <FileText className='w-4 h-4 text-tekhelet-400' />
-            <div>
-              <p className='text-sm text-tekhelet-500'>Question Groups</p>
-              <p className='font-medium text-tekhelet-400'>{passage.question_groups.length}</p>
             </div>
           </div>
           <div className='flex items-center gap-2'>

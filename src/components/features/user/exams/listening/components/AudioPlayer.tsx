@@ -5,15 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import useListeningAudio from '@/hooks/apis/listening/useListeningAudio';
 import { Volume2 } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface AudioPlayerProps {
   audioFileId: string;
   title: string;
   partNumber: number;
+  onAudioRefReady?: (ref: React.RefObject<HTMLAudioElement | null>) => void;
 }
 
-const AudioPlayer = ({ audioFileId, title, partNumber }: AudioPlayerProps) => {
+const AudioPlayer = ({ audioFileId, title, partNumber, onAudioRefReady }: AudioPlayerProps) => {
   const audioRef = useRef<HTMLAudioElement>(null);
   const { mutate, objectUrl, isLoading, error } = useListeningAudio(audioFileId);
 
@@ -24,8 +25,15 @@ const AudioPlayer = ({ audioFileId, title, partNumber }: AudioPlayerProps) => {
     }
   }, [audioFileId]);
 
+  // Pass audioRef to parent when audio is ready
+  useEffect(() => {
+    if (objectUrl && onAudioRefReady) {
+      onAudioRefReady(audioRef);
+    }
+  }, [objectUrl, onAudioRefReady]);
+
   return (
-    <Card className='backdrop-blur-lg border rounded-2xl'>
+    <Card>
       <CardHeader>
         <CardTitle className='flex items-center gap-2 text-tekhelet-400'>
           <Volume2 className='w-5 h-5' />
@@ -57,6 +65,7 @@ const AudioPlayer = ({ audioFileId, title, partNumber }: AudioPlayerProps) => {
               preload='metadata'
               controls
               controlsList='nodownload'
+              className='w-full'
             />
           </>
         )}

@@ -17,17 +17,13 @@ export const StatisticsCard = ({
   incorrectAnswers,
 }: StatisticsCardProps) => {
   return (
-    <Card className='bg-white/70 backdrop-blur-lg rounded-2xl shadow-xl'>
+    <Card>
       <CardHeader className='text-center'>
-        <BarChart3 className='w-12 h-12 mx-auto text-tangerine-500 mb-2' />
+        <BarChart3 className='w-12 h-12 mx-auto text-persimmon-400 mb-2' />
         <CardTitle className='text-tekhelet-400'>Statistics</CardTitle>
       </CardHeader>
       <CardContent>
         <div className='space-y-3'>
-          <div className='flex justify-between items-center'>
-            <span className='text-tekhelet-500'>Calculated Points</span>
-            <span className='font-bold text-tekhelet-400'>{totalPoints}</span>
-          </div>
           <div className='flex justify-between items-center'>
             <span className='text-tekhelet-500'>Exam Total Points</span>
             <span className='font-bold text-tekhelet-400'>{examTotalPoints}</span>
@@ -40,11 +36,11 @@ export const StatisticsCard = ({
             <span className='font-bold text-green-600'>{correctAnswers}</span>
           </div>
           <div className='flex justify-between items-center'>
-            <span className='text-persimmon-500 flex items-center gap-1'>
+            <span className='text-persimmon-300 flex items-center gap-1'>
               <XCircle className='w-4 h-4' />
               Incorrect
             </span>
-            <span className='font-bold text-persimmon-500'>{incorrectAnswers}</span>
+            <span className='font-bold text-persimmon-300'>{incorrectAnswers}</span>
           </div>
         </div>
       </CardContent>

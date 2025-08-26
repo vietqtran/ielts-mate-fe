@@ -154,15 +154,15 @@ export interface AttemptResponseQuestion {
   question_type: number; // This is an enum index
   point: number;
   explanation: string;
-  number_of_correct_answers: number;
-  instruction_for_choice: string;
+  number_of_correct_answers?: number;
+  instruction_for_choice?: string;
   choices: Choice[];
-  blank_index: number;
-  correct_answer: string;
-  instruction_for_matching: string;
-  correct_answer_for_matching: string;
-  zone_index: number;
-  drag_item_id: string;
+  blank_index?: number;
+  correct_answer?: string;
+  instruction_for_matching?: string;
+  correct_answer_for_matching?: string;
+  zone_index?: number;
+  drag_item_id?: string;
 }
 
 export interface DragItem {

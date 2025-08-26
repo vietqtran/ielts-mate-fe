@@ -150,6 +150,10 @@ const ReadingPracticePage = () => {
           question_groups: res.data.task_data.question_groups.map((group) => ({
             ...group,
             question_group_id: group.group_id,
+            questions: group.questions.map((question) => ({
+              ...question,
+              number_of_correct_answers: question.number_of_correct_answers ?? 1,
+            })),
           })),
         };
 
@@ -189,7 +193,11 @@ const ReadingPracticePage = () => {
   if (!passages) {
     return (
       <div className='h-screen flex items-center justify-center'>
-        <p className='text-red-600'>Failed to load reading passage. Please try again.</p>
+        <p className='text-persimmon-200'>
+          {attemptId
+            ? 'Failed to load your saved attempt. Please try again.'
+            : 'Failed to start new attempt. Please try again.'}
+        </p>
       </div>
     );
   }

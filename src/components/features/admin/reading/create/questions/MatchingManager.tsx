@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { MatchingForm, MatchingFormData } from './MatchingForm';
 
 import { Button } from '@/components/ui/button';
+import { ListeningExplanationDisplay } from '@/components/ui/listening-explanation-display';
 import { useListeningQuestion, useQuestion } from '@/hooks';
 import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 
@@ -188,6 +189,7 @@ export function MatchingManager({
           onCancel={handleCancel}
           isSubmitting={isLoading.createQuestions || isLoading.updateQuestionInfo}
           isEditing={!!editingQuestion}
+          isListening={isListening}
         />
       )}
 
@@ -220,13 +222,20 @@ export function MatchingManager({
                         </p>
                       </div>
                       {question.explanation && (
-                        <p className='text-muted-foreground'>
+                        <div className='text-muted-foreground'>
                           <strong>Explanation:</strong>
-                          <SafeHtmlRenderer
-                            htmlContent={question.explanation || ''}
-                            className='mt-1'
-                          />
-                        </p>
+                          {isListening ? (
+                            <ListeningExplanationDisplay
+                              explanation={question.explanation || ''}
+                              className='mt-1'
+                            />
+                          ) : (
+                            <SafeHtmlRenderer
+                              htmlContent={question.explanation || ''}
+                              className='mt-1'
+                            />
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>

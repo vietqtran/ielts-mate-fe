@@ -1,12 +1,10 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import instance from '@/lib/axios';
 import { cn } from '@/lib/utils';
-import { Bot, MessageCircle, Send, User, X } from 'lucide-react';
+import { Bot, MessageCircle, Send, Sparkle, User, X } from 'lucide-react';
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { toast } from 'sonner';
@@ -211,192 +209,183 @@ export function AIChatbot() {
 
   return (
     <div className='fixed bottom-6 right-6 z-50'>
-      <Card className='w-96 h-[40rem] bg-white shadow-2xl rounded-2xl overflow-hidden border-2 border-tekhelet-900/10'>
-        <CardHeader className='bg-gradient-to-r from-selective-yellow-300 to-selective-yellow-400 text-white p-3'>
-          <div className='flex items-center justify-between gap-2'>
-            <CardTitle className='flex items-center gap-2 text-base font-semibold flex-1 min-w-0'>
-              <Bot className='w-4 h-4 flex-shrink-0' />
-              <span className='truncate'>IELTS AI Assistant</span>
-            </CardTitle>
-            <Button
-              variant='ghost'
-              size='sm'
-              onClick={() => {
-                setIsOpen(false);
-                // Clear all messages when closing
-                setMessages([
-                  {
-                    id: '1',
-                    content:
-                      "Hello! I'm your IELTS preparation assistant. How can I help you today?",
-                    sender: 'ai',
-                    timestamp: new Date(),
-                  },
-                ]);
-              }}
-              className='text-white hover:bg-white/20 h-7 w-7 p-0 flex-shrink-0'
-              aria-label='Close chatbot'
-            >
-              <X className='w-3 h-3' />
-            </Button>
+      <div className='w-96 h-[40rem] bg-white shadow-2xl rounded-2xl overflow-hidden border-2 border-tekhelet-900/10 flex flex-col'>
+        {/* Header */}
+        <div className='bg-gradient-to-r from-selective-yellow-300 to-selective-yellow-400 text-white p-3 flex items-center justify-between gap-2 flex-shrink-0'>
+          <div className='flex items-center gap-2 text-base font-semibold flex-1 min-w-0'>
+            <Sparkle className='w-4 h-4 flex-shrink-0' />
+            <span className='truncate'>AI Assistant</span>
           </div>
-        </CardHeader>
+          <Button
+            variant='ghost'
+            size='sm'
+            onClick={() => {
+              setIsOpen(false);
+              // Clear all messages when closing
+              setMessages([
+                {
+                  id: '1',
+                  content: "Hello! I'm your AI Assistant. How can I help you today?",
+                  sender: 'ai',
+                  timestamp: new Date(),
+                },
+              ]);
+            }}
+            className='text-white hover:bg-white/20 h-7 w-7 p-0 flex-shrink-0'
+            aria-label='Close chatbot'
+          >
+            <X className='w-3 h-3' />
+          </Button>
+        </div>
 
-        <CardContent className='p-0 flex flex-col h-[34rem]'>
-          <div className='flex-1 overflow-hidden'>
-            <ScrollArea className='h-full p-4'>
-              <div className='space-y-4'>
-                {messages.map((message) => (
-                  <div
-                    key={message.id}
+        {/* Messages (scrollable) */}
+        <div className='flex-1 min-h-0 overflow-y-auto p-4'>
+          <div className='space-y-4'>
+            {messages.map((message) => (
+              <div
+                key={message.id}
+                className={cn(
+                  'flex gap-3 max-w-full',
+                  message.sender === 'user' ? 'justify-end' : 'justify-start'
+                )}
+              >
+                {message.sender === 'ai' && (
+                  <div className='w-8 h-8 rounded-full bg-tekhelet-400 flex items-center justify-center flex-shrink-0'>
+                    <Bot className='w-4 h-4 text-white' />
+                  </div>
+                )}
+
+                <div
+                  className={cn(
+                    'rounded-2xl px-3 py-2 max-w-[280px] break-words overflow-wrap-anywhere',
+                    message.sender === 'user'
+                      ? 'bg-selective-yellow-300 text-white ml-8'
+                      : 'bg-gray-100 text-tekhelet-400 mr-8'
+                  )}
+                >
+                  {message.sender === 'ai' ? (
+                    <div className='text-sm leading-relaxed'>
+                      <ReactMarkdown
+                        components={{
+                          p: ({ children }) => (
+                            <p className='mb-2 last:mb-0 text-tekhelet-400'>{children}</p>
+                          ),
+                          ul: ({ children }) => (
+                            <ul className='mb-2 ml-4 list-disc text-tekhelet-400'>{children}</ul>
+                          ),
+                          ol: ({ children }) => (
+                            <ol className='mb-2 ml-4 list-decimal text-tekhelet-400'>{children}</ol>
+                          ),
+                          li: ({ children }) => (
+                            <li className='mb-1 text-tekhelet-400'>{children}</li>
+                          ),
+                          strong: ({ children }) => (
+                            <strong className='font-semibold text-tekhelet-400'>{children}</strong>
+                          ),
+                          em: ({ children }) => (
+                            <em className='italic text-tekhelet-500'>{children}</em>
+                          ),
+                          h1: ({ children }) => (
+                            <h1 className='text-base font-bold mb-2 text-tekhelet-400'>
+                              {children}
+                            </h1>
+                          ),
+                          h2: ({ children }) => (
+                            <h2 className='text-sm font-bold mb-2 text-tekhelet-400'>{children}</h2>
+                          ),
+                          h3: ({ children }) => (
+                            <h3 className='text-sm font-semibold mb-1 text-tekhelet-400'>
+                              {children}
+                            </h3>
+                          ),
+                          code: ({ children }) => (
+                            <code className='bg-tekhelet-100 px-1 rounded text-tekhelet-600 text-xs'>
+                              {children}
+                            </code>
+                          ),
+                          blockquote: ({ children }) => (
+                            <blockquote className='border-l-2 border-tekhelet-300 pl-3 ml-2 text-tekhelet-500 italic'>
+                              {children}
+                            </blockquote>
+                          ),
+                        }}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                  ) : (
+                    <div className='text-sm leading-relaxed whitespace-pre-wrap'>
+                      {message.content}
+                    </div>
+                  )}
+                  <p
                     className={cn(
-                      'flex gap-3 max-w-full',
-                      message.sender === 'user' ? 'justify-end' : 'justify-start'
+                      'text-xs mt-1 opacity-70',
+                      message.sender === 'user' ? 'text-white' : 'text-tekhelet-500'
                     )}
                   >
-                    {message.sender === 'ai' && (
-                      <div className='w-8 h-8 rounded-full bg-tekhelet-400 flex items-center justify-center flex-shrink-0'>
-                        <Bot className='w-4 h-4 text-white' />
-                      </div>
-                    )}
+                    {formatTime(message.timestamp)}
+                  </p>
+                </div>
 
-                    <div
-                      className={cn(
-                        'rounded-2xl px-3 py-2 max-w-[280px] break-words overflow-wrap-anywhere',
-                        message.sender === 'user'
-                          ? 'bg-selective-yellow-300 text-white ml-8'
-                          : 'bg-gray-100 text-tekhelet-400 mr-8'
-                      )}
-                    >
-                      {message.sender === 'ai' ? (
-                        <div className='text-sm leading-relaxed'>
-                          <ReactMarkdown
-                            components={{
-                              p: ({ children }) => (
-                                <p className='mb-2 last:mb-0 text-tekhelet-400'>{children}</p>
-                              ),
-                              ul: ({ children }) => (
-                                <ul className='mb-2 ml-4 list-disc text-tekhelet-400'>
-                                  {children}
-                                </ul>
-                              ),
-                              ol: ({ children }) => (
-                                <ol className='mb-2 ml-4 list-decimal text-tekhelet-400'>
-                                  {children}
-                                </ol>
-                              ),
-                              li: ({ children }) => (
-                                <li className='mb-1 text-tekhelet-400'>{children}</li>
-                              ),
-                              strong: ({ children }) => (
-                                <strong className='font-semibold text-tekhelet-400'>
-                                  {children}
-                                </strong>
-                              ),
-                              em: ({ children }) => (
-                                <em className='italic text-tekhelet-500'>{children}</em>
-                              ),
-                              h1: ({ children }) => (
-                                <h1 className='text-base font-bold mb-2 text-tekhelet-400'>
-                                  {children}
-                                </h1>
-                              ),
-                              h2: ({ children }) => (
-                                <h2 className='text-sm font-bold mb-2 text-tekhelet-400'>
-                                  {children}
-                                </h2>
-                              ),
-                              h3: ({ children }) => (
-                                <h3 className='text-sm font-semibold mb-1 text-tekhelet-400'>
-                                  {children}
-                                </h3>
-                              ),
-                              code: ({ children }) => (
-                                <code className='bg-tekhelet-100 px-1 rounded text-tekhelet-600 text-xs'>
-                                  {children}
-                                </code>
-                              ),
-                              blockquote: ({ children }) => (
-                                <blockquote className='border-l-2 border-tekhelet-300 pl-3 ml-2 text-tekhelet-500 italic'>
-                                  {children}
-                                </blockquote>
-                              ),
-                            }}
-                          >
-                            {message.content}
-                          </ReactMarkdown>
-                        </div>
-                      ) : (
-                        <div className='text-sm leading-relaxed whitespace-pre-wrap'>
-                          {message.content}
-                        </div>
-                      )}
-                      <p
-                        className={cn(
-                          'text-xs mt-1 opacity-70',
-                          message.sender === 'user' ? 'text-white' : 'text-tekhelet-500'
-                        )}
-                      >
-                        {formatTime(message.timestamp)}
-                      </p>
-                    </div>
-
-                    {message.sender === 'user' && (
-                      <div className='w-8 h-8 rounded-full bg-selective-yellow-300 flex items-center justify-center flex-shrink-0'>
-                        <User className='w-4 h-4 text-white' />
-                      </div>
-                    )}
-                  </div>
-                ))}
-
-                {isLoading && (
-                  <div className='flex gap-3 justify-start'>
-                    <div className='w-8 h-8 rounded-full bg-tekhelet-400 flex items-center justify-center'>
-                      <Bot className='w-4 h-4 text-white' />
-                    </div>
-                    <div className='bg-gray-100 rounded-2xl px-3 py-2 mr-8'>
-                      <div className='flex space-x-1'>
-                        <div className='w-2 h-2 bg-tekhelet-400 rounded-full animate-bounce'></div>
-                        <div
-                          className='w-2 h-2 bg-tekhelet-400 rounded-full animate-bounce'
-                          style={{ animationDelay: '0.1s' }}
-                        ></div>
-                        <div
-                          className='w-2 h-2 bg-tekhelet-400 rounded-full animate-bounce'
-                          style={{ animationDelay: '0.2s' }}
-                        ></div>
-                      </div>
-                    </div>
+                {message.sender === 'user' && (
+                  <div className='w-8 h-8 rounded-full bg-selective-yellow-300 flex items-center justify-center flex-shrink-0'>
+                    <User className='w-4 h-4 text-white' />
                   </div>
                 )}
               </div>
-              <div ref={messagesEndRef} />
-            </ScrollArea>
-          </div>
+            ))}
 
-          <div className='border-t border-tekhelet-900/10 p-4 flex-shrink-0'>
-            <div className='flex gap-2 pt-2'>
+            {isLoading && (
+              <div className='flex gap-3 justify-start'>
+                <div className='w-8 h-8 rounded-full bg-tekhelet-400 flex items-center justify-center'>
+                  <Bot className='w-4 h-4 text-white' />
+                </div>
+                <div className='bg-gray-100 rounded-2xl px-3 py-2 mr-8'>
+                  <div className='flex space-x-1'>
+                    <div className='w-2 h-2 bg-tekhelet-400 rounded-full animate-bounce'></div>
+                    <div
+                      className='w-2 h-2 bg-tekhelet-400 rounded-full animate-bounce'
+                      style={{ animationDelay: '0.1s' }}
+                    ></div>
+                    <div
+                      className='w-2 h-2 bg-tekhelet-400 rounded-full animate-bounce'
+                      style={{ animationDelay: '0.2s' }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <div ref={messagesEndRef} />
+        </div>
+        {/* End Messages */}
+
+        {/* Input */}
+        <div className='p-4 flex-shrink-0'>
+          <div className='flex items-center gap-2 pt-2'>
+            <div className='grow'>
               <Input
                 ref={inputRef}
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder='Ask me about IELTS...'
-                className='flex-1 w-full border-tekhelet-900/20 focus:border-selective-yellow-300 focus:ring-selective-yellow-300 text-base px-4 min-w-0'
+                className='flex-1 w-full focus:border-selective-yellow-300 focus:ring-selective-yellow-300 text-base'
                 disabled={isLoading}
               />
-              <Button
-                onClick={handleSendMessage}
-                disabled={!inputValue.trim() || isLoading}
-                size='default'
-                className='bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white px-3'
-              >
-                <Send className='w-4 h-4' />
-              </Button>
             </div>
+            <Button
+              onClick={handleSendMessage}
+              disabled={!inputValue.trim() || isLoading}
+              size='default'
+              className='bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white px-3'
+            >
+              <Send className='w-4 h-4' />
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

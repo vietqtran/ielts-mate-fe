@@ -35,38 +35,38 @@ const ListeningExamHistory = () => {
   const pagination = useSelector((state: RootState) => state.listeningExamAttempt.pagination);
 
   // Load attempts when dependencies change
-  useEffect(() => {
-    const loadAttempts = async () => {
-      try {
-        dispatch(setLoading(true));
-        const response = await getListeningExamAttemptsHistory({
-          size: pagination?.pageSize,
-          listeningExamName: filters.searchText,
-          page: pagination?.currentPage,
-          sortBy: filters.sortBy,
-          sortDirection: filters.sortDirection,
-        });
+  const loadAttempts = async () => {
+    try {
+      dispatch(setLoading(true));
+      const response = await getListeningExamAttemptsHistory({
+        size: pagination?.pageSize,
+        listeningExamName: filters.searchText,
+        page: pagination?.currentPage,
+        sortBy: filters.sortBy,
+        sortDirection: filters.sortDirection,
+      });
 
-        if (response?.data) {
-          setAttemptHistoryData(response.data || []);
-          dispatch(
-            setPagination({
-              totalPages: response?.pagination?.totalPages || 1,
-              pageSize: response?.pagination?.pageSize || 12,
-              totalItems: response?.pagination?.totalItems || 0,
-              hasNextPage: response?.pagination?.hasNextPage || false,
-              hasPreviousPage: response?.pagination?.hasPreviousPage || false,
-              currentPage: response?.pagination?.currentPage || 1,
-            })
-          );
-        }
-      } catch (err) {
-        console.error('Failed to load listening exam attempt history:', err);
-      } finally {
-        dispatch(setLoading(false));
+      if (response?.data) {
+        setAttemptHistoryData(response.data || []);
+        dispatch(
+          setPagination({
+            totalPages: response?.pagination?.totalPages || 1,
+            pageSize: response?.pagination?.pageSize || 10,
+            totalItems: response?.pagination?.totalItems || 0,
+            hasNextPage: response?.pagination?.hasNextPage || false,
+            hasPreviousPage: response?.pagination?.hasPreviousPage || false,
+            currentPage: response?.pagination?.currentPage || 1,
+          })
+        );
       }
-    };
+    } catch (err) {
+      console.error('Failed to load listening exam attempt history:', err);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
 
+  useEffect(() => {
     loadAttempts();
   }, [
     filters.searchText,
@@ -106,8 +106,6 @@ const ListeningExamHistory = () => {
   const handleViewAttempt = (attemptId: string) => {
     router.push(`/history/exams/details?mode=listening&examId=${attemptId}`);
   };
-
-  // Filter and sort data locally since the API doesn't support these operations
 
   return (
     <div className='container mx-auto p-6'>
@@ -161,8 +159,8 @@ const ListeningExamHistory = () => {
               </Card>
             ))}
           </div>
-        ) : attemptHistoryData.length === 0 ? (
-          <Card className='bg-white/60 backdrop-blur-lg border rounded-2xl shadow-xl'>
+        ) : attemptHistoryData.length === 0 && !reduxIsLoading ? (
+          <Card>
             <CardContent className='pt-6'>
               <div className='text-center py-12'>
                 <Headphones className='h-12 w-12 mx-auto text-tekhelet-400 mb-4' />
@@ -246,7 +244,7 @@ const ListeningExamHistory = () => {
                       </span>
                     </div>
 
-                    <Separator className='bg-tekhelet-200' />
+                    <Separator />
 
                     {/* Action buttons */}
                     <div className='flex gap-2'>

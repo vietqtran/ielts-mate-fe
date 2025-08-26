@@ -66,7 +66,6 @@ const TakeListeningExam = ({ examData, initialAnswers }: TakeListeningExamProps)
   const [activeTab, setActiveTab] = useState<string>('part1');
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [startTime, setStartTime] = useState<boolean>(false);
-  const [audioId, setAudioId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
 
   // 30 minutes = 1800 seconds for listening exam
@@ -74,7 +73,24 @@ const TakeListeningExam = ({ examData, initialAnswers }: TakeListeningExamProps)
   const timeLeft = useDecrementTimer(EXAM_DURATION, startTime);
   const router = useRouter();
   const { submitListeningExamAnswers, isLoading } = useListeningExam();
-  const { error, isLoading: audioLoading, mutate, objectUrl } = useListeningAudio(audioId);
+
+  // Preload all audios for each part on mount using SWR
+  const part1AudioId = examData.listening_exam.listening_task_id_part1?.audio_file_id ?? null;
+  const part2AudioId = examData.listening_exam.listening_task_id_part2?.audio_file_id ?? null;
+  const part3AudioId = examData.listening_exam.listening_task_id_part3?.audio_file_id ?? null;
+  const part4AudioId = examData.listening_exam.listening_task_id_part4?.audio_file_id ?? null;
+
+  const audioPart1 = useListeningAudio(part1AudioId);
+  const audioPart2 = useListeningAudio(part2AudioId);
+  const audioPart3 = useListeningAudio(part3AudioId);
+  const audioPart4 = useListeningAudio(part4AudioId);
+
+  const audioByPart: Record<string, { objectUrl: string | undefined; isLoading: boolean }> = {
+    part1: { objectUrl: audioPart1.objectUrl, isLoading: audioPart1.isLoading },
+    part2: { objectUrl: audioPart2.objectUrl, isLoading: audioPart2.isLoading },
+    part3: { objectUrl: audioPart3.objectUrl, isLoading: audioPart3.isLoading },
+    part4: { objectUrl: audioPart4.objectUrl, isLoading: audioPart4.isLoading },
+  };
 
   // Initialize answers and start timer when component mounts
   useEffect(() => {
@@ -82,21 +98,7 @@ const TakeListeningExam = ({ examData, initialAnswers }: TakeListeningExamProps)
     setStartTime(true);
   }, [initialAnswers]);
 
-  // Load audio for current part
-  useEffect(() => {
-    const loadCurrentPartAudio = async () => {
-      const currentPart = parts.find((part) => part.key === activeTab);
-      if (currentPart?.data.audio_file_id) {
-        try {
-          setAudioId(currentPart.data.audio_file_id);
-        } catch (error) {
-          console.error('Failed to load audio:', error);
-        }
-      }
-    };
-
-    loadCurrentPartAudio();
-  }, [activeTab]);
+  // All audios are preloaded above via SWR hooks; no per-tab fetch needed
 
   // Auto-submit when time runs out
   useEffect(() => {
@@ -223,37 +225,29 @@ const TakeListeningExam = ({ examData, initialAnswers }: TakeListeningExamProps)
           group.questions!.forEach((question) => {
             const answer = partAnswers[question.question_id];
 
-            // Only include answers that have actual data
+            let selectedAnswers: string[] | null = null;
             if (answer) {
-              let hasValidAnswer = false;
-              let selectedAnswers: string[] = [];
-
               if (Array.isArray(answer.answer_id)) {
-                selectedAnswers = answer.answer_id.filter((id) => id && id.trim() !== '');
-                hasValidAnswer = selectedAnswers.length > 0;
+                const filtered = answer.answer_id.filter((id) => id && id.trim() !== '');
+                selectedAnswers = filtered.length > 0 ? filtered : null;
               } else {
                 const answerStr = answer.answer_id.toString().trim();
-                if (answerStr !== '') {
-                  selectedAnswers = [answerStr];
-                  hasValidAnswer = true;
-                }
-              }
-
-              // Only add to payload if there's a valid answer
-              if (hasValidAnswer) {
-                // Get all choice IDs for multiple choice questions
-                const choiceIds: string[] = [];
-                if (question.choices && question.choices.length > 0) {
-                  choiceIds.push(...question.choices.map((choice) => choice.choice_id));
-                }
-
-                transformedAnswers.push({
-                  question_id: question.question_id,
-                  selected_answers: selectedAnswers,
-                  choice_ids: choiceIds,
-                });
+                selectedAnswers = answerStr !== '' ? [answerStr] : null;
               }
             }
+
+            // Get all choice IDs for multiple choice questions
+            const choiceIds: string[] = [];
+            if (question.choices && question.choices.length > 0) {
+              choiceIds.push(...question.choices.map((choice) => choice.choice_id));
+            }
+
+            // Always include the question in payload
+            transformedAnswers.push({
+              question_id: question.question_id,
+              selected_answers: selectedAnswers,
+              choice_ids: choiceIds,
+            });
           });
         });
       });
@@ -276,7 +270,7 @@ const TakeListeningExam = ({ examData, initialAnswers }: TakeListeningExamProps)
       setIsModalOpen(false);
 
       if (result) {
-        router.push(`/exams/listening/details?mode=listening&examId=${examData.exam_attempt_id}`);
+        router.push(`/history/exams/details?mode=listening&examId=${examData.exam_attempt_id}`);
       }
     } catch (error) {
       console.error('Error submitting listening exam:', error);
@@ -302,7 +296,6 @@ const TakeListeningExam = ({ examData, initialAnswers }: TakeListeningExamProps)
   const totalQuestions = getTotalQuestions();
   const answeredQuestions = getAnsweredQuestions();
   const notAnsweredQuestions = getNotAnsweredQuestions();
-  const progressPercentage = totalQuestions > 0 ? (answeredQuestions / totalQuestions) * 100 : 0;
 
   return (
     <>
@@ -352,7 +345,7 @@ const TakeListeningExam = ({ examData, initialAnswers }: TakeListeningExamProps)
           // Listening layout: 4-6-2 columns
           gridClassName='gap-6 p-6'
           leftColClassName='col-span-4'
-          centerColClassName='col-span-6'
+          centerColClassName='col-span-5'
           rightColClassName='col-span-2'
           glass
           renderLeftColumn={(part) => (
@@ -363,26 +356,27 @@ const TakeListeningExam = ({ examData, initialAnswers }: TakeListeningExamProps)
                   Audio Controls
                 </CardTitle>
               </CardHeader>
-              <CardContent className='flex-1 p-6 space-y-4 min-h-0 overflow-y-auto'>
+              <CardContent className='flex-1 px-6 space-y-4 min-h-0 overflow-y-auto'>
                 {/* Audio Info */}
-                <div className='text-center space-y-2'>
-                  <h3 className='font-semibold text-tekhelet-600'>{part.data.title}</h3>
-                  <p className='text-sm text-medium-slate-blue-500'>{part.data.instruction}</p>
+                <div className='space-y-2'>
+                  <h3 className='font-semibold text-tekhelet-400'>{part.data.title}</h3>
+                  <p className='text-sm text-tekhelet-500'>{part.data.instruction}</p>
                 </div>
 
-                {objectUrl ? (
+                {audioByPart[part.key]?.objectUrl ? (
                   <>
                     <audio
                       ref={audioRef}
-                      src={objectUrl}
+                      src={audioByPart[part.key]?.objectUrl}
                       preload='metadata'
                       controls
                       controlsList='nodownload'
+                      className='w-full'
                     />
                   </>
                 ) : (
-                  <div className='text-center text-medium-slate-blue-500'>
-                    {audioLoading ? 'Loading audio...' : 'No audio available'}
+                  <div className='text-center text-selective-yellow-300'>
+                    {audioByPart[part.key]?.isLoading ? 'Loading audio...' : 'No audio available'}
                   </div>
                 )}
               </CardContent>

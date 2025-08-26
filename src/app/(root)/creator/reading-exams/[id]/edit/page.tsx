@@ -44,10 +44,7 @@ import * as z from 'zod';
 const formSchema = z.object({
   reading_exam_name: z.string().min(3, 'Exam name must be at least 3 characters'),
   reading_exam_description: z.string().min(10, 'Description must be at least 10 characters'),
-  url_slug: z
-    .string()
-    .min(3, 'URL slug must be at least 3 characters')
-    .regex(/^[a-z0-9-]+$/, 'URL slug can only contain lowercase letters, numbers, and hyphens'),
+  url_slug: z.string().min(3, 'URL slug must be at least 3 characters'),
   reading_passage_id_part1: z.string().min(1, 'Reading passage for part 1 is required'),
   reading_passage_id_part2: z.string().min(1, 'Reading passage for part 2 is required'),
   reading_passage_id_part3: z.string().min(1, 'Reading passage for part 3 is required'),

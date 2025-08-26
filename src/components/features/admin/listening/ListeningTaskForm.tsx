@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { useToast } from '@/components/ui/use-toast';
 import { useListeningTask } from '@/hooks';
 import {
@@ -539,7 +540,11 @@ export function ListeningTaskForm({
                 <FormItem>
                   <FormLabel>Transcript</FormLabel>
                   <FormControl>
-                    <Textarea placeholder='Enter transcript' {...field} rows={10} />
+                    <TiptapEditor
+                      content={field.value}
+                      onChange={field.onChange}
+                      placeholder='Enter transcript of the audio...'
+                    />
                   </FormControl>
                   <FormDescription>Manual transcript of the audio</FormDescription>
                   <FormMessage />

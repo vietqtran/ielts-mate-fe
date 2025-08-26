@@ -1,4 +1,5 @@
 'use client';
+import NotFound from '@/app/not-found';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useParams, useRouter } from 'next/navigation';
@@ -14,6 +15,10 @@ export default function ExamsLayout({ children }: { children: ReactNode }) {
       router.push(`/exams/${value}`);
     }
   };
+
+  if (tab !== 'reading' && tab !== 'listening') {
+    return <NotFound />;
+  }
 
   return (
     <div className='container mx-auto p-6'>
