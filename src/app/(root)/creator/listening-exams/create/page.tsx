@@ -1,6 +1,14 @@
 'use client';
+import { TaskSelectionTable } from '@/components/features/listening-exams/TaskSelectionTable';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -11,28 +19,12 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import LoadingSpinner from '@/components/ui/loading-spinner';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { SlugInput } from '@/components/ui/slug-input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
 import { Textarea } from '@/components/ui/textarea';
 import { useListeningExam } from '@/hooks/apis/admin/useListeningExam';
-import { useListeningTask } from '@/hooks/apis/listening/useListeningTask';
-import { ListeningTaskFilterParams } from '@/types/listening/listening.types';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -63,14 +55,16 @@ const formSchema = z
 
 type FormValues = z.infer<typeof formSchema>;
 
-type PartKey = 'part1_id' | 'part2_id' | 'part3_id' | 'part4_id';
-const PARTS: PartKey[] = ['part1_id', 'part2_id', 'part3_id', 'part4_id'];
-const PART_LABELS = ['Part 1', 'Part 2', 'Part 3', 'Part 4'];
-
 export default function CreateListeningExamPage() {
   const router = useRouter();
-  const { getListeningTasksByCreator, isLoading: isLoadingTask } = useListeningTask();
-  const { createExam, generateSlug, checkSlug, isLoading: isLoadingExam } = useListeningExam();
+  const { createExam, generateSlug, checkSlug, isLoading } = useListeningExam();
+  const [selectedTasks, setSelectedTasks] = useState({
+    part1: '',
+    part2: '',
+    part3: '',
+    part4: '',
+  });
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   // Memoize the checkSlug function to prevent infinite re-renders
   const memoizedCheckSlug = useCallback(
@@ -79,23 +73,6 @@ export default function CreateListeningExamPage() {
     },
     [checkSlug]
   );
-
-  const [tasks, setTasks] = useState<any[]>([]);
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-    pageSize: 10,
-    totalItems: 0,
-    hasNextPage: false,
-    hasPreviousPage: false,
-  });
-  const [filters, setFilters] = useState<ListeningTaskFilterParams>({
-    page: 1,
-    size: 10,
-    sort_by: 'updatedAt',
-    sort_direction: 'desc',
-    status: ['4'], // Only fetch tasks with status = 4 (test)
-  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -110,126 +87,54 @@ export default function CreateListeningExamPage() {
     },
   });
 
-  const fetchTasks = async () => {
-    try {
-      const response = await getListeningTasksByCreator(filters);
-      if (response) {
-        setTasks(response.data);
-        if (response.pagination) setPagination(response.pagination);
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
+  // Update form values when selected tasks change
   useEffect(() => {
-    fetchTasks();
-  }, [filters]);
+    form.setValue('part1_id', selectedTasks.part1);
+    form.setValue('part2_id', selectedTasks.part2);
+    form.setValue('part3_id', selectedTasks.part3);
+    form.setValue('part4_id', selectedTasks.part4);
+  }, [selectedTasks, form]);
 
-  // Unify filter changes like in listings page
-  const handleFilterChange = (newFilters: Partial<ListeningTaskFilterParams>) => {
-    setFilters((prev) => ({
-      ...prev,
-      ...newFilters,
-      page: 1,
-    }));
+  const handleTaskSelect = (taskId: string, _taskTitle: string, partNumber: number) => {
+    const partKey = `part${partNumber}` as keyof typeof selectedTasks;
+    setSelectedTasks((prev) => ({ ...prev, [partKey]: taskId }));
   };
-
-  const handlePageChange = (page: number) => {
-    setFilters((prev) => ({
-      ...prev,
-      page,
-    }));
-  };
-
-  // Radio selection logic: only one task per part, and a task can't be assigned to multiple parts
-  const handleRadioSelect = async (part: PartKey, taskId: string) => {
-    try {
-      // Remove this task from any other part
-      const currentValues = form.getValues();
-      const updatedValues = { ...currentValues };
-      PARTS.forEach((p) => {
-        if (p !== part && updatedValues[p] === taskId) {
-          updatedValues[p] = '';
-        }
-      });
-      updatedValues[part] = taskId;
-      form.reset(updatedValues);
-    } catch (error: any) {
-      if (error?.error_code === '000002') {
-        toast.error(
-          'Cannot assign this task to multiple parts. Please remove it from other parts first.'
-        );
-      } else {
-        toast.error('Failed to assign task to part');
-      }
-    }
-  };
-
-  // Remove a selected task from a part
-  const handleRemovePart = (part: PartKey) => {
-    const currentValues = form.getValues();
-    form.setValue(part, '');
-  };
-
-  // Helper to get task info by id
-  const getTaskById = (taskId: string) => tasks.find((t) => t.task_id === taskId) || null;
 
   const onSubmit = async (values: FormValues) => {
     try {
-      // Check if all parts are selected
-      const partIds = [values.part1_id, values.part2_id, values.part3_id, values.part4_id];
-      const missingParts = partIds.filter((id) => !id);
-
-      if (missingParts.length > 0) {
-        toast.error(`Please select all parts. Missing ${missingParts.length} part(s).`);
-        return;
-      }
-
-      // Check if all parts are different
-      const uniqueParts = new Set(partIds);
-      if (uniqueParts.size !== 4) {
-        toast.error('Each part must be a different task. Please check again.');
-        return;
-      }
-
+      setIsSubmitted(true);
       await createExam(values);
       toast.success('Listening exam created successfully');
       router.push('/creator/listening-exams');
     } catch (error) {
+      setIsSubmitted(false);
       console.log(error);
-      toast.error('There was an error creating the listening exam. Please try again.');
     }
   };
 
   return (
     <div className='container mx-auto p-6'>
-      <Card className='mb-8'>
-        <CardHeader>
-          <CardTitle>Create Listening Exam</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                const partIds = [
-                  form.getValues('part1_id'),
-                  form.getValues('part2_id'),
-                  form.getValues('part3_id'),
-                  form.getValues('part4_id'),
-                ];
-                const missingParts = partIds.filter((id) => !id);
-                if (missingParts.length > 0) {
-                  toast.error(`Please select all parts. Missing ${missingParts.length} part(s).`);
-                  return;
-                }
+      <div className='mb-6'>
+        <Button variant='ghost' asChild className='mb-6'>
+          <Link href='/creator/listening-exams'>
+            <ArrowLeft className='mr-2 h-4 w-4' />
+            Back to Listening Exams
+          </Link>
+        </Button>
+        <h1 className='text-3xl font-bold'>Create Listening Exam</h1>
+      </div>
 
-                form.handleSubmit(onSubmit)(e);
-              }}
-              className='space-y-6'
-            >
-              <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+      <div className='space-y-6'>
+        <Card>
+          <CardHeader>
+            <CardTitle>New Listening Exam</CardTitle>
+            <CardDescription>
+              Create a new IELTS listening exam with four listening tasks
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
                 <FormField
                   control={form.control}
                   name='exam_name'
@@ -243,6 +148,25 @@ export default function CreateListeningExamPage() {
                     </FormItem>
                   )}
                 />
+
+                <FormField
+                  control={form.control}
+                  name='exam_description'
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder='Enter detailed description of the exam'
+                          {...field}
+                          rows={4}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
                 <FormField
                   control={form.control}
                   name='url_slug'
@@ -251,278 +175,135 @@ export default function CreateListeningExamPage() {
                       value={field.value}
                       onChange={field.onChange}
                       onGenerateSlug={async () => {
-                        return await generateSlug(form.getValues('exam_name'));
+                        const examName = form.getValues('exam_name');
+                        return await generateSlug(examName);
                       }}
                       onCheckSlug={memoizedCheckSlug}
-                      examName={form.getValues('exam_name')}
+                      examName={form.watch('exam_name')}
                     />
                   )}
                 />
-              </div>
-              <FormField
-                control={form.control}
-                name='exam_description'
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder='Enter detailed description of the exam'
-                        {...field}
-                        rows={3}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type='submit' disabled={isLoadingExam.createExam}>
-                {isLoadingExam.createExam ? <LoadingSpinner color='white' /> : 'Create Exam'}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
-      {/* Selected Parts Table */}
-      <Card className='mb-8'>
-        <CardHeader>
-          <CardTitle>Selected Tasks for Each Part</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Part</TableHead>
-                <TableHead>Task Title</TableHead>
-                <TableHead>Part Number</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {PARTS.map((part, idx) => {
-                const taskId = form.watch(part);
-                const task = getTaskById(taskId);
-                return (
-                  <TableRow key={part}>
-                    <TableCell>{PART_LABELS[idx]}</TableCell>
-                    <TableCell>
-                      {task ? (
-                        task.title
+
+                <div className='grid grid-cols-1 md:grid-cols-4 gap-4'>
+                  <FormField
+                    control={form.control}
+                    name='part1_id'
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Listening Task (Part 1)</FormLabel>
+                        <FormControl>
+                          <div className='p-2 border rounded-md'>
+                            {selectedTasks.part1 ? (
+                              <div className='text-sm font-medium'>
+                                Selected task ID: {selectedTasks.part1}
+                              </div>
+                            ) : (
+                              <div className='text-sm text-muted-foreground'>No task selected</div>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name='part2_id'
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Listening Task (Part 2)</FormLabel>
+                        <FormControl>
+                          <div className='p-2 border rounded-md'>
+                            {selectedTasks.part2 ? (
+                              <div className='text-sm font-medium'>
+                                Selected task ID: {selectedTasks.part2}
+                              </div>
+                            ) : (
+                              <div className='text-sm text-muted-foreground'>No task selected</div>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name='part3_id'
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Listening Task (Part 3)</FormLabel>
+                        <FormControl>
+                          <div className='p-2 border rounded-md'>
+                            {selectedTasks.part3 ? (
+                              <div className='text-sm font-medium'>
+                                Selected task ID: {selectedTasks.part3}
+                              </div>
+                            ) : (
+                              <div className='text-sm text-muted-foreground'>No task selected</div>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name='part4_id'
+                    render={() => (
+                      <FormItem>
+                        <FormLabel>Listening Task (Part 4)</FormLabel>
+                        <FormControl>
+                          <div className='p-2 border rounded-md'>
+                            {selectedTasks.part4 ? (
+                              <div className='text-sm font-medium'>
+                                Selected task ID: {selectedTasks.part4}
+                              </div>
+                            ) : (
+                              <div className='text-sm text-muted-foreground'>No task selected</div>
+                            )}
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                {!isSubmitted && (
+                  <CardFooter className='flex justify-end px-0 pt-4'>
+                    <Button
+                      type='submit'
+                      disabled={
+                        isLoading['createExam'] ||
+                        !selectedTasks.part1 ||
+                        !selectedTasks.part2 ||
+                        !selectedTasks.part3 ||
+                        !selectedTasks.part4
+                      }
+                    >
+                      {isLoading['createExam'] ? (
+                        <>
+                          <LoadingSpinner color='white' />
+                          <span className='ml-2'>Creating...</span>
+                        </>
                       ) : (
-                        <span className='text-muted-foreground'>No task selected</span>
+                        'Create Listening Exam'
                       )}
-                    </TableCell>
-                    <TableCell>{task ? task.part_number + 1 : '-'}</TableCell>
-                    <TableCell>{task ? 'Test' : '-'}</TableCell>
-                    <TableCell>
-                      {task && (
-                        <Button size='sm' variant='outline' onClick={() => handleRemovePart(part)}>
-                          Remove
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </CardContent>
-      </Card>
-      {/* Main Task Table with filter/search and radio selection */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Available Test Listening Tasks</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {/* Filter & Sort toolbar */}
-          <div className='mb-4 flex flex-col gap-3 md:flex-row md:items-center'>
-            <div className='flex-1'>
-              <Input
-                placeholder='Search by title...'
-                value={filters.title || ''}
-                onChange={(e) => handleFilterChange({ title: e.target.value })}
-              />
-            </div>
-            <div className='flex gap-2 items-center'>
-              <Select
-                value={
-                  Array.isArray(filters.part_number) && filters.part_number.length > 0
-                    ? String(Number(filters.part_number[0]) + 1)
-                    : ''
-                }
-                onValueChange={(v) =>
-                  handleFilterChange({
-                    part_number: v && v !== 'all' ? [String(Number(v) - 1)] : undefined,
-                  })
-                }
-              >
-                <SelectTrigger className='w-[140px]'>
-                  <SelectValue placeholder='All Parts' />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value='all'>All Parts</SelectItem>
-                  <SelectItem value='1'>Part 1</SelectItem>
-                  <SelectItem value='2'>Part 2</SelectItem>
-                  <SelectItem value='3'>Part 3</SelectItem>
-                  <SelectItem value='4'>Part 4</SelectItem>
-                </SelectContent>
-              </Select>
+                    </Button>
+                  </CardFooter>
+                )}
+              </form>
+            </Form>
+          </CardContent>
+        </Card>
 
-              <Button
-                variant='outline'
-                onClick={() =>
-                  handleFilterChange({
-                    sort_by: 'updatedAt',
-                    sort_direction:
-                      filters.sort_by === 'updatedAt' ? filters.sort_direction : 'desc',
-                  })
-                }
-              >
-                Sort: Updated At{' '}
-                {filters.sort_by === 'updatedAt' ? (
-                  filters.sort_direction === 'asc' ? (
-                    <ArrowUp className='ml-2 h-4 w-4' />
-                  ) : (
-                    <ArrowDown className='ml-2 h-4 w-4' />
-                  )
-                ) : (
-                  <ArrowUpDown className='ml-2 h-4 w-4 text-muted-foreground' />
-                )}
-              </Button>
-              <Button
-                variant='outline'
-                onClick={() =>
-                  handleFilterChange({
-                    sort_by: 'createdAt',
-                    sort_direction:
-                      filters.sort_by === 'createdAt' ? filters.sort_direction : 'desc',
-                  })
-                }
-              >
-                Sort: Created At{' '}
-                {filters.sort_by === 'createdAt' ? (
-                  filters.sort_direction === 'asc' ? (
-                    <ArrowUp className='ml-2 h-4 w-4' />
-                  ) : (
-                    <ArrowDown className='ml-2 h-4 w-4' />
-                  )
-                ) : (
-                  <ArrowUpDown className='ml-2 h-4 w-4 text-muted-foreground' />
-                )}
-              </Button>
-              <Button
-                variant='outline'
-                title='Toggle sort direction'
-                onClick={() =>
-                  handleFilterChange({
-                    sort_direction: filters.sort_direction === 'asc' ? 'desc' : 'asc',
-                  })
-                }
-              >
-                {filters.sort_direction === 'asc' ? (
-                  <ArrowUp className='h-4 w-4' />
-                ) : (
-                  <ArrowDown className='h-4 w-4' />
-                )}
-              </Button>
-              <Button
-                variant='ghost'
-                onClick={() =>
-                  setFilters({
-                    page: 1,
-                    size: 10,
-                    sort_by: 'updatedAt',
-                    sort_direction: 'desc',
-                    status: ['4'], // Maintain status filter for test tasks
-                  })
-                }
-              >
-                Clear
-              </Button>
-            </div>
-          </div>
-
-          {isLoadingTask['getListeningTasksByCreator'] ? (
-            <div className='flex justify-center py-8'>
-              <LoadingSpinner />
-            </div>
-          ) : (
-            <>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Part</TableHead>
-                    <TableHead>Created At</TableHead>
-                    {PART_LABELS.map((label) => (
-                      <TableHead key={label}>{label}</TableHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tasks.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={8} className='text-center py-6'>
-                        No listening tasks found.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    tasks.map((task) => (
-                      <TableRow key={task.task_id}>
-                        <TableCell>{task.title}</TableCell>
-                        <TableCell>{task.part_number + 1}</TableCell>
-                        <TableCell>
-                          {task.created_at ? new Date(task.created_at).toLocaleString() : ''}
-                        </TableCell>
-                        {PARTS.map((part) => (
-                          <TableCell key={part} className='text-center'>
-                            <input
-                              type='radio'
-                              name={part}
-                              value={task.task_id}
-                              checked={form.watch(part) === task.task_id}
-                              onChange={() => handleRadioSelect(part, task.task_id)}
-                              disabled={
-                                Object.values(form.getValues()).includes(task.task_id) &&
-                                form.watch(part) !== task.task_id
-                              }
-                            />
-                          </TableCell>
-                        ))}
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-              {/* Pagination Controls */}
-              <div className='mt-4 flex items-center justify-between'>
-                <div className='text-sm text-muted-foreground'>
-                  Page {pagination.currentPage} of {pagination.totalPages}
-                </div>
-                <div className='flex gap-2'>
-                  <Button
-                    variant='outline'
-                    onClick={() => handlePageChange(Math.max(1, pagination.currentPage - 1))}
-                    disabled={!pagination.hasPreviousPage}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant='outline'
-                    onClick={() =>
-                      handlePageChange(Math.min(pagination.totalPages, pagination.currentPage + 1))
-                    }
-                    disabled={!pagination.hasNextPage}
-                  >
-                    Next
-                  </Button>
-                </div>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+        <TaskSelectionTable onSelect={handleTaskSelect} selectedTasks={selectedTasks} />
+      </div>
     </div>
   );
 }
