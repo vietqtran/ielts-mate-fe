@@ -74,6 +74,11 @@ export function MultipleChoiceManager({
           );
           // Refetch passage data to get updated question order
           refetchPassageData();
+
+          // Early return after order update to avoid duplicate processing
+          setEditingQuestion(null);
+          setIsAddingOrEditing(false);
+          return;
         }
 
         // 2. Sequentially process updates according to required logic:
