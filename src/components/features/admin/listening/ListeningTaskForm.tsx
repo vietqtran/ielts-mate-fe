@@ -223,6 +223,30 @@ export function ListeningTaskForm({
         }
       }
 
+      // Validate points for status change to TEST or PUBLISHED
+      if (
+        values.status === ListeningTaskStatus.TEST ||
+        values.status === ListeningTaskStatus.PUBLISHED
+      ) {
+        const totalPoints = questionGroups.reduce((total, group) => {
+          return (
+            total +
+            group.questions.reduce((groupTotal: number, question: any) => {
+              return groupTotal + (question.point || 1);
+            }, 0)
+          );
+        }, 0);
+
+        if (totalPoints < 10) {
+          toast({
+            title: 'Insufficient Points',
+            description: `This listening task requires at least 10 points to publish or test. Current points: ${totalPoints}`,
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
       if (mode === 'create') {
         // In create mode, audio_file is required
         if (!values.audio_file) {
