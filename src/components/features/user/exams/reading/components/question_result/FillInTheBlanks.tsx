@@ -13,21 +13,29 @@ const FillInTheBlanksResult = ({
 
   return (
     <div
-      className={`${
-        isAnswerCorrect ? 'bg-green-100/30' : 'bg-red-100/30'
-      } rounded-lg border p-4 space-y-4`}
+      className={`rounded-lg border p-4 space-y-4 ${
+        isAnswerCorrect
+          ? 'border-green-400 bg-green-50/30'
+          : hasAnswer
+            ? 'border-red-400 bg-red-50/30'
+            : 'border-gray-300 bg-white/70'
+      }`}
     >
       {/* Points */}
       <div className='flex items-center justify-between text-xs text-tekhelet-500'>
         <span className='font-medium text-tekhelet-400'>Fill in the blanks</span>
         <div className='flex items-center gap-2'>
           {isAnswerCorrect ? (
-            <Badge variant={'outline'} className='bg-green-700 text-white'>
+            <Badge variant={'outline'} className='bg-green-600 text-white'>
               Correct
             </Badge>
-          ) : (
-            <Badge variant={'outline'} className='bg-red-700 text-white'>
+          ) : hasAnswer ? (
+            <Badge variant={'outline'} className='bg-red-500 text-white'>
               Incorrect
+            </Badge>
+          ) : (
+            <Badge variant={'outline'} className='bg-gray-500 text-white'>
+              Not Answered
             </Badge>
           )}
           <span>Points: {question.point ?? 1}</span>
