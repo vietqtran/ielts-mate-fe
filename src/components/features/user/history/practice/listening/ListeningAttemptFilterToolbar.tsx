@@ -27,10 +27,10 @@ interface ListeningAttemptFilterToolbarProps {
 }
 
 const sortOptions = [
-  { value: 'createdAt', label: 'Created Date' },
-  { value: 'title', label: 'Title' },
-  { value: 'ieltsType', label: 'IELTS Type' },
-  { value: 'partNumber', label: 'Part Number' },
+  { value: 'createdAt', label: 'Created At' },
+  { value: 'finishedAt', label: 'Finished At' },
+  { value: 'totalPoints', label: 'Total Points' },
+  { value: 'status', label: 'Status' },
 ];
 
 export const ListeningAttemptFilterToolbar = memo(function ListeningAttemptFilterToolbar({

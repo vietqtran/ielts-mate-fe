@@ -51,6 +51,9 @@ export function usePassage() {
           ieltsType: params?.ieltsType?.length ? params?.ieltsType?.join(',') : undefined,
           partNumber: params?.partNumber?.length ? params?.partNumber?.join(',') : undefined,
           title: params?.title,
+          sortBy: params?.sortBy || undefined,
+          sortDirection: params?.sortDirection || undefined,
+          questionCategory: params?.questionCategory || undefined,
         },
       });
       return data as BaseResponse<PassageGetResponse[]>;

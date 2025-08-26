@@ -10,7 +10,6 @@ const AttemptMultipleChoicesResult = ({ question, userAnswers }: AttemptQuestion
   const userChoiceLabels = choices
     .filter((choice) => userChoices.includes(choice.choice_id))
     .map((choice) => choice.label);
-  console.log('userChoiceLabels', userChoiceLabels);
   const hasAnswer = userChoiceLabels.length > 0;
   const isAnswerCorrect = choices.every((choice) => {
     if (choice.is_correct) {
