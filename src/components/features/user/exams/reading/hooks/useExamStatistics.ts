@@ -1,8 +1,10 @@
 'use client';
 
+import { getQuestionResultStatus } from '@/components/features/user/exams/reading/components/QuestionResultRenderer';
 import { ReadingExamAttemptDetailsResponse } from '@/types/reading/reading-exam-attempt.types';
 import { ExamStats } from '../utils/examUtils';
 
+// Calculates stats for a reading exam attempt details, aligning with practice stats logic
 export const useExamStatistics = (
   examDetails: ReadingExamAttemptDetailsResponse | null
 ): ExamStats | null => {
@@ -15,44 +17,37 @@ export const useExamStatistics = (
   ];
 
   let totalQuestions = 0;
-  let correctAnswers = 0;
+  let totalCorrect = 0;
+  let totalNotAnswered = 0;
   let totalPoints = 0;
 
   const partStats = parts.map((part, index) => {
     let partQuestions = 0;
     let partCorrect = 0;
+    let partNotAnswered = 0;
     let partPoints = 0;
 
     part.question_groups.forEach((group) => {
-      if (group.questions && group.questions.length > 0) {
-        group.questions.forEach((question) => {
-          partQuestions++;
-          const userAnswers = examDetails.answers[question.question_id] || [];
-          const correctAnswer = question.correct_answer || '';
+      if (!group.questions || group.questions.length === 0) return;
+      group.questions.forEach((question) => {
+        partQuestions += 1;
+        const userAnswers = examDetails.answers[question.question_id] || [];
 
-          // Check if answer is correct based on question type
-          let isCorrect = false;
-          if (question.question_type === 0 && question.choices) {
-            // Multiple choice - check by choice ID
-            const correctChoiceId = question.choices.find((choice) => choice.is_correct)?.choice_id;
-            isCorrect = userAnswers.includes(correctChoiceId || '');
-          } else {
-            // Text-based answers
-            isCorrect =
-              userAnswers.length > 0 &&
-              userAnswers.join('').toLowerCase() === correctAnswer.toLowerCase();
-          }
-
-          if (isCorrect) {
-            partCorrect++;
-            partPoints += question.point || 1;
-          }
-        });
-      }
+        const status = getQuestionResultStatus(question, userAnswers);
+        if (status == null) {
+          partNotAnswered += 1;
+          return;
+        }
+        if (status === true) {
+          partCorrect += 1;
+          partPoints += question.point || 1;
+        }
+      });
     });
 
     totalQuestions += partQuestions;
-    correctAnswers += partCorrect;
+    totalCorrect += partCorrect;
+    totalNotAnswered += partNotAnswered;
     totalPoints += partPoints;
 
     return {
@@ -64,15 +59,18 @@ export const useExamStatistics = (
     };
   });
 
+  const incorrectAnswers = totalQuestions - totalCorrect - totalNotAnswered;
   const scorePercentage =
-    totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+    totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
 
   return {
     totalQuestions,
-    correctAnswers,
-    incorrectAnswers: totalQuestions - correctAnswers,
+    correctAnswers: totalCorrect,
+    incorrectAnswers,
+    notAnswered: totalNotAnswered,
     totalPoints,
     scorePercentage,
+    correctPercentage: scorePercentage,
     partStats,
   };
 };

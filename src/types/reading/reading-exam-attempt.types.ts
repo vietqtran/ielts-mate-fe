@@ -126,6 +126,7 @@ export type ReadingExamAttemptList = ReadingExamAttempt[];
 // Start of Reading Exam Attempt Details Response
 export interface ReadingExamAttemptDetailsResponse {
   exam_attempt_id: string;
+  estimated_ielts_band: number;
   reading_exam: ReadingExamAttemptDetailsMainResponse;
   duration: number;
   total_point: number;

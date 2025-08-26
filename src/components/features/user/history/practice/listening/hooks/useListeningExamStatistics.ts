@@ -1,5 +1,6 @@
 'use client';
 
+import { isAttemptQuestionCorrect } from '@/components/features/user/common/attempt/AttemptQuestionResultRenderer';
 import { ExamStats } from '@/components/features/user/exams/reading/utils/examUtils';
 import { LoadListeningAttemptResultResponse } from '@/types/listening/listening-attempt.types';
 
@@ -9,53 +10,28 @@ export const useListeningExamStatistics = (
   if (!attemptDetails) return null;
 
   const questionGroups = attemptDetails.task_data.question_groups;
-  let totalQuestions = 0;
+  const allQuestions = questionGroups.flatMap((g) => g.questions);
+  const totalQuestions = allQuestions.length;
 
-  // Since we don't have direct access to questions in the result response,
-  // we'll calculate stats based on the answers provided
-  const userAnswersMap = new Map<string, string[]>();
-  attemptDetails.answers.forEach((answer) => {
-    const answerValues: string[] = [];
-
-    if (answer.choice_ids && answer.choice_ids.length > 0) {
-      answerValues.push(...answer.choice_ids);
-    }
-    if (answer.filled_text_answer) {
-      answerValues.push(answer.filled_text_answer);
-    }
-    if (answer.matched_text_answer) {
-      answerValues.push(answer.matched_text_answer);
-    }
-    if (answer.drag_item_id) {
-      answerValues.push(answer.drag_item_id);
-    }
-
-    userAnswersMap.set(answer.question_id, answerValues);
-  });
-
-  // Calculate total questions from question groups
-  questionGroups.forEach((group) => {
-    totalQuestions += group.questions.length;
-  });
-
-  // Create part stats based on question groups
+  // Build part stats mirroring ListeningQuestionAnalysis filtering logic
   const partStats = questionGroups.map((group, index) => {
     let groupCorrect = 0;
-    let groupPoints = 0;
+    let groupNotAnswered = 0;
 
-    // Calculate correct answers and points for this group
-    group.questions.forEach((question) => {
-      const answer = attemptDetails.answers.find((a) => a.question_id === question.question_id);
-      if (answer) {
-        // Check if the answer is correct
-        const isCorrect =
-          answer.filled_text_answer === question.correct_answer ||
-          (answer.choice_ids && answer.choice_ids.includes(question.correct_answer!));
-
-        if (isCorrect) {
-          groupCorrect++;
-          groupPoints += question.point;
-        }
+    group.questions.forEach((q) => {
+      const userAnswers = attemptDetails.answers.filter((a) => a.question_id === q.question_id);
+      const hasAnswer =
+        userAnswers.length > 0 &&
+        ((userAnswers[0].choice_ids && userAnswers[0].choice_ids.length > 0) ||
+          !!userAnswers[0].filled_text_answer ||
+          !!userAnswers[0].matched_text_answer ||
+          !!userAnswers[0].drag_item_id);
+      if (!hasAnswer) {
+        groupNotAnswered += 1;
+        return;
+      }
+      if (isAttemptQuestionCorrect(q, userAnswers)) {
+        groupCorrect += 1;
       }
     });
 
@@ -66,22 +42,35 @@ export const useListeningExamStatistics = (
       title: `Part ${index + 1}`,
       questions: group.questions.length,
       correct: groupCorrect,
-      points: groupPoints,
+      points: groupCorrect,
       percentage: groupPercentage,
     };
   });
 
-  // Calculate overall statistics
   const totalCorrect = partStats.reduce((sum, part) => sum + part.correct, 0);
+  const totalNotAnswered = allQuestions.reduce((acc, q) => {
+    const userAnswers = attemptDetails.answers.filter((a) => a.question_id === q.question_id);
+    const hasAnswer =
+      userAnswers.length > 0 &&
+      ((userAnswers[0].choice_ids && userAnswers[0].choice_ids.length > 0) ||
+        !!userAnswers[0].filled_text_answer ||
+        !!userAnswers[0].matched_text_answer ||
+        !!userAnswers[0].drag_item_id);
+    return acc + (hasAnswer ? 0 : 1);
+  }, 0);
+
+  const incorrectAnswers = totalQuestions - totalCorrect - totalNotAnswered;
   const scorePercentage =
     totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
 
   return {
     totalQuestions,
     correctAnswers: totalCorrect,
-    incorrectAnswers: totalQuestions - totalCorrect,
-    totalPoints: attemptDetails.total_points,
+    incorrectAnswers,
+    notAnswered: totalNotAnswered,
+    totalPoints: totalCorrect,
     scorePercentage,
+    correctPercentage: scorePercentage,
     partStats,
   };
 };

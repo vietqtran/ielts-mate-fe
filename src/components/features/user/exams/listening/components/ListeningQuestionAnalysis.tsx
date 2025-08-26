@@ -1,14 +1,15 @@
 'use client';
 
 import { QuestionResultRenderer } from '@/components/features/user/exams/reading/components';
-import { Button } from '@/components/ui/button';
+import { getQuestionResultStatus } from '@/components/features/user/exams/reading/components/QuestionResultRenderer';
+import { Badge } from '@/components/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AudioProvider } from '@/contexts/AudioContext';
+import useListeningAudio from '@/hooks/apis/listening/useListeningAudio';
 import { ListeningExamAttemptDetailsResponse } from '@/types/listening/listening-exam.types';
-import { ChevronDown, ChevronUp, Eye, EyeOff, Headphones } from 'lucide-react';
-import React, { useState } from 'react';
-import AudioPlayer from './AudioPlayer';
+import { Headphones } from 'lucide-react';
+import { useRef, useState } from 'react';
 
 interface ListeningQuestionAnalysisProps {
   examDetails: ListeningExamAttemptDetailsResponse;
@@ -22,10 +23,7 @@ export const ListeningQuestionAnalysis = ({
   onToggleQuestion,
 }: ListeningQuestionAnalysisProps) => {
   const [showTranscripts, setShowTranscripts] = useState(false);
-  const [openParts, setOpenParts] = useState<Set<number>>(new Set([1, 2, 3, 4]));
-  const [activeAudioRef, setActiveAudioRef] = useState<
-    React.RefObject<HTMLAudioElement | null> | undefined
-  >(undefined);
+  const audioRef = useRef<HTMLAudioElement>(null);
 
   const parts = [
     examDetails.listening_exam.listening_task_id_part1,
@@ -33,6 +31,18 @@ export const ListeningQuestionAnalysis = ({
     examDetails.listening_exam.listening_task_id_part3,
     examDetails.listening_exam.listening_task_id_part4,
   ];
+
+  const audioPart1 = useListeningAudio(parts[0]?.audio_file_id);
+  const audioPart2 = useListeningAudio(parts[1]?.audio_file_id);
+  const audioPart3 = useListeningAudio(parts[2]?.audio_file_id);
+  const audioPart4 = useListeningAudio(parts[3]?.audio_file_id);
+
+  const audioByPart: Record<string, { objectUrl: string | undefined; isLoading: boolean }> = {
+    part1: { objectUrl: audioPart1.objectUrl, isLoading: audioPart1.isLoading },
+    part2: { objectUrl: audioPart2.objectUrl, isLoading: audioPart2.isLoading },
+    part3: { objectUrl: audioPart3.objectUrl, isLoading: audioPart3.isLoading },
+    part4: { objectUrl: audioPart4.objectUrl, isLoading: audioPart4.isLoading },
+  };
 
   const dragAndDropsList = [
     ...examDetails.listening_exam.listening_task_id_part1.question_groups.flatMap(
@@ -48,16 +58,6 @@ export const ListeningQuestionAnalysis = ({
       (g) => g.drag_items || []
     ),
   ];
-
-  const togglePart = (partNumber: number) => {
-    const newOpenParts = new Set(openParts);
-    if (newOpenParts.has(partNumber)) {
-      newOpenParts.delete(partNumber);
-    } else {
-      newOpenParts.add(partNumber);
-    }
-    setOpenParts(newOpenParts);
-  };
 
   const toggleAllQuestions = (isOpen: boolean) => {
     const allQuestionIds: string[] = [];
@@ -83,77 +83,79 @@ export const ListeningQuestionAnalysis = ({
   };
 
   return (
-    <div className='space-y-6'>
+    <Card className='space-y-6'>
       {/* Header with controls */}
-      <Card>
-        <CardHeader>
-          <div className='flex items-center justify-between'>
-            <CardTitle className='flex items-center gap-2 text-tekhelet-400'>
-              <Headphones className='w-5 h-5' />
-              Detailed Question Analysis
-            </CardTitle>
-            <div className='flex gap-2'>
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => setShowTranscripts(!showTranscripts)}
-                className='bg-white/50 border-tekhelet-300 hover:bg-white/70 text-tekhelet-600'
+      <CardHeader>
+        <CardTitle className='flex items-center gap-2 text-tekhelet-400'>
+          <Headphones className='w-5 h-5' />
+          Detailed Question Analysis
+        </CardTitle>
+        {/* <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowTranscripts(!showTranscripts)}
+              className="bg-white/50 border-tekhelet-300 hover:bg-white/70 text-tekhelet-600"
+            >
+              {showTranscripts ? (
+                <EyeOff className="w-4 h-4 mr-2" />
+              ) : (
+                <Eye className="w-4 h-4 mr-2" />
+              )}
+              {showTranscripts ? "Hide" : "Show"} Transcripts
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => toggleAllQuestions(openQuestions.size === 0)}
+              className="bg-white/50 border-tekhelet-300 hover:bg-white/70 text-tekhelet-600"
+            >
+              {openQuestions.size > 0 ? "Collapse All" : "Expand All"}
+            </Button>
+          </div> */}
+      </CardHeader>
+
+      {/* Tabs for Parts */}
+      <CardContent>
+        <Tabs defaultValue='part1' className='w-full'>
+          <TabsList className='grid w-full grid-cols-4'>
+            {['part1', 'part2', 'part3', 'part4'].map((key, idx) => (
+              <TabsTrigger
+                key={key}
+                value={key}
+                className='data-[state=active]:bg-tekhelet-300 data-[state=active]:text-selective-yellow-500'
               >
-                {showTranscripts ? (
-                  <EyeOff className='w-4 h-4 mr-2' />
-                ) : (
-                  <Eye className='w-4 h-4 mr-2' />
-                )}
-                {showTranscripts ? 'Hide' : 'Show'} Transcripts
-              </Button>
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => toggleAllQuestions(openQuestions.size === 0)}
-                className='bg-white/50 border-tekhelet-300 hover:bg-white/70 text-tekhelet-600'
-              >
-                {openQuestions.size > 0 ? 'Collapse All' : 'Expand All'}
-              </Button>
-            </div>
-          </div>
-        </CardHeader>
-      </Card>
+                Part {idx + 1}
+              </TabsTrigger>
+            ))}
+          </TabsList>
 
-      {/* Parts */}
-      {parts.map((part, partIndex) => {
-        const partNumber = partIndex + 1;
-        const isPartOpen = openParts.has(partNumber);
-
-        return (
-          <Card key={part.task_id}>
-            <Collapsible open={isPartOpen} onOpenChange={() => togglePart(partNumber)}>
-              <CollapsibleTrigger asChild>
-                <CardHeader className='cursor-pointer hover:bg-white/50 transition-colors rounded-t-2xl'>
-                  <div className='flex items-center justify-between'>
-                    <CardTitle className='flex items-center gap-2 text-tekhelet-400'>
-                      <Headphones className='w-5 h-5' />
-                      Part {partNumber}: {part.title}
-                    </CardTitle>
-                    {isPartOpen ? (
-                      <ChevronUp className='w-5 h-5' />
-                    ) : (
-                      <ChevronDown className='w-5 h-5' />
-                    )}
-                  </div>
-                  <p className='text-sm text-tekhelet-500 text-left'>{part.instruction}</p>
-                </CardHeader>
-              </CollapsibleTrigger>
-
-              <CollapsibleContent>
-                <CardContent className='space-y-6'>
+          {['part1', 'part2', 'part3', 'part4'].map((partKey, partIndex) => {
+            const part = parts[partIndex];
+            const partNumber = partIndex + 1;
+            return (
+              <TabsContent key={partKey} value={partKey} className='mt-4'>
+                <div className='space-y-6'>
                   {/* Audio Player */}
-                  <div className='mt-4 w-full'>
-                    <AudioPlayer
-                      audioFileId={part.audio_file_id}
-                      title={part.title}
-                      partNumber={partNumber}
-                      onAudioRefReady={(ref) => setActiveAudioRef(ref)}
-                    />
+                  <div className='mt-2 w-full'>
+                    {audioByPart[partKey]?.objectUrl ? (
+                      <>
+                        <audio
+                          ref={audioRef}
+                          src={audioByPart[partKey]?.objectUrl}
+                          preload='metadata'
+                          controls
+                          controlsList='nodownload'
+                          className='w-full'
+                        />
+                      </>
+                    ) : (
+                      <div className='text-center text-selective-yellow-300'>
+                        {audioByPart[partKey]?.isLoading
+                          ? 'Loading audio...'
+                          : 'No audio available'}
+                      </div>
+                    )}
                   </div>
 
                   {/* Transcript */}
@@ -173,27 +175,42 @@ export const ListeningQuestionAnalysis = ({
                   )}
 
                   {/* Question Groups */}
-                  {part.question_groups.map((group) => (
-                    <div key={group.question_group_id} className='space-y-4 border rounded-lg p-4'>
-                      {group.section_label && (
-                        <div className='p-3'>
-                          <h4 className='font-medium text-tekhelet-600'>{group.section_label}</h4>
-                          {group.instruction && (
-                            <div
-                              className='text-sm text-tekhelet-500 mt-1'
-                              dangerouslySetInnerHTML={{
-                                __html: group.instruction,
-                              }}
-                            />
-                          )}
-                        </div>
-                      )}
+                  {part.question_groups.map((group) => {
+                    const groupQuestions = group.questions || [];
+                    const correctCount = groupQuestions.reduce((acc, q) => {
+                      const ua = examDetails.answers[q.question_id] || [];
+                      const status = getQuestionResultStatus(q, ua);
+                      return acc + (status === true ? 1 : 0);
+                    }, 0);
 
-                      {/* Questions */}
-                      <AudioProvider audioRef={activeAudioRef}>
-                        {group.questions &&
-                          group.questions.map((question) => {
-                            // Get user answers from the main exam details answers map
+                    return (
+                      <div
+                        key={group.question_group_id}
+                        className='space-y-4 border rounded-lg p-4'
+                      >
+                        {group.section_label && (
+                          <div className='p-3'>
+                            <h4 className='font-medium text-tekhelet-600'>{group.section_label}</h4>
+                            {group.instruction && (
+                              <div
+                                className='text-sm text-tekhelet-500 mt-1'
+                                dangerouslySetInnerHTML={{
+                                  __html: group.instruction,
+                                }}
+                              />
+                            )}
+                            <Badge
+                              variant={'outline'}
+                              className='text-sm font-semibold text-white bg-selective-yellow-200 mt-5'
+                            >
+                              Correct: {correctCount} / {groupQuestions.length}
+                            </Badge>
+                          </div>
+                        )}
+
+                        {/* Questions */}
+                        <AudioProvider audioRef={audioRef}>
+                          {group.questions?.map((question) => {
                             const userAnswers = examDetails.answers[question.question_id] || [];
                             return (
                               <QuestionResultRenderer
@@ -205,15 +222,16 @@ export const ListeningQuestionAnalysis = ({
                               />
                             );
                           })}
-                      </AudioProvider>
-                    </div>
-                  ))}
-                </CardContent>
-              </CollapsibleContent>
-            </Collapsible>
-          </Card>
-        );
-      })}
-    </div>
+                        </AudioProvider>
+                      </div>
+                    );
+                  })}
+                </div>
+              </TabsContent>
+            );
+          })}
+        </Tabs>
+      </CardContent>
+    </Card>
   );
 };

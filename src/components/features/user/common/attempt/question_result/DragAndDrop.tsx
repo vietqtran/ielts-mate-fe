@@ -18,10 +18,6 @@ const AttemptDragAndDropResult = ({
   userAnswers,
   dragAndDropItems,
 }: AttemptDragAndDropProps) => {
-  console.log('question', question);
-  console.log('userAnswers', userAnswers);
-  console.log('dragAndDropItems', dragAndDropItems);
-
   const hasAnswer = userAnswers.length > 0;
   const userAnswer = hasAnswer ? (userAnswers[0]?.drag_item_id ?? null) : null;
   const userAnswerContent = dragAndDropItems.map((item) =>

@@ -3,8 +3,6 @@ import { Badge } from '@/components/ui/badge';
 import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 
 const AttemptMultipleChoicesResult = ({ question, userAnswers }: AttemptQuestionResultProps) => {
-  console.log('question', question);
-  console.log('userAnswers', userAnswers);
   const choices = question.choices ?? [];
   const userChoices = userAnswers.map((ans) => ans.choice_ids).flat();
   const userChoiceLabels = choices

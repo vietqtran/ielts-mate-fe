@@ -5,12 +5,9 @@ import {
   ExamLoadingState,
   ExamResultHeader,
   OverallScoreCard,
-  StatisticsCard,
 } from '@/components/features/user/exams/reading/components';
-import {
-  formatDuration,
-  getPerformanceLevel,
-} from '@/components/features/user/exams/reading/utils/examUtils';
+import { formatDuration } from '@/components/features/user/exams/reading/utils/examUtils';
+import { AttemptStatisticsCard } from '@/components/features/user/history/practice/common/AttemptStatisticsCard';
 import useReadingAttempt from '@/hooks/apis/reading/useReadingAttempt';
 import { LoadAttemptResponse } from '@/types/attempt.types';
 import { useEffect, useState } from 'react';
@@ -68,10 +65,6 @@ const ReadingAttemptResult = ({ attemptId }: ReadingAttemptResultProps) => {
   if (error || !attemptDetails)
     return <ExamErrorState error={error || 'Reading attempt not found'} />;
 
-  const performance = stats
-    ? getPerformanceLevel(stats.scorePercentage)
-    : { level: 'Unknown', color: 'bg-gray-500 text-white' };
-
   return (
     <div className='min-h-screen p-4'>
       <div className='max-w-6xl mx-auto space-y-6'>
@@ -85,15 +78,14 @@ const ReadingAttemptResult = ({ attemptId }: ReadingAttemptResultProps) => {
 
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           <OverallScoreCard
-            scorePercentage={stats?.scorePercentage || 0}
+            scorePercentage={stats?.correctPercentage || 0}
             correctAnswers={stats?.correctAnswers || 0}
             totalQuestions={stats?.totalQuestions || 0}
-            performance={performance}
           />
 
-          <StatisticsCard
-            totalPoints={stats?.totalPoints || 0}
-            examTotalPoints={stats?.totalQuestions || 0}
+          <AttemptStatisticsCard
+            totalQuestions={stats?.totalQuestions || 0}
+            notAnswered={stats?.notAnswered || 0}
             correctAnswers={stats?.correctAnswers || 0}
             incorrectAnswers={stats?.incorrectAnswers || 0}
           />

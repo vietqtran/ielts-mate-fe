@@ -3,8 +3,6 @@ import { Badge } from '@/components/ui/badge';
 import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 
 const AttemptFillInTheBlanksResult = ({ question, userAnswers }: AttemptQuestionResultProps) => {
-  console.log('question', question);
-  console.log('userAnswers', userAnswers);
   const hasAnswer = userAnswers.length > 0;
   const userAnswer = hasAnswer ? userAnswers[0]?.filled_text_answer.toString() : 'null';
   const isAnswerCorrect = userAnswer === question.correct_answer;
