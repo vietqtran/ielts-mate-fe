@@ -100,17 +100,24 @@ export function MultipleChoiceForm({
         // Step 1: First update - set number_of_correct_answers to total number of choices
         // This ensures database has enough capacity for all choices before we create/update them
         const totalChoicesCount = data.choices.length;
+        const originalQuestion = questions[editingIndex];
         await instance.put(`/reading/questions/${question_id}`, {
           question_order: data.question_order,
           point: data.point,
           explanation: data.explanation,
-          instruction_for_choice: data.instruction_for_choice,
+          question_categories: originalQuestion.question_categories || [],
           number_of_correct_answers: totalChoicesCount, // Set to total choices first
+          instruction_for_choice: data.instruction_for_choice,
+          blank_index: undefined, // Not applicable for multiple choice
+          correct_answer: undefined, // Not applicable for multiple choice
+          instruction_for_matching: undefined, // Not applicable for multiple choice
+          correct_answer_for_matching: undefined, // Not applicable for multiple choice
+          zone_index: undefined, // Not applicable for multiple choice
+          drag_item_id: undefined, // Not applicable for multiple choice
           question_type: 0,
         });
 
         // Step 2: Get original choices to compare and separate existing from new choices
-        const originalQuestion = questions[editingIndex];
         const originalChoices = originalQuestion.choices || [];
         const existingChoices = data.choices.filter((choice) => choice.id);
         const newChoices = data.choices.filter((choice) => !choice.id);
@@ -162,7 +169,19 @@ export function MultipleChoiceForm({
         // Step 4: Second update - set number_of_correct_answers to actual correct choices count
         const finalCorrectCount = data.choices.filter((choice) => choice.is_correct).length;
         await instance.put(`/reading/questions/${question_id}`, {
+          question_order: data.question_order,
+          point: data.point,
+          explanation: data.explanation,
+          question_categories: originalQuestion.question_categories || [],
           number_of_correct_answers: finalCorrectCount, // Set to actual correct choices count
+          instruction_for_choice: data.instruction_for_choice,
+          blank_index: undefined, // Not applicable for multiple choice
+          correct_answer: undefined, // Not applicable for multiple choice
+          instruction_for_matching: undefined, // Not applicable for multiple choice
+          correct_answer_for_matching: undefined, // Not applicable for multiple choice
+          zone_index: undefined, // Not applicable for multiple choice
+          drag_item_id: undefined, // Not applicable for multiple choice
+          question_type: 0,
         });
 
         const updatedQuestions = [...questions];

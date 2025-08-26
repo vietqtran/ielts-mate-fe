@@ -83,10 +83,17 @@ export function MultipleChoiceManager({
         // This ensures database has enough capacity for all choices before we create/update them
         const totalChoicesCount = submittedChoices.length;
         const firstUpdateRequest = {
-          point: data.point,
           explanation: data.explanation,
+          point: data.point,
+          question_categories: editingQuestion.question_categories || [],
           number_of_correct_answers: totalChoicesCount, // Set to total choices first
           instruction_for_choice: data.instruction_for_choice,
+          blank_index: undefined, // Not applicable for multiple choice
+          correct_answer: undefined, // Not applicable for multiple choice
+          instruction_for_matching: undefined, // Not applicable for multiple choice
+          correct_answer_for_matching: undefined, // Not applicable for multiple choice
+          zone_index: undefined, // Not applicable for multiple choice
+          drag_item_id: undefined, // Not applicable for multiple choice
         };
         await updateQuestionInfo(group.id, questionId, firstUpdateRequest, isListening);
 
@@ -188,7 +195,17 @@ export function MultipleChoiceManager({
 
         // Second update to question info with actual correct count
         const secondUpdateRequest = {
+          explanation: data.explanation,
+          point: data.point,
+          question_categories: editingQuestion.question_categories || [],
           number_of_correct_answers: finalCorrectCount, // Set to actual correct choices count
+          instruction_for_choice: data.instruction_for_choice,
+          blank_index: undefined, // Not applicable for multiple choice
+          correct_answer: undefined, // Not applicable for multiple choice
+          instruction_for_matching: undefined, // Not applicable for multiple choice
+          correct_answer_for_matching: undefined, // Not applicable for multiple choice
+          zone_index: undefined, // Not applicable for multiple choice
+          drag_item_id: undefined, // Not applicable for multiple choice
         };
         await updateQuestionInfo(group.id, questionId, secondUpdateRequest, isListening);
 
