@@ -296,9 +296,34 @@ export default function CreatePassagePage() {
   };
 
   const handleFinish = async (status?: PassageStatus) => {
-    if (status === PassageStatus.PUBLISHED && createdpassage_id) {
+    // Validate points for status change to TEST or PUBLISHED
+    if (status === PassageStatus.TEST || status === PassageStatus.PUBLISHED) {
+      const formData = form.getValues();
+      const totalPoints = questionGroups.reduce(
+        (total, group) =>
+          total +
+          group.questions.reduce(
+            (groupTotal: number, question: any) => groupTotal + (question.point || 1),
+            0
+          ),
+        0
+      );
+      const requiredPoints = formData.part_number === 1 ? 14 : 13;
+
+      if (totalPoints < requiredPoints) {
+        toast.error(
+          `Part ${formData.part_number} requires at least ${requiredPoints} points to publish or test. Current points: ${totalPoints}`
+        );
+        return;
+      }
+    }
+
+    if (
+      (status === PassageStatus.PUBLISHED || status === PassageStatus.TEST) &&
+      createdpassage_id
+    ) {
       try {
-        // Update the passage status to PUBLISHED
+        // Update the passage status to PUBLISHED or TEST
         const formData = form.getValues();
         const passageRequest = {
           title: formData.title,
@@ -307,13 +332,15 @@ export default function CreatePassagePage() {
           content_with_highlight_keywords: formData.content,
           ielts_type: Object.values(IeltsType).indexOf(formData.ielts_type),
           part_number: formData.part_number - 1,
-          passage_status: Object.values(PassageStatus).indexOf(PassageStatus.PUBLISHED), // 1 for PUBLISHED
+          passage_status: Object.values(PassageStatus).indexOf(status),
         };
 
         await updatePassage(createdpassage_id, passageRequest);
-        toast.success('Passage published successfully!');
+        const statusText = status === PassageStatus.PUBLISHED ? 'published' : 'set to test mode';
+        toast.success(`Passage ${statusText} successfully!`);
       } catch (error) {
-        toast.error('Failed to publish passage');
+        const statusText = status === PassageStatus.PUBLISHED ? 'publish' : 'set to test mode';
+        toast.error(`Failed to ${statusText} passage`);
         return;
       }
     }

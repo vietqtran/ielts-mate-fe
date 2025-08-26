@@ -7,6 +7,7 @@ import { BookOpen, CheckCircle, Clock, FileQuestion, Users } from 'lucide-react'
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
 import { LocalQuestionGroup } from './QuestionGroupsManager';
 
 interface PassageData {
@@ -83,7 +84,37 @@ export function PassagePreview({
 }: Readonly<PassagePreviewProps>) {
   console.log('PassagePreview received questionGroups:', questionGroups);
   const totalQuestions = questionGroups.reduce((total, group) => total + group.questions.length, 0);
+  const totalPoints = questionGroups.reduce(
+    (total, group) =>
+      total +
+      group.questions.reduce(
+        (groupTotal: number, question: any) => groupTotal + (question.point || 1),
+        0
+      ),
+    0
+  );
   const estimatedTime = Math.max(15, Math.ceil(totalQuestions * 1.5)); // Rough estimate: 1.5 min per question, min 15 min
+
+  // Function to validate points for status change
+  const validatePointsForStatus = (status: PassageStatus): boolean => {
+    if (status !== PassageStatus.TEST && status !== PassageStatus.PUBLISHED) {
+      return true; // No validation needed for DRAFT status
+    }
+
+    const requiredPoints = passageData.part_number === 1 ? 14 : 13;
+    return totalPoints >= requiredPoints;
+  };
+
+  const handleFinishWithValidation = (status: PassageStatus) => {
+    if (!validatePointsForStatus(status)) {
+      const requiredPoints = passageData.part_number === 1 ? 14 : 13;
+      toast.error(
+        `Part ${passageData.part_number} requires at least ${requiredPoints} points to publish or test. Current points: ${totalPoints}`
+      );
+      return;
+    }
+    onFinish(status);
+  };
 
   return (
     <div className='space-y-6'>
@@ -101,7 +132,7 @@ export function PassagePreview({
             </div>
             <div className='flex gap-2'>
               <Button
-                onClick={() => onFinish(PassageStatus.TEST)}
+                onClick={() => handleFinishWithValidation(PassageStatus.TEST)}
                 variant='outline'
                 className='gap-2'
                 disabled={passageData.passage_status === PassageStatus.TEST}
@@ -110,7 +141,7 @@ export function PassagePreview({
                 Test Mode
               </Button>
               <Button
-                onClick={() => onFinish(PassageStatus.PUBLISHED)}
+                onClick={() => handleFinishWithValidation(PassageStatus.PUBLISHED)}
                 className='gap-2'
                 disabled={passageData.passage_status === PassageStatus.TEST}
               >
@@ -407,7 +438,7 @@ export function PassagePreview({
               </div>
               <div className='flex gap-2'>
                 <Button
-                  onClick={() => onFinish(PassageStatus.TEST)}
+                  onClick={() => handleFinishWithValidation(PassageStatus.TEST)}
                   variant='outline'
                   size='lg'
                   className='gap-2'
@@ -417,7 +448,7 @@ export function PassagePreview({
                   Test Mode
                 </Button>
                 <Button
-                  onClick={() => onFinish(PassageStatus.PUBLISHED)}
+                  onClick={() => handleFinishWithValidation(PassageStatus.PUBLISHED)}
                   size='lg'
                   className='gap-2'
                   disabled={passageData.passage_status === PassageStatus.TEST}

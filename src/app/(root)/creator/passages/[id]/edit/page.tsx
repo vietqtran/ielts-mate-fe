@@ -173,6 +173,25 @@ export default function EditPassagePage() {
     return () => subscription.unsubscribe();
   }, [form, originalFormData]);
 
+  // Function to validate points for status change
+  const validatePointsForStatus = (status: PassageStatus, partNumber: number): boolean => {
+    if (status !== PassageStatus.TEST && status !== PassageStatus.PUBLISHED) {
+      return true; // No validation needed for DRAFT status
+    }
+
+    const totalPoints = questionGroups.reduce((total, group) => {
+      return (
+        total +
+        group.questions.reduce((groupTotal: number, question: any) => {
+          return groupTotal + (question.point || 1);
+        }, 0)
+      );
+    }, 0);
+
+    const requiredPoints = partNumber === 1 ? 14 : 13;
+    return totalPoints >= requiredPoints;
+  };
+
   const handleBasicInfoSubmit = async (data: PassageFormData) => {
     try {
       console.log('Edit page handleBasicInfoSubmit called with passage_id:', passage_id);
@@ -185,6 +204,24 @@ export default function EditPassagePage() {
           toast.error('Status cannot be changed when passage is in Test mode');
           return;
         }
+      }
+
+      // Validate points for status change to TEST or PUBLISHED
+      if (!validatePointsForStatus(data.passage_status, data.part_number)) {
+        const requiredPoints = data.part_number === 1 ? 14 : 13;
+        const currentPoints = questionGroups.reduce((total, group) => {
+          return (
+            total +
+            group.questions.reduce((groupTotal: number, question: any) => {
+              return groupTotal + (question.point || 1);
+            }, 0)
+          );
+        }, 0);
+
+        toast.error(
+          `Part ${data.part_number} requires at least ${requiredPoints} points to publish or test. Current points: ${currentPoints}`
+        );
+        return;
       }
 
       // Check if form data has changed
