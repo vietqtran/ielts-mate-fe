@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 import { useAppSelector } from '@/hooks';
 import { toast } from 'sonner';
@@ -9,11 +9,17 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 const SSE_PATH = 'notification/sse/stream';
 
 const CreatorSSEListener = () => {
-  const { user } = useAppSelector((state) => state.auth);
+  const userId = useAppSelector((state) => state.auth.user?.id);
+
+  // Memoize the user ID to ensure stability and prevent unnecessary effect runs
+  const stableUserId = useMemo(() => userId, [userId]);
+
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<number | null>(null);
   const backoffMsRef = useRef<number>(1000); // start at 1s
   const maxBackoffMs = 30000; // 30s cap
+  const currentUserIdRef = useRef<string | null>(null);
+  const isConnectingRef = useRef<boolean>(false);
 
   useEffect(() => {
     const cleanup = () => {
@@ -25,18 +31,47 @@ const CreatorSSEListener = () => {
         eventSourceRef.current.close();
         eventSourceRef.current = null;
       }
+      isConnectingRef.current = false;
     };
 
     const connect = () => {
-      if (!user?.id) return;
+      if (!stableUserId) return;
       if (!API_BASE_URL) return;
 
-      // Always cleanup any previous connection before opening a new one
+      // Prevent duplicate connections for the same user
+      if (
+        isConnectingRef.current ||
+        (currentUserIdRef.current === stableUserId &&
+          eventSourceRef.current?.readyState === EventSource.OPEN)
+      ) {
+        if (process.env.NODE_ENV === 'production') {
+          console.log(
+            'SSE: Skipping connection - already connected or connecting for user:',
+            stableUserId?.slice(0, 8) + '...'
+          );
+        } else {
+          console.log(
+            'SSE: Skipping connection - already connected or connecting for user:',
+            stableUserId
+          );
+        }
+        return;
+      }
+
       cleanup();
 
+      isConnectingRef.current = true;
+      currentUserIdRef.current = stableUserId;
+
       const base = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-      const url = `${base}/${SSE_PATH}/${encodeURIComponent(user.id)}`;
-      console.log('SSE: Attempting to connect to:', url);
+      const url = `${base}/${SSE_PATH}/${encodeURIComponent(stableUserId)}`;
+
+      if (process.env.NODE_ENV === 'production') {
+        console.log('SSE: Attempting to connect for user:', stableUserId?.slice(0, 8) + '...');
+      } else {
+        console.log('SSE: Attempting to connect to:', url);
+      }
+
       const es = new EventSource(url, { withCredentials: true });
       eventSourceRef.current = es;
 
@@ -45,6 +80,7 @@ const CreatorSSEListener = () => {
       es.addEventListener('open', () => {
         console.log('SSE connection opened');
         backoffMsRef.current = 1000; // reset backoff on successful connection
+        isConnectingRef.current = false; // reset connecting state
       });
 
       // Handle all event types (message, notification, etc.)
@@ -71,20 +107,37 @@ const CreatorSSEListener = () => {
         }
       };
 
-      // Listen for default 'message' events
       es.addEventListener('message', handleSSEEvent);
 
-      // Listen for custom event types that servers might send
       es.addEventListener('notification', handleSSEEvent);
       es.addEventListener('update', handleSSEEvent);
 
       es.addEventListener('error', (event) => {
-        console.log('SSE error event:', event, 'readyState:', es.readyState);
-        // Close and attempt reconnect with exponential backoff
+        if (process.env.NODE_ENV === 'production') {
+          console.error(
+            'SSE error - readyState:',
+            es.readyState,
+            'user:',
+            stableUserId?.slice(0, 8) + '...'
+          );
+        } else {
+          console.log('SSE error event:', event, 'readyState:', es.readyState);
+        }
+        isConnectingRef.current = false;
+
         es.close();
         const delay = backoffMsRef.current;
         backoffMsRef.current = Math.min(backoffMsRef.current * 2, maxBackoffMs);
-        console.log(`SSE: Reconnecting in ${delay}ms`);
+
+        if (process.env.NODE_ENV === 'production') {
+          console.log(
+            `SSE: Reconnecting in ${delay}ms for user:`,
+            stableUserId?.slice(0, 8) + '...'
+          );
+        } else {
+          console.log(`SSE: Reconnecting in ${delay}ms`);
+        }
+
         reconnectTimeoutRef.current = window.setTimeout(() => {
           connect();
         }, delay);
@@ -97,14 +150,23 @@ const CreatorSSEListener = () => {
       };
     };
 
-    if (user?.id) {
+    if (stableUserId && currentUserIdRef.current !== stableUserId) {
+      if (process.env.NODE_ENV === 'production') {
+        console.log('SSE: User changed, connecting for:', stableUserId?.slice(0, 8) + '...');
+      }
       connect();
+    } else if (!stableUserId && currentUserIdRef.current) {
+      if (process.env.NODE_ENV === 'production') {
+        console.log('SSE: User logged out, cleaning up connection');
+      }
+      currentUserIdRef.current = null;
+      cleanup();
     }
 
     return () => {
       cleanup();
     };
-  }, [user?.id]);
+  }, [stableUserId]);
 
   return null;
 };
