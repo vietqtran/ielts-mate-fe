@@ -17,7 +17,7 @@ export const OverviewCards = ({ data }: OverviewCardsProps) => {
 
   const cards = [
     {
-      title: 'Reading Exams',
+      title: 'Reading Exam Attempted',
       icon: BookOpen,
       completed: data.reading.exam,
       total: data.reading.total_exams,
@@ -29,7 +29,7 @@ export const OverviewCards = ({ data }: OverviewCardsProps) => {
       textColor: 'text-selective-yellow-300',
     },
     {
-      title: 'Reading Tasks',
+      title: 'Reading Tasks Attempted',
       icon: Target,
       completed: data.reading.task,
       total: data.reading.total_tasks,
@@ -42,7 +42,7 @@ export const OverviewCards = ({ data }: OverviewCardsProps) => {
       textColor: 'text-tangerine-300',
     },
     {
-      title: 'Listening Exams',
+      title: 'Listening Exams Attempted',
       icon: Headphones,
       completed: data.listening.exam,
       total: data.listening.total_exams,
@@ -54,7 +54,7 @@ export const OverviewCards = ({ data }: OverviewCardsProps) => {
       textColor: 'text-medium-slate-blue-300',
     },
     {
-      title: 'Listening Tasks',
+      title: 'Listening Tasks Attempted',
       icon: TrendingUp,
       completed: data.listening.task,
       total: data.listening.total_tasks,
@@ -84,27 +84,14 @@ export const OverviewCards = ({ data }: OverviewCardsProps) => {
                 <Icon className={`h-8 w-8 ${card.iconColor}`} />
                 <div
                   className={`px-3 py-1 bg-gradient-to-r ${card.bgGradient} rounded-full border ${card.borderColor} backdrop-blur-sm`}
-                >
-                  <span className={`text-sm font-semibold ${card.textColor}`}>
-                    {card.progress.toFixed(0)}%
-                  </span>
-                </div>
+                ></div>
               </div>
               <CardTitle className='text-tekhelet-400 text-sm font-medium'>{card.title}</CardTitle>
             </CardHeader>
             <CardContent className='pt-0'>
               <div className='space-y-3'>
                 <div className='flex items-end gap-2'>
-                  <span className='text-3xl font-bold text-tekhelet-300'>{card.completed}</span>
-                  <span className='text-tekhelet-500 text-sm mb-1'>/ {card.total}</span>
-                </div>
-
-                {/* Progress Bar */}
-                <div className='w-full bg-tekhelet-900/20 rounded-full h-2'>
-                  <div
-                    className={`bg-gradient-to-r ${card.bgGradient} h-2 rounded-full transition-all duration-500 ease-out`}
-                    style={{ width: `${Math.min(card.progress, 100)}%` }}
-                  />
+                  <span className='text-3xl font-bold text-tekhelet-300'>{card.total}</span>
                 </div>
               </div>
             </CardContent>
