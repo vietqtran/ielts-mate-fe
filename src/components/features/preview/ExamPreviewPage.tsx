@@ -42,7 +42,8 @@ const ExamPreviewPage = ({
         if (response && response.data) {
           // Find the exam with matching url_slug
           const exam = response.data.find(
-            (exam: ReadingExamResponse['data']) => exam.url_slug === examUrl
+            (exam: ReadingExamResponse['data']) =>
+              exam.url_slug.toLocaleLowerCase() === examUrl.toLocaleLowerCase()
           );
 
           if (exam) {

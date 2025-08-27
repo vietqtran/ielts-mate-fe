@@ -1,5 +1,6 @@
 'use client';
 
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
@@ -9,6 +10,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -16,14 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { IeltsType, PassageStatus } from '@/types/reading/reading.types';
-import { ArrowRight } from 'lucide-react';
-
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
+import { IeltsType, PassageStatus } from '@/types/reading/reading.types';
+import { ArrowRight } from 'lucide-react';
 
 interface PassageBasicInfoFormProps {
   isEdit: boolean;
@@ -34,6 +32,8 @@ interface PassageBasicInfoFormProps {
   hasChanges?: boolean;
   onEdit?: () => void;
   originalStatus?: string;
+  hasQuestionGroups?: boolean;
+  questionGroups?: any[];
 }
 
 const getielts_typeLabel = (type: IeltsType): string => {
@@ -73,14 +73,10 @@ export function PassageBasicInfoForm({
   hasChanges = true,
   onEdit,
   originalStatus,
+  hasQuestionGroups = false,
+  questionGroups = [],
 }: Readonly<PassageBasicInfoFormProps>) {
-  const formData = form.getValues();
-
-  console.log('PassageBasicInfoForm render:', { isEdit, isCompleted, hasChanges });
-
   const handleSubmit = (data: any) => {
-    console.log('PassageBasicInfoForm handleSubmit called with isEdit:', isEdit);
-    console.log('Submit data:', data);
     onSubmit(data);
   };
 
@@ -94,11 +90,6 @@ export function PassageBasicInfoForm({
               Enter the basic information and content for your IELTS reading passage
             </p>
           </div>
-          {isEdit && hasChanges && (
-            <Badge variant='outline' className='bg-yellow-50 text-yellow-700 border-yellow-200'>
-              Unsaved Changes
-            </Badge>
-          )}
         </div>
       </CardHeader>
       <CardContent>
@@ -178,8 +169,25 @@ export function PassageBasicInfoForm({
                 name='passage_status'
                 render={({ field }: any) => {
                   const currentStatus = field.value;
+                  const formData = form.getValues();
+
                   // Check if the original status from database was TEST
                   const isOriginalTestStatus = originalStatus === PassageStatus.TEST;
+                  // Only enable status if we have question groups or this is edit mode with existing status
+                  const shouldDisable = isOriginalTestStatus || (!isEdit && !hasQuestionGroups);
+
+                  // Calculate total points
+                  const totalPoints = questionGroups.reduce((total, group) => {
+                    return (
+                      total +
+                      group.questions.reduce((groupTotal: number, question: any) => {
+                        return groupTotal + (question.point || 1);
+                      }, 0)
+                    );
+                  }, 0);
+
+                  const requiredPoints = formData.part_number === 1 ? 14 : 13;
+                  const hasEnoughPoints = totalPoints >= requiredPoints;
 
                   return (
                     <FormItem>
@@ -187,24 +195,36 @@ export function PassageBasicInfoForm({
                       <Select
                         onValueChange={field.onChange}
                         value={field.value ?? ''}
-                        disabled={isOriginalTestStatus}
+                        disabled={shouldDisable}
                       >
                         <FormControl>
                           <SelectTrigger
-                            className={isOriginalTestStatus ? 'opacity-50 cursor-not-allowed' : ''}
+                            className={shouldDisable ? 'opacity-50 cursor-not-allowed' : ''}
                           >
                             <SelectValue placeholder='Select status' />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
                           <SelectItem value={PassageStatus.DRAFT}>Draft</SelectItem>
-                          <SelectItem value={PassageStatus.PUBLISHED}>Published</SelectItem>
-                          <SelectItem value={PassageStatus.TEST}>Test</SelectItem>
+                          <SelectItem value={PassageStatus.PUBLISHED} disabled={!hasEnoughPoints}>
+                            Published{' '}
+                            {!hasEnoughPoints
+                              ? `(Need ${requiredPoints} points, have ${totalPoints})`
+                              : ''}
+                          </SelectItem>
+                          <SelectItem value={PassageStatus.TEST} disabled={!hasEnoughPoints}>
+                            Test{' '}
+                            {!hasEnoughPoints
+                              ? `(Need ${requiredPoints} points, have ${totalPoints})`
+                              : ''}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
-                      {isOriginalTestStatus && (
+                      {shouldDisable && (
                         <p className='text-xs text-muted-foreground'>
-                          Status cannot be changed when passage is in Test mode
+                          {isOriginalTestStatus
+                            ? 'Status cannot be changed when passage is in Test mode'
+                            : 'Create question groups first to enable status selection'}
                         </p>
                       )}
                       <FormMessage />

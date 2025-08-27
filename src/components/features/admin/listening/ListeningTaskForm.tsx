@@ -1,5 +1,6 @@
 'use client';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -222,6 +223,30 @@ export function ListeningTaskForm({
         }
       }
 
+      // Validate points for status change to TEST or PUBLISHED
+      if (
+        values.status === ListeningTaskStatus.TEST ||
+        values.status === ListeningTaskStatus.PUBLISHED
+      ) {
+        const totalPoints = questionGroups.reduce((total, group) => {
+          return (
+            total +
+            group.questions.reduce((groupTotal: number, question: any) => {
+              return groupTotal + (question.point || 1);
+            }, 0)
+          );
+        }, 0);
+
+        if (totalPoints < 10) {
+          toast({
+            title: 'Insufficient Points',
+            description: `This listening task requires at least 10 points to publish or test. Current points: ${totalPoints}`,
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
       if (mode === 'create') {
         // In create mode, audio_file is required
         if (!values.audio_file) {
@@ -272,6 +297,18 @@ export function ListeningTaskForm({
         await updateListeningTask(taskId, request);
         setCreatedTaskId(taskId);
         setCurrentOriginalStatus(values.status); // Update original status after successful update
+
+        // Reset form with updated values to clear dirty state
+        form.reset({
+          title: values.title,
+          ielts_type: values.ielts_type,
+          part_number: values.part_number,
+          instruction: values.instruction,
+          status: values.status,
+          is_automatic_transcription: values.is_automatic_transcription,
+          transcript: values.transcript,
+        });
+
         toast({
           title: 'Success',
           description: 'Listening task updated successfully',
@@ -336,9 +373,16 @@ export function ListeningTaskForm({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>
-          {mode === 'create' ? 'Create New Listening Task' : 'Edit Listening Task'}
-        </CardTitle>
+        <div className='flex items-center justify-between'>
+          <CardTitle>
+            {mode === 'create' ? 'Create New Listening Task' : 'Edit Listening Task'}
+          </CardTitle>
+          {mode === 'edit' && form.formState.isDirty && (
+            <Badge variant='outline' className='bg-yellow-50 text-yellow-700 border-yellow-200'>
+              Unsaved Changes
+            </Badge>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -423,17 +467,33 @@ export function ListeningTaskForm({
                   // Check if the original status from database was TEST
                   const isOriginalTestStatus = currentOriginalStatus === ListeningTaskStatus.TEST;
 
+                  // Calculate total points
+                  const totalPoints = questionGroups.reduce((total, group) => {
+                    return (
+                      total +
+                      group.questions.reduce((groupTotal: number, question: any) => {
+                        return groupTotal + (question.point || 1);
+                      }, 0)
+                    );
+                  }, 0);
+
+                  const hasEnoughPoints = totalPoints >= 10;
+
                   return (
                     <FormItem>
                       <FormLabel>Status</FormLabel>
                       <Select
                         onValueChange={(value) => field.onChange(parseInt(value))}
                         defaultValue={field.value.toString()}
-                        disabled={isOriginalTestStatus}
+                        disabled={isOriginalTestStatus || mode === 'create'}
                       >
                         <FormControl>
                           <SelectTrigger
-                            className={isOriginalTestStatus ? 'opacity-50 cursor-not-allowed' : ''}
+                            className={
+                              isOriginalTestStatus || mode === 'create'
+                                ? 'opacity-50 cursor-not-allowed'
+                                : ''
+                            }
                           >
                             <SelectValue placeholder='Select status' />
                           </SelectTrigger>
@@ -442,15 +502,26 @@ export function ListeningTaskForm({
                           <SelectItem value={ListeningTaskStatus.DRAFT.toString()}>
                             Draft
                           </SelectItem>
-                          <SelectItem value={ListeningTaskStatus.PUBLISHED.toString()}>
-                            Published
+                          <SelectItem
+                            value={ListeningTaskStatus.PUBLISHED.toString()}
+                            disabled={!hasEnoughPoints}
+                          >
+                            Published{' '}
+                            {!hasEnoughPoints ? `(Need 10 points, have ${totalPoints})` : ''}
                           </SelectItem>
-                          <SelectItem value={ListeningTaskStatus.TEST.toString()}>Test</SelectItem>
+                          <SelectItem
+                            value={ListeningTaskStatus.TEST.toString()}
+                            disabled={!hasEnoughPoints}
+                          >
+                            Test {!hasEnoughPoints ? `(Need 10 points, have ${totalPoints})` : ''}
+                          </SelectItem>
                         </SelectContent>
                       </Select>
-                      {isOriginalTestStatus && (
+                      {(isOriginalTestStatus || mode === 'create') && (
                         <p className='text-xs text-muted-foreground'>
-                          Status cannot be changed when task is in Test mode
+                          {isOriginalTestStatus
+                            ? 'Status cannot be changed when task is in Test mode'
+                            : 'Status is set to Draft for new tasks'}
                         </p>
                       )}
                       <FormMessage />

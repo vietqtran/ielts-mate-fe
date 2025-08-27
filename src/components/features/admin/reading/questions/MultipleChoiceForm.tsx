@@ -97,34 +97,92 @@ export function MultipleChoiceForm({
       if (editingIndex !== null) {
         const question_id = questions[editingIndex].question_id;
 
-        // Update question
+        // Step 1: First update - set number_of_correct_answers to total number of choices
+        // This ensures database has enough capacity for all choices before we create/update them
+        const totalChoicesCount = data.choices.length;
+        const originalQuestion = questions[editingIndex];
         await instance.put(`/reading/questions/${question_id}`, {
           question_order: data.question_order,
           point: data.point,
           explanation: data.explanation,
+          question_categories: originalQuestion.question_categories || [],
+          number_of_correct_answers: totalChoicesCount, // Set to total choices first
           instruction_for_choice: data.instruction_for_choice,
-          number_of_correct_answers: data.number_of_correct_answers,
+          blank_index: undefined, // Not applicable for multiple choice
+          correct_answer: undefined, // Not applicable for multiple choice
+          instruction_for_matching: undefined, // Not applicable for multiple choice
+          correct_answer_for_matching: undefined, // Not applicable for multiple choice
+          zone_index: undefined, // Not applicable for multiple choice
+          drag_item_id: undefined, // Not applicable for multiple choice
           question_type: 0,
         });
 
-        // Update choices
-        for (const choice of data.choices) {
-          if (choice.id) {
+        // Step 2: Get original choices to compare and separate existing from new choices
+        const originalChoices = originalQuestion.choices || [];
+        const existingChoices = data.choices.filter((choice) => choice.id);
+        const newChoices = data.choices.filter((choice) => !choice.id);
+
+        // Step 3a: Create new choices first (so they exist before we try to update them)
+        for (const choice of newChoices) {
+          await instance.post(`/reading/questions/${question_id}/choices`, {
+            label: choice.label,
+            content: choice.content,
+            choice_order: choice.choice_order,
+            is_correct: choice.is_correct,
+          });
+        }
+
+        // Step 3b: Process existing choices in the required order
+        for (const choice of existingChoices) {
+          // Find the original state
+          const originalChoice = originalChoices.find((orig: any) => orig.choice_id === choice.id);
+
+          // Step 3b-i: If this choice was correct but now is not, unset it first
+          if (originalChoice && originalChoice.is_correct && !choice.is_correct) {
             await instance.put(`/reading/choices/${choice.id}`, {
               label: choice.label,
               content: choice.content,
               choice_order: choice.choice_order,
-              is_correct: choice.is_correct,
+              is_correct: false,
             });
-          } else {
-            await instance.post(`/reading/questions/${question_id}/choices`, {
+          }
+          // Step 3b-ii: If this choice is now correct (whether it was before or not), set it
+          else if (choice.is_correct) {
+            await instance.put(`/reading/choices/${choice.id}`, {
               label: choice.label,
               content: choice.content,
               choice_order: choice.choice_order,
-              is_correct: choice.is_correct,
+              is_correct: true,
+            });
+          }
+          // Step 3b-iii: If this choice is not correct and wasn't correct before, just update content/order
+          else {
+            await instance.put(`/reading/choices/${choice.id}`, {
+              label: choice.label,
+              content: choice.content,
+              choice_order: choice.choice_order,
+              is_correct: false,
             });
           }
         }
+
+        // Step 4: Second update - set number_of_correct_answers to actual correct choices count
+        const finalCorrectCount = data.choices.filter((choice) => choice.is_correct).length;
+        await instance.put(`/reading/questions/${question_id}`, {
+          question_order: data.question_order,
+          point: data.point,
+          explanation: data.explanation,
+          question_categories: originalQuestion.question_categories || [],
+          number_of_correct_answers: finalCorrectCount, // Set to actual correct choices count
+          instruction_for_choice: data.instruction_for_choice,
+          blank_index: undefined, // Not applicable for multiple choice
+          correct_answer: undefined, // Not applicable for multiple choice
+          instruction_for_matching: undefined, // Not applicable for multiple choice
+          correct_answer_for_matching: undefined, // Not applicable for multiple choice
+          zone_index: undefined, // Not applicable for multiple choice
+          drag_item_id: undefined, // Not applicable for multiple choice
+          question_type: 0,
+        });
 
         const updatedQuestions = [...questions];
         updatedQuestions[editingIndex] = {

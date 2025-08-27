@@ -62,6 +62,12 @@ export function FillInBlanksManager({
             { order: data.question_order },
             isListening
           );
+          refetchPassageData();
+
+          // Early return after order update to avoid duplicate processing
+          setEditingQuestion(null);
+          setIsAddingOrEditing(false);
+          return;
         }
 
         // Update existing question info (excluding question_order)

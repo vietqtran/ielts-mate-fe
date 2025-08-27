@@ -33,7 +33,10 @@ const AuthProvider = ({ children, isAuthPage = false }: Props) => {
     return '/dashboard'; // default user area
   };
 
-  // Initial fetch (or re-fetch) of the current user so we can decide redirects.
+  // Smart user verification: only call /me API when necessary
+  // - Skip for auth pages when user not authenticated
+  // - Skip for auth pages even when user is authenticated (wait for protected pages)
+  // - Only verify on protected pages to avoid unnecessary API calls
   useEffect(() => {
     let cancelled = false;
     const init = async () => {
@@ -47,15 +50,22 @@ const AuthProvider = ({ children, isAuthPage = false }: Props) => {
           return;
         }
 
-        // Skip refetchUser if we already have a user (from sign-in or previous fetch)
+        // If we have user from sign-in but are still on auth pages, don't call /me yet
+        // Wait until user navigates to protected pages to verify authentication
+        if (user && isAuthPage) {
+          dispatch(setFullPageLoading(false));
+          return;
+        }
+
+        // Skip refetchUser if we already have a user and have verified recently
         // This prevents double API calls after successful authentication
         if (user && fetchedRef.current) {
           dispatch(setFullPageLoading(false));
           return;
         }
 
-        // Only fetch user when we don't have one or haven't fetched yet
-        if (!user || !fetchedRef.current) {
+        // Only fetch user when we don't have one OR when we have user but are on protected pages and haven't verified yet
+        if (!user || (!isAuthPage && !fetchedRef.current)) {
           fetchedRef.current = true;
           await refetchUser();
         }

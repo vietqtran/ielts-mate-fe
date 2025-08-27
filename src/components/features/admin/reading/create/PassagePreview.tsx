@@ -2,11 +2,12 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { IeltsType, PassageStatus, QuestionTypeEnumIndex } from '@/types/reading/reading.types';
-import { BookOpen, CheckCircle, Clock, Users } from 'lucide-react';
+import { BookOpen, CheckCircle, Clock, FileQuestion, Users } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { toast } from 'sonner';
 import { LocalQuestionGroup } from './QuestionGroupsManager';
 
 interface PassageData {
@@ -83,7 +84,37 @@ export function PassagePreview({
 }: Readonly<PassagePreviewProps>) {
   console.log('PassagePreview received questionGroups:', questionGroups);
   const totalQuestions = questionGroups.reduce((total, group) => total + group.questions.length, 0);
+  const totalPoints = questionGroups.reduce(
+    (total, group) =>
+      total +
+      group.questions.reduce(
+        (groupTotal: number, question: any) => groupTotal + (question.point || 1),
+        0
+      ),
+    0
+  );
   const estimatedTime = Math.max(15, Math.ceil(totalQuestions * 1.5)); // Rough estimate: 1.5 min per question, min 15 min
+
+  // Function to validate points for status change
+  const validatePointsForStatus = (status: PassageStatus): boolean => {
+    if (status !== PassageStatus.TEST && status !== PassageStatus.PUBLISHED) {
+      return true; // No validation needed for DRAFT status
+    }
+
+    const requiredPoints = passageData.part_number === 1 ? 14 : 13;
+    return totalPoints >= requiredPoints;
+  };
+
+  const handleFinishWithValidation = (status: PassageStatus) => {
+    if (!validatePointsForStatus(status)) {
+      const requiredPoints = passageData.part_number === 1 ? 14 : 13;
+      toast.error(
+        `Part ${passageData.part_number} requires at least ${requiredPoints} points to publish or test. Current points: ${totalPoints}`
+      );
+      return;
+    }
+    onFinish(status);
+  };
 
   return (
     <div className='space-y-6'>
@@ -99,10 +130,25 @@ export function PassagePreview({
                 <Badge variant='outline'>{getStatusLabel(passageData.passage_status)}</Badge>
               </div>
             </div>
-            <Button onClick={() => onFinish(PassageStatus.PUBLISHED)} className='gap-2'>
-              <CheckCircle className='h-4 w-4' />
-              Publish Passage
-            </Button>
+            <div className='flex gap-2'>
+              <Button
+                onClick={() => handleFinishWithValidation(PassageStatus.TEST)}
+                variant='outline'
+                className='gap-2'
+                disabled={passageData.passage_status === PassageStatus.TEST}
+              >
+                <FileQuestion className='h-4 w-4' />
+                Test Mode
+              </Button>
+              <Button
+                onClick={() => handleFinishWithValidation(PassageStatus.PUBLISHED)}
+                className='gap-2'
+                disabled={passageData.passage_status === PassageStatus.TEST}
+              >
+                <CheckCircle className='h-4 w-4' />
+                Publish Passage
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -390,10 +436,27 @@ export function PassagePreview({
               <div className='text-sm text-muted-foreground'>
                 Ready to publish this passage for student use
               </div>
-              <Button onClick={() => onFinish(PassageStatus.PUBLISHED)} size='lg' className='gap-2'>
-                <CheckCircle className='h-5 w-5' />
-                Complete & Publish Passage
-              </Button>
+              <div className='flex gap-2'>
+                <Button
+                  onClick={() => handleFinishWithValidation(PassageStatus.TEST)}
+                  variant='outline'
+                  size='lg'
+                  className='gap-2'
+                  disabled={passageData.passage_status === PassageStatus.TEST}
+                >
+                  <FileQuestion className='h-5 w-5' />
+                  Test Mode
+                </Button>
+                <Button
+                  onClick={() => handleFinishWithValidation(PassageStatus.PUBLISHED)}
+                  size='lg'
+                  className='gap-2'
+                  disabled={passageData.passage_status === PassageStatus.TEST}
+                >
+                  <CheckCircle className='h-5 w-5' />
+                  Publish Passage
+                </Button>
+              </div>
             </div>
           </div>
         </CardContent>

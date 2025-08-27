@@ -72,24 +72,45 @@ export function MultipleChoiceManager({
             { order: data.question_order },
             isListening
           );
+          // Refetch passage data to get updated question order
+          refetchPassageData();
+
+          // Early return after order update to avoid duplicate processing
+          setEditingQuestion(null);
+          setIsAddingOrEditing(false);
+          return;
         }
 
-        // 2. Update main question info (excluding question_order)
-        const questionInfoRequest = {
-          point: data.point,
-          explanation: data.explanation,
-          number_of_correct_answers: data.number_of_correct_answers,
-          instruction_for_choice: data.instruction_for_choice,
-        };
-        await updateQuestionInfo(group.id, questionId, questionInfoRequest, isListening);
-
-        // 2. Sequentially process choice changes to avoid race conditions
+        // 2. Sequentially process updates according to required logic:
+        // Step 1: Update question with number of correct answers from form
         const originalChoices = editingQuestion.choices || [];
         const submittedChoices = data.choices;
 
-        // Step 2a: Handle deletions
+        // Step 1: First update - set number_of_correct_answers to total number of choices
+        // This ensures database has enough capacity for all choices before we create/update them
+        const totalChoicesCount = submittedChoices.length;
+        const firstUpdateRequest = {
+          explanation: data.explanation,
+          point: data.point,
+          question_categories: editingQuestion.question_categories || [],
+          number_of_correct_answers: totalChoicesCount, // Set to total choices first
+          instruction_for_choice: data.instruction_for_choice,
+          blank_index: undefined, // Not applicable for multiple choice
+          correct_answer: undefined, // Not applicable for multiple choice
+          instruction_for_matching: undefined, // Not applicable for multiple choice
+          correct_answer_for_matching: undefined, // Not applicable for multiple choice
+          zone_index: undefined, // Not applicable for multiple choice
+          drag_item_id: undefined, // Not applicable for multiple choice
+        };
+        await updateQuestionInfo(group.id, questionId, firstUpdateRequest, isListening);
+
+        // Separate existing choices from new choices
+        const existingChoices = submittedChoices.filter((sub: any) => sub.id);
+        const newChoices = submittedChoices.filter((sub: any) => !sub.id);
+
+        // Step 2a: Handle deletions first
         const choicesToDelete = originalChoices.filter(
-          (orig: any) => !submittedChoices.some((sub: any) => sub.id === orig.choice_id)
+          (orig: any) => !existingChoices.some((sub: any) => sub.id === orig.choice_id)
         );
         if (choicesToDelete.length > 0) {
           const deletePromises = choicesToDelete.map((choice: any) =>
@@ -98,36 +119,73 @@ export function MultipleChoiceManager({
           await Promise.all(deletePromises);
         }
 
-        // Step 2b: Handle updates - BATCH 1: Unset previously correct answers
-        const unsetCorrectPromises = submittedChoices
+        // Step 2b: Create new choices first (so they have IDs for subsequent updates)
+        if (newChoices.length > 0) {
+          const createPromises = newChoices.map((choice: any) => {
+            const { id, ...creationData } = choice; // Ensure no client-side ID is sent
+            return createChoice(questionId, creationData, isListening);
+          });
+          await Promise.all(createPromises);
+        }
+
+        // Step 2c: Refetch choices to get the updated list with new IDs
+        const updatedChoicesAfterCreation = await getChoicesByQuestionId(questionId, isListening);
+        const allCurrentChoices = updatedChoicesAfterCreation.data || [];
+
+        // Step 2d: Unset all previously correct answers (set is_correct = false for unchecked choices)
+        const unsetCorrectPromises = existingChoices
           .filter((sub: any) => {
             const original = originalChoices.find((o: any) => o.choice_id === sub.id);
             return original && original.is_correct && !sub.is_correct;
           })
           .map((choice: any) => {
-            const { id, ...updateData } = choice; // Clean data for update
-            return updateChoice(questionId, choice.id, updateData, isListening);
+            const { id, ...updateData } = choice;
+            return updateChoice(
+              questionId,
+              choice.id,
+              { ...updateData, is_correct: false },
+              isListening
+            );
           });
 
         if (unsetCorrectPromises.length > 0) {
           await Promise.all(unsetCorrectPromises);
         }
 
-        // Step 2c: Handle updates - BATCH 2: Set new correct answers and update content
-        const otherUpdatePromises = submittedChoices
+        // Step 2e: Set new correct answers (set is_correct = true for checked choices)
+        const setCorrectPromises = existingChoices
+          .filter((sub: any) => {
+            const original = originalChoices.find((o: any) => o.choice_id === sub.id);
+            return sub.is_correct && (!original || !original.is_correct);
+          })
+          .map((choice: any) => {
+            const { id, ...updateData } = choice;
+            return updateChoice(
+              questionId,
+              choice.id,
+              { ...updateData, is_correct: true },
+              isListening
+            );
+          });
+
+        if (setCorrectPromises.length > 0) {
+          await Promise.all(setCorrectPromises);
+        }
+
+        // Step 2f: Update other properties (content, label, choice_order) for existing choices
+        const otherUpdatePromises = existingChoices
           .filter((sub: any) => {
             const original = originalChoices.find((o: any) => o.choice_id === sub.id);
             if (!original) return false;
-            if (original.is_correct && !sub.is_correct) return false;
+            // Only update if content, label, or choice_order changed
             return (
-              original.is_correct !== sub.is_correct ||
               original.label !== sub.label ||
               original.content !== sub.content ||
               original.choice_order !== sub.choice_order
             );
           })
           .map((choice: any) => {
-            const { id, ...updateData } = choice; // Clean data for update
+            const { id, ...updateData } = choice;
             return updateChoice(questionId, choice.id, updateData, isListening);
           });
 
@@ -135,20 +193,30 @@ export function MultipleChoiceManager({
           await Promise.all(otherUpdatePromises);
         }
 
-        // Step 2d: Handle creations
-        const choicesToCreate = submittedChoices.filter((sub: any) => !sub.id);
-        if (choicesToCreate.length > 0) {
-          const createPromises = choicesToCreate.map((choice: any) => {
-            const { id, ...creationData } = choice; // Ensure no client-side ID is sent
-            return createChoice(questionId, creationData, isListening);
-          });
-          await Promise.all(createPromises);
-        }
-
-        // 3. Refetch choices to get the final state
+        // Step 3: Refetch choices to get the final state
         const updatedChoicesResponse = await getChoicesByQuestionId(questionId, isListening);
+        const finalChoices = updatedChoicesResponse.data || [];
 
-        // 4. Construct the final, authoritative question object
+        // Step 4: Second update - set number_of_correct_answers to actual correct choices count
+        const finalCorrectCount = finalChoices.filter((choice: any) => choice.is_correct).length;
+
+        // Second update to question info with actual correct count
+        const secondUpdateRequest = {
+          explanation: data.explanation,
+          point: data.point,
+          question_categories: editingQuestion.question_categories || [],
+          number_of_correct_answers: finalCorrectCount, // Set to actual correct choices count
+          instruction_for_choice: data.instruction_for_choice,
+          blank_index: undefined, // Not applicable for multiple choice
+          correct_answer: undefined, // Not applicable for multiple choice
+          instruction_for_matching: undefined, // Not applicable for multiple choice
+          correct_answer_for_matching: undefined, // Not applicable for multiple choice
+          zone_index: undefined, // Not applicable for multiple choice
+          drag_item_id: undefined, // Not applicable for multiple choice
+        };
+        await updateQuestionInfo(group.id, questionId, secondUpdateRequest, isListening);
+
+        // Step 5: Construct the final, authoritative question object
         const finalUpdatedQuestion = {
           question_id: questionId,
           question_group_id: editingQuestion.question_group_id,
@@ -157,10 +225,10 @@ export function MultipleChoiceManager({
           question_order: data.question_order,
           point: data.point,
           explanation: data.explanation,
-          number_of_correct_answers: data.number_of_correct_answers,
+          number_of_correct_answers: data.number_of_correct_answers, // Use form value, not calculated
           instruction_for_choice: data.instruction_for_choice,
           // Ensure choices have consistent structure with choice_id property
-          choices: (updatedChoicesResponse.data || []).map((choice: any) => ({
+          choices: finalChoices.map((choice: any) => ({
             ...choice,
             choice_id: choice.choice_id || choice.id,
             is_correct: !!choice.is_correct, // Ensure boolean type
@@ -178,6 +246,9 @@ export function MultipleChoiceManager({
           ...group,
           questions: updatedQuestions,
         });
+
+        // Refetch passage data to ensure all data is in sync after complex update
+        refetchPassageData();
       } else {
         // Create new question with choices
         const questionRequest = {
