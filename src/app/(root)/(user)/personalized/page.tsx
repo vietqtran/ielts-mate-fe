@@ -131,6 +131,8 @@ export default function PersonalizedPage() {
   });
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingVocabulary, setEditingVocabulary] = useState<VocabularyResponse | null>(null);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isProgressModalOpen, setIsProgressModalOpen] = useState(false);
   const [selectedModuleForShare, setSelectedModuleForShare] = useState<{
@@ -262,6 +264,12 @@ export default function PersonalizedPage() {
       setVocabularies(response.data);
       setPagination(response.pagination);
     }
+  };
+
+  // Handle vocabulary edit
+  const handleEditVocabulary = (vocab: VocabularyResponse) => {
+    setEditingVocabulary(vocab);
+    setIsEditModalOpen(true);
   };
 
   // Handle vocabulary delete
@@ -1083,7 +1091,12 @@ export default function PersonalizedPage() {
                         <p className='text-xs text-selective-yellow-100'>
                           Created: {new Date(vocab.created_at).toLocaleDateString()}
                         </p>
-                        <Button variant='outline' size='sm' className='text-tekhelet-400'>
+                        <Button
+                          variant='outline'
+                          size='sm'
+                          className='text-tekhelet-400'
+                          onClick={() => handleEditVocabulary(vocab)}
+                        >
                           Edit
                         </Button>
                         <Button
@@ -1254,6 +1267,27 @@ export default function PersonalizedPage() {
               }
             };
             fetchVocabularies();
+          }}
+        />
+
+        {/* Vocabulary Edit Modal */}
+        <VocabularyCreateModal
+          isOpen={isEditModalOpen}
+          mode='edit'
+          vocabularyId={editingVocabulary?.vocabulary_id}
+          initialData={{
+            word: editingVocabulary?.word,
+            context: editingVocabulary?.context,
+            meaning: editingVocabulary?.meaning,
+          }}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingVocabulary(null);
+          }}
+          onSuccess={() => {
+            setIsEditModalOpen(false);
+            setEditingVocabulary(null);
+            refreshVocabularyList();
           }}
         />
 

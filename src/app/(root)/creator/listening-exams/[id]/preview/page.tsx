@@ -1,9 +1,11 @@
 'use client';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { Separator } from '@/components/ui/separator';
 import { useListeningExam } from '@/hooks/apis/admin/useListeningExam';
-import { useParams } from 'next/navigation';
+import { ArrowLeft } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 // Helper to fetch audio file
@@ -25,6 +27,7 @@ async function getAudio(audio_file_id: string): Promise<string | null> {
 
 export default function ListeningExamPreviewPage() {
   const params = useParams();
+  const router = useRouter();
   const examId = params.id as string;
   const { getExamById } = useListeningExam();
   const [exam, setExam] = useState<any | null>(null);
@@ -90,9 +93,21 @@ export default function ListeningExamPreviewPage() {
 
   return (
     <div className='container mx-auto p-6'>
+      {/* Header with Back Button */}
+      <div className='flex items-center gap-4 mb-6'>
+        <Button variant='ghost' onClick={() => router.push('/creator/listening-exams')}>
+          <ArrowLeft className='h-4 w-4 mr-2' />
+          Back to Listening Exams
+        </Button>
+        <div>
+          <h1 className='text-3xl font-bold'>Preview Listening Exam</h1>
+          <p className='text-muted-foreground'>Preview how this exam will appear to students</p>
+        </div>
+      </div>
+
       <Card className='mb-6'>
         <CardHeader>
-          <CardTitle>Preview Listening Exam</CardTitle>
+          <CardTitle>Exam Information</CardTitle>
         </CardHeader>
         <CardContent>
           <div className='space-y-2'>

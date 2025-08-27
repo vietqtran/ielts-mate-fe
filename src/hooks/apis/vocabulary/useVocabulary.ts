@@ -4,9 +4,12 @@ import {
   VocabularyDeleteResponse,
   VocabularyListParams,
   VocabularyListResponse,
+  VocabularyResponse,
+  VocabularyUpdateRequest,
   createVocabulary,
   deleteVocabulary,
   getMyVocabulary,
+  updateVocabulary,
 } from '@/lib/api/vocabulary';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -16,10 +19,12 @@ export const useVocabulary = () => {
     createVocabulary: boolean;
     getMyVocabulary: boolean;
     deleteVocabulary: boolean;
+    updateVocabulary: boolean;
   }>({
     createVocabulary: false,
     getMyVocabulary: false,
     deleteVocabulary: false,
+    updateVocabulary: false,
   });
 
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +68,27 @@ export const useVocabulary = () => {
     }
   };
 
+  const updateVocabularyFn = async (
+    vocabularyId: string,
+    data: VocabularyUpdateRequest
+  ): Promise<VocabularyResponse | null> => {
+    setIsLoading((prev) => ({ ...prev, updateVocabulary: true }));
+    setError(null);
+
+    try {
+      const response = await updateVocabulary(vocabularyId, data);
+      toast.success('Vocabulary updated successfully');
+      return response;
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.message || 'Failed to update vocabulary';
+      setError(errorMessage);
+      toast.error(errorMessage);
+      return null;
+    } finally {
+      setIsLoading((prev) => ({ ...prev, updateVocabulary: false }));
+    }
+  };
+
   const deleteVocabularyFn = async (
     vocabularyId: string
   ): Promise<VocabularyDeleteResponse | null> => {
@@ -86,6 +112,7 @@ export const useVocabulary = () => {
   return {
     createVocabulary: createVocabularyFn,
     getMyVocabulary: getMyVocabularyFn,
+    updateVocabulary: updateVocabularyFn,
     deleteVocabulary: deleteVocabularyFn,
     isLoading,
     error,

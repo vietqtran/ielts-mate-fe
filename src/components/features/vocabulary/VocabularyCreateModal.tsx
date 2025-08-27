@@ -41,6 +41,8 @@ interface VocabularyCreateModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  mode?: 'create' | 'edit';
+  vocabularyId?: string;
   initialData?: {
     word?: string;
     context?: string;
@@ -52,9 +54,11 @@ export default function VocabularyCreateModal({
   isOpen,
   onClose,
   onSuccess,
+  mode = 'create',
+  vocabularyId,
   initialData,
 }: VocabularyCreateModalProps) {
-  const { createVocabulary, isLoading } = useVocabulary();
+  const { createVocabulary, updateVocabulary, isLoading } = useVocabulary();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -72,7 +76,13 @@ export default function VocabularyCreateModal({
       meaning: values.meaning?.trim() || null,
     };
 
-    const result = await createVocabulary(requestData);
+    let result;
+    if (mode === 'edit' && vocabularyId) {
+      result = await updateVocabulary(vocabularyId, requestData);
+    } else {
+      result = await createVocabulary(requestData);
+    }
+
     if (result) {
       form.reset();
       onClose();
@@ -98,10 +108,12 @@ export default function VocabularyCreateModal({
       <DialogContent className='border rounded-3xl max-w-md'>
         <DialogHeader>
           <DialogTitle className='text-xl font-semibold text-tekhelet-400'>
-            Add New Vocabulary
+            {mode === 'edit' ? 'Edit Vocabulary' : 'Add New Vocabulary'}
           </DialogTitle>
           <DialogDescription className='text-muted-foreground text-sm font-medium'>
-            Add a new word to your personal vocabulary collection
+            {mode === 'edit'
+              ? 'Edit the vocabulary word in your collection'
+              : 'Add a new word to your personal vocabulary collection'}
           </DialogDescription>
         </DialogHeader>
 
@@ -168,14 +180,16 @@ export default function VocabularyCreateModal({
               </Button>
               <Button
                 type='submit'
-                disabled={isLoading.createVocabulary}
+                disabled={isLoading.createVocabulary || isLoading.updateVocabulary}
                 className='bg-tekhelet-500 hover:bg-tekhelet-600 text-white'
               >
-                {isLoading.createVocabulary ? (
+                {isLoading.createVocabulary || isLoading.updateVocabulary ? (
                   <>
                     <LoadingSpinner color='white' />
-                    <span className='ml-2'>Adding...</span>
+                    <span className='ml-2'>{mode === 'edit' ? 'Updating...' : 'Adding...'}</span>
                   </>
+                ) : mode === 'edit' ? (
+                  'Update Vocabulary'
                 ) : (
                   'Add Vocabulary'
                 )}

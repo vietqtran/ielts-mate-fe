@@ -6,6 +6,12 @@ export interface VocabularyCreateRequest {
   meaning?: string | null;
 }
 
+export interface VocabularyUpdateRequest {
+  word: string;
+  context: string;
+  meaning?: string | null;
+}
+
 export interface VocabularyResponse {
   vocabulary_id: string;
   word: string;
@@ -84,6 +90,23 @@ export const getMyVocabulary = async (
 
   const url = `/personal/vocabulary/my-vocabulary${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
   const response = await axios.get<VocabularyListResponse>(url);
+  return response.data;
+};
+
+/**
+ * Update a vocabulary by ID
+ * @param vocabularyId Vocabulary ID to update
+ * @param data Updated vocabulary data
+ * @returns Promise with the updated vocabulary
+ */
+export const updateVocabulary = async (
+  vocabularyId: string,
+  data: VocabularyUpdateRequest
+): Promise<VocabularyResponse> => {
+  const response = await axios.put<VocabularyResponse>(
+    `/personal/vocabulary/${vocabularyId}`,
+    data
+  );
   return response.data;
 };
 

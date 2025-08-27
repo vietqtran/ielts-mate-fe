@@ -276,9 +276,9 @@ export default function PassagePreviewPage() {
       {/* Header */}
       <div className='flex items-center justify-between mb-6'>
         <div className='flex items-center gap-4'>
-          <Button variant='ghost' onClick={() => router.back()}>
+          <Button variant='ghost' onClick={() => router.push('/creator/passages')}>
             <ArrowLeft className='h-4 w-4 mr-2' />
-            Back
+            Back to Passages
           </Button>
           <div>
             <h1 className='text-3xl font-bold'>Passage Preview</h1>
