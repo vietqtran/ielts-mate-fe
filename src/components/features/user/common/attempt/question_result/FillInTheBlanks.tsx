@@ -4,7 +4,7 @@ import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 
 const AttemptFillInTheBlanksResult = ({ question, userAnswers }: AttemptQuestionResultProps) => {
   const hasAnswer = userAnswers.length > 0;
-  const userAnswer = hasAnswer ? userAnswers[0]?.filled_text_answer.toString() : 'null';
+  const userAnswer = hasAnswer ? userAnswers[0]?.filled_text_answer.toString() : null;
   const isAnswerCorrect = userAnswer === question.correct_answer;
 
   return (

@@ -17,7 +17,7 @@ import {
 import { RootState } from '@/types';
 import { ListeningExamAttemptsHistoryResponse } from '@/types/listening/listening-exam.types';
 import { formatDate, formatDuration } from '@/utils/time';
-import { Calendar, Clock, Eye, Headphones, Users } from 'lucide-react';
+import { Calendar, Clock, Eye, Headphones } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -196,10 +196,10 @@ const ListeningExamHistory = () => {
             {attemptHistoryData.map((attempt) => (
               <Card
                 key={attempt.exam_attempt_id}
-                className='bg-white/60 backdrop-blur-lg border rounded-2xl shadow-xl hover:shadow-2xl transition-shadow'
+                className='border rounded-2xl shadow-xl hover:shadow-2xl transition-shadow'
               >
                 <CardHeader className='min-w-0'>
-                  <CardTitle className='text-lg mb-2 line-clamp-2 text-tekhelet-700 w-full truncate'>
+                  <CardTitle className='text-lg mb-2 line-clamp-2 text-tekhelet-500 w-full truncate'>
                     {attempt.listening_exam.listening_exam_name || 'Untitled Exam'}
                   </CardTitle>
                   <div className='flex items-center gap-2 mb-2'>
@@ -223,7 +223,7 @@ const ListeningExamHistory = () => {
                         <Calendar className='h-3 w-3' />
                         <span>Started:</span>
                       </div>
-                      <span className='text-right text-tekhelet-700'>
+                      <span className='text-right text-tekhelet-600'>
                         {formatDate(attempt.created_at)}
                       </span>
 
@@ -231,16 +231,16 @@ const ListeningExamHistory = () => {
                         <Clock className='h-3 w-3' />
                         <span>Duration:</span>
                       </div>
-                      <span className='text-right text-tekhelet-700'>
+                      <span className='text-right text-tekhelet-600'>
                         {formatDuration(attempt.duration)}
                       </span>
 
-                      <div className='flex items-center gap-1 text-tekhelet-500'>
-                        <Users className='h-3 w-3' />
-                        <span>Questions:</span>
+                      <div className='flex items-center gap-1 text-[var(--color-tekhelet-500)]'>
+                        <Calendar className='h-3 w-3' />
+                        <span>Finished At:</span>
                       </div>
-                      <span className='text-right font-semibold text-tekhelet-700'>
-                        {attempt.total_question} questions
+                      <span className='text-right font-semibold text-tekhelet-600'>
+                        {formatDate(attempt.updated_at)}
                       </span>
                     </div>
 
