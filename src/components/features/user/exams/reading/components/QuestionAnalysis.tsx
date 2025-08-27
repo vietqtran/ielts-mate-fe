@@ -30,6 +30,7 @@ export const QuestionAnalysis = ({ examDetails }: QuestionAnalysisProps) => {
       (g) => g.drag_items || []
     ),
   ];
+
   return (
     <Card>
       <CardHeader>

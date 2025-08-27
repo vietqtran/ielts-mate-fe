@@ -107,7 +107,10 @@ export default function SuggestionPage() {
   const [isRefreshingSuggestions, setIsRefreshingSuggestions] = useState(false);
   const [isAINotificationModalOpen, setIsAINotificationModalOpen] = useState(false);
   const [currentStreak, setCurrentStreak] = useState<number>(0);
-  const [bandScores, setBandScores] = useState<BandScoreResponse>({ listening: 0, reading: 0 });
+  const [bandScores, setBandScores] = useState<BandScoreResponse>({
+    listening: 0,
+    reading: 0,
+  });
   const router = useRouter();
 
   // Helper function to clean JSON content from markdown code blocks
@@ -662,7 +665,7 @@ export default function SuggestionPage() {
       case 'medium':
         return 'bg-selective-yellow-100 text-selective-yellow-600 border-selective-yellow-200';
       case 'low':
-        return 'bg-tekhelet-100 text-tekhelet-600 border-tekhelet-200';
+        return 'bg-gray-100 text-tekhelet-600 border-tekhelet-200';
       default:
         return 'bg-gray-100 text-gray-600 border-gray-200';
     }
@@ -900,8 +903,8 @@ export default function SuggestionPage() {
                       <CardContent className='p-6'>
                         <div className='flex items-start justify-between mb-4'>
                           <div className='flex items-center space-x-3'>
-                            <div className='p-2 bg-tekhelet-100 rounded-lg'>
-                              <SkillIcon className='h-5 w-5 text-tekhelet-500' />
+                            <div className='p-2 bg-selective-yellow-300 rounded-lg'>
+                              <SkillIcon className='h-5 w-5 text-white' />
                             </div>
                             <div className='flex-1'>
                               <h3 className='text-lg font-semibold text-tekhelet-400 mb-1'>
@@ -912,7 +915,10 @@ export default function SuggestionPage() {
                               </p>
                             </div>
                           </div>
-                          <Badge className={`${getPriorityColor(suggestion.priority)} border`}>
+                          <Badge
+                            className={`${getPriorityColor(suggestion.priority)}`}
+                            variant={'outline'}
+                          >
                             {suggestion.priority} priority
                           </Badge>
                         </div>
@@ -1090,7 +1096,7 @@ export default function SuggestionPage() {
             {/* Performance Alert */}
             <Card className='bg-gradient-to-br from-medium-slate-blue-50 to-tekhelet-50 border border-tekhelet-200'>
               <CardContent className='p-6 text-center'>
-                <div className='p-3 bg-tekhelet-100 rounded-full w-fit mx-auto mb-4'>
+                <div className='p-3 bg-selective-yellow-500 rounded-full w-fit mx-auto mb-4'>
                   <AlertCircle className='h-6 w-6 text-tekhelet-500' />
                 </div>
                 <h3 className='text-lg font-semibold text-tekhelet-400 mb-2'>Stay on Track!</h3>
@@ -1100,7 +1106,7 @@ export default function SuggestionPage() {
                 </p>
                 <Button
                   asChild
-                  className='bg-selective-yellow-400 hover:bg-selective-yellow-300 text-tekhelet-600 font-semibold'
+                  className='bg-selective-yellow-400 hover:bg-selective-yellow-300 font-semibold'
                 >
                   <Link href='/target'>
                     <Target className='h-4 w-4 mr-1' />
