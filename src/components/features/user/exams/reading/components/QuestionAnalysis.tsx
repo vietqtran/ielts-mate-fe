@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ReadingExamAttemptDetailsResponse } from '@/types/reading/reading-exam-attempt.types';
 import { BookOpen } from 'lucide-react';
 import { QuestionResultRenderer } from './QuestionResultRenderer';
+import { SelectableText } from './SelectableText';
 
 interface QuestionAnalysisProps {
   examDetails: ReadingExamAttemptDetailsResponse;
@@ -74,20 +75,16 @@ export const QuestionAnalysis = ({
                       <BookOpen className='w-5 h-5' />
                       {part.title}
                     </h3>
-                    <div
+                    <SelectableText
+                      content={part.instruction || 'No instruction provided'}
                       className='prose prose-sm max-w-none text-tekhelet-500 mb-4'
-                      dangerouslySetInnerHTML={{
-                        __html: part.instruction || 'No instruction provided',
-                      }}
                     />
                     {part.content && (
                       <div className='mt-4 p-4 bg-white/70 rounded-lg border border-tekhelet-200'>
                         <h4 className='font-medium text-tekhelet-400 mb-2'>Reading Passage:</h4>
-                        <div
+                        <SelectableText
+                          content={part.content}
                           className='prose prose-sm max-w-none text-tekhelet-600 leading-relaxed'
-                          dangerouslySetInnerHTML={{
-                            __html: part.content,
-                          }}
                         />
                       </div>
                     )}
@@ -100,11 +97,9 @@ export const QuestionAnalysis = ({
                         <h4 className='font-semibold text-tekhelet-400 mb-3'>
                           {group.section_label}
                         </h4>
-                        <div
+                        <SelectableText
+                          content={group.instruction || 'No instruction provided'}
                           className='text-tekhelet-500 prose prose-sm max-w-none mb-4'
-                          dangerouslySetInnerHTML={{
-                            __html: group.instruction || 'No instruction provided',
-                          }}
                         />
 
                         <div className='space-y-3'>

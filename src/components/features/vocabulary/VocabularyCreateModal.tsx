@@ -41,12 +41,18 @@ interface VocabularyCreateModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  initialData?: {
+    word?: string;
+    context?: string;
+    meaning?: string;
+  };
 }
 
 export default function VocabularyCreateModal({
   isOpen,
   onClose,
   onSuccess,
+  initialData,
 }: VocabularyCreateModalProps) {
   const { createVocabulary, isLoading } = useVocabulary();
 
@@ -74,12 +80,18 @@ export default function VocabularyCreateModal({
     }
   };
 
-  // Reset form when modal closes
+  // Reset form when modal closes and set initial data when modal opens
   useEffect(() => {
     if (!isOpen) {
       form.reset();
+    } else if (initialData) {
+      form.reset({
+        word: initialData.word || '',
+        context: initialData.context || '',
+        meaning: initialData.meaning || '',
+      });
     }
-  }, [isOpen, form]);
+  }, [isOpen, form, initialData]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
