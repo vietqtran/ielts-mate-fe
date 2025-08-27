@@ -62,11 +62,27 @@ export function FillInBlanksManager({
             { order: data.question_order },
             isListening
           );
+
+          // Update local state immediately with new order
+          const updatedQuestions = localQuestions.map((q) =>
+            q.question_id === editingQuestion.question_id || q.id === editingQuestion.question_id
+              ? { ...q, question_order: data.question_order }
+              : q
+          );
+          setLocalQuestions(updatedQuestions);
+
+          // Propagate changes to parent component
+          onUpdateGroup({
+            ...group,
+            questions: updatedQuestions,
+          });
+
+          // Also refetch passage data to ensure consistency
           refetchPassageData();
 
-          // Early return after order update to avoid duplicate processing
-          setEditingQuestion(null);
-          setIsAddingOrEditing(false);
+          // Keep form open after order update - don't reset editing state
+          // setEditingQuestion(null);
+          // setIsAddingOrEditing(false);
           return;
         }
 

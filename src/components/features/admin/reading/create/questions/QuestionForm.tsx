@@ -87,7 +87,7 @@ export function QuestionForm({
   isListening = false,
 }: Readonly<QuestionFormProps>) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { createQuestions, updateQuestionInfo, isLoading } = useQuestion();
+  const { createQuestions, updateQuestionInfo, updateQuestionOrder, isLoading } = useQuestion();
 
   // Calculate default values for new questions
   const getDefaultValues = () => {
@@ -131,7 +131,29 @@ export function QuestionForm({
       setIsSubmitting(true);
 
       if (isEditing && questionId) {
-        // Update existing question
+        // Check if question_order changed and update it separately if needed
+        if (initialData && data.question_order !== initialData.question_order) {
+          await updateQuestionOrder(
+            groupId,
+            questionId,
+            { order: data.question_order },
+            isListening
+          );
+          toast.success('Question order updated successfully');
+          // Don't call onSuccess to keep form open after order update
+          // onSuccess({
+          //   id: questionId,
+          //   question_order: data.question_order,
+          //   point: initialData.point,
+          //   explanation: initialData.explanation,
+          //   zone_index: initialData.zone_index,
+          //   drag_item_id: initialData.drag_item_id,
+          //   drag_items: [],
+          // });
+          return;
+        }
+
+        // Update existing question info (excluding question_order)
         const result = await updateQuestionInfo(
           groupId,
           questionId,

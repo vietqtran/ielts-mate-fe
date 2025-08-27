@@ -117,8 +117,13 @@ export function ListeningTaskForm({
 }: ListeningTaskFormProps) {
   const router = useRouter();
   const { toast } = useToast();
-  const { createListeningTask, updateListeningTask, isLoading, deleteGroupQuestion } =
-    useListeningTask();
+  const {
+    createListeningTask,
+    updateListeningTask,
+    getListeningTaskById,
+    isLoading,
+    deleteGroupQuestion,
+  } = useListeningTask();
 
   const [audioPreview, setAudioPreview] = useState<string | null>(null);
   const [serverAudioUrl, setServerAudioUrl] = useState<string | null>(null);
@@ -129,6 +134,41 @@ export function ListeningTaskForm({
     originalStatus
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRefreshingQuestions, setIsRefreshingQuestions] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  // Function to refresh task data after updates
+  const refreshTaskData = async () => {
+    if (!createdTaskId) return;
+
+    setIsRefreshingQuestions(true);
+    try {
+      const response = await getListeningTaskById(createdTaskId);
+
+      if (response?.data && (response.data as any).question_groups) {
+        // Map question_groups to LocalListeningQuestionGroup[]
+        const groups = (response.data as any).question_groups.map((g: any) => ({
+          id: g.group_id,
+          section_order: g.section_order,
+          section_label: g.section_label,
+          instruction: g.instruction,
+          question_type: g.question_type,
+          questions: g.questions ?? [],
+          drag_items: g.drag_items ?? [],
+        }));
+        setQuestionGroups(groups);
+        setRefreshKey((prev) => prev + 1); // Force re-render
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to refresh task data',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsRefreshingQuestions(false);
+    }
+  };
 
   const schema = mode === 'create' ? createSchema : editSchema;
   const form = useForm<FormType>({
@@ -656,31 +696,44 @@ export function ListeningTaskForm({
         {/* Sau khi tạo xong task hoặc khi edit, hiển thị quản lý group/question */}
         {createdTaskId && (
           <div className='mt-8'>
+            <div className='mb-4 flex items-center justify-between'>
+              <h3 className='text-lg font-semibold'>Question Groups</h3>
+              <Button
+                type='button'
+                variant='outline'
+                size='sm'
+                onClick={refreshTaskData}
+                disabled={isRefreshingQuestions}
+                className='flex items-center gap-2'
+              >
+                {isRefreshingQuestions ? (
+                  <>
+                    <div className='animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600'></div>
+                    Refreshing...
+                  </>
+                ) : (
+                  <>
+                    <svg className='h-4 w-4' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                      <path
+                        strokeLinecap='round'
+                        strokeLinejoin='round'
+                        strokeWidth={2}
+                        d='M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15'
+                      />
+                    </svg>
+                    Refresh Task Data
+                  </>
+                )}
+              </Button>
+            </div>
             <ListeningQuestionGroupsManager
+              key={refreshKey}
               task_id={createdTaskId}
               questionGroups={questionGroups}
               onAddGroup={handleAddGroup}
               onUpdateGroup={handleUpdateGroup}
               onDeleteGroup={handleDeleteGroup}
-              refetchTaskData={async () => {
-                if (createdTaskId) {
-                  const { getAllQuestionGroups } = useListeningTask();
-                  const response: { data?: any[] } = await getAllQuestionGroups(createdTaskId);
-                  if (response?.data) {
-                    // Map AddGroupQuestionResponse[] to LocalListeningQuestionGroup[]
-                    const groups = (response.data as any[]).map((g) => ({
-                      id: g.group_id,
-                      section_order: g.section_order,
-                      section_label: g.section_label,
-                      instruction: g.instruction,
-                      question_type: g.question_type,
-                      questions: g.questions ?? [],
-                      drag_items: g.drag_items ?? [],
-                    }));
-                    setQuestionGroups(groups);
-                  }
-                }
-              }}
+              refetchTaskData={refreshTaskData}
             />
             {/*
             {mode === 'edit' && questionGroups.length > 0 && (
