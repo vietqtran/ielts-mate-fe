@@ -1,7 +1,10 @@
 'use client';
 
+import useExamIELTSBand from '@/components/features/user/exams/common/useExamIELTSBand';
+import { AttemptStatisticsCard } from '@/components/features/user/history/practice/common/AttemptStatisticsCard';
 import useReadingExamAttempt from '@/hooks/apis/reading/useReadingExamAttempt';
 import { ReadingExamAttemptDetailsResponse } from '@/types/reading/reading-exam-attempt.types';
+import { IeltsTypeEnumIndex } from '@/types/reading/reading.types';
 import { useEffect, useState } from 'react';
 import {
   ExamErrorState,
@@ -12,15 +15,9 @@ import {
   OverallScoreCard,
   PerformanceByPartsCard,
   QuestionAnalysis,
-  StatisticsCard,
 } from './components';
 import { useExamStatistics } from './hooks/useExamStatistics';
-import {
-  formatDate,
-  formatDuration,
-  getIELTSBandScore,
-  getPerformanceLevel,
-} from './utils/examUtils';
+import { formatDate, formatDuration } from './utils/examUtils';
 
 interface ReadingExamDetailsPageProps {
   examId: string;
@@ -32,7 +29,6 @@ const ReadingExamDetailsPage = ({ examId }: ReadingExamDetailsPageProps) => {
   const [examDetails, setExamDetails] = useState<ReadingExamAttemptDetailsResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [openQuestions, setOpenQuestions] = useState<Set<string>>(new Set());
 
   // Load exam details
   useEffect(() => {
@@ -64,17 +60,11 @@ const ReadingExamDetailsPage = ({ examId }: ReadingExamDetailsPageProps) => {
 
   // Calculate statistics using custom hook
   const stats = useExamStatistics(examDetails);
-
-  // Toggle question details
-  const toggleQuestion = (questionId: string) => {
-    const newOpen = new Set(openQuestions);
-    if (newOpen.has(questionId)) {
-      newOpen.delete(questionId);
-    } else {
-      newOpen.add(questionId);
-    }
-    setOpenQuestions(newOpen);
-  };
+  const { headline } = useExamIELTSBand(
+    examDetails?.estimated_ielts_band!,
+    'listening',
+    IeltsTypeEnumIndex.ACADEMIC
+  );
 
   // Loading state
   if (isLoading) {
@@ -86,10 +76,7 @@ const ReadingExamDetailsPage = ({ examId }: ReadingExamDetailsPageProps) => {
     return <ExamErrorState error={error || 'Exam details not found'} />;
   }
 
-  const bandScore = stats ? getIELTSBandScore(stats.scorePercentage) : 0;
-  const performance = stats
-    ? getPerformanceLevel(stats.scorePercentage)
-    : { level: 'Unknown', color: 'bg-gray-500 text-white' };
+  const bandScore = examDetails?.estimated_ielts_band || 0;
 
   return (
     <div className='min-h-screen  p-4'>
@@ -111,16 +98,15 @@ const ReadingExamDetailsPage = ({ examId }: ReadingExamDetailsPageProps) => {
             scorePercentage={stats?.scorePercentage || 0}
             correctAnswers={stats?.correctAnswers || 0}
             totalQuestions={stats?.totalQuestions || 0}
-            performance={performance}
           />
 
           {/* IELTS Band Score */}
-          <IELTSBandScoreCard bandScore={bandScore} />
+          <IELTSBandScoreCard bandScore={bandScore} slogan={headline} />
 
           {/* Statistics */}
-          <StatisticsCard
-            totalPoints={stats?.totalPoints || 0}
-            examTotalPoints={examDetails.total_point}
+          <AttemptStatisticsCard
+            totalQuestions={stats?.totalQuestions || 0}
+            notAnswered={stats?.notAnswered || 0}
             correctAnswers={stats?.correctAnswers || 0}
             incorrectAnswers={stats?.incorrectAnswers || 0}
           />
@@ -130,11 +116,7 @@ const ReadingExamDetailsPage = ({ examId }: ReadingExamDetailsPageProps) => {
         {stats && <PerformanceByPartsCard partStats={stats.partStats} />}
 
         {/* Detailed Question Analysis */}
-        <QuestionAnalysis
-          examDetails={examDetails}
-          openQuestions={openQuestions}
-          onToggleQuestion={toggleQuestion}
-        />
+        <QuestionAnalysis examDetails={examDetails} />
       </div>
     </div>
   );

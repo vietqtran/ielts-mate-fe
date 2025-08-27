@@ -142,7 +142,6 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
       `;
       content = content.replace(zonePattern, dropZoneElement);
     });
-
     return content;
   };
 
@@ -158,7 +157,7 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
       <CardContent className='space-y-6'>
         {/* Drag Items */}
         <div className='space-y-2'>
-          <h4 className='font-medium text-sm'>Drag the items below to the correct zones:</h4>
+          <h4 className='font-medium text-sm'>Drag the items below to the correct question:</h4>
           <div className='flex flex-wrap gap-2 p-4 bg-blue-50 rounded-lg'>
             {questionGroup.drag_items
               .filter((item) => !usedDragItemIds.has(item.drag_item_id))
@@ -191,16 +190,10 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
             // Fallback: Individual drop zones
             <div className='space-y-3'>
               {questionGroup.questions
-                .sort(
-                  (a, b) =>
-                    (a.zone_index ? a.zone_index : a.question_order) -
-                    (b.zone_index ? b.zone_index : b.question_order)
-                )
+                .sort((a, b) => a.question_order - b.question_order)
                 .map((question) => (
                   <div key={question.question_id} className='flex items-center gap-4'>
-                    <span className='text-sm font-medium'>
-                      Zone {question.zone_index ? question.zone_index : question.question_order}:
-                    </span>
+                    <span className='text-sm font-medium'>Question {question.question_order}:</span>
                     <div
                       onDragOver={handleDragOver}
                       onDrop={(e) => handleDrop(e, question.question_id, question.question_order)}

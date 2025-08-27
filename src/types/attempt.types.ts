@@ -163,6 +163,8 @@ export interface AttemptResponseQuestion {
   correct_answer_for_matching?: string;
   zone_index?: number;
   drag_item_id?: string;
+  start_time?: number; // for listening question
+  end_time?: number; // for listening question
 }
 
 export interface DragItem {

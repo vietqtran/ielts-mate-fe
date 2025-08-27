@@ -26,23 +26,6 @@ export const formatDate = (dateString: string): string => {
   });
 };
 
-// IELTS band score approximation
-export const getIELTSBandScore = (percentage: number): number => {
-  if (percentage >= 95) return 9.0;
-  if (percentage >= 89) return 8.5;
-  if (percentage >= 83) return 8.0;
-  if (percentage >= 75) return 7.5;
-  if (percentage >= 67) return 7.0;
-  if (percentage >= 58) return 6.5;
-  if (percentage >= 50) return 6.0;
-  if (percentage >= 42) return 5.5;
-  if (percentage >= 33) return 5.0;
-  if (percentage >= 25) return 4.5;
-  if (percentage >= 17) return 4.0;
-  if (percentage >= 8) return 3.5;
-  return 3.0;
-};
-
 // Get performance level and color
 export const getPerformanceLevel = (score: number) => {
   if (score >= 85)
@@ -68,8 +51,11 @@ export interface ExamStats {
   totalQuestions: number;
   correctAnswers: number;
   incorrectAnswers: number;
+  notAnswered: number;
   totalPoints: number;
   scorePercentage: number;
+  // Alias for clarity when needed by UI
+  correctPercentage: number;
   partStats: PartStat[];
 }
 
