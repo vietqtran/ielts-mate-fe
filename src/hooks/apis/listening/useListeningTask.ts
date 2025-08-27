@@ -10,6 +10,7 @@ import {
   ListeningTaskCreationRequest,
   ListeningTaskDetailResponse,
   ListeningTaskFilterParams,
+  ListeningTaskFilterParamsCamelCase,
   ListeningTaskResponse,
   ListeningTaskUpdateRequest,
 } from '@/types/listening/listening.types';
@@ -79,7 +80,7 @@ export function useListeningTask() {
   };
 
   // Get listening tasks created by the current user
-  const getListeningTasksByCreator = async (params?: ListeningTaskFilterParams) => {
+  const getListeningTasksByCreator = async (params?: ListeningTaskFilterParamsCamelCase) => {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
@@ -95,14 +96,14 @@ export function useListeningTask() {
         params: {
           page: params?.page,
           size: params?.size,
-          ielts_type: params?.ielts_type?.length ? params.ielts_type.join(',') : undefined,
-          part_number: params?.part_number?.length ? params.part_number.join(',') : undefined,
+          ieltsType: params?.ieltsType?.length ? params.ieltsType.join(',') : undefined,
+          partNumber: params?.partNumber?.length ? params.partNumber.join(',') : undefined,
           status: params?.status?.length ? params.status.join(',') : undefined,
-          question_category: params?.question_category,
-          sort_by: params?.sort_by,
-          sort_direction: params?.sort_direction,
+          questionCategory: params?.questionCategory,
+          sortBy: params?.sortBy,
+          sortDirection: params?.sortDirection,
           title: params?.title,
-          created_by: params?.created_by,
+          createdBy: params?.createdBy,
         },
         signal: currentController.signal,
       });

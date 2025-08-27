@@ -268,3 +268,17 @@ export interface BaseResponse<T> {
   pagination?: Pagination;
   status?: string;
 }
+
+// Filter parameters for reading passages (camelCase for UI components)
+export interface ReadingPassageFilterParams {
+  page: number;
+  size: number;
+  ieltsType?: number;
+  status?: number;
+  partNumber?: number;
+  questionCategory?: string;
+  sortBy?: string;
+  sortDirection?: string;
+  title?: string;
+  createdBy?: string;
+}

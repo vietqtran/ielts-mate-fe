@@ -123,7 +123,7 @@ export default function PreviewListeningTaskPage() {
               {task.ielts_type && (
                 <div className='flex items-center gap-2'>
                   <span className='px-2 py-1 rounded-full bg-blue-200 text-blue-700'>
-                    {task.ielts_type === 1 ? 'Academic' : 'General Training'}
+                    {task.ielts_type === 0 ? 'Academic' : 'General Training'}
                   </span>
                   <span className='px-2 py-1 rounded-full bg-purple-200 text-purple-700'>
                     Part {task.part_number}

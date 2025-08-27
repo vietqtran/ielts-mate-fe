@@ -4,7 +4,7 @@ import { ListeningTaskFilterToolbar } from '@/components/features/admin/listenin
 import { ListeningTaskTable } from '@/components/features/admin/listening/ListeningTaskTable';
 import { Button } from '@/components/ui/button';
 import { useListeningTask } from '@/hooks';
-import { ListeningTaskFilterParams } from '@/types/listening/listening.types';
+import { ListeningTaskFilterParamsCamelCase } from '@/types/listening/listening.types';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -20,16 +20,32 @@ export default function ListeningsPage() {
     hasNextPage: false,
     hasPreviousPage: false,
   });
-  const [filters, setFilters] = useState<ListeningTaskFilterParams>({
+  const [filters, setFilters] = useState<ListeningTaskFilterParamsCamelCase>({
     page: 1,
     size: 10,
-    sort_by: 'updatedAt',
-    sort_direction: 'desc',
+    sortBy: 'updatedAt',
+    sortDirection: 'desc',
   });
 
   const fetchListeningTasks = async () => {
     try {
-      const response = await getListeningTasksByCreator(filters);
+      // Filter out null/empty values before sending to API
+      const cleanFilters = Object.entries(filters).reduce((acc, [key, value]) => {
+        // Skip empty strings, empty arrays, null, undefined
+        if (
+          value === '' ||
+          value === null ||
+          value === undefined ||
+          (Array.isArray(value) && value.length === 0)
+        ) {
+          return acc;
+        }
+
+        acc[key] = value;
+        return acc;
+      }, {} as any);
+
+      const response = await getListeningTasksByCreator(cleanFilters);
       if (response) {
         setListeningTasks(response.data);
         if (response.pagination) {
@@ -45,7 +61,7 @@ export default function ListeningsPage() {
     fetchListeningTasks();
   }, [filters]);
 
-  const handleFilterChange = (newFilters: Partial<ListeningTaskFilterParams>) => {
+  const handleFilterChange = (newFilters: Partial<ListeningTaskFilterParamsCamelCase>) => {
     setFilters((prev) => ({
       ...prev,
       ...newFilters,
@@ -93,8 +109,8 @@ export default function ListeningsPage() {
         onPageChange={handlePageChange}
         onSortChange={handleFilterChange}
         currentSort={{
-          sort_by: filters.sort_by,
-          sort_direction: filters.sort_direction,
+          sortBy: filters.sortBy,
+          sortDirection: filters.sortDirection,
         }}
       />
     </div>

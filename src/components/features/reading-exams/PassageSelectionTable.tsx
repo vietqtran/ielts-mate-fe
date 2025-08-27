@@ -14,7 +14,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { usePassage } from '@/hooks/apis/reading/usePassage';
-import { Pagination, PassageGetResponse } from '@/types/reading/reading.types';
+import {
+  Pagination,
+  PassageGetResponse,
+  ReadingPassageFilterParams,
+} from '@/types/reading/reading.types';
 import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import LoadingSpinner from '../../ui/loading-spinner';
@@ -59,27 +63,44 @@ export function PassageSelectionTable({ onSelect, selectedPassages }: PassageSel
     hasNextPage: false,
   });
 
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<Omit<ReadingPassageFilterParams, 'page' | 'size'>>({
     title: '',
     ieltsType: 0,
     status: 4, // Default to Test status (4)
-    partNumber: undefined as number | undefined,
+    partNumber: undefined,
     sortBy: 'updatedAt',
     sortDirection: 'desc',
   });
 
   const fetchPassages = async () => {
     try {
-      const response = await getPassagesForTeacher({
+      // Filter out null/empty values before sending to API
+      const apiParams: any = {
         page: pagination.currentPage,
         size: pagination.pageSize,
-        ielts_type: filters.ieltsType,
-        status: filters.status,
-        part_number: filters.partNumber,
-        title: filters.title || undefined,
-        sortBy: filters.sortBy,
-        sortDirection: filters.sortDirection,
-      });
+      };
+
+      // Only add non-empty/non-null values
+      if (filters.ieltsType !== undefined && filters.ieltsType !== null) {
+        apiParams.ielts_type = filters.ieltsType;
+      }
+      if (filters.status !== undefined && filters.status !== null) {
+        apiParams.status = filters.status;
+      }
+      if (filters.partNumber !== undefined && filters.partNumber !== null) {
+        apiParams.part_number = filters.partNumber;
+      }
+      if (filters.title && filters.title.trim() !== '') {
+        apiParams.title = filters.title.trim();
+      }
+      if (filters.sortBy && filters.sortBy.trim() !== '') {
+        apiParams.sortBy = filters.sortBy;
+      }
+      if (filters.sortDirection && filters.sortDirection.trim() !== '') {
+        apiParams.sortDirection = filters.sortDirection;
+      }
+
+      const response = await getPassagesForTeacher(apiParams);
 
       if (response && response.data && response.pagination) {
         setPassages(response.data);

@@ -26,7 +26,7 @@ import {
 import { useListeningTask } from '@/hooks';
 import { formatDate } from '@/lib/utils';
 import {
-  ListeningTaskFilterParams,
+  ListeningTaskFilterParamsCamelCase,
   ListeningTaskResponse,
   ListeningTaskStatus,
 } from '@/types/listening/listening.types';
@@ -54,10 +54,10 @@ interface ListeningTaskTableProps {
     hasPreviousPage: boolean;
   };
   onPageChange: (page: number) => void;
-  onSortChange?: (sortParams: Partial<ListeningTaskFilterParams>) => void;
+  onSortChange?: (sortParams: Partial<ListeningTaskFilterParamsCamelCase>) => void;
   currentSort?: {
-    sort_by?: string;
-    sort_direction?: string;
+    sortBy?: string;
+    sortDirection?: string;
   };
 }
 
@@ -67,7 +67,7 @@ export function ListeningTaskTable({
   pagination,
   onPageChange,
   onSortChange,
-  currentSort = { sort_by: 'updatedAt', sort_direction: 'desc' },
+  currentSort = { sortBy: 'updatedAt', sortDirection: 'desc' },
 }: Readonly<ListeningTaskTableProps>) {
   const router = useRouter();
   const { deleteListeningTask } = useListeningTask();
@@ -118,13 +118,13 @@ export function ListeningTaskTable({
     if (!field) return;
 
     let direction = 'asc';
-    if (currentSort.sort_by === field) {
-      direction = currentSort.sort_direction === 'asc' ? 'desc' : 'asc';
+    if (currentSort.sortBy === field) {
+      direction = currentSort.sortDirection === 'asc' ? 'desc' : 'asc';
     }
 
     onSortChange({
-      sort_by: field,
-      sort_direction: direction,
+      sortBy: field,
+      sortDirection: direction,
     });
   };
 
@@ -142,8 +142,8 @@ export function ListeningTaskTable({
     const field = fieldMapping[column];
     if (!field) return <ArrowUpDown className='ml-2 h-4 w-4' />;
 
-    if (currentSort.sort_by === field) {
-      return currentSort.sort_direction === 'asc' ? (
+    if (currentSort.sortBy === field) {
+      return currentSort.sortDirection === 'asc' ? (
         <ArrowUp className='ml-2 h-4 w-4' />
       ) : (
         <ArrowDown className='ml-2 h-4 w-4' />
@@ -271,7 +271,7 @@ export function ListeningTaskTable({
               data.map((task) => (
                 <TableRow key={task.task_id}>
                   <TableCell className='font-medium'>{task.title}</TableCell>
-                  <TableCell>{task.ielts_type === 1 ? 'Academic' : 'General Training'}</TableCell>
+                  <TableCell>{task.ielts_type === 0 ? 'Academic' : 'General Training'}</TableCell>
                   <TableCell>{task.part_number + 1}</TableCell>
                   <TableCell>{getStatusBadge(task.status)}</TableCell>
                   <TableCell>

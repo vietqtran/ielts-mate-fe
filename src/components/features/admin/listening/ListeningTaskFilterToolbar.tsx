@@ -12,15 +12,15 @@ import {
 } from '@/components/ui/select';
 import {
   IeltsListeningType,
-  ListeningTaskFilterParams,
+  ListeningTaskFilterParamsCamelCase,
   ListeningTaskStatus,
 } from '@/types/listening/listening.types';
 import { SearchIcon } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 interface ListeningTaskFilterToolbarProps {
-  filters: ListeningTaskFilterParams;
-  onFilterChange: (filters: Partial<ListeningTaskFilterParams>) => void;
+  filters: ListeningTaskFilterParamsCamelCase;
+  onFilterChange: (filters: Partial<ListeningTaskFilterParamsCamelCase>) => void;
 }
 
 export function ListeningTaskFilterToolbar({
@@ -48,11 +48,11 @@ export function ListeningTaskFilterToolbar({
   };
 
   const handleIeltsTypeChange = (value: string) => {
-    onFilterChange({ ielts_type: value === 'all' ? undefined : [value] });
+    onFilterChange({ ieltsType: value === 'all' ? undefined : [value] });
   };
 
   const handlePartNumberChange = (value: string) => {
-    onFilterChange({ part_number: value === 'all' ? undefined : [value] });
+    onFilterChange({ partNumber: value === 'all' ? undefined : [value] });
   };
 
   const handleStatusChange = (value: string) => {
@@ -60,22 +60,22 @@ export function ListeningTaskFilterToolbar({
   };
 
   const handleSortDirectionChange = (value: string) => {
-    onFilterChange({ sort_direction: value });
+    onFilterChange({ sortDirection: value });
   };
 
   const handleSortByChange = (value: string) => {
-    onFilterChange({ sort_by: value });
+    onFilterChange({ sortBy: value });
   };
 
   const handleResetFilters = () => {
     setTitle('');
     onFilterChange({
       title: '',
-      ielts_type: undefined,
-      part_number: undefined,
+      ieltsType: undefined,
+      partNumber: undefined,
       status: undefined,
-      sort_by: 'updatedAt',
-      sort_direction: 'desc',
+      sortBy: 'updatedAt',
+      sortDirection: 'desc',
     });
   };
 
@@ -116,9 +116,9 @@ export function ListeningTaskFilterToolbar({
           <Label htmlFor='ieltsType'>IELTS Type</Label>
           <Select
             value={
-              Array.isArray(filters.ielts_type)
-                ? (filters.ielts_type[0] ?? 'all')
-                : (filters.ielts_type ?? 'all')
+              Array.isArray(filters.ieltsType)
+                ? (filters.ieltsType[0] ?? 'all')
+                : (filters.ieltsType ?? 'all')
             }
             onValueChange={handleIeltsTypeChange}
           >
@@ -139,9 +139,9 @@ export function ListeningTaskFilterToolbar({
           <Label htmlFor='partNumber'>Part Number</Label>
           <Select
             value={
-              Array.isArray(filters.part_number)
-                ? (filters.part_number[0] ?? 'all')
-                : (filters.part_number ?? 'all')
+              Array.isArray(filters.partNumber)
+                ? (filters.partNumber[0] ?? 'all')
+                : (filters.partNumber ?? 'all')
             }
             onValueChange={handlePartNumberChange}
           >
@@ -181,7 +181,7 @@ export function ListeningTaskFilterToolbar({
 
         <div className='flex items-center gap-1.5'>
           <Label htmlFor='sortBy'>Sort By</Label>
-          <Select value={filters.sort_by ?? 'updatedAt'} onValueChange={handleSortByChange}>
+          <Select value={filters.sortBy ?? 'updatedAt'} onValueChange={handleSortByChange}>
             <SelectTrigger id='sortBy' className='min-w-[140px]'>
               <SelectValue placeholder='Updated At' />
             </SelectTrigger>
@@ -199,10 +199,7 @@ export function ListeningTaskFilterToolbar({
 
         <div className='flex items-center gap-1.5'>
           <Label htmlFor='sortDirection'>Order</Label>
-          <Select
-            value={filters.sort_direction ?? 'desc'}
-            onValueChange={handleSortDirectionChange}
-          >
+          <Select value={filters.sortDirection ?? 'desc'} onValueChange={handleSortDirectionChange}>
             <SelectTrigger id='sortDirection' className='min-w-[120px]'>
               <SelectValue placeholder='Descending' />
             </SelectTrigger>

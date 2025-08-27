@@ -47,7 +47,7 @@ const ACCEPTED_AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg
 // We need to conditionally validate the audio file based on mode
 const createSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
-  ielts_type: z.number().int().min(1, 'IELTS type is required'),
+  ielts_type: z.number().int().min(0, 'IELTS type is required'),
   part_number: z
     .number()
     .int()
@@ -69,7 +69,7 @@ const createSchema = z.object({
 
 const editSchema = z.object({
   title: z.string().min(3, 'Title must be at least 3 characters'),
-  ielts_type: z.number().int().min(1, 'IELTS type is required'),
+  ielts_type: z.number().int().min(0, 'IELTS type is required'),
   part_number: z
     .number()
     .int()
@@ -137,7 +137,7 @@ export function ListeningTaskForm({
       mode === 'create'
         ? {
             title: initialData?.title || '',
-            ielts_type: initialData?.ielts_type || 1,
+            ielts_type: initialData?.ielts_type || 0,
             part_number: initialData?.part_number || 0,
             instruction: initialData?.instruction || '',
             status: initialData?.status || 0,
@@ -147,7 +147,7 @@ export function ListeningTaskForm({
           }
         : {
             title: initialData?.title || '',
-            ielts_type: initialData?.ielts_type || 1,
+            ielts_type: initialData?.ielts_type || 0,
             part_number: initialData?.part_number || 0,
             instruction: initialData?.instruction || '',
             status: initialData?.status || 0,

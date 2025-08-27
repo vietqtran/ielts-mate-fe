@@ -1,8 +1,8 @@
 import { Pagination, UserInformation } from '../reading/reading.types';
 
 export enum IeltsListeningType {
-  ACADEMIC = 1,
-  GENERAL_TRAINING = 2,
+  ACADEMIC = 0,
+  GENERAL_TRAINING = 1,
 }
 
 export enum ListeningTaskStatus {
@@ -68,6 +68,20 @@ export interface ListeningTaskFilterParams {
   sort_direction?: string;
   title?: string;
   created_by?: string;
+}
+
+// New camelCase filter params for UI components
+export interface ListeningTaskFilterParamsCamelCase {
+  page: number;
+  size: number;
+  ieltsType?: string[];
+  partNumber?: string[];
+  status?: string[];
+  questionCategory?: string;
+  sortBy?: string;
+  sortDirection?: string;
+  title?: string;
+  createdBy?: string;
 }
 
 export interface BaseListeningResponse<T> {

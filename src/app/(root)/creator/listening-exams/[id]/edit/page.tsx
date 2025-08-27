@@ -31,7 +31,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useListeningExam } from '@/hooks/apis/admin/useListeningExam';
 import { useListeningTask } from '@/hooks/apis/listening/useListeningTask';
-import { ListeningTaskFilterParams } from '@/types/listening/listening.types';
+import { ListeningTaskFilterParamsCamelCase } from '@/types/listening/listening.types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
@@ -98,11 +98,11 @@ export default function EditListeningExamPage() {
     hasNextPage: false,
     hasPreviousPage: false,
   });
-  const [filters, setFilters] = useState<ListeningTaskFilterParams>({
+  const [filters, setFilters] = useState<ListeningTaskFilterParamsCamelCase>({
     page: 1,
     size: 10,
-    sort_by: 'updatedAt',
-    sort_direction: 'desc',
+    sortBy: 'updatedAt',
+    sortDirection: 'desc',
   });
 
   const form = useForm<FormValues>({
@@ -148,7 +148,23 @@ export default function EditListeningExamPage() {
   // Fetch tasks
   const fetchTasks = async () => {
     try {
-      const response = await getListeningTasksByCreator(filters);
+      // Filter out null/empty values before sending to API
+      const cleanFilters = Object.entries(filters).reduce((acc, [key, value]) => {
+        // Skip empty strings, empty arrays, null, undefined
+        if (
+          value === '' ||
+          value === null ||
+          value === undefined ||
+          (Array.isArray(value) && value.length === 0)
+        ) {
+          return acc;
+        }
+
+        acc[key] = value;
+        return acc;
+      }, {} as any);
+
+      const response = await getListeningTasksByCreator(cleanFilters);
       if (response) {
         setTasks(response.data);
         if (response.pagination) setPagination(response.pagination);
@@ -164,7 +180,7 @@ export default function EditListeningExamPage() {
   }, [filters]);
 
   // Unified filter updates like in listings page
-  const handleFilterChange = (newFilters: Partial<ListeningTaskFilterParams>) => {
+  const handleFilterChange = (newFilters: Partial<ListeningTaskFilterParamsCamelCase>) => {
     setFilters((prev) => ({
       ...prev,
       ...newFilters,
@@ -373,13 +389,13 @@ export default function EditListeningExamPage() {
             <div className='flex gap-2 items-center'>
               <Select
                 value={
-                  Array.isArray(filters.part_number) && filters.part_number.length > 0
-                    ? String(Number(filters.part_number[0]) + 1)
+                  Array.isArray(filters.partNumber) && filters.partNumber.length > 0
+                    ? String(Number(filters.partNumber[0]) + 1)
                     : ''
                 }
                 onValueChange={(v) =>
                   handleFilterChange({
-                    part_number: v && v !== 'all' ? [String(Number(v) - 1)] : undefined,
+                    partNumber: v && v !== 'all' ? [String(Number(v) - 1)] : undefined,
                   })
                 }
               >

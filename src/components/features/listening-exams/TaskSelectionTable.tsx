@@ -15,7 +15,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useListeningTask } from '@/hooks/apis/listening/useListeningTask';
-import { ListeningTaskFilterParams } from '@/types/listening/listening.types';
+import { ListeningTaskFilterParamsCamelCase } from '@/types/listening/listening.types';
 import { ArrowDownIcon, ArrowUpIcon } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import LoadingSpinner from '../../ui/loading-spinner';
@@ -57,19 +57,35 @@ export function TaskSelectionTable({ onSelect, selectedTasks }: TaskSelectionTab
     hasPreviousPage: false,
   });
 
-  const [filters, setFilters] = useState<ListeningTaskFilterParams>({
+  const [filters, setFilters] = useState<ListeningTaskFilterParamsCamelCase>({
     page: 1,
     size: 10,
     title: '',
     status: ['4'], // Default to Test status (4)
-    part_number: [String(selectedPart - 1)], // Filter by selected part
-    sort_by: 'updatedAt',
-    sort_direction: 'desc',
+    partNumber: [String(selectedPart - 1)], // Filter by selected part
+    sortBy: 'updatedAt',
+    sortDirection: 'desc',
   });
 
   const fetchTasks = async () => {
     try {
-      const response = await getListeningTasksByCreator(filters);
+      // Filter out null/empty values before sending to API
+      const cleanFilters = Object.entries(filters).reduce((acc, [key, value]) => {
+        // Skip empty strings, empty arrays, null, undefined
+        if (
+          value === '' ||
+          value === null ||
+          value === undefined ||
+          (Array.isArray(value) && value.length === 0)
+        ) {
+          return acc;
+        }
+
+        acc[key] = value;
+        return acc;
+      }, {} as any);
+
+      const response = await getListeningTasksByCreator(cleanFilters);
       if (response) {
         setTasks(response.data);
         if (response.pagination) setPagination(response.pagination);
@@ -87,7 +103,7 @@ export function TaskSelectionTable({ onSelect, selectedTasks }: TaskSelectionTab
   useEffect(() => {
     setFilters((prev) => ({
       ...prev,
-      part_number: [String(selectedPart - 1)], // Convert to 0-based index for API
+      partNumber: [String(selectedPart - 1)], // Convert to 0-based index for API
       page: 1,
     }));
   }, [selectedPart]);
@@ -138,11 +154,11 @@ export function TaskSelectionTable({ onSelect, selectedTasks }: TaskSelectionTab
 
   const handleSort = (sortBy: string) => {
     const newDirection =
-      filters.sort_by === sortBy && filters.sort_direction === 'asc' ? 'desc' : 'asc';
+      filters.sortBy === sortBy && filters.sortDirection === 'asc' ? 'desc' : 'asc';
     setFilters((prev) => ({
       ...prev,
-      sort_by: sortBy,
-      sort_direction: newDirection,
+      sortBy: sortBy,
+      sortDirection: newDirection,
       page: 1,
     }));
   };
@@ -281,8 +297,8 @@ export function TaskSelectionTable({ onSelect, selectedTasks }: TaskSelectionTab
                   onClick={() => handleSort('title')}
                 >
                   Title
-                  {filters.sort_by === 'title' &&
-                    (filters.sort_direction === 'asc' ? (
+                  {filters.sortBy === 'title' &&
+                    (filters.sortDirection === 'asc' ? (
                       <ArrowUpIcon className='inline ml-2 h-4 w-4' />
                     ) : (
                       <ArrowDownIcon className='inline ml-2 h-4 w-4' />
@@ -290,11 +306,11 @@ export function TaskSelectionTable({ onSelect, selectedTasks }: TaskSelectionTab
                 </TableHead>
                 <TableHead
                   className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
-                  onClick={() => handleSort('part_number')}
+                  onClick={() => handleSort('partNumber')}
                 >
                   Part
-                  {filters.sort_by === 'part_number' &&
-                    (filters.sort_direction === 'asc' ? (
+                  {filters.sortBy === 'partNumber' &&
+                    (filters.sortDirection === 'asc' ? (
                       <ArrowUpIcon className='inline ml-2 h-4 w-4' />
                     ) : (
                       <ArrowDownIcon className='inline ml-2 h-4 w-4' />
@@ -305,8 +321,8 @@ export function TaskSelectionTable({ onSelect, selectedTasks }: TaskSelectionTab
                   onClick={() => handleSort('status')}
                 >
                   Status
-                  {filters.sort_by === 'status' &&
-                    (filters.sort_direction === 'asc' ? (
+                  {filters.sortBy === 'status' &&
+                    (filters.sortDirection === 'asc' ? (
                       <ArrowUpIcon className='inline ml-2 h-4 w-4' />
                     ) : (
                       <ArrowDownIcon className='inline ml-2 h-4 w-4' />
