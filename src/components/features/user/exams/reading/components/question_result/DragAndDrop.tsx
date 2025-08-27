@@ -1,11 +1,15 @@
+import { SegmentPlayButton } from '@/components/features/user/common/attempt/SegmentPlayButton';
 import { Badge } from '@/components/ui/badge';
 import { ListeningExplanationDisplay } from '@/components/ui/listening-explanation-display';
 import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 import { ReadingExamAttemptDetailsQuestion } from '@/types/reading/reading-exam-attempt.types';
+import { RefObject } from 'react';
 
 export interface QuestionResultProps {
   question: ReadingExamAttemptDetailsQuestion;
   userAnswers: string[];
+  isListening?: boolean; // indicates if it's a listening question
+  audioRef?: RefObject<HTMLAudioElement | null>;
 }
 
 export interface DragAndDropProps extends QuestionResultProps {
@@ -19,7 +23,8 @@ const DragAndDropResult = ({
   userAnswers,
   dragAndDropItems,
   isListening,
-}: DragAndDropProps & { isListening?: boolean }) => {
+  audioRef,
+}: DragAndDropProps) => {
   const hasAnswer = userAnswers.length > 0;
   const userAnswer = hasAnswer ? userAnswers[0] : null;
   const userAnswerContent = dragAndDropItems.find(
@@ -86,6 +91,17 @@ const DragAndDropResult = ({
         <p className='text-sm font-medium text-tekhelet-400 mb-1'>Correct Answer</p>
         <div className='text-green-700'>{correctAnswerContent}</div>
       </div>
+
+      {isListening && audioRef && (
+        <div>
+          <SegmentPlayButton
+            audioRef={audioRef as RefObject<HTMLAudioElement>}
+            end={question.end_time}
+            start={question.start_time}
+            segmentKey={question.question_id}
+          />
+        </div>
+      )}
 
       {/* Explanation */}
       {question.explanation && (

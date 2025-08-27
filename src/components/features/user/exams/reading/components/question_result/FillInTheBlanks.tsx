@@ -1,13 +1,16 @@
+import { SegmentPlayButton } from '@/components/features/user/common/attempt/SegmentPlayButton';
 import { QuestionResultProps } from '@/components/features/user/exams/reading/components/question_result/DragAndDrop';
 import { Badge } from '@/components/ui/badge';
 import { ListeningExplanationDisplay } from '@/components/ui/listening-explanation-display';
 import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
+import { RefObject } from 'react';
 
 const FillInTheBlanksResult = ({
   question,
   userAnswers,
   isListening,
-}: QuestionResultProps & { isListening?: boolean }) => {
+  audioRef,
+}: QuestionResultProps) => {
   const hasAnswer = userAnswers.length > 0;
   const isAnswerCorrect = hasAnswer && userAnswers[0] === question.correct_answer;
 
@@ -66,6 +69,17 @@ const FillInTheBlanksResult = ({
         <p className='text-sm font-medium text-tekhelet-400 mb-1'>Correct Answer</p>
         <div className='text-green-700'>{question.correct_answer}</div>
       </div>
+
+      {isListening && audioRef && (
+        <div>
+          <SegmentPlayButton
+            audioRef={audioRef as RefObject<HTMLAudioElement>}
+            end={question.end_time}
+            start={question.start_time}
+            segmentKey={question.question_id}
+          />
+        </div>
+      )}
 
       {/* Explanation */}
       {question.explanation && (

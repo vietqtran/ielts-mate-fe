@@ -1,10 +1,14 @@
+import { SegmentPlayButton } from '@/components/features/user/common/attempt/SegmentPlayButton';
 import { Badge } from '@/components/ui/badge';
 import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
 import { AttemptAnswer, AttemptResponseQuestion } from '@/types/attempt.types';
+import { RefObject } from 'react';
 
 export interface AttemptQuestionResultProps {
   question: AttemptResponseQuestion;
   userAnswers: AttemptAnswer[];
+  audioRef?: RefObject<HTMLAudioElement | null>;
+  isListening?: boolean; // indicates if it's a listening question
 }
 
 export interface AttemptDragAndDropProps extends AttemptQuestionResultProps {
@@ -17,8 +21,10 @@ const AttemptDragAndDropResult = ({
   question,
   userAnswers,
   dragAndDropItems,
+  audioRef,
+  isListening,
 }: AttemptDragAndDropProps) => {
-  const hasAnswer = userAnswers.length > 0;
+  const hasAnswer = userAnswers.length > 0 && userAnswers[0]?.drag_item_id;
   const userAnswer = hasAnswer ? (userAnswers[0]?.drag_item_id ?? null) : null;
   const userAnswerContent = dragAndDropItems.map((item) =>
     userAnswer === item.drag_item_id ? item.content : null
@@ -84,6 +90,17 @@ const AttemptDragAndDropResult = ({
         <p className='text-sm font-medium text-tekhelet-400 mb-1'>Correct Answer</p>
         <div className='text-green-700 font-semibold'>{correctAnswerContent}</div>
       </div>
+
+      {isListening && audioRef && (
+        <div>
+          <SegmentPlayButton
+            audioRef={audioRef as RefObject<HTMLAudioElement>}
+            end={question.end_time}
+            start={question.start_time}
+            segmentKey={question.question_id}
+          />
+        </div>
+      )}
 
       {/* Explanation */}
       {question.explanation && (

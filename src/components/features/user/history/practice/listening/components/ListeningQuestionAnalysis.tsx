@@ -6,7 +6,9 @@ import {
 } from '@/components/features/user/common/attempt/AttemptQuestionResultRenderer';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import useListeningAudio from '@/hooks/apis/listening/useListeningAudio';
 import { LoadListeningAttemptResultResponse } from '@/types/listening/listening-attempt.types';
+import { useRef } from 'react';
 
 interface ListeningQuestionAnalysisProps {
   attemptDetails: LoadListeningAttemptResultResponse;
@@ -14,6 +16,7 @@ interface ListeningQuestionAnalysisProps {
 
 export const ListeningQuestionAnalysis = ({ attemptDetails }: ListeningQuestionAnalysisProps) => {
   const userAnswersMap = new Map<string, string[]>();
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const dragAndDropItems =
     attemptDetails.task_data.question_groups.flatMap((group) => group.drag_items) || [];
   attemptDetails.answers.forEach((answer) => {
@@ -34,6 +37,7 @@ export const ListeningQuestionAnalysis = ({ attemptDetails }: ListeningQuestionA
 
     userAnswersMap.set(answer.question_id, answerValues);
   });
+  const { objectUrl, isLoading } = useListeningAudio(attemptDetails.task_data.audio_file_id);
 
   return (
     <Card>
@@ -44,6 +48,20 @@ export const ListeningQuestionAnalysis = ({ attemptDetails }: ListeningQuestionA
         </p>
       </CardHeader>
       <CardContent className='space-y-4'>
+        <div className='w-full'>
+          {isLoading ? (
+            <p className='text-sm text-muted-foreground'>Loading audio...</p>
+          ) : (
+            <audio
+              ref={audioRef}
+              src={objectUrl}
+              preload='metadata'
+              controls
+              controlsList='nodownload'
+              className='w-full'
+            />
+          )}
+        </div>
         {attemptDetails.task_data.question_groups.map((group, groupIndex) => {
           const groupQuestions = group.questions;
           const correctCount = groupQuestions.reduce((acc, q) => {
@@ -54,7 +72,7 @@ export const ListeningQuestionAnalysis = ({ attemptDetails }: ListeningQuestionA
             <Card key={group.group_id}>
               <CardHeader className='pb-3'>
                 <CardTitle className='text-lg text-tekhelet-500 font-semibold'>
-                  Part {groupIndex + 1}: {group.section_label}
+                  {group.section_label}
                 </CardTitle>
                 {group.instruction && (
                   <div
@@ -82,6 +100,8 @@ export const ListeningQuestionAnalysis = ({ attemptDetails }: ListeningQuestionA
                         question={question}
                         userAnswers={userAnswers}
                         dragAndDropItems={dragAndDropItems}
+                        audioRef={audioRef}
+                        listening
                       />
                     );
                   })}

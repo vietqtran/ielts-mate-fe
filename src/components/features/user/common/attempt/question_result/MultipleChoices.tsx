@@ -1,8 +1,15 @@
+import { SegmentPlayButton } from '@/components/features/user/common/attempt/SegmentPlayButton';
 import { AttemptQuestionResultProps } from '@/components/features/user/common/attempt/question_result/DragAndDrop';
 import { Badge } from '@/components/ui/badge';
 import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
+import { RefObject } from 'react';
 
-const AttemptMultipleChoicesResult = ({ question, userAnswers }: AttemptQuestionResultProps) => {
+const AttemptMultipleChoicesResult = ({
+  question,
+  userAnswers,
+  audioRef,
+  isListening,
+}: AttemptQuestionResultProps) => {
   const choices = question.choices ?? [];
   const userChoices = userAnswers.map((ans) => ans.choice_ids).flat();
   const userChoiceLabels = choices
@@ -102,6 +109,17 @@ const AttemptMultipleChoicesResult = ({ question, userAnswers }: AttemptQuestion
               );
             })}
           </div>
+        </div>
+      )}
+
+      {isListening && audioRef && (
+        <div>
+          <SegmentPlayButton
+            audioRef={audioRef as RefObject<HTMLAudioElement>}
+            end={question.end_time}
+            start={question.start_time}
+            segmentKey={question.question_id}
+          />
         </div>
       )}
 

@@ -1,13 +1,11 @@
+import { SegmentPlayButton } from '@/components/features/user/common/attempt/SegmentPlayButton';
 import { QuestionResultProps } from '@/components/features/user/exams/reading/components/question_result/DragAndDrop';
 import { Badge } from '@/components/ui/badge';
 import { ListeningExplanationDisplay } from '@/components/ui/listening-explanation-display';
 import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
+import { RefObject } from 'react';
 
-const MatchingResult = ({
-  question,
-  userAnswers,
-  isListening,
-}: QuestionResultProps & { isListening?: boolean }) => {
+const MatchingResult = ({ question, userAnswers, isListening, audioRef }: QuestionResultProps) => {
   const hasAnswer = userAnswers.length > 0;
   const userAnswer = hasAnswer ? userAnswers[0] : null;
   const isAnswerCorrect = userAnswer === question.correct_answer_for_matching;
@@ -65,6 +63,17 @@ const MatchingResult = ({
         <p className='text-sm font-medium text-tekhelet-400 mb-1'>Correct Answer</p>
         <div className='text-green-700'>{question.correct_answer_for_matching}</div>
       </div>
+
+      {isListening && audioRef && (
+        <div>
+          <SegmentPlayButton
+            audioRef={audioRef as RefObject<HTMLAudioElement>}
+            end={question.end_time}
+            start={question.start_time}
+            segmentKey={question.question_id}
+          />
+        </div>
+      )}
 
       {/* Explanation */}
       {question.explanation && (

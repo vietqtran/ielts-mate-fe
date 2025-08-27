@@ -44,7 +44,7 @@ export const ReadingQuestionAnalysis = ({
             <Card key={group.group_id} className='border rounded-2xl'>
               <CardHeader className='pb-3'>
                 <CardTitle className='text-lg text-tekhelet-500 font-semibold'>
-                  Part {groupIndex + 1}: {group.section_label}
+                  {group.section_label}
                 </CardTitle>
                 {group.instruction && (
                   <div

@@ -1,13 +1,16 @@
+import { SegmentPlayButton } from '@/components/features/user/common/attempt/SegmentPlayButton';
 import { QuestionResultProps } from '@/components/features/user/exams/reading/components/question_result/DragAndDrop';
 import { Badge } from '@/components/ui/badge';
 import { ListeningExplanationDisplay } from '@/components/ui/listening-explanation-display';
 import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
+import { RefObject } from 'react';
 
 const MultipleChoicesResult = ({
   question,
   userAnswers,
   isListening,
-}: QuestionResultProps & { isListening?: boolean }) => {
+  audioRef,
+}: QuestionResultProps) => {
   const choices = question.choices ?? [];
   const userChoiceLabels = choices
     .filter((c) => userAnswers.includes(c.choice_id))
@@ -114,6 +117,18 @@ const MultipleChoicesResult = ({
               );
             })}
           </div>
+        </div>
+      )}
+
+      {isListening && audioRef && (
+        <div>
+          <SegmentPlayButton
+            audioRef={audioRef as RefObject<HTMLAudioElement>}
+            end={question.end_time}
+            start={question.start_time}
+            segmentKey={question.question_id}
+            key={question.question_id}
+          />
         </div>
       )}
 

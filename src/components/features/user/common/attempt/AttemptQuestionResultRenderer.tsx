@@ -6,6 +6,7 @@ import AttemptMatchingResult from '@/components/features/user/common/attempt/que
 import AttemptMultipleChoicesResult from '@/components/features/user/common/attempt/question_result/MultipleChoices';
 import { AttemptAnswer, AttemptResponseQuestion, Choice } from '@/types/attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
+import { RefObject } from 'react';
 
 interface AttemptQuestionResultRenderer {
   question: AttemptResponseQuestion;
@@ -14,26 +15,53 @@ interface AttemptQuestionResultRenderer {
     drag_item_id: string;
     content: string;
   }[];
+  audioRef?: RefObject<HTMLAudioElement | null>;
+  listening?: boolean; // indicates if it's a listening question
 }
 
 export const AttemptQuestionResultRenderer = ({
   question,
   userAnswers,
   dragAndDropItems,
+  audioRef = undefined,
+  listening = false,
 }: AttemptQuestionResultRenderer) => {
   switch (question.question_type) {
     case QuestionTypeEnumIndex.MULTIPLE_CHOICE:
-      return <AttemptMultipleChoicesResult question={question} userAnswers={userAnswers} />;
+      return (
+        <AttemptMultipleChoicesResult
+          question={question}
+          userAnswers={userAnswers}
+          isListening={listening}
+          audioRef={audioRef}
+        />
+      );
     case QuestionTypeEnumIndex.FILL_IN_THE_BLANKS:
-      return <AttemptFillInTheBlanksResult question={question} userAnswers={userAnswers} />;
+      return (
+        <AttemptFillInTheBlanksResult
+          question={question}
+          userAnswers={userAnswers}
+          isListening={listening}
+          audioRef={audioRef}
+        />
+      );
     case QuestionTypeEnumIndex.MATCHING:
-      return <AttemptMatchingResult question={question} userAnswers={userAnswers} />;
+      return (
+        <AttemptMatchingResult
+          question={question}
+          userAnswers={userAnswers}
+          isListening={listening}
+          audioRef={audioRef}
+        />
+      );
     case QuestionTypeEnumIndex.DRAG_AND_DROP:
       return (
         <AttemptDragAndDropResult
           question={question}
           userAnswers={userAnswers}
           dragAndDropItems={dragAndDropItems}
+          isListening={listening}
+          audioRef={audioRef}
         />
       );
     default:

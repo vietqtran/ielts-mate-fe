@@ -155,6 +155,8 @@ export type ReadingExamAttemptDetailsQuestion = {
   point?: number;
   blank_index?: number;
   zone_index?: number;
+  start_time?: number; // for listening question
+  end_time?: number; // for listening question
 };
 
 export interface QuestionGroup {

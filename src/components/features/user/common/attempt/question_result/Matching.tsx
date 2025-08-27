@@ -1,10 +1,17 @@
+import { SegmentPlayButton } from '@/components/features/user/common/attempt/SegmentPlayButton';
 import { AttemptQuestionResultProps } from '@/components/features/user/common/attempt/question_result/DragAndDrop';
 import { Badge } from '@/components/ui/badge';
 import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
+import { RefObject } from 'react';
 
-const AttemptMatchingResult = ({ question, userAnswers }: AttemptQuestionResultProps) => {
-  const hasAnswer = userAnswers.length > 0;
-  const userAnswer = hasAnswer ? userAnswers[0].matched_text_answer : null;
+const AttemptMatchingResult = ({
+  question,
+  userAnswers,
+  audioRef,
+  isListening,
+}: AttemptQuestionResultProps) => {
+  const hasAnswer = userAnswers.length > 0 && userAnswers[0]?.matched_text_answer;
+  const userAnswer = hasAnswer ? userAnswers[0]?.matched_text_answer : null;
   const isAnswerCorrect = userAnswer === question.correct_answer_for_matching;
 
   return (
@@ -60,6 +67,17 @@ const AttemptMatchingResult = ({ question, userAnswers }: AttemptQuestionResultP
         <p className='text-sm font-medium text-tekhelet-400 mb-1'>Correct Answer</p>
         <div className='text-green-700 font-semibold'>{question.correct_answer_for_matching}</div>
       </div>
+
+      {isListening && audioRef && (
+        <div>
+          <SegmentPlayButton
+            audioRef={audioRef as RefObject<HTMLAudioElement>}
+            end={question.end_time}
+            start={question.start_time}
+            segmentKey={question.question_id}
+          />
+        </div>
+      )}
 
       {/* Explanation */}
       {question.explanation && (

@@ -160,14 +160,14 @@ export const ListeningQuestionAnalysis = ({
 
                   {/* Transcript */}
                   {showTranscripts && part.transcription && (
-                    <Card className='bg-tekhelet-100/30 border border-tekhelet-300'>
+                    <Card className='border '>
                       <CardHeader>
-                        <CardTitle className='text-sm text-tekhelet-600'>
+                        <CardTitle className='text-sm text-tekhelet-400'>
                           Audio Transcript
                         </CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className='prose prose-sm max-w-none text-tekhelet-700'>
+                        <div className='prose prose-sm max-w-none text-tekhelet-500'>
                           <p className='whitespace-pre-line'>{part.transcription}</p>
                         </div>
                       </CardContent>
@@ -219,6 +219,7 @@ export const ListeningQuestionAnalysis = ({
                                 question={question}
                                 key={question.question_id}
                                 isListening={true}
+                                audioRef={audioRef}
                               />
                             );
                           })}

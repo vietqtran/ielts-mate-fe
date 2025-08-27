@@ -20,7 +20,7 @@ export const OverallScoreCard = ({
     <Card className='rounded-2xl'>
       <CardHeader className='text-center'>
         <Award className='w-12 h-12 mx-auto text-persimmon-400 mb-2' />
-        <CardTitle className='text-tekhelet-400'>Correction Percentage</CardTitle>
+        <CardTitle className='text-tekhelet-400'>Correct Percentage</CardTitle>
       </CardHeader>
       <CardContent className='text-center gap-4'>
         <div className='text-4xl font-bold text-tekhelet-400 mb-2'>{scorePercentage}%</div>
