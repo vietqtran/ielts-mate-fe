@@ -21,12 +21,10 @@ import {
   Clock,
   Headphones,
   Menu,
-  MessageSquare,
-  PenTool,
   Play,
+  Sparkles,
   Star,
   Target,
-  Users,
   X,
 } from 'lucide-react';
 import Image from 'next/image';
@@ -158,7 +156,7 @@ const GuestPage = () => {
                 className='bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white'
                 onClick={() => router.push('/exams')}
               >
-                Start Learning Free
+                Start Practicing Free
               </Button>
             </div>
 
@@ -226,7 +224,7 @@ const GuestPage = () => {
                       router.push('/exams');
                     }}
                   >
-                    Start Learning Free
+                    Start Practicing Free
                   </Button>
                 </div>
               </div>
@@ -248,25 +246,25 @@ const GuestPage = () => {
                 🚀 Master IELTS with Confidence
               </Badge>
               <h1 className='text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight'>
-                Your Journey to
+                Master
                 <span className='text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600'>
                   {' '}
-                  IELTS Success{' '}
+                  IELTS Reading & Listening{' '}
                 </span>
-                Starts Here
+                with Confidence
               </h1>
               <p className='text-xl text-gray-600 mb-8 max-w-2xl'>
-                Join thousands of successful test-takers with our comprehensive, AI-powered IELTS
-                preparation platform. Practice with real test scenarios, get instant feedback, and
-                achieve your target score.
+                Practice authentic IELTS Reading and Listening exams with AI-powered hints and
+                explanations. Train with real test scenarios, get instant feedback, and hit your
+                target band.
               </p>
               <div className='flex flex-col sm:flex-row gap-4 justify-center lg:justify-start'>
                 <Button
                   size='lg'
-                  className='bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-6 text-lg'
+                  className='bg-selective-yellow-300 text-white hover:bg-selective-yellow-300/90 px-8 py-6 text-lg'
                   onClick={() => router.push('/exams')}
                 >
-                  Start Learning Free
+                  Start Practicing Free
                   <ArrowRight className='ml-2 h-5 w-5' />
                 </Button>
                 <Button size='lg' variant='outline' className='px-8 py-6 text-lg'>
@@ -315,20 +313,11 @@ const GuestPage = () => {
                   </div>
                   <div className='flex items-center gap-3'>
                     <div className='w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center'>
-                      <PenTool className='h-6 w-6 text-white' />
+                      <Sparkles className='h-6 w-6 text-white' />
                     </div>
                     <div>
-                      <h3 className='font-semibold text-gray-900'>Writing Tasks</h3>
-                      <p className='text-sm text-gray-600'>AI-powered feedback</p>
-                    </div>
-                  </div>
-                  <div className='flex items-center gap-3'>
-                    <div className='w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center'>
-                      <MessageSquare className='h-6 w-6 text-white' />
-                    </div>
-                    <div>
-                      <h3 className='font-semibold text-gray-900'>Speaking Practice</h3>
-                      <p className='text-sm text-gray-600'>Real-time conversation</p>
+                      <h3 className='font-semibold text-gray-900'>AI Hints & Explanations</h3>
+                      <p className='text-sm text-gray-600'>See why answers are right or wrong</p>
                     </div>
                   </div>
                 </div>
@@ -347,11 +336,11 @@ const GuestPage = () => {
               Why Choose IeltsMate?
             </Badge>
             <h2 className='text-3xl md:text-4xl font-bold text-gray-900 mb-4'>
-              Everything You Need to Succeed
+              Built for Reading & Listening Success
             </h2>
             <p className='text-xl text-gray-600 max-w-3xl mx-auto'>
-              Our comprehensive platform combines advanced AI technology with proven teaching
-              methods to give you the edge in your IELTS preparation.
+              We focus on IELTS Reading and Listening only—delivering realistic exams, instant AI
+              support, and analytics that help you improve fast.
             </p>
           </div>
 
@@ -365,8 +354,8 @@ const GuestPage = () => {
               </CardHeader>
               <CardContent>
                 <p className='text-gray-600'>
-                  AI-powered assessment identifies your strengths and weaknesses, creating a
-                  customized study plan just for you.
+                  AI pinpoints your Reading and Listening strengths and gaps to tailor practice to
+                  your goals.
                 </p>
               </CardContent>
             </Card>
@@ -376,12 +365,11 @@ const GuestPage = () => {
                 <div className='w-12 h-12 bg-gradient-to-br from-green-500 to-teal-500 rounded-full flex items-center justify-center mb-4'>
                   <Clock className='h-6 w-6 text-white' />
                 </div>
-                <CardTitle className='text-xl'>Real-time Feedback</CardTitle>
+                <CardTitle className='text-xl'>Instant Feedback</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className='text-gray-600'>
-                  Get instant feedback on your performance with detailed explanations and
-                  improvement suggestions.
+                  Get AI explanations for each answer plus actionable tips to improve.
                 </p>
               </CardContent>
             </Card>
@@ -395,8 +383,7 @@ const GuestPage = () => {
               </CardHeader>
               <CardContent>
                 <p className='text-gray-600'>
-                  Practice with authentic materials created by IELTS experts and experienced
-                  teachers.
+                  Practice with authentic IELTS-style Reading passages and Listening audios.
                 </p>
               </CardContent>
             </Card>
@@ -404,14 +391,13 @@ const GuestPage = () => {
             <Card className='hover:shadow-lg transition-shadow duration-300 border-0 shadow-md'>
               <CardHeader>
                 <div className='w-12 h-12 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center mb-4'>
-                  <Users className='h-6 w-6 text-white' />
+                  <Play className='h-6 w-6 text-white' />
                 </div>
-                <CardTitle className='text-xl'>Study Groups</CardTitle>
+                <CardTitle className='text-xl'>Exam Simulator</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className='text-gray-600'>
-                  Join study groups with other learners, practice together, and learn from each
-                  other's experiences.
+                  Timed mock tests that mirror the real IELTS Reading and Listening experience.
                 </p>
               </CardContent>
             </Card>
@@ -425,8 +411,7 @@ const GuestPage = () => {
               </CardHeader>
               <CardContent>
                 <p className='text-gray-600'>
-                  Monitor your progress with detailed analytics and see how you're improving over
-                  time.
+                  Track band trends, accuracy by question type, and improvement over time.
                 </p>
               </CardContent>
             </Card>
@@ -436,11 +421,11 @@ const GuestPage = () => {
                 <div className='w-12 h-12 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-full flex items-center justify-center mb-4'>
                   <Star className='h-6 w-6 text-white' />
                 </div>
-                <CardTitle className='text-xl'>24/7 Support</CardTitle>
+                <CardTitle className='text-xl'>Vocabulary & Tips</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className='text-gray-600'>
-                  Get help whenever you need it with our round-the-clock support team and community.
+                  Boost your Reading and Listening with curated vocabulary and strategy tips.
                 </p>
               </CardContent>
             </Card>
@@ -483,7 +468,7 @@ const GuestPage = () => {
               What Our Students Say
             </h2>
             <p className='text-xl text-gray-600'>
-              Real stories from real students who achieved their IELTS goals
+              Real stories from real students who improved their Reading and Listening bands
             </p>
           </div>
 
@@ -496,8 +481,8 @@ const GuestPage = () => {
                   ))}
                 </div>
                 <p className='text-gray-600 mb-4'>
-                  "IeltsMate helped me improve from 6.5 to 8.5 in just 3 months! The personalized
-                  feedback was incredibly helpful."
+                  "I improved my Reading band from 6.5 to 8.5 in 3 months. The AI explanations were
+                  spot on!"
                 </p>
                 <div className='flex items-center gap-3'>
                   <div className='w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center'>
@@ -519,8 +504,8 @@ const GuestPage = () => {
                   ))}
                 </div>
                 <p className='text-gray-600 mb-4'>
-                  "The speaking practice sessions were amazing. I felt confident on test day and
-                  scored 8.0 in speaking!"
+                  "The Listening exams felt exactly like the real test. I hit 8.0 after focused
+                  practice here."
                 </p>
                 <div className='flex items-center gap-3'>
                   <div className='w-10 h-10 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center'>
@@ -542,8 +527,8 @@ const GuestPage = () => {
                   ))}
                 </div>
                 <p className='text-gray-600 mb-4'>
-                  "The comprehensive practice tests and detailed explanations made all the
-                  difference. Highly recommended!"
+                  "The mock tests and detailed answer breakdowns made all the difference. Highly
+                  recommended!"
                 </p>
                 <div className='flex items-center gap-3'>
                   <div className='w-10 h-10 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center'>
@@ -564,7 +549,7 @@ const GuestPage = () => {
       <section className='py-20 bg-gradient-to-br from-blue-600 to-indigo-600'>
         <div className='container mx-auto px-4 text-center'>
           <h2 className='text-3xl md:text-4xl font-bold text-white mb-4'>
-            Ready to Start Your IELTS Journey?
+            Ready to Practice Reading & Listening?
           </h2>
           <p className='text-xl text-blue-100 mb-8 max-w-2xl mx-auto'>
             Join thousands of successful students and master IELTS completely free. Start your
@@ -577,7 +562,7 @@ const GuestPage = () => {
               variant={'ghost'}
               onClick={() => router.push('/exams')}
             >
-              Start Learning Free
+              Start Practicing Free
               <ArrowRight className='ml-2 h-5 w-5' />
             </Button>
           </div>

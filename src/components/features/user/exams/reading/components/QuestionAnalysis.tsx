@@ -1,10 +1,10 @@
 'use client';
 
-import { Badge } from '@/components/ui';
+import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ReadingExamAttemptDetailsResponse } from '@/types/reading/reading-exam-attempt.types';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, ChevronDown } from 'lucide-react';
 import { QuestionResultRenderer, getQuestionResultStatus } from './QuestionResultRenderer';
 import { SelectableText } from './SelectableText';
 
@@ -96,47 +96,61 @@ export const QuestionAnalysis = ({ examDetails }: QuestionAnalysisProps) => {
                         return acc + (status === true ? 1 : 0);
                       }, 0);
                       return (
-                        <div key={group.question_group_id} className='border rounded-lg p-6'>
-                          <h4 className='font-semibold text-tekhelet-400 mb-3'>
-                            {group.section_label}
-                          </h4>
-                          <SelectableText
-                            content={group.instruction || 'No instruction provided'}
-                            className='text-tekhelet-500 prose prose-sm max-w-none mb-4'
-                          />
-                          <Badge
-                            variant={'outline'}
-                            className='text-sm font-semibold text-white bg-selective-yellow-200'
-                          >
-                            Correct: {correctCount} / {groupQuestions?.length}
-                          </Badge>
-
-                          <div className='space-y-3 mt-5'>
-                            {group.questions && group.questions.length > 0 ? (
-                              group.questions.map((question) => {
-                                // Get user answers from the main exam details answers map
-                                const userAnswers = examDetails.answers[question.question_id] || [];
-
-                                return (
-                                  <QuestionResultRenderer
-                                    key={question.question_id}
-                                    question={question}
-                                    userAnswers={userAnswers}
-                                    dragAndDropItems={dragAndDropItems}
-                                  />
-                                );
-                              })
-                            ) : (
-                              <div className='text-center py-4 text-tekhelet-500'>
-                                <p>No questions available for this section.</p>
-                                <p className='text-sm mt-1'>
-                                  This may be a question group with questions stored elsewhere or
-                                  questions that need to be populated.
-                                </p>
+                        <Collapsible
+                          key={group.question_group_id}
+                          className='border rounded-lg p-6'
+                        >
+                          <CollapsibleTrigger asChild>
+                            <button
+                              type='button'
+                              className='group flex w-full items-center justify-between gap-4 cursor-pointer'
+                              aria-label={`Toggle ${group.section_label}`}
+                            >
+                              <div className='flex items-center gap-3'>
+                                <span className='font-semibold text-tekhelet-400'>
+                                  {group.section_label}
+                                </span>
+                                <Badge
+                                  variant={'outline'}
+                                  className='text-sm font-semibold text-white bg-selective-yellow-200'
+                                >
+                                  Correct: {correctCount} / {groupQuestions?.length}
+                                </Badge>
                               </div>
-                            )}
-                          </div>
-                        </div>
+                              <ChevronDown className='h-5 w-5 text-tekhelet-400 transition-transform duration-200 group-data-[state=open]:rotate-180' />
+                            </button>
+                          </CollapsibleTrigger>
+
+                          <CollapsibleContent>
+                            <SelectableText
+                              content={group.instruction || 'No instruction provided'}
+                              className='text-tekhelet-500 prose prose-sm max-w-none mt-4'
+                            />
+
+                            <div className='space-y-3 mt-5'>
+                              {group.questions && group.questions.length > 0 ? (
+                                group.questions.map((question) => {
+                                  // Get user answers from the main exam details answers map
+                                  const userAnswers =
+                                    examDetails.answers[question.question_id] || [];
+
+                                  return (
+                                    <QuestionResultRenderer
+                                      key={question.question_id}
+                                      question={question}
+                                      userAnswers={userAnswers}
+                                      dragAndDropItems={dragAndDropItems}
+                                    />
+                                  );
+                                })
+                              ) : (
+                                <div className='text-center py-4 text-tekhelet-500'>
+                                  <p>No questions available for this section.</p>
+                                </div>
+                              )}
+                            </div>
+                          </CollapsibleContent>
+                        </Collapsible>
                       );
                     })}
                   </div>

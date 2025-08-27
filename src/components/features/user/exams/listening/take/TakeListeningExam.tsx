@@ -352,8 +352,7 @@ const TakeListeningExam = ({ examData, initialAnswers }: TakeListeningExamProps)
             <>
               <CardHeader className='flex-shrink-0 backdrop-blur-md rounded-t-2xl'>
                 <CardTitle className='text-center text-lg text-tekhelet-400 flex items-center justify-center gap-2'>
-                  <Headphones className='w-5 h-5' />
-                  Audio Controls
+                  {part.title} - Audio
                 </CardTitle>
               </CardHeader>
               <CardContent className='flex-1 px-6 space-y-4 min-h-0 overflow-y-auto'>

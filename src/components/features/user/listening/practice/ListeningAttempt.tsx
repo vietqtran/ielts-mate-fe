@@ -17,7 +17,7 @@ import { Answer } from '@/types/attempt.types';
 import { StartListeningAttemptResponse } from '@/types/listening/listening-attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { RootState } from '@/types/store.types';
-import { AlertTriangle, Volume2 } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
@@ -318,8 +318,7 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
             <>
               <CardHeader className='flex-shrink-0 bg-medium-slate-blue-50'>
                 <CardTitle className='text-center text-lg text-medium-slate-blue-400 flex items-center justify-center gap-2'>
-                  <Volume2 className='w-5 h-5' />
-                  Audio Player
+                  Audio
                 </CardTitle>
               </CardHeader>
               <CardContent className='flex-1 p-6 space-y-4'>

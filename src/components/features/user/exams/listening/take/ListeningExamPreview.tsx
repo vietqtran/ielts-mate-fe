@@ -42,22 +42,26 @@ const ListeningExamPreview = ({ examData, onStartExam, onBack }: ListeningExamPr
   ];
 
   return (
-    <div className='min-h-screen bg-medium-slate-blue-900 py-8 px-4'>
+    <div className='min-h-screen py-8 px-4'>
       <div className='max-w-4xl mx-auto'>
         {/* Header */}
-        <div className='bg-white/80 backdrop-blur-lg border rounded-2xl shadow-xl p-6 mb-6'>
+        <div className='border rounded-2xl bg-white p-6 mb-6'>
           <div className='flex items-center justify-between mb-4'>
             <Button
               variant='outline'
               onClick={onBack}
               className='text-tekhelet-600 hover:bg-tekhelet-50 bg-white/60 backdrop-blur-md'
             >
-              <ArrowLeft className='w-4 h-4 mr-2' />
+              <ArrowLeft className='w-4 h-4' />
               Back to Exams
             </Button>
-            <Badge variant='outline' className='text-tekhelet-600 backdrop-blur-md'>
-              {examData.url_slug}
-            </Badge>
+            <Button
+              onClick={onStartExam}
+              className='bg-selective-yellow-300 hover:bg-selective-yellow-400 text-white'
+            >
+              Start Exam
+              <ArrowRight className='w-5 h-5' />
+            </Button>
           </div>
 
           <div className='text-center'>
@@ -71,7 +75,7 @@ const ListeningExamPreview = ({ examData, onStartExam, onBack }: ListeningExamPr
         {/* Exam Details */}
         <div className='grid md:grid-cols-2 gap-6 mb-8'>
           {/* Duration and Info */}
-          <Card className='bg-white/80 backdrop-blur-lg border rounded-2xl shadow-xl'>
+          <Card>
             <CardHeader className='backdrop-blur-md rounded-t-2xl'>
               <CardTitle className='flex items-center gap-2 text-tekhelet-400'>
                 <Clock className='w-5 h-5' />
@@ -80,19 +84,19 @@ const ListeningExamPreview = ({ examData, onStartExam, onBack }: ListeningExamPr
             </CardHeader>
             <CardContent className='space-y-4 p-6'>
               <div className='flex justify-between items-center'>
-                <span className='text-medium-slate-blue-500'>Duration:</span>
+                <span className='text-tekhelet-500'>Duration:</span>
                 <span className='font-semibold text-tekhelet-400'>30 minutes</span>
               </div>
               <div className='flex justify-between items-center'>
-                <span className='text-medium-slate-blue-500'>Total Parts:</span>
+                <span className='text-tekhelet-500'>Total Parts:</span>
                 <span className='font-semibold text-tekhelet-400'>4 parts</span>
               </div>
               <div className='flex justify-between items-center'>
-                <span className='text-medium-slate-blue-500'>Exam Type:</span>
+                <span className='text-tekhelet-500'>Exam Type:</span>
                 <span className='font-semibold text-tekhelet-400'>IELTS Listening</span>
               </div>
               <Separator className='bg-tekhelet-800' />
-              <div className='text-sm text-medium-slate-blue-500'>
+              <div className='text-sm text-tekhelet-500'>
                 <p>• You will have 30 minutes to complete all four parts</p>
                 <p>• Audio will be played only once for each part</p>
                 <p>• Take notes while listening to help answer questions</p>
@@ -101,7 +105,7 @@ const ListeningExamPreview = ({ examData, onStartExam, onBack }: ListeningExamPr
           </Card>
 
           {/* Tasks Overview */}
-          <Card className='bg-white/80 backdrop-blur-lg border rounded-2xl shadow-xl'>
+          <Card>
             <CardHeader className='backdrop-blur-md rounded-t-2xl'>
               <CardTitle className='flex items-center gap-2 text-tekhelet-400'>
                 <Headphones className='w-5 h-5' />
@@ -121,7 +125,7 @@ const ListeningExamPreview = ({ examData, onStartExam, onBack }: ListeningExamPr
                     <span className='font-medium text-tekhelet-400'>{part.title}</span>
                   </div>
                   {part.instruction && (
-                    <p className='text-xs text-medium-slate-blue-500 ml-16'>
+                    <p className='text-xs text-tekhelet-500 ml-16'>
                       {part.instruction.substring(0, 80)}...
                     </p>
                   )}
@@ -133,7 +137,7 @@ const ListeningExamPreview = ({ examData, onStartExam, onBack }: ListeningExamPr
         </div>
 
         {/* Instructions */}
-        <Card className='bg-white/80 backdrop-blur-lg border rounded-2xl shadow-xl mb-8'>
+        <Card className='mb-8'>
           <CardHeader className='backdrop-blur-md rounded-t-2xl'>
             <CardTitle className='flex items-center gap-2 text-tangerine-400'>
               <FileText className='w-5 h-5' />
@@ -144,7 +148,7 @@ const ListeningExamPreview = ({ examData, onStartExam, onBack }: ListeningExamPr
             <div className='grid md:grid-cols-2 gap-6'>
               <div className='space-y-3'>
                 <h4 className='font-semibold text-tekhelet-400'>Before You Start:</h4>
-                <ul className='space-y-2 text-sm text-medium-slate-blue-500'>
+                <ul className='space-y-2 text-sm text-tekhelet-500'>
                   <li className='flex items-start gap-2'>
                     <span className='w-1.5 h-1.5 bg-tekhelet-400 rounded-full mt-2 flex-shrink-0'></span>
                     Ensure you have a stable internet connection
@@ -165,7 +169,7 @@ const ListeningExamPreview = ({ examData, onStartExam, onBack }: ListeningExamPr
               </div>
               <div className='space-y-3'>
                 <h4 className='font-semibold text-tekhelet-400'>During the Exam:</h4>
-                <ul className='space-y-2 text-sm text-medium-slate-blue-500'>
+                <ul className='space-y-2 text-sm text-tekhelet-500'>
                   <li className='flex items-start gap-2'>
                     <span className='w-1.5 h-1.5 bg-tekhelet-400 rounded-full mt-2 flex-shrink-0'></span>
                     Listen carefully as audio plays only once
@@ -187,30 +191,6 @@ const ListeningExamPreview = ({ examData, onStartExam, onBack }: ListeningExamPr
             </div>
           </CardContent>
         </Card>
-
-        {/* Start Exam Button */}
-        <div className='text-center'>
-          <Card className='backdrop-blur-lg border rounded-2xl shadow-xl'>
-            <CardContent className='p-6'>
-              <div className='space-y-4'>
-                <div className='text-center'>
-                  <h3 className='text-lg font-semibold text-tekhelet-400 mb-2'>Ready to Begin?</h3>
-                  <p className='text-medium-slate-blue-500 text-sm mb-4'>
-                    Once you start, the 30-minute timer will begin immediately.
-                  </p>
-                </div>
-                <Button
-                  onClick={onStartExam}
-                  size='lg'
-                  className='bg-tekhelet-400 hover:bg-tekhelet-300 text-white px-8 py-3 text-lg shadow-lg'
-                >
-                  Start Exam
-                  <ArrowRight className='w-5 h-5 ml-2' />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </div>
     </div>
   );

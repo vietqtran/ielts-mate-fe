@@ -5,10 +5,10 @@ import {
   isAttemptQuestionCorrect,
 } from '@/components/features/user/common/attempt/AttemptQuestionResultRenderer';
 import { SelectableText } from '@/components/features/user/exams/reading/components/SelectableText';
-import { Badge } from '@/components/ui';
+import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadAttemptResponse } from '@/types/attempt.types';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, ChevronDown } from 'lucide-react';
 
 interface ReadingQuestionAnalysisProps {
   attemptDetails: LoadAttemptResponse;
@@ -42,40 +42,53 @@ export const ReadingQuestionAnalysis = ({
             return acc + (isAttemptQuestionCorrect(q, ua) ? 1 : 0);
           }, 0);
           return (
-            <Card key={group.group_id} className='border rounded-2xl'>
-              <CardHeader className='pb-3'>
-                <CardTitle className='text-lg text-tekhelet-500 font-semibold'>
-                  {group.section_label}
-                </CardTitle>
+            <Collapsible key={group.group_id} className='border rounded-2xl p-4'>
+              <CollapsibleTrigger asChild>
+                <button
+                  type='button'
+                  className='group flex w-full items-center justify-between gap-4 cursor-pointer'
+                  aria-label={`Toggle ${group.section_label || 'Question Group'}`}
+                >
+                  <div className='flex items-center gap-3'>
+                    <span className='text-lg text-tekhelet-500 font-semibold'>
+                      {group.section_label || 'Question Group'}
+                    </span>
+                    <Badge
+                      variant={'outline'}
+                      className='text-sm font-semibold text-white bg-selective-yellow-200'
+                    >
+                      Correct: {correctCount} / {groupQuestions.length}
+                    </Badge>
+                  </div>
+                  <ChevronDown className='h-5 w-5 text-tekhelet-400 transition-transform duration-200 group-data-[state=open]:rotate-180' />
+                </button>
+              </CollapsibleTrigger>
+
+              <CollapsibleContent>
                 {group.instruction && (
                   <SelectableText
                     content={group.instruction || 'No instruction provided'}
-                    className='prose prose-sm max-w-none text-tekhelet-500 mb-4'
+                    className='prose prose-sm max-w-none text-tekhelet-500 mt-4'
                   />
                 )}
-                <Badge
-                  variant={'outline'}
-                  className='text-sm font-semibold text-white bg-selective-yellow-200 mt-5'
-                >
-                  Correct: {correctCount} / {groupQuestions.length}
-                </Badge>
-              </CardHeader>
-              <CardContent className='space-y-5'>
-                {group.questions.map((question) => {
-                  const userAnswers = attemptDetails.answers.filter(
-                    (ans) => ans.question_id === question.question_id
-                  );
-                  return (
-                    <AttemptQuestionResultRenderer
-                      key={question.question_id}
-                      question={question}
-                      userAnswers={userAnswers}
-                      dragAndDropItems={dragAndDropItems}
-                    />
-                  );
-                })}
-              </CardContent>
-            </Card>
+
+                <div className='space-y-5 mt-5'>
+                  {group.questions.map((question) => {
+                    const userAnswers = attemptDetails.answers.filter(
+                      (ans) => ans.question_id === question.question_id
+                    );
+                    return (
+                      <AttemptQuestionResultRenderer
+                        key={question.question_id}
+                        question={question}
+                        userAnswers={userAnswers}
+                        dragAndDropItems={dragAndDropItems}
+                      />
+                    );
+                  })}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
           );
         })}
       </CardContent>

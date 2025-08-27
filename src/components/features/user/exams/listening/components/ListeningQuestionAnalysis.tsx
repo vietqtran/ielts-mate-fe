@@ -3,13 +3,19 @@
 import { QuestionResultRenderer } from '@/components/features/user/exams/reading/components';
 import { getQuestionResultStatus } from '@/components/features/user/exams/reading/components/QuestionResultRenderer';
 import { SelectableText } from '@/components/features/user/exams/reading/components/SelectableText';
-import { Badge } from '@/components/ui';
+import {
+  Badge,
+  Button,
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AudioProvider } from '@/contexts/AudioContext';
 import useListeningAudio from '@/hooks/apis/listening/useListeningAudio';
 import { ListeningExamAttemptDetailsResponse } from '@/types/listening/listening-exam.types';
-import { Headphones } from 'lucide-react';
+import { ChevronDown, ChevronUp, Headphones } from 'lucide-react';
 import { useRef, useState } from 'react';
 
 interface ListeningQuestionAnalysisProps {
@@ -59,30 +65,6 @@ export const ListeningQuestionAnalysis = ({
       (g) => g.drag_items || []
     ),
   ];
-
-  const toggleAllQuestions = (isOpen: boolean) => {
-    const allQuestionIds: string[] = [];
-    parts.forEach((part) => {
-      part.question_groups.forEach((group) => {
-        if (group.questions) {
-          group.questions.forEach((question) => {
-            allQuestionIds.push(question.question_id);
-          });
-        }
-      });
-    });
-
-    if (isOpen) {
-      allQuestionIds.forEach(onToggleQuestion);
-    } else {
-      allQuestionIds.forEach((id) => {
-        if (openQuestions.has(id)) {
-          onToggleQuestion(id);
-        }
-      });
-    }
-  };
-
   return (
     <Card className='space-y-6'>
       {/* Header with controls */}
@@ -91,29 +73,6 @@ export const ListeningQuestionAnalysis = ({
           <Headphones className='w-5 h-5' />
           Detailed Question Analysis
         </CardTitle>
-        {/* <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowTranscripts(!showTranscripts)}
-              className="bg-white/50 border-tekhelet-300 hover:bg-white/70 text-tekhelet-600"
-            >
-              {showTranscripts ? (
-                <EyeOff className="w-4 h-4 mr-2" />
-              ) : (
-                <Eye className="w-4 h-4 mr-2" />
-              )}
-              {showTranscripts ? "Hide" : "Show"} Transcripts
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => toggleAllQuestions(openQuestions.size === 0)}
-              className="bg-white/50 border-tekhelet-300 hover:bg-white/70 text-tekhelet-600"
-            >
-              {openQuestions.size > 0 ? "Collapse All" : "Expand All"}
-            </Button>
-          </div> */}
       </CardHeader>
 
       {/* Tabs for Parts */}
@@ -133,7 +92,6 @@ export const ListeningQuestionAnalysis = ({
 
           {['part1', 'part2', 'part3', 'part4'].map((partKey, partIndex) => {
             const part = parts[partIndex];
-            const partNumber = partIndex + 1;
             return (
               <TabsContent key={partKey} value={partKey} className='mt-4'>
                 <div className='space-y-6'>
@@ -159,21 +117,49 @@ export const ListeningQuestionAnalysis = ({
                     )}
                   </div>
 
-                  {/* Transcript */}
-                  {showTranscripts && part.transcription && (
-                    <Card className='border '>
-                      <CardHeader>
-                        <CardTitle className='text-sm text-tekhelet-400'>
-                          Audio Transcript
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className='prose prose-sm max-w-none text-tekhelet-500'>
-                          <p className='whitespace-pre-line'>{part.transcription}</p>
+                  <div>
+                    <Collapsible
+                      open={showTranscripts}
+                      onOpenChange={setShowTranscripts}
+                      className='flex flex-col gap-2 border rounded-xl p-4'
+                    >
+                      <div className='flex items-center justify-between gap-4'>
+                        <div className='flex items-center gap-2'>
+                          <h4 className='text-sm font-semibold text-tekhelet-500'>
+                            Audio Transcript
+                          </h4>
+                          <Badge
+                            variant={'outline'}
+                            className={`${
+                              part.transcript
+                                ? 'bg-green-600 text-white'
+                                : 'bg-red-200 text-red-700'
+                            } text-sm font-medium`}
+                          >
+                            {part.transcript ? 'Available' : 'Not Available'}
+                          </Badge>
                         </div>
-                      </CardContent>
-                    </Card>
-                  )}
+                        <CollapsibleTrigger asChild>
+                          <Button
+                            variant='ghost'
+                            size='icon'
+                            className='size-8'
+                            disabled={!part.transcript}
+                          >
+                            {showTranscripts ? <ChevronUp /> : <ChevronDown />}
+                          </Button>
+                        </CollapsibleTrigger>
+                      </div>
+                      <CollapsibleContent>
+                        <div className='p-4 rounded-lg'>
+                          <SelectableText
+                            content={part.transcript ?? 'No transcript available'}
+                            className='prose prose-sm max-w-none text-tekhelet-500 mb-4'
+                          />
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
+                  </div>
 
                   {/* Question Groups */}
                   {part.question_groups.map((group) => {
@@ -185,45 +171,56 @@ export const ListeningQuestionAnalysis = ({
                     }, 0);
 
                     return (
-                      <div
-                        key={group.question_group_id}
-                        className='space-y-4 border rounded-lg p-4'
-                      >
-                        {group.section_label && (
-                          <div className='p-3'>
-                            <h4 className='font-medium text-tekhelet-600'>{group.section_label}</h4>
-                            {group.instruction && (
-                              <SelectableText
-                                content={group.instruction || 'No instruction provided'}
-                                className='prose prose-sm max-w-none text-tekhelet-500 mb-4'
-                              />
-                            )}
-                            <Badge
-                              variant={'outline'}
-                              className='text-sm font-semibold text-white bg-selective-yellow-200 mt-5'
-                            >
-                              Correct: {correctCount} / {groupQuestions.length}
-                            </Badge>
-                          </div>
-                        )}
+                      <Collapsible key={group.question_group_id} className='border rounded-lg p-4'>
+                        <CollapsibleTrigger asChild>
+                          <button
+                            type='button'
+                            className='group flex w-full items-center justify-between gap-4 cursor-pointer'
+                            aria-label={`Toggle ${group.section_label || 'Question Group'}`}
+                          >
+                            <div className='flex items-center gap-3'>
+                              <span className='font-semibold text-tekhelet-400'>
+                                {group.section_label || 'Question Group'}
+                              </span>
+                              <Badge
+                                variant={'outline'}
+                                className='text-sm font-semibold text-white bg-selective-yellow-200'
+                              >
+                                Correct: {correctCount} / {groupQuestions.length}
+                              </Badge>
+                            </div>
+                            <ChevronDown className='h-5 w-5 text-tekhelet-400 transition-transform duration-200 group-data-[state=open]:rotate-180' />
+                          </button>
+                        </CollapsibleTrigger>
 
-                        {/* Questions */}
-                        <AudioProvider audioRef={audioRef}>
-                          {group.questions?.map((question) => {
-                            const userAnswers = examDetails.answers[question.question_id] || [];
-                            return (
-                              <QuestionResultRenderer
-                                userAnswers={userAnswers}
-                                dragAndDropItems={dragAndDropsList}
-                                question={question}
-                                key={question.question_id}
-                                isListening={true}
-                                audioRef={audioRef}
-                              />
-                            );
-                          })}
-                        </AudioProvider>
-                      </div>
+                        <CollapsibleContent>
+                          {group.instruction && (
+                            <SelectableText
+                              content={group.instruction || 'No instruction provided'}
+                              className='prose prose-sm max-w-none text-tekhelet-500 mt-4'
+                            />
+                          )}
+
+                          {/* Questions */}
+                          <div className='space-y-3 mt-5'>
+                            <AudioProvider audioRef={audioRef}>
+                              {group.questions?.map((question) => {
+                                const userAnswers = examDetails.answers[question.question_id] || [];
+                                return (
+                                  <QuestionResultRenderer
+                                    userAnswers={userAnswers}
+                                    dragAndDropItems={dragAndDropsList}
+                                    question={question}
+                                    key={question.question_id}
+                                    isListening={true}
+                                    audioRef={audioRef}
+                                  />
+                                );
+                              })}
+                            </AudioProvider>
+                          </div>
+                        </CollapsibleContent>
+                      </Collapsible>
                     );
                   })}
                 </div>
