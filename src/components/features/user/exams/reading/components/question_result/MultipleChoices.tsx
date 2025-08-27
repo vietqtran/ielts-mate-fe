@@ -44,7 +44,10 @@ const MultipleChoicesResult = ({
     >
       {/* Points */}
       <div className='flex items-center justify-between text-xs text-tekhelet-500'>
-        <span className='font-medium text-tekhelet-400'>Multiple Choice</span>
+        <div className='flex items-baseline gap-2'>
+          <span className='font-semibold text-xl'>{question.question_order}</span>
+          <span className='font-medium text-tekhelet-400'>Multiple Choice</span>
+        </div>
         <div className='flex items-center gap-2'>
           {isQuestionCorrect ? (
             <Badge variant={'outline'} className='bg-green-600 text-white'>

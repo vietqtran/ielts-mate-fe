@@ -12,7 +12,7 @@ const initialState: ListeningExamFilters = {
   filters: {
     searchText: '',
     sortBy: '',
-    sortDirection: '',
+    sortDirection: 'asc',
   },
   isLoading: false,
   pagination: {

@@ -10,11 +10,15 @@ import ConfirmSubmitModal from '@/components/features/user/reading/finish/Confir
 import { QuestionRenderer } from '@/components/features/user/reading/questions';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import useReadingAttempt from '@/hooks/apis/reading/useReadingAttempt';
+import { AttemptStompState } from '@/hooks/utils/useLockAttempt';
 import { useIncrementalTimer } from '@/hooks/utils/useTimer';
 import { AttemptData } from '@/types/attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
+import { RootState } from '@/types/store.types';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { toast } from 'sonner';
 // import { useUnloadSubmit } from "@/hooks/utils/useUnloadSubmit";
 
 // Stable child component to isolate timer re-renders
@@ -87,9 +91,24 @@ interface ReadingPracticeProps {
     }
   >;
   initialDuration: number;
+  stomp: {
+    state: AttemptStompState;
+    sessionId: string;
+    connect: () => void;
+    disconnect: () => Promise<void>;
+    register: (attemptId: string, userId?: string) => void;
+    unregister: (attemptId: string) => void;
+    startHeartbeat: (attemptId: string) => void;
+    stopHeartbeat: () => void;
+  };
 }
 
-const ReadingPractice = ({ passages, initialAnswers, initialDuration }: ReadingPracticeProps) => {
+const ReadingPractice = ({
+  passages,
+  initialAnswers,
+  initialDuration,
+  stomp,
+}: ReadingPracticeProps) => {
   const [answers, setAnswers] =
     useState<
       Record<
@@ -110,6 +129,7 @@ const ReadingPractice = ({ passages, initialAnswers, initialDuration }: ReadingP
   const timeRef = useRef<number>(initialDuration);
   const { submitAttempt, saveAttemptProgress } = useReadingAttempt();
   const router = useRouter();
+  const user = useSelector((state: RootState) => state.auth.user);
   const passageRef = useRef<HTMLDivElement | null>(null);
   const leftColumn = useMemo(
     () => (
@@ -201,6 +221,7 @@ const ReadingPractice = ({ passages, initialAnswers, initialDuration }: ReadingP
         payload,
       });
       if (!res) console.error('Failed to save attempt');
+      else toast.success('Progress saved');
     } catch (e) {
       console.error('Error saving attempt:', e);
     } finally {
@@ -240,6 +261,22 @@ const ReadingPractice = ({ passages, initialAnswers, initialDuration }: ReadingP
       },
     }));
   };
+
+  const connectAndRegister = async (attemptId: string) => {
+    stomp.connect();
+    stomp.register(attemptId, user?.id);
+  };
+
+  useEffect(() => {
+    const id = passages?.attempt_id;
+    if (!id) return;
+    connectAndRegister(id);
+    return () => {
+      stomp.stopHeartbeat();
+      stomp.unregister(id);
+      stomp.disconnect();
+    };
+  }, [passages?.attempt_id, user?.id]);
 
   // useUnloadSubmit({
   //   endpoint: `reading/attempts/submit/${passages.attempt_id}`,

@@ -210,7 +210,7 @@ export default function CreateModulePage() {
                       </>
                     )}
                   </Button>
-                  <Button
+                  {/* <Button
                     type='button'
                     variant='outline'
                     className='w-full border-tekhelet-200 text-tekhelet-400'
@@ -220,7 +220,7 @@ export default function CreateModulePage() {
                     }}
                   >
                     Test Form
-                  </Button>
+                  </Button> */}
                   <p className='text-xs text-medium-slate-blue-500 text-center'>
                     {form.watch('vocabulary_ids').length === 0
                       ? 'Please select at least one vocabulary'

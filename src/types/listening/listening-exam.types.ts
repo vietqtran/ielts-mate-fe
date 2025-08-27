@@ -42,7 +42,7 @@ export interface ListeningTaskShort {
   instruction: string;
   title: string;
   audio_file_id: string;
-  transcription: string;
+  transcript: string;
   question_groups: QuestionGroup[];
 }
 

@@ -53,14 +53,14 @@ export function SegmentPlayButton({
           Stop
         </Button>
       )}
-      <div className='text-xs text-tekhelet-500'>
+      {/* <div className='text-xs text-tekhelet-500'>
         {start && end && (
           <span>
             From <span className='font-semibold'>{start}</span> to{' '}
             <span className='font-semibold'>{end}</span>
           </span>
         )}
-      </div>
+      </div> */}
     </div>
   );
 }

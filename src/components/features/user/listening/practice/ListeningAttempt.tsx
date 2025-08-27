@@ -11,13 +11,16 @@ import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import useListeningAttempt from '@/hooks/apis/listening/useListeningAttempt';
 import useListeningAudio from '@/hooks/apis/listening/useListeningAudio';
+import { AttemptStompState } from '@/hooks/utils/useLockAttempt';
 import { useIncrementalTimer } from '@/hooks/utils/useTimer';
 import { Answer } from '@/types/attempt.types';
 import { StartListeningAttemptResponse } from '@/types/listening/listening-attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
-import { AlertTriangle, Volume2 } from 'lucide-react';
+import { RootState } from '@/types/store.types';
+import { AlertTriangle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
 
 export interface HandleAnswerChangeParams {
@@ -40,15 +43,27 @@ interface ListeningPracticeAttemptProps {
     }
   >;
   initialDuration: number;
+  stomp: {
+    state: AttemptStompState;
+    sessionId: string;
+    connect: () => void;
+    disconnect: () => Promise<void>;
+    register: (attemptId: string, userId?: string) => void;
+    unregister: (attemptId: string) => void;
+    startHeartbeat: (attemptId: string) => void;
+    stopHeartbeat: () => void;
+  };
 }
 
 const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
   attemptData: propAttemptData,
   initialAnswers,
   initialDuration,
+  stomp,
 }) => {
   const router = useRouter();
   const [audioId, setAudioId] = useState<string | null>(null);
+  const user = useSelector((state: RootState) => state.auth.user);
 
   const { submitAttempt, isLoading, saveAttemptProgress } = useListeningAttempt();
 
@@ -182,10 +197,12 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
       };
 
       if (params.type === 'save') {
-        await saveAttemptProgress({
+        const res = await saveAttemptProgress({
           attempt_id: propAttemptData.attempt_id,
           payload,
         });
+        if (!res) console.error('Failed to save attempt');
+        else toast.success('Progress saved!');
         return;
       }
 
@@ -227,6 +244,22 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
       </div>
     );
   }
+
+  const connectAndRegister = async (attemptId: string) => {
+    stomp.connect();
+    stomp.register(attemptId, user?.id);
+  };
+
+  useEffect(() => {
+    const id = propAttemptData?.attempt_id;
+    if (!id) return;
+    connectAndRegister(id);
+    return () => {
+      stomp.stopHeartbeat();
+      stomp.unregister(id);
+      stomp.disconnect();
+    };
+  }, [propAttemptData?.attempt_id, user?.id]);
 
   const totalQuestions = getTotalQuestions();
   const answeredQuestions = getAnsweredQuestions();
@@ -285,8 +318,7 @@ const ListeningPracticeAttempt: React.FC<ListeningPracticeAttemptProps> = ({
             <>
               <CardHeader className='flex-shrink-0 bg-medium-slate-blue-50'>
                 <CardTitle className='text-center text-lg text-medium-slate-blue-400 flex items-center justify-center gap-2'>
-                  <Volume2 className='w-5 h-5' />
-                  Audio Player
+                  Audio
                 </CardTitle>
               </CardHeader>
               <CardContent className='flex-1 p-6 space-y-4'>

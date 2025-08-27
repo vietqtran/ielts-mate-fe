@@ -12,7 +12,7 @@ const initialState: ReadingExamFilters = {
   filters: {
     searchText: '',
     sortBy: '',
-    sortDirection: '',
+    sortDirection: 'asc',
   },
   isLoading: false,
   pagination: {

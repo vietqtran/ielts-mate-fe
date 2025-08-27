@@ -2,6 +2,7 @@
 
 import ReadingPractice from '@/components/features/user/reading/practice/ReadingPractice';
 import useReadingAttempt from '@/hooks/apis/reading/useReadingAttempt';
+import { useLockAttempt } from '@/hooks/utils/useLockAttempt';
 import { AttemptData, LoadAttemptResponse } from '@/types/attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { useParams, useSearchParams } from 'next/navigation';
@@ -32,11 +33,18 @@ const ReadingPracticePage = () => {
       }
     >
   >({});
+  const [inSession, setInSession] = useState<boolean>(false);
 
   const [initialDuration, setInitialDuration] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const { startNewAttempt, loadAttemptById } = useReadingAttempt();
+
+  const stomp = useLockAttempt({
+    sockUrl: process.env.NEXT_PUBLIC_WS_URL!,
+    pingIntervalMs: 29000,
+    debug: true,
+  });
 
   // Initialize answer state for questions
   const initializeAnswerState = (
@@ -162,7 +170,16 @@ const ReadingPracticePage = () => {
         setInitialAnswers(answers);
         setInitialDuration(res.data.duration);
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'status' in error &&
+        (error as { status?: number }).status === 409
+      ) {
+        setInSession(true);
+        return;
+      }
       console.error('Error loading attempt:', error);
     } finally {
       setIsLoading(false);
@@ -193,10 +210,12 @@ const ReadingPracticePage = () => {
   if (!passages) {
     return (
       <div className='h-screen flex items-center justify-center'>
-        <p className='text-persimmon-200'>
-          {attemptId
-            ? 'Failed to load your saved attempt. Please try again.'
-            : 'Failed to start new attempt. Please try again.'}
+        <p className='text-persimmon-300'>
+          {inSession
+            ? 'You are already in a session. Please complete it before starting a new one.'
+            : attemptId
+              ? 'Failed to load your saved attempt. Please try again.'
+              : 'Failed to start new attempt. Please try again.'}
         </p>
       </div>
     );
@@ -207,6 +226,7 @@ const ReadingPracticePage = () => {
       passages={passages}
       initialAnswers={initialAnswers}
       initialDuration={initialDuration}
+      stomp={stomp}
     />
   );
 };

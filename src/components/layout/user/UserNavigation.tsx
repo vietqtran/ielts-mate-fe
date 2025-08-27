@@ -95,7 +95,7 @@ const navigationGroups = [
 
 export function UserNavigation() {
   const { signOut } = useAuth();
-  const { replace } = useRouter();
+  const { replace, push } = useRouter();
   const pathname = usePathname();
   const { user } = useAppSelector((state) => state.auth);
 
@@ -117,7 +117,10 @@ export function UserNavigation() {
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex justify-between items-center h-16'>
           {/* Logo */}
-          <div className='flex items-center gap-2'>
+          <div
+            className='flex items-center gap-2 cursor-pointer'
+            onClick={() => push('/dashboard')}
+          >
             <Image src='/logo.svg' height={32} width={32} alt='IELTS Mate' />
             <span className='font-bold text-lg'>IELTS Mate</span>
           </div>
