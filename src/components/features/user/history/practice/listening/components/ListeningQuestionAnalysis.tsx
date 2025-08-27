@@ -4,6 +4,7 @@ import {
   AttemptQuestionResultRenderer,
   isAttemptQuestionCorrect,
 } from '@/components/features/user/common/attempt/AttemptQuestionResultRenderer';
+import { SelectableText } from '@/components/features/user/exams/reading/components/SelectableText';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import useListeningAudio from '@/hooks/apis/listening/useListeningAudio';
@@ -75,9 +76,9 @@ export const ListeningQuestionAnalysis = ({ attemptDetails }: ListeningQuestionA
                   {group.section_label}
                 </CardTitle>
                 {group.instruction && (
-                  <div
-                    className='text-sm text-tekhelet-500'
-                    dangerouslySetInnerHTML={{ __html: group.instruction }}
+                  <SelectableText
+                    content={group.instruction || 'No instruction provided'}
+                    className='prose prose-sm max-w-none text-tekhelet-500 mb-4'
                   />
                 )}
                 <Badge

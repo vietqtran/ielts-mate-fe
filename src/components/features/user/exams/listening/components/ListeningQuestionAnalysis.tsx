@@ -2,6 +2,7 @@
 
 import { QuestionResultRenderer } from '@/components/features/user/exams/reading/components';
 import { getQuestionResultStatus } from '@/components/features/user/exams/reading/components/QuestionResultRenderer';
+import { SelectableText } from '@/components/features/user/exams/reading/components/SelectableText';
 import { Badge } from '@/components/ui';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -192,11 +193,9 @@ export const ListeningQuestionAnalysis = ({
                           <div className='p-3'>
                             <h4 className='font-medium text-tekhelet-600'>{group.section_label}</h4>
                             {group.instruction && (
-                              <div
-                                className='text-sm text-tekhelet-500 mt-1'
-                                dangerouslySetInnerHTML={{
-                                  __html: group.instruction,
-                                }}
+                              <SelectableText
+                                content={group.instruction || 'No instruction provided'}
+                                className='prose prose-sm max-w-none text-tekhelet-500 mb-4'
                               />
                             )}
                             <Badge

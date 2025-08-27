@@ -108,22 +108,26 @@ export default function CreateModulePage() {
   return (
     <div className='container mx-auto p-6 space-y-6'>
       {/* Header */}
-      <div className='flex items-start gap-2 flex-col space-x-3'>
-        <Button variant='ghost' asChild>
+      <div className='flex gap-2 justify-between items-end'>
+        <div>
+          <h1 className='text-3xl font-bold text-tekhelet-400'>Create New Module</h1>
+          <p className='text-tekhelet-500'>Build a learning module with your vocabulary</p>
+        </div>
+        <Button
+          variant='default'
+          asChild
+          className='bg-selective-yellow-300 hover:bg-selective-yellow-400'
+        >
           <Link href='/personalized'>
             <ArrowLeft className='mr-2 h-4 w-4' />
             Back to Personalized Learning
           </Link>
         </Button>
-        <div>
-          <h1 className='text-3xl font-bold text-tekhelet-400'>Create New Module</h1>
-          <p className='text-medium-slate-blue-500'>Build a learning module with your vocabulary</p>
-        </div>
       </div>
 
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
         {/* Module Form */}
-        <Card className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl'>
+        <Card>
           <CardHeader>
             <CardTitle className='text-tekhelet-400'>Module Information</CardTitle>
             <CardDescription>Fill in the details for your new learning module</CardDescription>
@@ -138,11 +142,7 @@ export default function CreateModulePage() {
                     <FormItem>
                       <FormLabel className='text-tekhelet-400 font-medium'>Module Name</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder='Enter module name'
-                          {...field}
-                          className='bg-white/80 border-tekhelet-200 focus:border-tekhelet-400'
-                        />
+                        <Input placeholder='Enter module name' {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -160,7 +160,7 @@ export default function CreateModulePage() {
                           placeholder='Enter module description'
                           {...field}
                           rows={4}
-                          className='bg-white/80 border-tekhelet-200 focus:border-tekhelet-400 resize-none'
+                          className='resize-none'
                         />
                       </FormControl>
                       <FormMessage />
@@ -184,7 +184,7 @@ export default function CreateModulePage() {
                         <FormLabel className='text-tekhelet-400 font-medium'>
                           Make this module public
                         </FormLabel>
-                        <p className='text-sm text-medium-slate-blue-500'>
+                        <p className='text-sm text-medium-slate-blue-400'>
                           Other users can view and use this module
                         </p>
                       </div>
@@ -233,7 +233,7 @@ export default function CreateModulePage() {
         </Card>
 
         {/* Vocabulary Selection */}
-        <Card className='bg-white/60 backdrop-blur-lg border border-tekhelet-200 rounded-2xl shadow-xl'>
+        <Card>
           <CardHeader>
             <CardTitle className='text-tekhelet-400'>Select Vocabulary</CardTitle>
             <CardDescription>
@@ -248,12 +248,12 @@ export default function CreateModulePage() {
                 placeholder='Search vocabulary...'
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className='pl-10 bg-white/80 border-tekhelet-200'
+                className='pl-10 '
               />
             </div>
 
             {/* Vocabulary List */}
-            <div className='max-h-96 overflow-y-auto space-y-2 border border-tekhelet-200 rounded-lg p-3 bg-white/80'>
+            <div className='max-h-96 overflow-y-auto space-y-2 border rounded-lg p-3 '>
               {filteredVocabularies.length === 0 ? (
                 <div className='text-center py-8'>
                   <BookOpen className='h-12 w-12 text-medium-slate-blue-300 mx-auto mb-4' />
@@ -281,7 +281,7 @@ export default function CreateModulePage() {
                     key={vocab.vocabulary_id}
                     className={`flex items-center space-x-3 p-3 rounded-md cursor-pointer transition-colors ${
                       form.watch('vocabulary_ids').includes(vocab.vocabulary_id)
-                        ? 'bg-tekhelet-100 border border-tekhelet-300'
+                        ? 'bg-medium-slate-blue-500/30 border'
                         : 'hover:bg-tekhelet-50 border border-transparent'
                     }`}
                     onClick={() => handleVocabToggle(vocab.vocabulary_id)}
@@ -292,8 +292,8 @@ export default function CreateModulePage() {
                     />
                     <div className='flex-1 min-w-0'>
                       <p className='font-medium text-tekhelet-400 truncate'>{vocab.word}</p>
-                      <p className='text-sm text-medium-slate-blue-500 truncate'>{vocab.meaning}</p>
-                      <p className='text-xs text-medium-slate-blue-400 truncate'>
+                      <p className='text-sm text-tekhelet-500 truncate'>{vocab.meaning}</p>
+                      <p className='text-xs text-medium-slate-blue-300 truncate'>
                         "{vocab.context}"
                       </p>
                     </div>
