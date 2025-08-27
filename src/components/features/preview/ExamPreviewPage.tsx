@@ -59,7 +59,7 @@ const ExamPreviewPage = ({
         });
 
         setListeningExams(res?.data || []);
-        // Find the listening exam with matching url_slug from the exams state
+        // Find the listening exam with matching url_slug
         const exam = res?.data.find(
           (exam: ListActiveListeningExamsResponse) => exam.url_slug === examUrl
         );

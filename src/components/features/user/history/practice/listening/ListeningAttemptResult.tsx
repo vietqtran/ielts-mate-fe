@@ -5,13 +5,12 @@ import {
   ExamLoadingState,
   ExamResultHeader,
   OverallScoreCard,
-  StatisticsCard,
 } from '@/components/features/user/exams/reading/components';
 import {
   formatDate,
   formatDuration,
-  getPerformanceLevel,
 } from '@/components/features/user/exams/reading/utils/examUtils';
+import { AttemptStatisticsCard } from '@/components/features/user/history/practice/common/AttemptStatisticsCard';
 import { useListeningExamStatistics } from '@/components/features/user/history/practice/listening/hooks/useListeningExamStatistics';
 import useListeningAttempt from '@/hooks/apis/listening/useListeningAttempt';
 import { LoadListeningAttemptResultResponse } from '@/types/listening/listening-attempt.types';
@@ -69,10 +68,6 @@ const ListeningAttemptResult = ({ attemptId }: ListeningAttemptResultProps) => {
     return <ExamErrorState error={error || 'Listening attempt details not found'} />;
   }
 
-  const performance = stats
-    ? getPerformanceLevel(stats.scorePercentage)
-    : { level: 'Unknown', color: 'bg-gray-500 text-white' };
-
   return (
     <div className='min-h-screen p-4'>
       <div className='max-w-6xl mx-auto space-y-6'>
@@ -94,18 +89,18 @@ const ListeningAttemptResult = ({ attemptId }: ListeningAttemptResultProps) => {
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
           {/* Overall Score */}
           <OverallScoreCard
-            scorePercentage={stats?.scorePercentage || 0}
+            scorePercentage={stats?.correctPercentage || 0}
             correctAnswers={stats?.correctAnswers || 0}
             totalQuestions={stats?.totalQuestions || 0}
-            performance={performance}
           />
 
           {/* Statistics */}
-          <StatisticsCard
-            totalPoints={stats?.totalPoints || 0}
-            examTotalPoints={attemptDetails.total_points}
+          <AttemptStatisticsCard
+            notAnswered={stats?.notAnswered || 0}
+            totalQuestions={stats?.totalQuestions || 0}
             correctAnswers={stats?.correctAnswers || 0}
             incorrectAnswers={stats?.incorrectAnswers || 0}
+            key={attemptDetails.attempt_id}
           />
         </div>
 

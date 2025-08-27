@@ -64,6 +64,7 @@ export interface SubmitListeningExamAttemptAnswersResponse extends SubmitExamRes
  */
 export interface ListeningExamAttemptDetailsResponse {
   exam_attempt_id: string;
+  estimated_ielts_band: number;
   listening_exam: ListeningExamDetail;
   duration: number;
   total_point: number;

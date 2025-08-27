@@ -1,34 +1,40 @@
+import { SegmentPlayButton } from '@/components/features/user/common/attempt/SegmentPlayButton';
 import { QuestionResultProps } from '@/components/features/user/exams/reading/components/question_result/DragAndDrop';
 import { Badge } from '@/components/ui/badge';
 import { ListeningExplanationDisplay } from '@/components/ui/listening-explanation-display';
 import { SafeHtmlRenderer } from '@/lib/utils/safeHtml';
+import { RefObject } from 'react';
 
-const MatchingResult = ({
-  question,
-  userAnswers,
-  isListening,
-}: QuestionResultProps & { isListening?: boolean }) => {
+const MatchingResult = ({ question, userAnswers, isListening, audioRef }: QuestionResultProps) => {
   const hasAnswer = userAnswers.length > 0;
   const userAnswer = hasAnswer ? userAnswers[0] : null;
   const isAnswerCorrect = userAnswer === question.correct_answer_for_matching;
 
   return (
     <div
-      className={`${
-        isAnswerCorrect ? 'bg-green-100/30' : 'bg-red-100/20'
-      } rounded-lg border p-4 space-y-4`}
+      className={`rounded-lg border p-4 space-y-4 ${
+        isAnswerCorrect
+          ? 'border-green-400 bg-green-50/30'
+          : hasAnswer
+            ? 'border-red-400 bg-red-50/30'
+            : 'border-gray-300 bg-white/70'
+      }`}
     >
       {/* Points */}
       <div className='flex items-center justify-between text-xs text-tekhelet-500'>
         <span className='font-medium text-tekhelet-400'>Matching</span>
         <div className='flex items-center gap-2'>
           {isAnswerCorrect ? (
-            <Badge variant={'outline'} className='bg-green-700 text-white'>
+            <Badge variant={'outline'} className='bg-green-600 text-white'>
               Correct
             </Badge>
-          ) : (
-            <Badge variant={'outline'} className='bg-red-700 text-white'>
+          ) : hasAnswer ? (
+            <Badge variant={'outline'} className='bg-red-500 text-white'>
               Incorrect
+            </Badge>
+          ) : (
+            <Badge variant={'outline'} className='bg-gray-500 text-white'>
+              Not Answered
             </Badge>
           )}
           <span>Points: {question.point ?? 1}</span>
@@ -57,6 +63,17 @@ const MatchingResult = ({
         <p className='text-sm font-medium text-tekhelet-400 mb-1'>Correct Answer</p>
         <div className='text-green-700'>{question.correct_answer_for_matching}</div>
       </div>
+
+      {isListening && audioRef && (
+        <div>
+          <SegmentPlayButton
+            audioRef={audioRef as RefObject<HTMLAudioElement>}
+            end={question.end_time}
+            start={question.start_time}
+            segmentKey={question.question_id}
+          />
+        </div>
+      )}
 
       {/* Explanation */}
       {question.explanation && (

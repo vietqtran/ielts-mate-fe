@@ -1,5 +1,6 @@
 'use client';
 
+import useExamIELTSBand from '@/components/features/user/exams/common/useExamIELTSBand';
 import {
   ExamErrorState,
   ExamLoadingState,
@@ -7,16 +8,15 @@ import {
   IELTSBandScoreCard,
   OverallScoreCard,
   PerformanceByPartsCard,
-  StatisticsCard,
 } from '@/components/features/user/exams/reading/components';
 import {
   formatDate,
   formatDuration,
-  getIELTSBandScore,
-  getPerformanceLevel,
 } from '@/components/features/user/exams/reading/utils/examUtils';
+import { AttemptStatisticsCard } from '@/components/features/user/history/practice/common/AttemptStatisticsCard';
 import { useListeningExam } from '@/hooks/apis/listening/useListeningExam';
 import { ListeningExamAttemptDetailsResponse } from '@/types/listening/listening-exam.types';
+import { IeltsTypeEnumIndex } from '@/types/reading/reading.types';
 import { useEffect, useState } from 'react';
 import { ListeningExamInfoCard, ListeningQuestionAnalysis } from './components';
 import { useListeningExamStatistics } from './hooks/useListeningExamStatistics';
@@ -64,6 +64,12 @@ const ListeningExamDetailsPage = ({ examId }: ListeningExamDetailsPageProps) => 
   // Calculate statistics using custom hook
   const stats = useListeningExamStatistics(examDetails);
 
+  const { headline } = useExamIELTSBand(
+    examDetails?.estimated_ielts_band!,
+    'listening',
+    IeltsTypeEnumIndex.ACADEMIC
+  );
+
   // Toggle question details
   const toggleQuestion = (questionId: string) => {
     const newOpen = new Set(openQuestions);
@@ -85,10 +91,7 @@ const ListeningExamDetailsPage = ({ examId }: ListeningExamDetailsPageProps) => 
     return <ExamErrorState error={error || 'Listening exam details not found'} />;
   }
 
-  const bandScore = stats ? getIELTSBandScore(stats.scorePercentage) : 0;
-  const performance = stats
-    ? getPerformanceLevel(stats.scorePercentage)
-    : { level: 'Unknown', color: 'bg-gray-500 text-white' };
+  const bandScore = examDetails?.estimated_ielts_band || 0;
 
   return (
     <div className='min-h-screen p-4'>
@@ -114,16 +117,15 @@ const ListeningExamDetailsPage = ({ examId }: ListeningExamDetailsPageProps) => 
             scorePercentage={stats?.scorePercentage || 0}
             correctAnswers={stats?.correctAnswers || 0}
             totalQuestions={stats?.totalQuestions || 0}
-            performance={performance}
           />
 
           {/* IELTS Band Score */}
-          <IELTSBandScoreCard bandScore={bandScore} />
+          <IELTSBandScoreCard bandScore={bandScore} slogan={headline} />
 
           {/* Statistics */}
-          <StatisticsCard
-            totalPoints={stats?.totalPoints || 0}
-            examTotalPoints={examDetails.total_point}
+          <AttemptStatisticsCard
+            totalQuestions={stats?.totalQuestions || 0}
+            notAnswered={stats?.notAnswered || 0}
             correctAnswers={stats?.correctAnswers || 0}
             incorrectAnswers={stats?.incorrectAnswers || 0}
           />

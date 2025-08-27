@@ -18,6 +18,7 @@ interface QuestionResultRendererProps {
     content: string;
   }[];
   isListening?: boolean;
+  audioRef?: React.RefObject<HTMLAudioElement | null>;
 }
 
 export const QuestionResultRenderer = ({
@@ -25,37 +26,44 @@ export const QuestionResultRenderer = ({
   userAnswers,
   dragAndDropItems,
   isListening = false,
+  audioRef = undefined,
 }: QuestionResultRendererProps) => {
-  // Cast to ComponentType<any> so we can pass props even if the leaf component hasn't defined them yet
-  const MCComponent = MultipleChoicesResult as unknown as React.ComponentType<any>;
-  const FITBComponent = FillInTheBlanksResult as unknown as React.ComponentType<any>;
-  const MatchingComponent = MatchingResult as unknown as React.ComponentType<any>;
-  const DnDComponent = DragAndDropResult as unknown as React.ComponentType<any>;
-
   switch (question.question_type) {
     case QuestionTypeEnumIndex.MULTIPLE_CHOICE:
       return (
-        <MCComponent question={question} userAnswers={userAnswers} isListening={isListening} />
-      );
-    case QuestionTypeEnumIndex.FILL_IN_THE_BLANKS:
-      return (
-        <FITBComponent question={question} userAnswers={userAnswers} isListening={isListening} />
-      );
-    case QuestionTypeEnumIndex.MATCHING:
-      return (
-        <MatchingComponent
+        <MultipleChoicesResult
           question={question}
           userAnswers={userAnswers}
           isListening={isListening}
+          audioRef={audioRef}
+        />
+      );
+    case QuestionTypeEnumIndex.FILL_IN_THE_BLANKS:
+      return (
+        <FillInTheBlanksResult
+          question={question}
+          userAnswers={userAnswers}
+          isListening={isListening}
+          audioRef={audioRef}
+        />
+      );
+    case QuestionTypeEnumIndex.MATCHING:
+      return (
+        <MatchingResult
+          question={question}
+          userAnswers={userAnswers}
+          isListening={isListening}
+          audioRef={audioRef}
         />
       );
     case QuestionTypeEnumIndex.DRAG_AND_DROP:
       return (
-        <DnDComponent
+        <DragAndDropResult
           question={question}
           userAnswers={userAnswers}
           dragAndDropItems={dragAndDropItems}
           isListening={isListening}
+          audioRef={audioRef}
         />
       );
     default:
@@ -64,5 +72,51 @@ export const QuestionResultRenderer = ({
           Unsupported question type
         </div>
       );
+  }
+};
+
+// Helper: evaluate user's answer for a question in attempt details view
+// Returns one of: 'correct' | 'incorrect' | 'unanswered'
+
+export const getQuestionResultStatus = (
+  question: ReadingExamAttemptDetailsQuestion,
+  userAnswers: string[]
+): boolean | null => {
+  switch (question.question_type) {
+    case QuestionTypeEnumIndex.MULTIPLE_CHOICE: {
+      const choices = question.choices ?? [];
+      const hasAnswer = (userAnswers?.length ?? 0) > 0;
+      if (!hasAnswer) return null;
+      // Correct when every correct choice is selected and no incorrect choice is selected
+      const isCorrect = choices.every((choice) =>
+        choice.is_correct
+          ? userAnswers.includes(choice.choice_id)
+          : !userAnswers.includes(choice.choice_id)
+      );
+      return isCorrect;
+    }
+    case QuestionTypeEnumIndex.FILL_IN_THE_BLANKS: {
+      const hasAnswer = (userAnswers?.length ?? 0) > 0;
+      if (!hasAnswer) return null;
+      const userAnswer = userAnswers[0] ?? null;
+      const correct = question.correct_answer ?? null;
+      return userAnswer === correct;
+    }
+    case QuestionTypeEnumIndex.MATCHING: {
+      const hasAnswer = (userAnswers?.length ?? 0) > 0;
+      if (!hasAnswer) return null;
+      const userAnswer = userAnswers[0] ?? null;
+      const correct = question.correct_answer_for_matching ?? null;
+      return userAnswer === correct;
+    }
+    case QuestionTypeEnumIndex.DRAG_AND_DROP: {
+      const hasAnswer = (userAnswers?.length ?? 0) > 0;
+      if (!hasAnswer) return null;
+      const userAnswer = userAnswers[0] ?? null;
+      const correct = question.correct_answer ?? null;
+      return userAnswer === correct;
+    }
+    default:
+      return (userAnswers?.length ?? 0) > 0 ? false : null;
   }
 };

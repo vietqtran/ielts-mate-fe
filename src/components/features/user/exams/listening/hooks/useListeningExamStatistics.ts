@@ -1,5 +1,6 @@
 'use client';
 
+import { getQuestionResultStatus } from '@/components/features/user/exams/reading/components/QuestionResultRenderer';
 import { ExamStats } from '@/components/features/user/exams/reading/utils/examUtils';
 import { ListeningExamAttemptDetailsResponse } from '@/types/listening/listening-exam.types';
 
@@ -16,44 +17,36 @@ export const useListeningExamStatistics = (
   ];
 
   let totalQuestions = 0;
-  let correctAnswers = 0;
+  let totalCorrect = 0;
+  let totalNotAnswered = 0;
   let totalPoints = 0;
 
   const partStats = parts.map((part, index) => {
     let partQuestions = 0;
     let partCorrect = 0;
+    let partNotAnswered = 0;
     let partPoints = 0;
 
     part.question_groups.forEach((group) => {
-      if (group.questions && group.questions.length > 0) {
-        group.questions.forEach((question) => {
-          partQuestions++;
-          const userAnswers = examDetails.answers[question.question_id] || [];
-          const correctAnswer = question.correct_answer || '';
-
-          // Check if answer is correct based on question type
-          let isCorrect = false;
-          if (question.question_type === 0 && question.choices) {
-            // Multiple choice - check by choice ID
-            const correctChoiceId = question.choices.find((choice) => choice.is_correct)?.choice_id;
-            isCorrect = userAnswers.includes(correctChoiceId || '');
-          } else {
-            // Text-based answers
-            isCorrect =
-              userAnswers.length > 0 &&
-              userAnswers.join('').toLowerCase() === correctAnswer.toLowerCase();
-          }
-
-          if (isCorrect) {
-            partCorrect++;
-            partPoints += question.point || 1;
-          }
-        });
-      }
+      if (!group.questions || group.questions.length === 0) return;
+      group.questions.forEach((question) => {
+        partQuestions += 1;
+        const userAnswers = examDetails.answers[question.question_id] || [];
+        const status = getQuestionResultStatus(question as any, userAnswers);
+        if (status == null) {
+          partNotAnswered += 1;
+          return;
+        }
+        if (status === true) {
+          partCorrect += 1;
+          partPoints += question.point || 1;
+        }
+      });
     });
 
     totalQuestions += partQuestions;
-    correctAnswers += partCorrect;
+    totalCorrect += partCorrect;
+    totalNotAnswered += partNotAnswered;
     totalPoints += partPoints;
 
     return {
@@ -65,15 +58,18 @@ export const useListeningExamStatistics = (
     };
   });
 
+  const incorrectAnswers = totalQuestions - totalCorrect - totalNotAnswered;
   const scorePercentage =
-    totalQuestions > 0 ? Math.round((correctAnswers / totalQuestions) * 100) : 0;
+    totalQuestions > 0 ? Math.round((totalCorrect / totalQuestions) * 100) : 0;
 
   return {
     totalQuestions,
-    correctAnswers,
-    incorrectAnswers: totalQuestions - correctAnswers,
+    correctAnswers: totalCorrect,
+    incorrectAnswers,
+    notAnswered: totalNotAnswered,
     totalPoints,
     scorePercentage,
+    correctPercentage: scorePercentage,
     partStats,
   };
 };

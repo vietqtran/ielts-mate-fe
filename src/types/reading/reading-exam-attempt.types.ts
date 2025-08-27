@@ -126,6 +126,7 @@ export type ReadingExamAttemptList = ReadingExamAttempt[];
 // Start of Reading Exam Attempt Details Response
 export interface ReadingExamAttemptDetailsResponse {
   exam_attempt_id: string;
+  estimated_ielts_band: number;
   reading_exam: ReadingExamAttemptDetailsMainResponse;
   duration: number;
   total_point: number;
@@ -154,6 +155,8 @@ export type ReadingExamAttemptDetailsQuestion = {
   point?: number;
   blank_index?: number;
   zone_index?: number;
+  start_time?: number; // for listening question
+  end_time?: number; // for listening question
 };
 
 export interface QuestionGroup {
