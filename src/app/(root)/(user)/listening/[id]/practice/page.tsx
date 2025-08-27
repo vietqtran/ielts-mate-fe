@@ -2,6 +2,7 @@
 
 import ListeningPracticeAttempt from '@/components/features/user/listening/practice/ListeningAttempt';
 import useListeningAttempt from '@/hooks/apis/listening/useListeningAttempt';
+import { useLockAttempt } from '@/hooks/utils/useLockAttempt';
 import {
   LoadListeningAttemptResponse,
   StartListeningAttemptResponse,
@@ -38,6 +39,7 @@ const ListeningPractice = () => {
 
   const [initialDuration, setInitialDuration] = useState<number>(0);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [inSession, setInSession] = useState<boolean>(false);
 
   const { startNewAttempt, loadAttemptById } = useListeningAttempt();
 
@@ -119,6 +121,12 @@ const ListeningPractice = () => {
     return initialAnswers;
   };
 
+  const stomp = useLockAttempt({
+    sockUrl: process.env.NEXT_PUBLIC_WS_URL!,
+    pingIntervalMs: 29000,
+    debug: true,
+  });
+
   const startAttempt = async () => {
     try {
       setIsLoading(true);
@@ -166,6 +174,15 @@ const ListeningPractice = () => {
         setInitialDuration(res.data.duration);
       }
     } catch (error) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'status' in error &&
+        (error as { status?: number }).status === 409
+      ) {
+        setInSession(true);
+        return;
+      }
       console.error('Error loading attempt:', error);
     } finally {
       setIsLoading(false);
@@ -197,10 +214,12 @@ const ListeningPractice = () => {
     return (
       <div className='h-screen flex items-center justify-center'>
         <div className='text-center border rounded-2xl p-8'>
-          <p className='text-persimmon-200'>
-            {attemptId
-              ? 'Failed to load your saved attempt. Please try again.'
-              : 'Failed to start new attempt. Please try again.'}
+          <p className='text-persimmon-300'>
+            {inSession
+              ? 'You are already in a session. Please complete it before starting a new one.'
+              : attemptId
+                ? 'Failed to load your saved attempt. Please try again.'
+                : 'Failed to start new attempt. Please try again.'}
           </p>
         </div>
       </div>
@@ -212,6 +231,7 @@ const ListeningPractice = () => {
       attemptData={attemptData}
       initialAnswers={initialAnswers}
       initialDuration={initialDuration}
+      stomp={stomp}
     />
   );
 };
