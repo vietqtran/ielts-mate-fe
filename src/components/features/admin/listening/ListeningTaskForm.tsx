@@ -128,6 +128,7 @@ export function ListeningTaskForm({
   const [currentOriginalStatus, setCurrentOriginalStatus] = useState<number | undefined>(
     originalStatus
   );
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const schema = mode === 'create' ? createSchema : editSchema;
   const form = useForm<FormType>({
@@ -209,6 +210,9 @@ export function ListeningTaskForm({
   }, [mode, initialData, taskId]);
 
   const onSubmit = async (values: FormType) => {
+    if (isSubmitting) return; // Prevent double submission
+
+    setIsSubmitting(true);
     try {
       // Check if the original status was TEST and prevent status change
       if (currentOriginalStatus === ListeningTaskStatus.TEST) {
@@ -247,7 +251,7 @@ export function ListeningTaskForm({
         }
       }
 
-      if (mode === 'create') {
+      if (mode === 'create' && !createdTaskId) {
         // In create mode, audio_file is required
         if (!values.audio_file) {
           toast({
@@ -282,7 +286,7 @@ export function ListeningTaskForm({
           title: 'Success',
           description: 'Listening task created successfully',
         });
-      } else if (mode === 'edit' && taskId) {
+      } else if ((mode === 'edit' && taskId) || (mode === 'create' && createdTaskId)) {
         const request: ListeningTaskUpdateRequest = {
           title: values.title,
           ielts_type: values.ielts_type,
@@ -294,8 +298,11 @@ export function ListeningTaskForm({
           ...(values.audio_file && { audio_file: values.audio_file }),
         };
 
-        await updateListeningTask(taskId, request);
-        setCreatedTaskId(taskId);
+        const updateTaskId = taskId || createdTaskId;
+        await updateListeningTask(updateTaskId!, request);
+        if (!taskId && createdTaskId) {
+          setCreatedTaskId(createdTaskId);
+        }
         setCurrentOriginalStatus(values.status); // Update original status after successful update
 
         // Reset form with updated values to clear dirty state
@@ -322,6 +329,8 @@ export function ListeningTaskForm({
         description: 'Failed to save listening task',
         variant: 'destructive',
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -485,12 +494,12 @@ export function ListeningTaskForm({
                       <Select
                         onValueChange={(value) => field.onChange(parseInt(value))}
                         defaultValue={field.value.toString()}
-                        disabled={isOriginalTestStatus || mode === 'create'}
+                        disabled={isOriginalTestStatus || (mode === 'create' && !createdTaskId)}
                       >
                         <FormControl>
                           <SelectTrigger
                             className={
-                              isOriginalTestStatus || mode === 'create'
+                              isOriginalTestStatus || (mode === 'create' && !createdTaskId)
                                 ? 'opacity-50 cursor-not-allowed'
                                 : ''
                             }
@@ -517,11 +526,11 @@ export function ListeningTaskForm({
                           </SelectItem>
                         </SelectContent>
                       </Select>
-                      {(isOriginalTestStatus || mode === 'create') && (
+                      {(isOriginalTestStatus || (mode === 'create' && !createdTaskId)) && (
                         <p className='text-xs text-muted-foreground'>
                           {isOriginalTestStatus
                             ? 'Status cannot be changed when task is in Test mode'
-                            : 'Status is set to Draft for new tasks'}
+                            : 'Status can be changed after creating the task'}
                         </p>
                       )}
                       <FormMessage />
@@ -629,9 +638,15 @@ export function ListeningTaskForm({
               </Button>
               <Button
                 type='submit'
-                disabled={isLoading['createListeningTask'] || isLoading['updateListeningTask']}
+                disabled={
+                  isSubmitting ||
+                  isLoading['createListeningTask'] ||
+                  isLoading['updateListeningTask']
+                }
               >
-                {isLoading['createListeningTask'] || isLoading['updateListeningTask']
+                {isSubmitting ||
+                isLoading['createListeningTask'] ||
+                isLoading['updateListeningTask']
                   ? 'Saving...'
                   : 'Save'}
               </Button>
