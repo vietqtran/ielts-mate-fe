@@ -14,8 +14,58 @@ import { useIncrementalTimer } from '@/hooks/utils/useTimer';
 import { AttemptData } from '@/types/attempt.types';
 import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 // import { useUnloadSubmit } from "@/hooks/utils/useUnloadSubmit";
+
+// Stable child component to isolate timer re-renders
+function HeaderWithTimer(props: {
+  initialDuration: number;
+  startTime: boolean;
+  title: string;
+  answeredCount: number;
+  totalQuestions: number;
+  notAnsweredCount: number;
+  submitting: boolean;
+  saving: boolean;
+  onSubmit: () => void;
+  onSave: () => void;
+  setTime: (t: number) => void;
+}) {
+  const {
+    initialDuration,
+    startTime,
+    title,
+    answeredCount,
+    totalQuestions,
+    notAnsweredCount,
+    submitting,
+    saving,
+    onSubmit,
+    onSave,
+    setTime,
+  } = props;
+  const time = useIncrementalTimer(initialDuration, startTime);
+  useEffect(() => {
+    setTime(time);
+  }, [time, setTime]);
+  return (
+    <PracticeHeader
+      title={title}
+      description={'IELTS Reading Practice'}
+      answered={answeredCount}
+      total={totalQuestions}
+      timeLeftSec={time}
+      onSubmit={onSubmit}
+      submitting={submitting}
+      showUnansweredWarning={notAnsweredCount > 0}
+      unansweredCount={notAnsweredCount}
+      submitText='Submit'
+      glass
+      onSave={onSave}
+      saving={saving}
+    />
+  );
+}
 
 export interface HandleAnswerChangeParams {
   questionId: string;
@@ -56,9 +106,26 @@ const ReadingPractice = ({ passages, initialAnswers, initialDuration }: ReadingP
   const [startTime, setStartTime] = useState<boolean>(false);
   const [saving, setSaving] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const time = useIncrementalTimer(initialDuration, startTime);
+  // Keep timer updates local to a child to avoid re-rendering the whole screen
+  const timeRef = useRef<number>(initialDuration);
   const { submitAttempt, saveAttemptProgress } = useReadingAttempt();
   const router = useRouter();
+  const passageRef = useRef<HTMLDivElement | null>(null);
+  const leftColumn = useMemo(
+    () => (
+      <>
+        <CardHeader className='flex-shrink-0 bg-medium-slate-blue-50'>
+          <CardTitle className='text-center text-lg text-medium-slate-blue-400'>
+            Reading Passage
+          </CardTitle>
+        </CardHeader>
+        <CardContent className='flex-1 overflow-y-auto p-6 min-h-0'>
+          <PassageBox ref={passageRef} content={passages.content} />
+        </CardContent>
+      </>
+    ),
+    [passages.content]
+  );
 
   // Initialize answers when initialAnswers prop changes
   useEffect(() => {
@@ -121,7 +188,7 @@ const ReadingPractice = ({ passages, initialAnswers, initialDuration }: ReadingP
             : answer
           : null,
     })),
-    duration: time,
+    duration: timeRef.current,
   });
 
   const handleSave = async () => {
@@ -200,38 +267,27 @@ const ReadingPractice = ({ passages, initialAnswers, initialDuration }: ReadingP
       />
       <PracticeShell
         header={
-          <PracticeHeader
+          <HeaderWithTimer
+            initialDuration={initialDuration}
+            startTime={startTime}
             title={passages.title}
-            description={'IELTS Reading Practice'}
-            answered={answeredCount}
-            total={totalQuestions}
-            timeLeftSec={time}
-            onSubmit={() => setIsModalOpen(true)}
+            answeredCount={answeredCount}
+            totalQuestions={totalQuestions}
+            notAnsweredCount={notAnsweredQuestions.length}
             submitting={submitting}
-            showUnansweredWarning={notAnsweredQuestions.length > 0}
-            unansweredCount={notAnsweredQuestions.length}
-            submitText='Submit'
-            glass
-            onSave={handleSave}
             saving={saving}
+            onSubmit={() => setIsModalOpen(true)}
+            onSave={handleSave}
+            setTime={(t) => {
+              timeRef.current = t;
+            }}
           />
         }
       >
         <PracticeContentRenderer
           leftColClassName='col-span-5'
           // passage
-          renderLeftColumn={
-            <>
-              <CardHeader className='flex-shrink-0 bg-medium-slate-blue-50'>
-                <CardTitle className='text-center text-lg text-medium-slate-blue-400'>
-                  Reading Passage
-                </CardTitle>
-              </CardHeader>
-              <CardContent className='flex-1 overflow-y-auto p-6 min-h-0'>
-                <PassageBox content={passages.content} />
-              </CardContent>
-            </>
-          }
+          renderLeftColumn={leftColumn}
           centerColClassName='col-span-5'
           renderCenterColumn={
             <>

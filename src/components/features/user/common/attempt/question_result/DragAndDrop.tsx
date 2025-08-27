@@ -81,7 +81,7 @@ const AttemptDragAndDropResult = ({
       <div>
         <p className='text-sm font-medium text-tekhelet-400 mb-1'>Your Answer</p>
         <div className='text-tekhelet-500 font-semibold'>
-          {userAnswerContent || 'No answer provided'}
+          {userAnswer ? userAnswerContent : 'No answer provided'}
         </div>
       </div>
 
