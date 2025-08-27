@@ -187,7 +187,7 @@ export function PassageBasicInfoForm({
                   }, 0);
 
                   const requiredPoints = formData.part_number === 1 ? 14 : 13;
-                  const hasEnoughPoints = totalPoints >= requiredPoints;
+                  const hasEnoughPoints = totalPoints === requiredPoints;
 
                   return (
                     <FormItem>
@@ -209,13 +209,13 @@ export function PassageBasicInfoForm({
                           <SelectItem value={PassageStatus.PUBLISHED} disabled={!hasEnoughPoints}>
                             Published{' '}
                             {!hasEnoughPoints
-                              ? `(Need ${requiredPoints} points, have ${totalPoints})`
+                              ? `(Need exactly ${requiredPoints} points, have ${totalPoints})`
                               : ''}
                           </SelectItem>
                           <SelectItem value={PassageStatus.TEST} disabled={!hasEnoughPoints}>
                             Test{' '}
                             {!hasEnoughPoints
-                              ? `(Need ${requiredPoints} points, have ${totalPoints})`
+                              ? `(Need exactly ${requiredPoints} points, have ${totalPoints})`
                               : ''}
                           </SelectItem>
                         </SelectContent>

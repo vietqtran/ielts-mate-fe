@@ -281,10 +281,10 @@ export function ListeningTaskForm({
           );
         }, 0);
 
-        if (totalPoints < 10) {
+        if (totalPoints !== 10) {
           toast({
-            title: 'Insufficient Points',
-            description: `This listening task requires at least 10 points to publish or test. Current points: ${totalPoints}`,
+            title: 'Invalid Points',
+            description: `This listening task requires exactly 10 points to publish or test. Current points: ${totalPoints}`,
             variant: 'destructive',
           });
           return;
@@ -526,7 +526,7 @@ export function ListeningTaskForm({
                     );
                   }, 0);
 
-                  const hasEnoughPoints = totalPoints >= 10;
+                  const hasEnoughPoints = totalPoints === 10;
 
                   return (
                     <FormItem>
@@ -556,13 +556,18 @@ export function ListeningTaskForm({
                             disabled={!hasEnoughPoints}
                           >
                             Published{' '}
-                            {!hasEnoughPoints ? `(Need 10 points, have ${totalPoints})` : ''}
+                            {!hasEnoughPoints
+                              ? `(Need exactly 10 points, have ${totalPoints})`
+                              : ''}
                           </SelectItem>
                           <SelectItem
                             value={ListeningTaskStatus.TEST.toString()}
                             disabled={!hasEnoughPoints}
                           >
-                            Test {!hasEnoughPoints ? `(Need 10 points, have ${totalPoints})` : ''}
+                            Test{' '}
+                            {!hasEnoughPoints
+                              ? `(Need exactly 10 points, have ${totalPoints})`
+                              : ''}
                           </SelectItem>
                         </SelectContent>
                       </Select>

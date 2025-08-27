@@ -102,14 +102,14 @@ export function PassagePreview({
     }
 
     const requiredPoints = passageData.part_number === 1 ? 14 : 13;
-    return totalPoints >= requiredPoints;
+    return totalPoints === requiredPoints;
   };
 
   const handleFinishWithValidation = (status: PassageStatus) => {
     if (!validatePointsForStatus(status)) {
       const requiredPoints = passageData.part_number === 1 ? 14 : 13;
       toast.error(
-        `Part ${passageData.part_number} requires at least ${requiredPoints} points to publish or test. Current points: ${totalPoints}`
+        `Part ${passageData.part_number} requires exactly ${requiredPoints} points to publish or test. Current points: ${totalPoints}`
       );
       return;
     }

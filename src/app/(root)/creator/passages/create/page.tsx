@@ -310,9 +310,9 @@ export default function CreatePassagePage() {
       );
       const requiredPoints = formData.part_number === 1 ? 14 : 13;
 
-      if (totalPoints < requiredPoints) {
+      if (totalPoints !== requiredPoints) {
         toast.error(
-          `Part ${formData.part_number} requires at least ${requiredPoints} points to publish or test. Current points: ${totalPoints}`
+          `Part ${formData.part_number} requires exactly ${requiredPoints} points to publish or test. Current points: ${totalPoints}`
         );
         return;
       }

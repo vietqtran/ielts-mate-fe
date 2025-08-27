@@ -189,7 +189,7 @@ export default function EditPassagePage() {
     }, 0);
 
     const requiredPoints = partNumber === 1 ? 14 : 13;
-    return totalPoints >= requiredPoints;
+    return totalPoints === requiredPoints;
   };
 
   const handleBasicInfoSubmit = async (data: PassageFormData) => {
@@ -219,7 +219,7 @@ export default function EditPassagePage() {
         }, 0);
 
         toast.error(
-          `Part ${data.part_number} requires at least ${requiredPoints} points to publish or test. Current points: ${currentPoints}`
+          `Part ${data.part_number} requires exactly ${requiredPoints} points to publish or test. Current points: ${currentPoints}`
         );
         return;
       }
