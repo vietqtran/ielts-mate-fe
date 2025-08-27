@@ -415,15 +415,14 @@ export default function EditListeningExamPage() {
                 variant='outline'
                 onClick={() =>
                   handleFilterChange({
-                    sort_by: 'updatedAt',
-                    sort_direction:
-                      filters.sort_by === 'updatedAt' ? filters.sort_direction : 'desc',
+                    sortBy: 'updatedAt',
+                    sortDirection: filters.sortBy === 'updatedAt' ? filters.sortDirection : 'desc',
                   })
                 }
               >
                 Sort: Updated At{' '}
-                {filters.sort_by === 'updatedAt' ? (
-                  filters.sort_direction === 'asc' ? (
+                {filters.sortBy === 'updatedAt' ? (
+                  filters.sortDirection === 'asc' ? (
                     <ArrowUp className='ml-2 h-4 w-4' />
                   ) : (
                     <ArrowDown className='ml-2 h-4 w-4' />
@@ -436,15 +435,14 @@ export default function EditListeningExamPage() {
                 variant='outline'
                 onClick={() =>
                   handleFilterChange({
-                    sort_by: 'createdAt',
-                    sort_direction:
-                      filters.sort_by === 'createdAt' ? filters.sort_direction : 'desc',
+                    sortBy: 'createdAt',
+                    sortDirection: filters.sortBy === 'createdAt' ? filters.sortDirection : 'desc',
                   })
                 }
               >
                 Sort: Created At{' '}
-                {filters.sort_by === 'createdAt' ? (
-                  filters.sort_direction === 'asc' ? (
+                {filters.sortBy === 'createdAt' ? (
+                  filters.sortDirection === 'asc' ? (
                     <ArrowUp className='ml-2 h-4 w-4' />
                   ) : (
                     <ArrowDown className='ml-2 h-4 w-4' />
@@ -458,11 +456,11 @@ export default function EditListeningExamPage() {
                 title='Toggle sort direction'
                 onClick={() =>
                   handleFilterChange({
-                    sort_direction: filters.sort_direction === 'asc' ? 'desc' : 'asc',
+                    sortDirection: filters.sortDirection === 'asc' ? 'desc' : 'asc',
                   })
                 }
               >
-                {filters.sort_direction === 'asc' ? (
+                {filters.sortDirection === 'asc' ? (
                   <ArrowUp className='h-4 w-4' />
                 ) : (
                   <ArrowDown className='h-4 w-4' />
@@ -474,8 +472,8 @@ export default function EditListeningExamPage() {
                   setFilters({
                     page: 1,
                     size: 10,
-                    sort_by: 'updatedAt',
-                    sort_direction: 'desc',
+                    sortBy: 'updatedAt',
+                    sortDirection: 'desc',
                   })
                 }
               >
