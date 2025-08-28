@@ -334,7 +334,7 @@ const TakeExam = ({ examData, initialAnswers }: TakeExamProps) => {
             <>
               <CardHeader className='flex-shrink-0'>
                 <CardTitle className='text-center text-lg text-medium-slate-blue-400'>
-                  {part.title} - Reading Passage
+                  {part.title} - {part?.data?.title ?? 'Reading Passage'}
                 </CardTitle>
               </CardHeader>
               <CardContent className='flex-1 overflow-y-auto p-4 min-h-0'>
