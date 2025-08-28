@@ -269,10 +269,10 @@ export function PassageTable({
               </TableHead>
               <TableHead
                 className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
-                onClick={() => onSort?.('passage_status')}
+                onClick={() => onSort?.('passageStatus')}
               >
                 Status
-                {sortBy === 'passage_status' &&
+                {sortBy === 'passageStatus' &&
                   (sortDirection === 'asc' ? (
                     <ArrowUpIcon className='inline ml-2 h-4 w-4' />
                   ) : (
