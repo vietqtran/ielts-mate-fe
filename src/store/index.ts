@@ -23,6 +23,7 @@ import {
   readingAttemptReducer,
   readingExamAttemptReducer,
   readingExamReducer,
+  readingHighlightReducer,
   userPassageReducer,
 } from './slices';
 
@@ -48,6 +49,7 @@ const persistConfig = {
     'listeningExam',
     'readingExam',
     'readingExamAttempt',
+    'readingHighlight',
     'addMarkup',
   ],
 };
@@ -61,6 +63,7 @@ const rootReducer = combineReducers({
   readingAttempt: readingAttemptReducer,
   readingExam: readingExamReducer,
   readingExamAttempt: readingExamAttemptReducer,
+  readingHighlight: readingHighlightReducer,
   listeningTasks: listeningTasksReducer,
   listeningAttempt: listeningAttemptReducer,
   listeningExam: listeningExamReducer,

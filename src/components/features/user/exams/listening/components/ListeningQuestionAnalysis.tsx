@@ -155,6 +155,10 @@ export const ListeningQuestionAnalysis = ({
                           <SelectableText
                             content={part.transcript ?? 'No transcript available'}
                             className='prose prose-sm max-w-none text-tekhelet-500 mb-4'
+                            examAttemptId={examDetails.exam_attempt_id}
+                            partKey={partKey}
+                            passageId={part.task_id}
+                            isReviewMode={true}
                           />
                         </div>
                       </CollapsibleContent>
@@ -198,6 +202,10 @@ export const ListeningQuestionAnalysis = ({
                             <SelectableText
                               content={group.instruction || 'No instruction provided'}
                               className='prose prose-sm max-w-none text-tekhelet-500 mt-4'
+                              examAttemptId={examDetails.exam_attempt_id}
+                              partKey={partKey}
+                              passageId={part.task_id}
+                              isReviewMode={true}
                             />
                           )}
 

@@ -6,7 +6,7 @@ import {
   ExamTakeShell,
   ExamTakeTabs,
 } from '@/components/features/user/exams/common/take';
-import PassageBox from '@/components/features/user/reading/PassageBox';
+import { SelectableText } from '@/components/features/user/exams/reading/components/SelectableText';
 import ConfirmSubmitModal from '@/components/features/user/reading/finish/ConfirmSubmitModal';
 import { QuestionRenderer } from '@/components/features/user/reading/questions';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -338,7 +338,13 @@ const TakeExam = ({ examData, initialAnswers }: TakeExamProps) => {
                 </CardTitle>
               </CardHeader>
               <CardContent className='flex-1 overflow-y-auto p-4 min-h-0'>
-                <PassageBox content={part.data.content} />
+                <SelectableText
+                  content={part.data.content}
+                  examAttemptId={examData.exam_attempt_id}
+                  partKey={part.key}
+                  passageId={part.data.passage_id || ''}
+                  className='prose prose-sm max-w-none text-tekhelet-600 leading-relaxed'
+                />
               </CardContent>
             </>
           )}

@@ -22,7 +22,7 @@ import LoadingSpinner from '@/components/ui/loading-spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useVocabulary } from '@/hooks/apis/vocabulary/useVocabulary';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
@@ -59,6 +59,7 @@ export default function VocabularyCreateModal({
   initialData,
 }: VocabularyCreateModalProps) {
   const { createVocabulary, updateVocabulary, isLoading } = useVocabulary();
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -84,7 +85,7 @@ export default function VocabularyCreateModal({
     }
 
     if (result) {
-      form.reset();
+      // Don't reset form here - let the modal close handle it
       onClose();
       onSuccess?.();
     }
@@ -94,14 +95,17 @@ export default function VocabularyCreateModal({
   useEffect(() => {
     if (!isOpen) {
       form.reset();
-    } else if (initialData) {
+      setIsInitialized(false);
+    } else if (initialData && !isInitialized) {
+      // Only set initial data once when modal opens
       form.reset({
         word: initialData.word || '',
         context: initialData.context || '',
         meaning: initialData.meaning || '',
       });
+      setIsInitialized(true);
     }
-  }, [isOpen, form, initialData]);
+  }, [isOpen, form, initialData, isInitialized]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

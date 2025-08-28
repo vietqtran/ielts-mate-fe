@@ -69,6 +69,10 @@ export const ReadingQuestionAnalysis = ({
                   <SelectableText
                     content={group.instruction || 'No instruction provided'}
                     className='prose prose-sm max-w-none text-tekhelet-500 mt-4'
+                    examAttemptId={attemptDetails.attempt_id}
+                    partKey='practice'
+                    passageId={attemptDetails.task_data.passage_id}
+                    isReviewMode={true}
                   />
                 )}
 

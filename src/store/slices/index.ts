@@ -12,6 +12,7 @@ import readingAttemptReducer from './reading-attempt-filter-slice';
 import readingExamAttemptReducer from './reading-exam-attempt-filter-slice';
 import readingExamReducer from './reading-exam-filter-slice';
 import userPassageReducer from './reading-filter-slices';
+import readingHighlightReducer from './reading-highlight-slice';
 export {
   authReducer,
   commonReducer,
@@ -20,6 +21,7 @@ export {
   userPassageReducer,
   readingAttemptReducer,
   readingExamAttemptReducer,
+  readingHighlightReducer,
   listeningTasksReducer,
   listeningAttemptReducer,
   listeningExamAttemptReducer,

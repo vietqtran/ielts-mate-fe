@@ -9,13 +9,25 @@ interface SelectableTextProps {
   content: string;
   className?: string;
   children?: React.ReactNode;
+  examAttemptId: string;
+  partKey: string; // 'part1', 'part2', 'part3', 'practice'
+  passageId: string;
+  isReviewMode?: boolean; // If true, don't allow text selection
 }
 
 interface SelectedTextData {
   text: string;
 }
 
-export const SelectableText = ({ content, className = '', children }: SelectableTextProps) => {
+export const SelectableText = ({
+  content,
+  className = '',
+  children,
+  examAttemptId,
+  partKey,
+  passageId,
+  isReviewMode = false,
+}: SelectableTextProps) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedTextData, setSelectedTextData] = useState<SelectedTextData | null>(null);
   const [actionPos, setActionPos] = useState<{
@@ -73,10 +85,11 @@ export const SelectableText = ({ content, className = '', children }: Selectable
       top: Math.max(0, top),
       left: Math.max(0, left),
     });
-  }, []);
+  }, [content]);
 
   const handleCloseModal = useCallback(() => {
     setIsModalOpen(false);
+    // Clear selectedTextData only when modal is closed
     setSelectedTextData(null);
   }, []);
 
@@ -91,6 +104,7 @@ export const SelectableText = ({ content, className = '', children }: Selectable
     if (selection && selection.rangeCount) selection.removeAllRanges();
     setIsModalOpen(true);
     setActionPos((p) => ({ ...p, visible: false }));
+    // Don't clear selectedTextData here - let the modal handle it
   }, []);
 
   // Hide the floating action on window events like scroll/resize
@@ -133,17 +147,17 @@ export const SelectableText = ({ content, className = '', children }: Selectable
 
         <MemoContent
           className={`select-text cursor-text transition-colors hover:bg-selective-yellow-50 ${className}`}
-          onMouseUp={handleTextSelection}
+          onMouseUp={isReviewMode ? undefined : handleTextSelection}
           content={content}
         />
 
-        {/* Floating action button to confirm adding vocabulary */}
-        {actionPos.visible && (
+        {/* Floating action button to add vocabulary */}
+        {actionPos.visible && !isReviewMode && (
           <div
             className='absolute z-50 -translate-x-1/2 -translate-y-full'
             style={{ top: actionPos.top, left: actionPos.left }}
           >
-            <div className='rounded-md bg-white shadow-md border-0'>
+            <div className='rounded-md bg-white shadow-md border-0 p-1'>
               <Button
                 size='sm'
                 variant='ghost'

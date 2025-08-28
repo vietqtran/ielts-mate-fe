@@ -6,10 +6,10 @@ import {
   VocabularyListResponse,
   VocabularyResponse,
   VocabularyUpdateRequest,
-  createVocabulary,
-  deleteVocabulary,
-  getMyVocabulary,
-  updateVocabulary,
+  createVocabulary as createVocabularyAPI,
+  deleteVocabulary as deleteVocabularyAPI,
+  getMyVocabulary as getMyVocabularyAPI,
+  updateVocabulary as updateVocabularyAPI,
 } from '@/lib/api/vocabulary';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -29,14 +29,14 @@ export const useVocabulary = () => {
 
   const [error, setError] = useState<string | null>(null);
 
-  const createVocabularyFn = async (
+  const createVocabulary = async (
     data: VocabularyCreateRequest
   ): Promise<VocabularyCreateResponse | null> => {
     setIsLoading((prev) => ({ ...prev, createVocabulary: true }));
     setError(null);
 
     try {
-      const response = await createVocabulary(data);
+      const response = await createVocabularyAPI(data);
       toast.success('Vocabulary created successfully');
       return response;
     } catch (err: any) {
@@ -49,14 +49,14 @@ export const useVocabulary = () => {
     }
   };
 
-  const getMyVocabularyFn = async (
+  const getMyVocabulary = async (
     params: VocabularyListParams = {}
   ): Promise<VocabularyListResponse | null> => {
     setIsLoading((prev) => ({ ...prev, getMyVocabulary: true }));
     setError(null);
 
     try {
-      const response = await getMyVocabulary(params);
+      const response = await getMyVocabularyAPI(params);
       return response;
     } catch (err: any) {
       const errorMessage = err.response?.data?.message || 'Failed to fetch vocabulary';
@@ -68,7 +68,7 @@ export const useVocabulary = () => {
     }
   };
 
-  const updateVocabularyFn = async (
+  const updateVocabulary = async (
     vocabularyId: string,
     data: VocabularyUpdateRequest
   ): Promise<VocabularyResponse | null> => {
@@ -76,7 +76,7 @@ export const useVocabulary = () => {
     setError(null);
 
     try {
-      const response = await updateVocabulary(vocabularyId, data);
+      const response = await updateVocabularyAPI(vocabularyId, data);
       toast.success('Vocabulary updated successfully');
       return response;
     } catch (err: any) {
@@ -89,14 +89,14 @@ export const useVocabulary = () => {
     }
   };
 
-  const deleteVocabularyFn = async (
+  const deleteVocabulary = async (
     vocabularyId: string
   ): Promise<VocabularyDeleteResponse | null> => {
     setIsLoading((prev) => ({ ...prev, deleteVocabulary: true }));
     setError(null);
 
     try {
-      const response = await deleteVocabulary(vocabularyId);
+      const response = await deleteVocabularyAPI(vocabularyId);
       toast.success('Vocabulary deleted successfully');
       return response;
     } catch (err: any) {
@@ -110,10 +110,10 @@ export const useVocabulary = () => {
   };
 
   return {
-    createVocabulary: createVocabularyFn,
-    getMyVocabulary: getMyVocabularyFn,
-    updateVocabulary: updateVocabularyFn,
-    deleteVocabulary: deleteVocabularyFn,
+    createVocabulary,
+    getMyVocabulary,
+    updateVocabulary,
+    deleteVocabulary,
     isLoading,
     error,
   };

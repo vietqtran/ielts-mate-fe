@@ -5,7 +5,7 @@ import {
   PracticeHeader,
   PracticeShell,
 } from '@/components/features/user/common/take';
-import PassageBox from '@/components/features/user/reading/PassageBox';
+import { SelectableText } from '@/components/features/user/exams/reading/components/SelectableText';
 import ConfirmSubmitModal from '@/components/features/user/reading/finish/ConfirmSubmitModal';
 import { QuestionRenderer } from '@/components/features/user/reading/questions';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { toast } from 'sonner';
+
 // import { useUnloadSubmit } from "@/hooks/utils/useUnloadSubmit";
 
 // Stable child component to isolate timer re-renders
@@ -140,7 +141,13 @@ const ReadingPractice = ({
           </CardTitle>
         </CardHeader>
         <CardContent className='flex-1 overflow-y-auto p-6 min-h-0'>
-          <PassageBox ref={passageRef} content={passages.content} />
+          <SelectableText
+            content={passages.content}
+            examAttemptId={passages.attempt_id || ''}
+            partKey='practice'
+            passageId={passages.passage_id || ''}
+            className='prose prose-sm max-w-none text-tekhelet-600 leading-relaxed'
+          />
         </CardContent>
       </>
     ),

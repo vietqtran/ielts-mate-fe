@@ -4,7 +4,9 @@ import { Badge, Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/co
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ReadingExamAttemptDetailsResponse } from '@/types/reading/reading-exam-attempt.types';
+import { RootState } from '@/types/store.types';
 import { BookOpen, ChevronDown } from 'lucide-react';
+import { useSelector } from 'react-redux';
 import { QuestionResultRenderer, getQuestionResultStatus } from './QuestionResultRenderer';
 import { SelectableText } from './SelectableText';
 
@@ -18,6 +20,11 @@ export const QuestionAnalysis = ({ examDetails }: QuestionAnalysisProps) => {
     examDetails.reading_exam.reading_passage_id_part2,
     examDetails.reading_exam.reading_passage_id_part3,
   ];
+
+  // Get highlights from store for this exam attempt
+  const highlights = useSelector(
+    (state: RootState) => state.readingHighlight.highlights[examDetails.exam_attempt_id] || []
+  );
 
   const dragAndDropItems = [
     ...examDetails.reading_exam.reading_passage_id_part1.question_groups.flatMap(
@@ -74,6 +81,10 @@ export const QuestionAnalysis = ({ examDetails }: QuestionAnalysisProps) => {
                     <SelectableText
                       content={part.instruction || 'No instruction provided'}
                       className='prose prose-sm max-w-none text-tekhelet-500 mb-4'
+                      examAttemptId={examDetails.exam_attempt_id}
+                      partKey={partKey}
+                      passageId={part.passage_id}
+                      isReviewMode={true}
                     />
                     {part.content && (
                       <div className='mt-4 p-4 bg-white/70 rounded-lg border border-tekhelet-200'>
@@ -81,6 +92,10 @@ export const QuestionAnalysis = ({ examDetails }: QuestionAnalysisProps) => {
                         <SelectableText
                           content={part.content}
                           className='prose prose-sm max-w-none text-tekhelet-600 leading-relaxed'
+                          examAttemptId={examDetails.exam_attempt_id}
+                          partKey={partKey}
+                          passageId={part.passage_id}
+                          isReviewMode={true}
                         />
                       </div>
                     )}
@@ -125,6 +140,10 @@ export const QuestionAnalysis = ({ examDetails }: QuestionAnalysisProps) => {
                             <SelectableText
                               content={group.instruction || 'No instruction provided'}
                               className='text-tekhelet-500 prose prose-sm max-w-none mt-4'
+                              examAttemptId={examDetails.exam_attempt_id}
+                              partKey={partKey}
+                              passageId={part.passage_id}
+                              isReviewMode={true}
                             />
 
                             <div className='space-y-3 mt-5'>

@@ -10,8 +10,10 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import useListeningAudio from '@/hooks/apis/listening/useListeningAudio';
 import { LoadListeningAttemptResultResponse } from '@/types/listening/listening-attempt.types';
+import { RootState } from '@/types/store.types';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
 
 interface ListeningQuestionAnalysisProps {
   attemptDetails: LoadListeningAttemptResultResponse;
@@ -23,6 +25,11 @@ export const ListeningQuestionAnalysis = ({ attemptDetails }: ListeningQuestionA
   const [isOpen, setIsOpen] = useState(false);
   const dragAndDropItems =
     attemptDetails.task_data.question_groups.flatMap((group) => group.drag_items) || [];
+
+  // Get highlights from store for this attempt
+  const highlights = useSelector(
+    (state: RootState) => state.readingHighlight.highlights[attemptDetails.attempt_id] || []
+  );
   attemptDetails.answers.forEach((answer) => {
     const answerValues: string[] = [];
 
@@ -102,6 +109,10 @@ export const ListeningQuestionAnalysis = ({ attemptDetails }: ListeningQuestionA
                 <SelectableText
                   content={attemptDetails.task_data?.transcript ?? 'No transcript available'}
                   className='prose prose-sm max-w-none text-tekhelet-500 mb-4'
+                  examAttemptId={attemptDetails.attempt_id}
+                  partKey='listening'
+                  passageId={attemptDetails.task_data.task_id}
+                  isReviewMode={true}
                 />
               </div>
             </CollapsibleContent>
@@ -141,6 +152,10 @@ export const ListeningQuestionAnalysis = ({ attemptDetails }: ListeningQuestionA
                   <SelectableText
                     content={group.instruction || 'No instruction provided'}
                     className='prose prose-sm max-w-none text-tekhelet-500 mt-4'
+                    examAttemptId={attemptDetails.attempt_id}
+                    partKey='listening'
+                    passageId={attemptDetails.task_data.task_id}
+                    isReviewMode={true}
                   />
                 )}
                 <div className='space-y-5 mt-5'>

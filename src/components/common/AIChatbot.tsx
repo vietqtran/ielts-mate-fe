@@ -147,14 +147,16 @@ export function AIChatbot() {
         currentMessage: messageContent,
       };
 
-      // Call the real API
+      // Call the API using the configured instance with proper endpoint
       const response = await instance.post<BaseResponse<AIResponse>>(
-        'https://tootsstore.online/api/v1/personal/chat/ielts/send',
+        '/personal/chat/ielts/send',
         chatRequest,
         {
           headers: {
             'Content-Type': 'application/json',
           },
+          // Disable default error notifications since we handle them manually
+          notify: false,
         }
       );
 
@@ -190,13 +192,28 @@ export function AIChatbot() {
       setTimeout(() => {
         scrollToBottom();
       }, 200);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error calling AI API:', error);
+
+      let errorMessage =
+        "I'm sorry, I'm having trouble connecting to the AI service right now. Please try again later.";
+
+      // Provide more specific error messages based on the error type
+      if (error.response?.status === 401) {
+        errorMessage = 'Please log in to use the AI chatbot.';
+      } else if (error.response?.status === 403) {
+        errorMessage = "You don't have permission to use the AI chatbot.";
+      } else if (error.response?.status === 429) {
+        errorMessage = 'Too many requests. Please wait a moment before trying again.';
+      } else if (error.response?.status >= 500) {
+        errorMessage = 'The AI service is temporarily unavailable. Please try again later.';
+      } else if (error.code === 'ERR_NETWORK') {
+        errorMessage = 'Network error. Please check your internet connection.';
+      }
 
       const errorResponse: Message = {
         id: (Date.now() + 1).toString(),
-        content:
-          "I'm sorry, I'm having trouble connecting to the AI service right now. Please try again later.",
+        content: errorMessage,
         sender: 'ai',
         timestamp: new Date(),
       };

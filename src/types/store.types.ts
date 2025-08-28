@@ -9,6 +9,7 @@ import { ReadingAttemptState } from '@/store/slices/reading-attempt-filter-slice
 import { ReadingExamAttemptFilters } from '@/store/slices/reading-exam-attempt-filter-slice';
 import { ReadingExamFilters } from '@/store/slices/reading-exam-filter-slice';
 import { UserPassageState } from '@/store/slices/reading-filter-slices';
+import { ReadingHighlightState } from '@/store/slices/reading-highlight-slice';
 import { User } from '.';
 
 export interface RootState {
@@ -19,6 +20,7 @@ export interface RootState {
   userPassage: UserPassageState;
   readingAttempt: ReadingAttemptState;
   readingExamAttempt: ReadingExamAttemptFilters;
+  readingHighlight: ReadingHighlightState;
   listeningTasks: ListeningTasksStates;
   listeningAttempt: ListeningAttemptState;
   listeningExamAttempt: ListeningExamAttemptFilters;
