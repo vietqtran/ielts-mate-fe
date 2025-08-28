@@ -90,7 +90,7 @@ const MultipleChoicesResult = ({
         <div>
           <p className='text-sm font-medium text-tekhelet-400 mb-2'>Options</p>
           <div className='space-y-1'>
-            {choices.map((choice) => {
+            {choices?.map((choice) => {
               const isCorrect = choice.is_correct;
               const isUserChoice = userAnswers.includes(choice.choice_id);
               return (

@@ -149,9 +149,9 @@ const MultipleChoiceQuestion = ({
                   {question.number_of_correct_answers > 1 ? (
                     // Multiple choice (checkboxes)
                     <div className='space-y-2'>
-                      {question.choices
-                        .sort((a, b) => a.choice_order - b.choice_order)
-                        .map((choice) => {
+                      {question?.choices
+                        ?.sort((a, b) => a.choice_order - b.choice_order)
+                        ?.map((choice) => {
                           const currentAnswers = Array.isArray(
                             selectedAnswers[question.question_id]?.answer_id
                           )
@@ -213,9 +213,9 @@ const MultipleChoiceQuestion = ({
                       }
                       className='space-y-2'
                     >
-                      {question.choices
-                        .sort((a, b) => a.choice_order - b.choice_order)
-                        .map((choice) => (
+                      {question?.choices
+                        ?.sort((a, b) => a.choice_order - b.choice_order)
+                        ?.map((choice) => (
                           <div key={choice.choice_id} className='flex items-center space-x-2'>
                             <RadioGroupItem
                               value={choice.choice_id}
