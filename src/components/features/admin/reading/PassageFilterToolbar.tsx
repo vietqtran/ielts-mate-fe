@@ -163,16 +163,6 @@ export function PassageFilterToolbar({
             </div>
 
             <div className='space-y-2'>
-              <Label htmlFor='questionCategory'>Question Category</Label>
-              <Input
-                id='questionCategory'
-                placeholder='Enter category...'
-                value={filters.questionCategory ?? ''}
-                onChange={(e) => updateFilter('questionCategory', e.target.value)}
-              />
-            </div>
-
-            <div className='space-y-2'>
               <Label htmlFor='createdBy'>Created By</Label>
               <Input
                 id='createdBy'
