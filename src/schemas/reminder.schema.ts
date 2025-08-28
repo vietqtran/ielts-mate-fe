@@ -41,6 +41,10 @@ export const reminderConfigSchema = z
       message: 'Please select appropriate dates for the selected recurrence pattern',
       path: ['reminder_date'],
     }
-  );
+  )
+  .transform((data) => ({
+    ...data,
+    reminder_date: data.reminder_date.map((date) => date.trim()),
+  }));
 
 export type ReminderConfigFormData = z.infer<typeof reminderConfigSchema>;

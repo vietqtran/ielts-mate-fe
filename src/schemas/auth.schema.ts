@@ -16,6 +16,11 @@ export const signUpSchema = z
     password: passwordValidation,
     confirmPassword: confirmPasswordValidation,
   })
+  .transform((data) => ({
+    ...data,
+    password: data.password.trim(),
+    confirmPassword: data.confirmPassword.trim(),
+  }))
   .refine((data) => data.password === data.confirmPassword, {
     message: 'Passwords do not match',
     path: ['confirmPassword'],
