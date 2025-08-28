@@ -1,30 +1,41 @@
+import {
+  createRequiredEmailValidation,
+  createRequiredStringValidation,
+} from '@/constants/validate';
 import { z } from 'zod';
 
 export const reminderConfigSchema = z
   .object({
-    email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
-    reminder_date: z.array(z.string()).refine((dates) => {
-      // Validate ISO date format for each date
-      return dates.every((date) => {
-        const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
-        return isoDateRegex.test(date) && !isNaN(Date.parse(date));
-      });
-    }, 'Invalid date format'),
-    reminder_time: z
-      .string()
-      // .regex(/^([01]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Time must be in HH:mm format'),
-      .nonempty('Reminder time is required'),
+    email: createRequiredEmailValidation(),
+    reminder_date: z
+      .array(z.string())
+      .refine((dates) => {
+        // Validate ISO date format for each date
+        return dates.every((date) => {
+          const trimmedDate = date.trim();
+          if (trimmedDate.length === 0) return false;
+          const isoDateRegex = /^\d{4}-\d{2}-\d{2}$/;
+          return isoDateRegex.test(trimmedDate) && !isNaN(Date.parse(trimmedDate));
+        });
+      }, 'Invalid date format or empty dates')
+      .transform((dates) => dates.map((date) => date.trim())),
+    reminder_time: createRequiredStringValidation('Reminder time'),
     recurrence: z
       .number()
       .int()
       .min(0, 'Invalid recurrence value')
       .max(5, 'Invalid recurrence value'),
-    time_zone: z.string().min(1, 'Time zone is required'),
+    time_zone: createRequiredStringValidation('Time zone'),
     enable: z.boolean(),
     message: z
       .string()
       .min(1, 'Reminder message is required')
-      .max(500, 'Message must be less than 500 characters'),
+      .refine((val) => val.trim().length > 0, { message: 'Reminder message cannot be empty' })
+      .transform((val) => val.trim())
+      .refine((val) => val.length > 0, {
+        message: 'Reminder message cannot be empty after trimming',
+      })
+      .refine((val) => val.length <= 500, { message: 'Message must be less than 500 characters' }),
   })
   .refine(
     (data) => {
@@ -41,10 +52,6 @@ export const reminderConfigSchema = z
       message: 'Please select appropriate dates for the selected recurrence pattern',
       path: ['reminder_date'],
     }
-  )
-  .transform((data) => ({
-    ...data,
-    reminder_date: data.reminder_date.map((date) => date.trim()),
-  }));
+  );
 
 export type ReminderConfigFormData = z.infer<typeof reminderConfigSchema>;

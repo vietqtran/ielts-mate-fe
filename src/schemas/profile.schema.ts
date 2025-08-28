@@ -2,16 +2,10 @@ import { firstNameValidation, lastNameValidation, passwordValidation } from '@/c
 
 import { z } from 'zod';
 
-export const updateProfileDataSchema = z
-  .object({
-    first_name: firstNameValidation,
-    last_name: lastNameValidation,
-  })
-  .transform((data) => ({
-    ...data,
-    first_name: data.first_name.trim(),
-    last_name: data.last_name.trim(),
-  }));
+export const updateProfileDataSchema = z.object({
+  first_name: firstNameValidation,
+  last_name: lastNameValidation,
+});
 
 export const updatePasswordSchema = z
   .object({
@@ -19,12 +13,6 @@ export const updatePasswordSchema = z
     newPassword: passwordValidation,
     confirmNewPassword: passwordValidation,
   })
-  .transform((data) => ({
-    ...data,
-    oldPassword: data.oldPassword.trim(),
-    newPassword: data.newPassword.trim(),
-    confirmNewPassword: data.confirmNewPassword.trim(),
-  }))
   .refine((data) => data.newPassword === data.confirmNewPassword, {
     message: 'Passwords do not match',
     path: ['confirmNewPassword'],
