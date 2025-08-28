@@ -111,7 +111,7 @@ export const ListeningQuestionAnalysis = ({ attemptDetails }: ListeningQuestionA
                   className='prose prose-sm max-w-none text-tekhelet-500 mb-4'
                   examAttemptId={attemptDetails.attempt_id}
                   partKey='listening'
-                  passageId={attemptDetails.task_data.task_id}
+                  passageId={attemptDetails.task_data.listening_task_id}
                   isReviewMode={true}
                 />
               </div>
@@ -154,7 +154,7 @@ export const ListeningQuestionAnalysis = ({ attemptDetails }: ListeningQuestionA
                     className='prose prose-sm max-w-none text-tekhelet-500 mt-4'
                     examAttemptId={attemptDetails.attempt_id}
                     partKey='listening'
-                    passageId={attemptDetails.task_data.task_id}
+                    passageId={attemptDetails.task_data.listening_task_id}
                     isReviewMode={true}
                   />
                 )}
