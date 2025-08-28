@@ -3,7 +3,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { LoadListeningAttemptResultResponse } from '@/types/listening/listening-attempt.types';
-import { Clock, Trophy, Volume2 } from 'lucide-react';
+import { Clock, Volume2 } from 'lucide-react';
 
 interface ListeningAttemptInfoCardProps {
   attemptDetails: LoadListeningAttemptResultResponse;
@@ -49,13 +49,13 @@ export const ListeningAttemptInfoCard = ({
               </p>
             </div>
           </div>
-          <div className='flex items-center gap-2'>
+          {/* <div className='flex items-center gap-2'>
             <Trophy className='w-4 h-4 text-tekhelet-400' />
             <div>
               <p className='text-sm text-tekhelet-500'>Total Points</p>
               <p className='font-medium text-tekhelet-400'>{attemptDetails.total_points}</p>
             </div>
-          </div>
+          </div> */}
         </div>
       </CardContent>
     </Card>

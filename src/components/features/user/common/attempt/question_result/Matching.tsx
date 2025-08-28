@@ -44,7 +44,7 @@ const AttemptMatchingResult = ({
               Not Answered
             </Badge>
           )}
-          <span>Points: {question.point ?? 1}</span>
+          <span>Points: {question.point ?? 0}</span>
         </div>
       </div>
 
