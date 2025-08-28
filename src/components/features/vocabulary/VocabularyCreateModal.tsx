@@ -71,13 +71,16 @@ export default function VocabularyCreateModal({
   });
 
   const onSubmit = async (values: FormValues) => {
-    // Convert empty string to null for meaning
+    // Normalize optional fields to undefined (not null) to satisfy request types
+    const trimmedContext = values.context?.trim();
+    const trimmedMeaning = values.meaning?.trim();
+
     const requestData = {
-      ...values,
-      context: values.context?.trim() || null,
-      meaning: values.meaning?.trim() || null,
+      word: values.word,
+      context: trimmedContext ? trimmedContext : undefined,
+      meaning: trimmedMeaning ? trimmedMeaning : undefined,
       is_public: true,
-      language: 'ENGLISH'
+      language: 'ENGLISH',
     };
 
     let result;
@@ -168,6 +171,7 @@ export default function VocabularyCreateModal({
                     <Textarea
                       placeholder='Enter the context or example sentence'
                       {...field}
+                      value={field.value || ''}
                       rows={3}
                     />
                   </FormControl>
