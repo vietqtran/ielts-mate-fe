@@ -189,9 +189,9 @@ const DragDropQuestion = ({ questionGroup, onAnswerChange, answers }: DragDropQu
           ) : (
             // Fallback: Individual drop zones
             <div className='space-y-3'>
-              {questionGroup.questions
-                .sort((a, b) => a.question_order - b.question_order)
-                .map((question) => (
+              {questionGroup?.questions
+                ?.sort((a, b) => a.question_order - b.question_order)
+                ?.map((question) => (
                   <div key={question.question_id} className='flex items-center gap-4'>
                     <span className='text-sm font-medium'>Question {question.question_order}:</span>
                     <div

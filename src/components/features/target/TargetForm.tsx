@@ -80,6 +80,14 @@ const TargetForm = ({ onSuccess }: TargetFormProps) => {
   };
 
   const isLoading = isUpdating || isRegistering;
+  // Compute today's local date in YYYY-MM-DD for date input min attributes
+  const todayYMD = (() => {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  })();
 
   return (
     <Card className='backdrop-blur-lg border rounded-2xl'>
@@ -132,6 +140,7 @@ const TargetForm = ({ onSuccess }: TargetFormProps) => {
                       <FormControl>
                         <Input
                           type='date'
+                          min={todayYMD}
                           className=' focus:border-medium-slate-blue-300'
                           {...field}
                         />
@@ -183,6 +192,7 @@ const TargetForm = ({ onSuccess }: TargetFormProps) => {
                       <FormControl>
                         <Input
                           type='date'
+                          min={todayYMD}
                           className=' focus:border-medium-slate-blue-300'
                           {...field}
                         />

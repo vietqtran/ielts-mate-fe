@@ -89,9 +89,9 @@ const FillInBlankQuestion = ({
         </div>
 
         <div className='grid gap-4'>
-          {questionGroup.questions
-            .sort((a, b) => a.question_order - b.question_order)
-            .map((question) => (
+          {questionGroup?.questions
+            ?.sort((a, b) => a.question_order - b.question_order)
+            ?.map((question) => (
               <div
                 key={question.question_id}
                 className='flex items-center gap-4 p-3 border rounded-lg'
