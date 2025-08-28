@@ -20,22 +20,24 @@ import {
 import { Input } from '@/components/ui/input';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { Textarea } from '@/components/ui/textarea';
+import { createRequiredStringValidation } from '@/constants/validate';
 import { useVocabulary } from '@/hooks/apis/vocabulary/useVocabulary';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 
-const formSchema = z.object({
-  word: z.string().min(1, 'Word is required').max(100, 'Word must be less than 100 characters'),
-  context: z
-    .string()
-    .min(1, 'Context is required')
-    .max(500, 'Context must be less than 500 characters'),
+const vocabularySchema = z.object({
+  word: createRequiredStringValidation('Word', 1).refine((val: string) => val.length <= 100, {
+    message: 'Word must be less than 100 characters',
+  }),
+  context: createRequiredStringValidation('Context', 1).refine((val: string) => val.length <= 500, {
+    message: 'Context must be less than 500 characters',
+  }),
   meaning: z.string().max(300, 'Meaning must be less than 300 characters').optional().nullable(),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<typeof vocabularySchema>;
 
 interface VocabularyCreateModalProps {
   isOpen: boolean;
@@ -62,7 +64,7 @@ export default function VocabularyCreateModal({
   const [isInitialized, setIsInitialized] = useState(false);
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(vocabularySchema),
     defaultValues: {
       word: '',
       context: '',

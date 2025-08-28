@@ -24,6 +24,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { TiptapEditor } from '@/components/ui/tiptap-editor';
 import { useToast } from '@/components/ui/use-toast';
+import { createRequiredStringValidation } from '@/constants/validate';
 import { useListeningTask } from '@/hooks';
 import {
   IeltsListeningType,
@@ -41,25 +42,25 @@ import {
   LocalListeningQuestionGroup,
 } from './ListeningQuestionGroupsManager';
 
-const MAX_FILE_SIZE = 30 * 1024 * 1024; // 30MB
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 30MB
 const ACCEPTED_AUDIO_TYPES = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg'];
 
 // We need to conditionally validate the audio file based on mode
 const createSchema = z.object({
-  title: z.string().min(3, 'Title must be at least 3 characters'),
+  title: createRequiredStringValidation('Title', 3),
   ielts_type: z.number().int().min(0, 'IELTS type is required'),
   part_number: z
     .number()
     .int()
     .min(0, 'Part number is required')
     .max(3, 'Part number must be between 1-4'),
-  instruction: z.string().min(10, 'Instruction must be at least 10 characters'),
+  instruction: createRequiredStringValidation('Instruction', 10),
   status: z.number().int(),
   is_automatic_transcription: z.boolean().default(true),
   transcript: z.string().optional(),
   audio_file: z
     .instanceof(File)
-    .refine((file) => file.size <= MAX_FILE_SIZE, 'File size must be less than 30MB')
+    .refine((file) => file.size <= MAX_FILE_SIZE, 'File size must be less than 20MB')
     .refine(
       (file) => ACCEPTED_AUDIO_TYPES.includes(file.type),
       'File must be an audio file (MP3, WAV, OGG)'
@@ -68,14 +69,14 @@ const createSchema = z.object({
 });
 
 const editSchema = z.object({
-  title: z.string().min(3, 'Title must be at least 3 characters'),
+  title: createRequiredStringValidation('Title', 3),
   ielts_type: z.number().int().min(0, 'IELTS type is required'),
   part_number: z
     .number()
     .int()
     .min(0, 'Part number is required')
     .max(3, 'Part number must be between 1-4'),
-  instruction: z.string().min(10, 'Instruction must be at least 10 characters'),
+  instruction: createRequiredStringValidation('Instruction', 10),
   status: z.number().int(),
   is_automatic_transcription: z.boolean().default(true),
   transcript: z.string().optional(),

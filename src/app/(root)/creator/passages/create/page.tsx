@@ -16,6 +16,7 @@ import {
   QuestionGroupsManager,
 } from '@/components/features/admin/reading/create/QuestionGroupsManager';
 import { Button } from '@/components/ui/button';
+import { createRequiredStringValidation } from '@/constants/validate';
 import { usePassage } from '@/hooks/apis/reading/usePassage';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -24,9 +25,9 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 
 const passageSchema = z.object({
-  title: z.string().min(1, 'Title is required'),
-  instruction: z.string().min(1, 'Instruction is required'),
-  content: z.string().min(1, 'Content is required'),
+  title: createRequiredStringValidation('Title', 1),
+  instruction: createRequiredStringValidation('Instruction', 1),
+  content: createRequiredStringValidation('Content', 1),
   ielts_type: z.nativeEnum(IeltsType),
   part_number: z.number().min(1).max(3),
   passage_status: z.nativeEnum(PassageStatus),

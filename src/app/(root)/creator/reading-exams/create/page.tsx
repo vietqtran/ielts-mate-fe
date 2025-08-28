@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/select';
 import { SlugInput } from '@/components/ui/slug-input';
 import { Textarea } from '@/components/ui/textarea';
+import { createRequiredStringValidation } from '@/constants/validate';
 import { useReadingExam } from '@/hooks/apis/admin/useReadingExam';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { Status } from '@/types/reading/reading-exam.types';
@@ -42,17 +43,17 @@ import { toast } from 'sonner';
 import * as z from 'zod';
 
 // Form validation schema
-const formSchema = z.object({
-  reading_exam_name: z.string().min(3, 'Exam name must be at least 3 characters'),
-  reading_exam_description: z.string().min(10, 'Description must be at least 10 characters'),
-  url_slug: z.string().min(3, 'URL slug must be at least 3 characters'),
-  reading_passage_id_part1: z.string().min(1, 'Reading passage for part 1 is required'),
-  reading_passage_id_part2: z.string().min(1, 'Reading passage for part 2 is required'),
-  reading_passage_id_part3: z.string().min(1, 'Reading passage for part 3 is required'),
+const readingExamSchema = z.object({
+  reading_exam_name: createRequiredStringValidation('Exam name', 3),
+  reading_exam_description: createRequiredStringValidation('Description', 10),
+  url_slug: createRequiredStringValidation('URL slug', 3),
+  reading_passage_id_part1: createRequiredStringValidation('Reading passage for part 1', 1),
+  reading_passage_id_part2: createRequiredStringValidation('Reading passage for part 2', 1),
+  reading_passage_id_part3: createRequiredStringValidation('Reading passage for part 3', 1),
   status: z.number().min(0).max(1),
 });
 
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<typeof readingExamSchema>;
 
 export default function CreateReadingExamPage() {
   usePageTitle('Create Reading Exam');
@@ -75,7 +76,7 @@ export default function CreateReadingExamPage() {
   );
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(readingExamSchema),
     defaultValues: {
       reading_exam_name: '',
       reading_exam_description: '',

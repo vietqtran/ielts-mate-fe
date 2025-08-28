@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { SlugInput } from '@/components/ui/slug-input';
 import { Textarea } from '@/components/ui/textarea';
+import { createRequiredStringValidation } from '@/constants/validate';
 import { useListeningExam } from '@/hooks/apis/admin/useListeningExam';
 import { usePageTitle } from '@/hooks/usePageTitle';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -35,13 +36,14 @@ import * as z from 'zod';
 // Form validation schema
 const formSchema = z
   .object({
-    exam_name: z.string().min(3, 'Exam name must be at least 3 characters'),
-    exam_description: z.string().min(10, 'Description must be at least 10 characters'),
-    url_slug: z.string().min(3, 'URL slug must be at least 3 characters'),
-    part1_id: z.string().min(1, 'Task for part 1 is required'),
-    part2_id: z.string().min(1, 'Task for part 2 is required'),
-    part3_id: z.string().min(1, 'Task for part 3 is required'),
-    part4_id: z.string().min(1, 'Task for part 4 is required'),
+    exam_name: createRequiredStringValidation('Exam name', 3),
+    exam_description: createRequiredStringValidation('Description', 10),
+    url_slug: createRequiredStringValidation('URL slug', 3),
+    part1_id: createRequiredStringValidation('Task for part 1', 1),
+    part2_id: createRequiredStringValidation('Task for part 2', 1),
+    part3_id: createRequiredStringValidation('Task for part 3', 1),
+    part4_id: createRequiredStringValidation('Task for part 4', 1),
+    status: z.number().min(0).max(1),
   })
   .refine(
     (data) => {
@@ -87,6 +89,7 @@ export default function CreateListeningExamPage() {
       part2_id: '',
       part3_id: '',
       part4_id: '',
+      status: 1, // Default to active
     },
   });
 
