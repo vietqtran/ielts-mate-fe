@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { useGetTargetConfig } from '@/hooks/apis/config/useTargetConfig';
 import { useAppSelector } from '@/hooks/redux/useStore';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import {
   ArrowRight,
   Award,
@@ -33,6 +34,8 @@ import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
 const GuestPage = () => {
+  usePageTitle('Home');
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const router = useRouter();
   const user = useAppSelector((state) => state.auth.user);

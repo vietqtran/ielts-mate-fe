@@ -8,6 +8,8 @@ import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { usePageTitle } from '@/hooks/usePageTitle';
+
 export interface HandleAnswerChangeParams {
   questionId: string;
   answer_id: string | string[];
@@ -17,6 +19,8 @@ export interface HandleAnswerChangeParams {
 }
 
 const ReadingPracticePage = () => {
+  usePageTitle('Reading Practice');
+
   const { id }: { id: string } = useParams();
   const searchParams = useSearchParams();
   const attemptId = searchParams.get('attempt');

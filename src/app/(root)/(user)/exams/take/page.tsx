@@ -11,7 +11,11 @@ import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { notFound, useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { usePageTitle } from '@/hooks/usePageTitle';
+
 const TakeExamPage = () => {
+  usePageTitle('Take Exam');
+
   const searchParams = useSearchParams();
   const router = useRouter();
   const examUrl = searchParams.get('examUrl');

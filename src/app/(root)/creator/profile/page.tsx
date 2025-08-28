@@ -9,7 +9,11 @@ import { useAppSelector } from '@/hooks';
 import { XCircle } from 'lucide-react';
 import { Suspense } from 'react';
 
+import { usePageTitle } from '@/hooks/usePageTitle';
+
 const ProfileContent = () => {
+  usePageTitle('Creator Profile');
+
   const { user } = useAppSelector((state) => state.auth);
   try {
     return (

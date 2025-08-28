@@ -4,9 +4,12 @@ import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
 
 import { SignUpForm } from '@/components/features/public/auth/SignUpForm';
 import CustomLink from '@/components/ui/link';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { useEffect } from 'react';
 
 export default function SignUpPage() {
+  usePageTitle('Sign Up');
+
   useEffect(() => {
     if (window != undefined) {
       sessionStorage.setItem(CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES.AUTH.SIGN_UP);

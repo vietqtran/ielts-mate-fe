@@ -8,7 +8,11 @@ import { ListeningTaskFilterParamsCamelCase } from '@/types/listening/listening.
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { usePageTitle } from '@/hooks/usePageTitle';
+
 export default function ListeningsPage() {
+  usePageTitle('Listening Tasks');
+
   const router = useRouter();
   const { getListeningTasksByCreator, isLoading } = useListeningTask();
   const [listeningTasks, setListeningTasks] = useState<any[]>([]);

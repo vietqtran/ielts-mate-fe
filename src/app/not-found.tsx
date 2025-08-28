@@ -1,6 +1,10 @@
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
+export const metadata = {
+  title: 'Page Not Found',
+};
+
 const NotFound = () => {
   return (
     <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-tekhelet-500 via-persimmon-400 to-tekhelet-500'>

@@ -2,6 +2,7 @@
 
 import ListeningPracticeAttempt from '@/components/features/user/listening/practice/ListeningAttempt';
 import useListeningAttempt from '@/hooks/apis/listening/useListeningAttempt';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { useLockAttempt } from '@/hooks/utils/useLockAttempt';
 import {
   LoadListeningAttemptResponse,
@@ -20,6 +21,8 @@ export interface HandleAnswerChangeParams {
 }
 
 const ListeningPractice = () => {
+  usePageTitle('Listening Practice');
+
   const { id }: { id: string } = useParams();
   const searchParams = useSearchParams();
   const attemptId = searchParams.get('attempt');

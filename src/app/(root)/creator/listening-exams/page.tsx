@@ -24,6 +24,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useListeningExam } from '@/hooks/apis/admin/useListeningExam';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import {
   clearFilters,
   setFilters,
@@ -47,6 +48,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'sonner';
 
 export default function ListeningExamsPage() {
+  usePageTitle('Listening Exams');
+
   const { getAllExams, deleteExam, isLoading, updateExam } = useListeningExam();
   const [exams, setExams] = useState<any[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);

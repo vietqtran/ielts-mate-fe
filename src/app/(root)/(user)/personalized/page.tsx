@@ -35,6 +35,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppSelector } from '@/hooks';
 import { useModules } from '@/hooks/apis/modules/useModules';
 import { useVocabulary } from '@/hooks/apis/vocabulary/useVocabulary';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { ModuleResponse, ModuleUserResponse } from '@/lib/api/modules';
 import { VocabularyResponse } from '@/lib/api/vocabulary';
 import { Trash2 } from 'lucide-react';
@@ -86,6 +87,8 @@ interface FilterOptions {
 }
 
 export default function PersonalizedPage() {
+  usePageTitle('Personalized Learning');
+
   // Helper function to format time spent
   const formatTimeSpent = (timeInMs: number) => {
     const timeInSeconds = Math.floor(timeInMs / 1000);

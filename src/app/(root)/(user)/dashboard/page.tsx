@@ -10,11 +10,14 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useDashboard } from '@/hooks/apis/config/useDashboard';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { DashboardOverviewData, TimeFrame } from '@/types/dashboard.types';
 import { AlertCircle, RefreshCw, TrendingUp } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
 const Dashboard = () => {
+  usePageTitle('Dashboard');
+
   const { getProgressOverview, isLoading, error } = useDashboard();
   const [timeFrame, setTimeFrame] = useState<TimeFrame>('weekly');
   const [dashboardData, setDashboardData] = useState<DashboardOverviewData | null>(null);

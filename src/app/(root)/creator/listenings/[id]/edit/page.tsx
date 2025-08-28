@@ -7,7 +7,11 @@ import { useListeningTask } from '@/hooks';
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { usePageTitle } from '@/hooks/usePageTitle';
+
 export default function EditListeningTaskPage() {
+  usePageTitle('Edit Listening Task');
+
   const params = useParams();
   const taskId = params.id as string;
   const { getListeningTaskById, isLoading } = useListeningTask();

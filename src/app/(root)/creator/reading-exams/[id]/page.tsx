@@ -12,7 +12,11 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
+import { usePageTitle } from '@/hooks/usePageTitle';
+
 export default function ReadingExamDetailsPage() {
+  usePageTitle('Reading Exam Details');
+
   const params = useParams();
   const router = useRouter();
   const examId = params.id as string;

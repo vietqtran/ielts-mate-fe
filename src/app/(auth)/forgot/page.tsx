@@ -18,6 +18,7 @@ import CustomLink from '@/components/ui/link';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { emailValidation } from '@/constants/validate';
 import { useAuth } from '@/hooks';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { extractAxiosErrorData } from '@/utils/error';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -31,6 +32,8 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
 
 export default function ForgotPasswordForm() {
+  usePageTitle('Forgot Password');
+
   const { forgotPassword } = useAuth();
   const [errors, setErrors] = useState<{
     email?: string;

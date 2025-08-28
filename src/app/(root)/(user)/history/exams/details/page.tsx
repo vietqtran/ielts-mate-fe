@@ -2,6 +2,10 @@ import NotFound from '@/app/not-found';
 import ListeningExamDetailsPage from '@/components/features/user/exams/listening/ListeningExamDetailsPage';
 import ReadingExamDetailsPage from '@/components/features/user/exams/reading/ReadingExamDetailsPage';
 
+export const metadata = {
+  title: 'Exam Details',
+};
+
 interface ExamDetailsProps {
   searchParams: Promise<{
     mode?: string;

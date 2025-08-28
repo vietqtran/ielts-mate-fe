@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { usePassage } from '@/hooks/apis/reading/usePassage';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import {
   UserPassageFilters,
   clearFilters,
@@ -23,6 +24,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 const Reading = () => {
+  usePageTitle('Reading');
+
   const dispatch = useDispatch();
   const router = useRouter();
   const { getActivePassages, isLoading, error } = usePassage();

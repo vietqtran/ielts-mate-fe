@@ -10,7 +10,11 @@ import { QuestionTypeEnumIndex } from '@/types/reading/reading.types';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
+import { usePageTitle } from '@/hooks/usePageTitle';
+
 export default function PreviewListeningTaskPage() {
+  usePageTitle('Preview Listening Task');
+
   const params = useParams();
   const router = useRouter();
   const taskId = params.id as string;

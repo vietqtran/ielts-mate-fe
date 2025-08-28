@@ -5,6 +5,7 @@ import * as z from 'zod';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CURRENT_PAGE_SESSION_STORAGE_KEY, PAGES } from '@/constants/pages';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import {
   AddGroupQuestionRequest,
   IeltsType,
@@ -40,6 +41,8 @@ const passageSchema = z.object({
 type PassageFormData = z.infer<typeof passageSchema>;
 
 export default function EditPassagePage() {
+  usePageTitle('Edit Passage');
+
   const router = useRouter();
   const params = useParams();
   const {

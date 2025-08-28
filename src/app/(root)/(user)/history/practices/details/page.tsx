@@ -1,6 +1,10 @@
 import ListeningAttemptResult from '@/components/features/user/history/practice/listening/ListeningAttemptResult';
 import ReadingAttemptResult from '@/components/features/user/history/practice/reading/ReadingAttemptResult';
 
+export const metadata = {
+  title: 'Practice Details',
+};
+
 interface PracticeDetailsProps {
   searchParams: Promise<{
     mode?: string;

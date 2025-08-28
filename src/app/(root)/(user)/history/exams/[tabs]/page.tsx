@@ -1,6 +1,10 @@
 import ListeningExamHistory from '@/components/features/user/history/exam/listening/ListeningExamHistory';
 import ReadingExamHistory from '@/components/features/user/history/exam/reading/ReadingExamHistory';
 
+export const metadata = {
+  title: 'Exam History',
+};
+
 interface ExamsTabControllerProps {
   params: Promise<{ tabs: string }>;
 }

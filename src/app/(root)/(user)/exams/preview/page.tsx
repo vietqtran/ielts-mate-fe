@@ -1,6 +1,10 @@
 import NotFound from '@/app/not-found';
 import ExamPreviewPage from '@/components/features/preview/ExamPreviewPage';
 
+export const metadata = {
+  title: 'Exam Preview',
+};
+
 const ExamPreview = async ({
   searchParams,
 }: {

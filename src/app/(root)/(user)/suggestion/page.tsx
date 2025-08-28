@@ -13,6 +13,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import instance from '@/lib/axios';
 import { BaseResponse } from '@/types/reading/reading.types';
 
@@ -98,6 +99,8 @@ interface LearningInsight {
 }
 
 export default function SuggestionPage() {
+  usePageTitle('Suggestion');
+
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [insights, setInsights] = useState<LearningInsight[]>([]);
   const [isLoading, setIsLoading] = useState(true);

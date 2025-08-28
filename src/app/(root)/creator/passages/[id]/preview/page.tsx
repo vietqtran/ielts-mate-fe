@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/apis/reading/usePassage';
 
+import { usePageTitle } from '@/hooks/usePageTitle';
+
 // Use backend response types
 interface PassagePreviewData {
   passage_id: string;
@@ -60,6 +62,8 @@ interface DragItem {
 }
 
 export default function PassagePreviewPage() {
+  usePageTitle('Preview Passage');
+
   const router = useRouter();
   const params = useParams();
   const { getPassageById, isLoading } = usePassage();

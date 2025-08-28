@@ -12,6 +12,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { NavigationHandler } from '@/components/layout/NavigationHandler';
+import { usePageTitle } from '@/hooks/usePageTitle';
 
 import { CreatePassageModal } from '@/components/features/admin/reading/CreatePassageModal';
 import { PassageFilterToolbar } from '@/components/features/admin/reading/PassageFilterToolbar';
@@ -25,6 +26,8 @@ import { PlusCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export default function PassagesPage() {
+  usePageTitle('Passages');
+
   const router = useRouter();
   const dispatch = useDispatch();
   const { getPassagesForTeacher, deletePassage, isLoading } = usePassage();

@@ -1,4 +1,9 @@
 import { ListeningExamsTable, ReadingExamsTable } from '@/components/features/user/exams';
+
+export const metadata = {
+  title: 'Exams',
+};
+
 interface ExamHomepageProps {
   params: Promise<{ tabs: string }>;
 }

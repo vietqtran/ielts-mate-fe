@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DatePickerWithRange } from '@/components/ui/date-picker';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import instance from '@/lib/axios';
 import { format } from 'date-fns';
 import {
@@ -117,6 +118,8 @@ function SectionCard({
 }
 
 const Page = () => {
+  usePageTitle('Creator Dashboard');
+
   const [data, setData] = useState<CreatorDashboardData | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);

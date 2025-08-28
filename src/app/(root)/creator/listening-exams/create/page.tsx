@@ -22,6 +22,7 @@ import LoadingSpinner from '@/components/ui/loading-spinner';
 import { SlugInput } from '@/components/ui/slug-input';
 import { Textarea } from '@/components/ui/textarea';
 import { useListeningExam } from '@/hooks/apis/admin/useListeningExam';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
@@ -56,6 +57,8 @@ const formSchema = z
 type FormValues = z.infer<typeof formSchema>;
 
 export default function CreateListeningExamPage() {
+  usePageTitle('Create Listening Exam');
+
   const router = useRouter();
   const { createExam, generateSlug, checkSlug, isLoading } = useListeningExam();
   const [selectedTasks, setSelectedTasks] = useState({

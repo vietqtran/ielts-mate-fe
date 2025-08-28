@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 import { useListeningTask } from '@/hooks';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import {
   clearFilters,
   setFilters,
@@ -24,6 +25,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 const Listening = () => {
+  usePageTitle('Listening');
+
   const dispatch = useDispatch();
   const router = useRouter();
   const { getListeningTasks, isLoading, error } = useListeningTask();

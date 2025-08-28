@@ -9,7 +9,11 @@ import { ArrowLeft, Loader2 } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { usePageTitle } from '@/hooks/usePageTitle';
+
 export default function StudyPage() {
+  usePageTitle('Study Module');
+
   const params = useParams();
   const router = useRouter();
   const moduleId = params.moduleId as string;

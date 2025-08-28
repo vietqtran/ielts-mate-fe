@@ -13,6 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { useReadingExam } from '@/hooks/apis/admin/useReadingExam';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import {
   clearFilters,
   setFilters,
@@ -50,6 +51,8 @@ const getStatusColor = (status: number): string => {
 };
 
 export default function ReadingExamsPage() {
+  usePageTitle('Reading Exams');
+
   const { getAllExams, deleteExam, isLoading } = useReadingExam();
   const [exams, setExams] = useState<ReadingExamResponse['data'][]>([]);
   const dispatch = useDispatch();

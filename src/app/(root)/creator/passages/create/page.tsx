@@ -17,6 +17,7 @@ import {
 } from '@/components/features/admin/reading/create/QuestionGroupsManager';
 import { Button } from '@/components/ui/button';
 import { usePassage } from '@/hooks/apis/reading/usePassage';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -34,6 +35,8 @@ const passageSchema = z.object({
 type PassageFormData = z.infer<typeof passageSchema>;
 
 export default function CreatePassagePage() {
+  usePageTitle('Create Passage');
+
   const router = useRouter();
   const { createPassage, updatePassage, deleteGroupQuestion, isLoading } = usePassage();
 

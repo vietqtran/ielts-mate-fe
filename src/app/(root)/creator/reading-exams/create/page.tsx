@@ -30,6 +30,7 @@ import {
 import { SlugInput } from '@/components/ui/slug-input';
 import { Textarea } from '@/components/ui/textarea';
 import { useReadingExam } from '@/hooks/apis/admin/useReadingExam';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { Status } from '@/types/reading/reading-exam.types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft } from 'lucide-react';
@@ -54,6 +55,8 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function CreateReadingExamPage() {
+  usePageTitle('Create Reading Exam');
+
   const router = useRouter();
   const { createExam, generateSlug, checkSlug, isLoading } = useReadingExam();
   const [selectedPassages, setSelectedPassages] = useState({

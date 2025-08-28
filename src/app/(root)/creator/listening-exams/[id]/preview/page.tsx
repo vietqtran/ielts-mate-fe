@@ -8,8 +8,12 @@ import { ArrowLeft } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import { usePageTitle } from '@/hooks/usePageTitle';
+
 // Helper to fetch audio file
 async function getAudio(audio_file_id: string): Promise<string | null> {
+  usePageTitle('Preview Listening Exam');
+
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_BASE_URL || ''}/resource/files/download/${audio_file_id}`,

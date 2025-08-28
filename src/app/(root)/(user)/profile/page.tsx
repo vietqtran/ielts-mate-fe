@@ -6,10 +6,13 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
 import { Skeleton } from '@/components/ui/skeleton';
 import { useAppSelector } from '@/hooks';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { XCircle } from 'lucide-react';
 import { Suspense } from 'react';
 
 const ProfileContent = () => {
+  usePageTitle('Profile');
+
   const { user } = useAppSelector((state) => state.auth);
   try {
     return (

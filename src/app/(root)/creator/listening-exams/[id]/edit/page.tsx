@@ -31,6 +31,7 @@ import {
 import { Textarea } from '@/components/ui/textarea';
 import { useListeningExam } from '@/hooks/apis/admin/useListeningExam';
 import { useListeningTask } from '@/hooks/apis/listening/useListeningTask';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { ListeningTaskFilterParamsCamelCase } from '@/types/listening/listening.types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowDown, ArrowUp, ArrowUpDown } from 'lucide-react';
@@ -69,6 +70,8 @@ const PARTS: PartKey[] = ['part1_id', 'part2_id', 'part3_id', 'part4_id'];
 const PART_LABELS = ['Part 1', 'Part 2', 'Part 3', 'Part 4'];
 
 export default function EditListeningExamPage() {
+  usePageTitle('Edit Listening Exam');
+
   const router = useRouter();
   const params = useParams();
   const examId = params.id as string;

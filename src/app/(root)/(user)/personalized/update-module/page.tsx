@@ -16,6 +16,7 @@ import LoadingSpinner from '@/components/ui/loading-spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useModules } from '@/hooks/apis/modules/useModules';
 import { useVocabulary } from '@/hooks/apis/vocabulary/useVocabulary';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { VocabularyResponse } from '@/lib/api/vocabulary';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ArrowLeft, BookOpen, Save, Search } from 'lucide-react';
@@ -41,6 +42,8 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export default function UpdateModulePage() {
+  usePageTitle('Update Module');
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const moduleId = searchParams.get('id');

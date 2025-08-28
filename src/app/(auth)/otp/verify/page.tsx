@@ -20,6 +20,7 @@ import { Label } from '@/components/ui/label';
 import CustomLink from '@/components/ui/link';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { otpValidation } from '@/constants/validate';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { extractAxiosErrorData } from '@/utils/error';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -31,6 +32,8 @@ const otpVerificationSchema = z.object({
 });
 
 export default function OtpVerificationForm() {
+  usePageTitle('Verify OTP');
+
   const router = useRouter();
   const searchParams = useSearchParams();
   const email = (searchParams.get('email') ?? '').replace(/ /g, '+');

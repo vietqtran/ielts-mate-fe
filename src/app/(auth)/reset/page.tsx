@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import LoadingSpinner from '@/components/ui/loading-spinner';
 import { useAuth } from '@/hooks';
+import { usePageTitle } from '@/hooks/usePageTitle';
 import { extractAxiosErrorData } from '@/utils/error';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
@@ -38,6 +39,8 @@ const resetPasswordSchema = z
 type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;
 
 export default function ResetPasswordForm() {
+  usePageTitle('Reset Password');
+
   const router = useRouter();
   const { resetPassword, verifyResetToken } = useAuth();
   const searchParams = useSearchParams();

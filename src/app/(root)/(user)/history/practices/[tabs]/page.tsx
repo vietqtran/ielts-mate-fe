@@ -1,6 +1,10 @@
 import ListeningHistory from '@/components/features/user/history/practice/listening/ListeningHistory';
 import ReadingHistory from '@/components/features/user/history/practice/reading/ReadingHistory';
 
+export const metadata = {
+  title: 'Practice History',
+};
+
 interface AttemptPracticeProps {
   params: Promise<{ tabs: string }>;
 }
