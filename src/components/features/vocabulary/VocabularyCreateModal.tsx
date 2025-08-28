@@ -67,8 +67,8 @@ export default function VocabularyCreateModal({
     resolver: zodResolver(vocabularySchema),
     defaultValues: {
       word: '',
-      context: '',
       meaning: '',
+      context: '',
     },
   });
 
@@ -77,6 +77,8 @@ export default function VocabularyCreateModal({
     const requestData = {
       ...values,
       meaning: values.meaning?.trim() || null,
+      is_public: true,
+      language: 'ENGLISH'
     };
 
     let result;
