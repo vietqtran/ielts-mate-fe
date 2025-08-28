@@ -28,7 +28,6 @@ export const createRequiredEmailValidation = () => {
 export const passwordValidation = z
   .string()
   .min(1, { message: 'Password is required' })
-  .refine((val) => val.trim().length > 0, { message: 'Password cannot be empty' })
   .transform((val) => val.trim())
   .refine((val) => val.length >= 8, { message: 'Password must be at least 8 characters' })
   .refine((val) => /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*?&\u00C0-\u017F]).*$/.test(val), {
@@ -38,14 +37,12 @@ export const passwordValidation = z
 export const passwordSignInValidation = z
   .string()
   .min(1, { message: 'Password is required' })
-  .refine((val) => val.trim().length > 0, { message: 'Password cannot be empty' })
   .transform((val) => val.trim())
   .refine((val) => val.length >= 8, { message: 'Password must be at least 8 characters' });
 
 export const confirmPasswordValidation = z
   .string()
   .min(1, { message: 'Confirm password is required' })
-  .refine((val) => val.trim().length > 0, { message: 'Confirm password cannot be empty' })
   .transform((val) => val.trim());
 
 export const emailValidation = createRequiredEmailValidation();
