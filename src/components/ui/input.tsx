@@ -12,6 +12,7 @@ function Input({
   isError = false,
   className,
   type,
+  onChange,
   ...props
 }: React.ComponentProps<'input'> & InputProps) {
   const [showPassword, setShowPassword] = React.useState(false);
@@ -22,11 +23,27 @@ function Input({
     setShowPassword(!showPassword);
   };
 
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Trim the input value after each keystroke
+    const trimmedValue = e.target.value.trim();
+
+    // Only update if the trimmed value is different from the current value
+    if (trimmedValue !== e.target.value) {
+      e.target.value = trimmedValue;
+    }
+
+    // Call the original onChange if provided
+    if (onChange) {
+      onChange(e);
+    }
+  };
+
   return (
     <div className='relative'>
       <input
         type={inputType}
         data-slot='input'
+        onChange={handleChange}
         className={cn(
           'file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm',
           'focus-visible:border-ring focus-visible:ring-blue-600 focus-visible:ring',
