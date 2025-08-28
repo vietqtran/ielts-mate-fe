@@ -31,9 +31,7 @@ const vocabularySchema = z.object({
   word: createRequiredStringValidation('Word', 1).refine((val: string) => val.length <= 100, {
     message: 'Word must be less than 100 characters',
   }),
-  context: createRequiredStringValidation('Context', 1).refine((val: string) => val.length <= 500, {
-    message: 'Context must be less than 500 characters',
-  }),
+  context: z.string().max(300, 'Context must be less than 300 characters').optional().nullable(),
   meaning: z.string().max(300, 'Meaning must be less than 300 characters').optional().nullable(),
 });
 
@@ -76,6 +74,7 @@ export default function VocabularyCreateModal({
     // Convert empty string to null for meaning
     const requestData = {
       ...values,
+      context: values.context?.trim() || null,
       meaning: values.meaning?.trim() || null,
       is_public: true,
       language: 'ENGLISH'
@@ -163,7 +162,7 @@ export default function VocabularyCreateModal({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className='text-selective-yellow-200 font-semibold text-sm'>
-                    Context
+                    Context (optional)
                   </FormLabel>
                   <FormControl>
                     <Textarea

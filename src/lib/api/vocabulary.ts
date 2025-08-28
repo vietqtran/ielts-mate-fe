@@ -2,13 +2,13 @@ import axios from '../axios';
 
 export interface VocabularyCreateRequest {
   word: string;
-  context: string;
+  context?: string;
   meaning?: string | null;
 }
 
 export interface VocabularyUpdateRequest {
   word: string;
-  context: string;
+  context?: string;
   meaning?: string | null;
 }
 
