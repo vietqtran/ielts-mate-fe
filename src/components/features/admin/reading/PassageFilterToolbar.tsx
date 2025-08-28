@@ -161,16 +161,6 @@ export function PassageFilterToolbar({
                 </SelectContent>
               </Select>
             </div>
-
-            <div className='space-y-2'>
-              <Label htmlFor='createdBy'>Created By</Label>
-              <Input
-                id='createdBy'
-                placeholder='Search by creator...'
-                value={filters.createdBy ?? ''}
-                onChange={(e) => updateFilter('createdBy', e.target.value)}
-              />
-            </div>
           </div>
         )}
       </CardContent>
