@@ -147,12 +147,12 @@ export const SelectableText = ({
 
         <MemoContent
           className={`select-text cursor-text transition-colors hover:bg-selective-yellow-50 ${className}`}
-          onMouseUp={isReviewMode ? undefined : handleTextSelection}
+          onMouseUp={handleTextSelection}
           content={content}
         />
 
         {/* Floating action button to add vocabulary */}
-        {actionPos.visible && !isReviewMode && (
+        {actionPos.visible && (
           <div
             className='absolute z-50 -translate-x-1/2 -translate-y-full'
             style={{ top: actionPos.top, left: actionPos.left }}
@@ -165,7 +165,8 @@ export const SelectableText = ({
                 className='gap-2 text-tekhelet-400 hover:text-tekhelet-500 hover:bg-selective-yellow-50'
                 aria-label='Add selected text to vocabulary'
               >
-                <BookMarkedIcon className='w-4 h-4' /> Add vocabulary
+                <BookMarkedIcon className='w-4 h-4' />
+                {isReviewMode ? 'Save to Vocabulary' : 'Add vocabulary'}
               </Button>
             </div>
           </div>
